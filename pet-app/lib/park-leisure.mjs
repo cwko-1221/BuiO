@@ -1,7 +1,8 @@
+import {createFishing,stepFishing} from './park-fishing.mjs';
 import {PARK_ECONOMY} from './park-economy.mjs';
 // Deterministic leisure games. Only inputs cross the network; outcomes stay here.
 export const LEISURE_RULES={
-  fishing:{duration:60,target:2,reward:PARK_ECONOMY.gameReward,name:{'zh-HK':'池畔慢釣','en-US':'Lily Pond Fishing'}},
+  fishing:{duration:120,target:2,reward:PARK_ECONOMY.gameReward,name:{'zh-HK':'池畔慢釣','en-US':'Lily Pond Fishing'}},
   rhythm:{duration:30,target:12,reward:PARK_ECONOMY.gameReward,name:{'zh-HK':'森林節奏鼓','en-US':'Woodland Rhythm'}},
   lantern:{duration:90,target:2,reward:PARK_ECONOMY.gameReward,name:{'zh-HK':'願望點燈師','en-US':'Wish Lanterns'}},
   golf:{duration:90,target:2,reward:PARK_ECONOMY.gameReward,name:{'zh-HK':'草地迷你高爾夫','en-US':'Meadow Mini Golf'}},
@@ -47,38 +48,12 @@ function board(s){let tiles=Array(9).fill(true);for(let i=0;i<4+s.leisure.round;
 export function createLeisure(s){
   s.leisure={presses:Array(10).fill(0),phase:'ready',round:0,completed:0,hits:0,misses:0,perfect:0,feedback:'',feedbackUntil:0,collection:[],fish:0,biteAt:0,castAt:0,phaseUntil:0,tension:50,progress:0,strain:0,chart:[],tiles:[],moves:0,hint:-1,ball:{x:150,y:440,vx:0,vy:0},strokes:0,totalStrokes:0,cupAt:0};
   const l=s.leisure;
-  if(s.kind==='fishing')Object.assign(l,{collection:[],fish:0,biteAt:0,phaseUntil:0,tension:50,progress:0,strain:0,spot:0,castX:FISHING_SPOTS[0].x,castY:FISHING_SPOTS[0].y,length:0,records:[],nibbles:0,hookAt:0,surging:false});
+  if(s.kind==='fishing')createFishing(s,FISHING_SPOTS);
   if(s.kind==='rhythm'){l.phase='playing';l.chart=Array.from({length:56},(_,i)=>({id:i,lane:Math.floor(random(s)*4),at:2+i*.46875,done:false}));}
   if(s.kind==='lantern'){l.phase='playing';board(s);}
   if(s.kind==='golf'){l.phase='playing';l.ball={...GOLF_COURSES[0].start,vx:0,vy:0};l.strokes=0;l.totalStrokes=0;l.cupAt=0;}
 }
 function feedback(s,text,type='tap'){s.leisure.feedback=text;s.leisure.feedbackUntil=s.t+1.2;event(s,type);}
-function cast(s,input){
-  const l=s.leisure,x=Number.isFinite(input.x)?input.x/480*800:FISHING_SPOTS[0].x,y=Number.isFinite(input.y)?input.y/720*600:FISHING_SPOTS[0].y;
-  l.spot=FISHING_SPOTS.reduce((best,p,i)=>Math.hypot(p.x-x,p.y-y)<Math.hypot(FISHING_SPOTS[best].x-x,FISHING_SPOTS[best].y-y)?i:best,0);
-  const spot=FISHING_SPOTS[l.spot];l.fish=spot.fish[Math.floor(random(s)*spot.fish.length)];l.castX=spot.x;l.castY=spot.y;
-  const range=FISH[l.fish].length;l.length=Math.round((range[0]+random(s)*(range[1]-range[0]))*10)/10;
-  l.phase='casting';l.castAt=s.t;l.biteAt=s.t+2.6+random(s)*1.3;l.phaseUntil=l.biteAt+1.8;l.nibbles=0;l.surging=false;feedback(s,'cast','cast');
-}
-function fishing(s,input,pressed,dt){
-  const l=s.leisure;
-  if(pressed[0]){
-    if(['ready','caught','escaped'].includes(l.phase))cast(s,input);
-    else if(l.phase==='waiting'){l.phase='escaped';l.misses++;feedback(s,'early','miss');}
-    else if(l.phase==='bite'){l.phase='reeling';l.hookAt=s.t;l.tension=48;l.progress=.08;l.strain=0;feedback(s,'hook','hook');}
-  }
-  if(l.phase==='casting'&&s.t>=l.castAt+.58)l.phase='waiting';
-  if(l.phase==='waiting'&&l.nibbles<2&&s.t>=l.castAt+1.2+l.nibbles*.7){l.nibbles++;feedback(s,'nibble','nibble');}
-  if(l.phase==='waiting'&&s.t>=l.biteAt){l.phase='bite';feedback(s,'bite','bite');}
-  if(l.phase==='bite'&&s.t>l.phaseUntil){l.phase='escaped';l.misses++;feedback(s,'late','miss');}
-  if(l.phase==='reeling'){
-    const surging=s.t-l.hookAt>1.5&&Math.sin((s.t-l.hookAt)*1.8)>.65;if(surging&&!l.surging)feedback(s,'surge','surge');l.surging=surging;
-    l.tension=clamp(l.tension+((input.mask&16?40:-29)+Math.sin(s.t*3+l.fish)*FISH[l.fish].pull+(surging?12:0))*dt,0,100);
-    const safe=l.tension>=28&&l.tension<=78;l.progress=clamp(l.progress+(safe?.27:-.10)*dt,0,1);l.strain=clamp(l.strain+(l.tension>92||l.tension<9?dt:-dt*2),0,2);
-    if(l.strain>1.4){l.phase='escaped';l.misses++;feedback(s,'line','miss');}
-    if(l.progress>=1){l.phase='caught';l.hits++;l.completed++;s.caught++;s.score+=FISH[l.fish].points;l.collection.push(l.fish);l.records.push({fish:l.fish,length:l.length,spot:l.spot});feedback(s,'caught','catch');}
-  }
-}
 function rhythm(s,pressed){
   const l=s.leisure;
   for(let lane=0;lane<4;lane++)if(pressed[lane]){
@@ -119,7 +94,7 @@ export function stepLeisure(s,input,dt){
   const l=s.leisure,pressed=Array(10).fill(false);
   for(let i=0;i<10;i++){const n=input.presses?.[i]||0;pressed[i]=n>l.presses[i];l.presses[i]=Math.max(l.presses[i],n);}
   s.inputSeq=input.seq??s.inputSeq;
-  if(s.kind==='fishing')fishing(s,input,pressed,dt);
+  if(s.kind==='fishing')stepFishing(s,input,pressed,dt,FISH,FISHING_SPOTS);
   else if(s.kind==='rhythm')rhythm(s,pressed);
   else if(s.kind==='lantern')lantern(s,pressed);
   else golf(s,input,pressed,dt);

@@ -1,0 +1,16 @@
+{
+  "pass": true,
+  "smoke": true,
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-v4-build-1",
+  "htmlSha256": "2875fb67bcaf49c827b0956508abe373a96da4a984c52edf0186906889d0fd16",
+  "checks": [
+    "native modular terrain, fourteen request cards and shared pets load without missing art or route overlay",
+    "tracking still walks to the next stop without any ground or map route graphics; manual input cancels walking",
+    "a wrong search and a throttled retry leave the correct spot playable",
+    "phone touch control, pause, no horizontal overflow, teacher lock cancels the active game and unlock restores the park"
+  ],
+  "errors": [],
+  "metrics": {},
+  "browser": "Windows Chrome; emulated tablet and phone",
+  "physicalMobileVerified": false
+}

@@ -18,3 +18,5 @@ node scripts/test-park-fishing-catch-live.mjs --output=artifacts/pet-playtest/pa
 合併遠端更新後，以 `artifacts/park-fishing-catch-build-2` 重新建置，並再次通過[完整釣獲流程](../artifacts/pet-playtest/park-fishing-catch-live-2/report.json)及[樂園回歸流程](../artifacts/pet-playtest/park-fishing-catch-regression-2/smoke-report.json)。另有 70 項規則及 PostgreSQL／JSON 測試、4 項正式產物檢查、TypeScript 及原有寵物模組檢查通過。
 
 [本機預覽](http://localhost:3000/pet)已同步此版本；[分發核對](../artifacts/pet-playtest/park-fishing-catch-final-1/preview-verification.json)驗證了 142 個檔案，並確認未登入仍須先登入。
+
+2026-10-29：修正 iPad 長按收線時的文字選取、點按高亮、圖片拖曳及 Safari 長按選單。保護範圍包含釣魚介面及放在遊戲容器外的全屏魚獲畫面，返回房間後仍可正常選取文字。新增[觸控回歸驗證](../artifacts/pet-playtest/park-fishing-longpress-live-1/report.json)：實際按住收線 800 毫秒、放開鬆線、長按標題及魚名、五種視窗、保存魚獲、老師鎖定和離開後恢復均通過。使用 Windows Chrome 觸控模擬，未在實體 iPad 上驗證。

@@ -1,0 +1,95 @@
+{
+  "pass": true,
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-v4-build-1",
+  "htmlSha256": "2875fb67bcaf49c827b0956508abe373a96da4a984c52edf0186906889d0fd16",
+  "checks": {
+    "typescript": true,
+    "parkTests": 74,
+    "productionArtifactTests": 4,
+    "randomWaitingAndDepartures": true,
+    "noBiteMarkerOrButtonCue": true,
+    "lineTensionAndFishRuns": true,
+    "mashingBreaksLine": true,
+    "patientReelingCanLandFish": true,
+    "inventoryAndTrading": true,
+    "adventureSmoke": true,
+    "teacherLock": true,
+    "visualReview": true,
+    "httpDistribution": true,
+    "physicalIpad": false
+  },
+  "fingerprints": [
+    {
+      "file": "pet-app/lib/park-fishing.mjs",
+      "sha256": "d2da766a8ead0ca74d5d86ae3c65422fe218b0deb73cae1a4420f1ae5ff6d135"
+    },
+    {
+      "file": "pet-app/lib/park-fishing.d.mts",
+      "sha256": "366e8f7ebb7c7286d46c7466f3510fafcce3902f656a6df8943e295e6e8e1ed0"
+    },
+    {
+      "file": "pet-app/lib/park-leisure.mjs",
+      "sha256": "40ee52a3b021d07f212b4da888d611f67149eebcbaef5f27aba760b35a1ceed1"
+    },
+    {
+      "file": "pet-app/lib/park-leisure.d.mts",
+      "sha256": "b69085afdc703fb319d03b4df50f7205f58914a3063aeff697c076fbee14e492"
+    },
+    {
+      "file": "pet-app/lib/fishing-sound.mjs",
+      "sha256": "62d18ecc3182f89a7e6c9b8f4bd8519c6804e129e5f2534109298867c25e5448"
+    },
+    {
+      "file": "pet-app/src/park/fishing-view.ts",
+      "sha256": "ef1f33e1a1c6034e06a568533539819d6f42d66b732b46067a2e693b713aba0b"
+    },
+    {
+      "file": "pet-app/src/park/leisure-games.ts",
+      "sha256": "1c991b48465efa20f5f156be2c1fb244ca9204a096dd7f67b2f029a169f7376a"
+    },
+    {
+      "file": "pet-app/src/park/leisure-games.css",
+      "sha256": "b8ebe77df32567c96fb09ba0c11f8e5c02dfd997f2eafc587b4653202b2effb2"
+    },
+    {
+      "file": "pet-app/src/audio.ts",
+      "sha256": "dcd3fcc5064c4fed4014dc18576092361ab98c0ad99d9bb80c6dd5b941289e4e"
+    },
+    {
+      "file": "pet-app/tests/park-fishing.test.cjs",
+      "sha256": "d7cf2afb222cf93afcc659b82f0ee54b35e67942ee78b5ef980f4ceed1522f3e"
+    },
+    {
+      "file": "scripts/lib/fishing-touch-player.mjs",
+      "sha256": "0f841396258d5f1a69f8ca495c45660bcacf40c0f4fc3d94e9c5100be8c9b021"
+    },
+    {
+      "file": "scripts/test-park-fishing-v4-live.mjs",
+      "sha256": "bef60fe1752db2627002070f1aec2e357cb3db30a38142f888eeb029baf65c04"
+    },
+    {
+      "file": "docs/pet-park-fishing-v4.md",
+      "sha256": "c1174194237c4761ffc6c277e46512af0d9671f2dc5ced45cb38f6f2d5d2d868"
+    },
+    {
+      "file": "artifacts/park-fishing-v4/unit-tests.tap",
+      "sha256": "fc45d5c8e3687f6f7a7d4c0baca076aa8b9c872e4305fbb18e1e1656fcfbdcbd"
+    },
+    {
+      "file": "artifacts/park-fishing-v4/artifact-tests.tap",
+      "sha256": "e1976002bde9ce716edc1cdcbbbc5b50f8a3521d8c65dd1b06d99079fbaf483b"
+    },
+    {
+      "file": "artifacts/park-fishing-v4/balance.json",
+      "sha256": "ba49c9a37ff8be3851e6ce61035cef5dae7b7002b49895918f2d1f43c9dfcd5e"
+    },
+    {
+      "file": "artifacts/pet-playtest/park-fishing-v4-live-3/report.json",
+      "sha256": "50c759cfbffa45e6dcd0ecc904ebd00bc673c33b1440deebb7d96f36feda0898"
+    },
+    {
+      "file": "artifacts/pet-playtest/park-fishing-v4-regression-1/smoke-report.json",
+      "sha256": "38450a91753de2eae79283711f64c3cc20c7e749404944b5f1b4ec3d2753530d"
+    }
+  ]
+}

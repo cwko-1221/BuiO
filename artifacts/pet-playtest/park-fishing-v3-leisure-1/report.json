@@ -1,0 +1,56 @@
+{
+  "pass": true,
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-v3-build-1",
+  "htmlSha256": "3450cbb939ad8327c8c4fd9eb6f1f4dd9fd617eff2df2adf5b79074e3c13460d",
+  "checks": [
+    "three distinct lantern boards solve through actual canvas taps; hints, phone layout and the bell quest step work",
+    "the echo tree is a navigable maze with real walls and saved quest progress; it no longer repeats melody memory",
+    "golf is played through real pull-and-release controls with authoritative friction, bumper bounces and multiple holes",
+    "four independent drum lanes score actual timed touch input and preserve the music quest step",
+    "fishing uses real cast, moving fish, bite and repeated tap input; tablet pause, rotation, persistent species and duplicate settlement pass",
+    "phone fishing uses actual touch selection, hooking and repeated reeling taps; native fish artwork, journal and landscape pause stay readable"
+  ],
+  "results": [
+    {
+      "kind": "lantern",
+      "score": 39,
+      "completed": 3,
+      "perfect": 0,
+      "collection": [],
+      "strokes": 0
+    },
+    {
+      "kind": "golf",
+      "score": 26,
+      "completed": 3,
+      "perfect": 0,
+      "collection": [],
+      "strokes": 6
+    },
+    {
+      "kind": "rhythm",
+      "score": 150,
+      "completed": 52,
+      "perfect": 46,
+      "collection": [],
+      "strokes": 0
+    },
+    {
+      "kind": "fishing",
+      "score": 18,
+      "completed": 5,
+      "perfect": 0,
+      "collection": [
+        6,
+        2,
+        10,
+        3,
+        9
+      ],
+      "strokes": 0
+    }
+  ],
+  "questCount": 14,
+  "errors": [],
+  "scope": "Windows Chrome, four real authenticated isolated students; native emulated touch and pointer input; no physical iPad claim"
+}

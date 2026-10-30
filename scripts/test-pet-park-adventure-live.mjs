@@ -96,19 +96,19 @@ async function pointerAt(page, x, y, touch = false) {
 }
 async function playLeisure(page,kind){
   await page.waitForFunction(()=>window.__petPark.miniGame?.ready);await page.locator('[data-leisure="start"]').click();await page.waitForFunction(()=>window.__petPark.miniGame.phase==='playing');
-  let previous='',held=false;const notes=new Set(),deadline=Date.now()+110000;
+  let previous='',held=false,lastFishingTap=0;const notes=new Set(),deadline=Date.now()+170000;
   const point=(x,y)=>page.evaluate(({x,y})=>{const m=window.__petPark.miniGame,r=document.querySelector('.park-leisure-stage canvas').getBoundingClientRect();if(m.kind==='lantern'&&r.width<600){x=(x-400)*1.3+400;y=(y-300)*1.3+300;}return{x:r.x+x/800*r.width,y:r.y+y/600*r.height};},{x,y});
   while(await page.evaluate(()=>window.__petPark.miniGame.state.status==='playing')){
-    const s=await page.evaluate(()=>window.__petPark.miniGame.state),l=s.leisure;if(s.paused){await page.locator('[data-leisure="resume"]').click();continue;}
+    const s=await page.evaluate(()=>window.__petPark.miniGame.state),l=s.leisure;if(kind==='fishing'&&await page.locator('.fishing-catch-screen:not([hidden])').count()){await page.locator('[data-leisure="catch-next"]').click();await page.locator('.fishing-catch-screen').waitFor({state:'hidden'});continue;}if(s.paused){await page.locator('[data-leisure="resume"]').click();continue;}
     if(kind==='fishing'){
       if(['ready','caught','escaped','bite'].includes(l.phase)&&l.phase!==previous){if(held){await page.mouse.up();held=false;}await page.locator('[data-leisure="reel"]').click();}previous=l.phase;
-      const hold=l.phase==='reeling'&&l.tension<54;if(hold!==held){if(hold){const r=await page.locator('[data-leisure="reel"]').boundingBox();await page.mouse.move(r.x+r.width/2,r.y+r.height/2);await page.mouse.down();}else await page.mouse.up();held=hold;}
+      if(l.phase==='reeling'&&!l.surging&&l.tension<62&&Date.now()-lastFishingTap>250){lastFishingTap=Date.now();await page.locator('[data-leisure="reel"]').click();}
     }else if(kind==='rhythm'){for(const n of l.chart)if(!notes.has(n.id)&&n.at-s.t<.12&&n.at-s.t>-.16){notes.add(n.id);await page.keyboard.press(String(n.lane+1));}}
     else if(kind==='lantern'&&l.phase==='playing'){const i=lanternHint(l.tiles)[0],p=await point(270+i%3*130,180+Math.floor(i/3)*130);await page.mouse.click(p.x,p.y);await page.waitForFunction(({round,moves})=>{const l=window.__petPark.miniGame.state.leisure;return l.round!==round||l.moves>moves;},{round:l.round,moves:l.moves});}
     else if(kind==='golf'&&l.phase==='playing'&&!Math.hypot(l.ball.vx,l.ball.vy)){const plan=planGolf(s),a=await point(l.ball.x,l.ball.y),b=await point(plan.x,plan.y);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:4});await page.mouse.up();await page.waitForFunction(({round,strokes})=>{const l=window.__petPark.miniGame.state.leisure;return l.round!==round||l.strokes>strokes;},{round:l.round,strokes:l.strokes});}
     if(Date.now()>deadline)throw Error(kind+' timed out');await page.waitForTimeout(60);
   }
-  if(held)await page.mouse.up();assert.ok(await page.evaluate(()=>window.__petPark.miniGame.state.leisure.completed>=({fishing:2,rhythm:12,lantern:2,golf:2})[window.__petPark.miniGame.kind]));await page.locator('[data-leisure="finish"]').click();await page.locator('.park-leisure-root').waitFor({state:'detached'});
+  if(held)await page.mouse.up();if(kind==='fishing'&&await page.locator('.fishing-catch-screen:not([hidden])').count())await page.locator('[data-leisure="catch-next"]').click();assert.ok(await page.evaluate(()=>window.__petPark.miniGame.state.leisure.completed>=({fishing:2,rhythm:12,lantern:2,golf:2})[window.__petPark.miniGame.kind]));await page.locator('[data-leisure="finish"]').click();await page.locator('.park-leisure-root').waitFor({state:'detached'});
 }
 async function play(page, kind) {
   await page.locator('.park-mini-card').waitFor(); await shot(page, kind === 'banana' ? '11-banana-intro' : '14-flight-intro');

@@ -1,0 +1,12 @@
+✔ production pet artifact contains the paid coin-pusher client but no dev-money endpoint (5054.5307ms)
+✔ production Rapier WASM has a valid compact Brotli sidecar for mobile delivery (24.3472ms)
+✔ the HTML entrypoint loads the teacher reward settings and scoped gesture lock (8.3646ms)
+✔ production desktop coin-pusher artwork stays within its cold-load transfer budget (1.0728ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5470.8311

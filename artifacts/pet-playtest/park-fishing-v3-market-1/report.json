@@ -1,0 +1,20 @@
+{
+  "pass": true,
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-v3-build-1",
+  "htmlSha256": "3450cbb939ad8327c8c4fd9eb6f1f4dd9fd617eff2df2adf5b79074e3c13460d",
+  "checks": [
+    "twenty native fish are in the journal; real touch fishing can end early with both catches saved, and trader sales credit the exact wallet amount once",
+    "actual apple and flower harvesting adds physical inventory, a phone sale review shows the exact price, and selling consumes stock without duplicate payouts",
+    "an actual accepted trail quest completes through three real sign interactions and credits the full 500 coins",
+    "five random reachable litter objects disappear after real walking and pickup; the eco NPC pays the configured reward once and each student keeps their own patrol",
+    "reload preserves sold-fish discoveries and eco completion; touch layouts and teacher lock/unlock preserve inventory and close trading controls"
+  ],
+  "fishCount": 20,
+  "questReward": 500,
+  "dailyCap": 5000,
+  "fishValue": 1000,
+  "ecoReward": 300,
+  "phoneBalance": 540,
+  "errors": [],
+  "scope": "Windows Chrome with authenticated tablet and phone touch input; physical iPad not tested"
+}

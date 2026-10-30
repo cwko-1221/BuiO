@@ -1,0 +1,869 @@
+{
+  "pass": true,
+  "checkedAt": "2026-10-29T17:08:34.313Z",
+  "preview": "http://localhost:3000/pet",
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-v4-build-1",
+  "unauthenticatedPetStatus": 302,
+  "htmlSha256": "2875fb67bcaf49c827b0956508abe373a96da4a984c52edf0186906889d0fd16",
+  "files": 142,
+  "marketImages": 21,
+  "marketBytes": 955698,
+  "fishingImages": 9,
+  "fishingBytes": 366172,
+  "communityImages": 8,
+  "communityBytes": 881190,
+  "checked": [
+    {
+      "file": "index.html",
+      "checkedVia": "published filesystem entry",
+      "bytes": 2285,
+      "sha256": "2875fb67bcaf49c827b0956508abe373a96da4a984c52edf0186906889d0fd16"
+    },
+    {
+      "file": "assets/arcade-prizes-v2-BGQ7UJPi.glb",
+      "checkedVia": "HTTP",
+      "bytes": 715004,
+      "sha256": "5d22e558aef417e17b9c3a095f3d07178b8cd81dbc6a00ef2c65fd97565acc31"
+    },
+    {
+      "file": "assets/ArcadePrizes-ChUYXooa.js",
+      "checkedVia": "HTTP",
+      "bytes": 325,
+      "sha256": "84e0dbe514ff2e3f8955c4d838ccd6feff64f5adfb2056c0291e9f99601678f8"
+    },
+    {
+      "file": "assets/audio-BqsoTSaT.js",
+      "checkedVia": "HTTP",
+      "bytes": 17514,
+      "sha256": "df015e886158948822e8a90abe165f4bd276176ac65b6f8added817020c563e3"
+    },
+    {
+      "file": "assets/catalog-q_BzW1bp.js",
+      "checkedVia": "HTTP",
+      "bytes": 423841,
+      "sha256": "a743319e2a6b13c8f7386da274ac85d324515f19d0a1a5527931fd4448813311"
+    },
+    {
+      "file": "assets/catalog-r5hIzoJZ.js",
+      "checkedVia": "HTTP",
+      "bytes": 459,
+      "sha256": "1956bed9ebe2b90f87537a263b40b35bf23dc34177f4618d4f8cd732ca5287c7"
+    },
+    {
+      "file": "assets/coin-pusher-backboard-desktop-v2-B6xGC4ty.webp",
+      "checkedVia": "HTTP",
+      "bytes": 185436,
+      "sha256": "0947ebfa1f083f914873d21f59b6f0d7130e9f0ddd4c19fddfd469e078e73d33"
+    },
+    {
+      "file": "assets/coin-pusher-backboard-mobile-v2-wSMZ3OBI.webp",
+      "checkedVia": "HTTP",
+      "bytes": 37408,
+      "sha256": "96ff8b6ec138bbe1dd4c8da731fc82add7a54e97a9b7f6662619576cbc9610d2"
+    },
+    {
+      "file": "assets/coin-pusher-brushed-metal-v1-C1NqSYBq.webp",
+      "checkedVia": "HTTP",
+      "bytes": 19706,
+      "sha256": "087792fb98ed6aca1a7ab0b58053d9f30e32965b68e17497c404fe69d6ff6a5d"
+    },
+    {
+      "file": "assets/coin-pusher-minted-paw-desktop-v2-B5eLM0TD.webp",
+      "checkedVia": "HTTP",
+      "bytes": 99146,
+      "sha256": "754cb73b996df202fb46f9bb9c355b6b1e39c8a93100de809a3145ef5f8890da"
+    },
+    {
+      "file": "assets/coin-pusher-minted-paw-mobile-v2-DZ52sENp.webp",
+      "checkedVia": "HTTP",
+      "bytes": 21456,
+      "sha256": "1edabf6b71917fccba16d445bb2f7058e51f415a62b1519d5c829850b39daead"
+    },
+    {
+      "file": "assets/CoinPusherDimensions-CGhVOq-R.js",
+      "checkedVia": "HTTP",
+      "bytes": 500,
+      "sha256": "535198baa1545a313df99030b4a8990811f1dd7cd058ba28ce21c63883e049de"
+    },
+    {
+      "file": "assets/CoinPusherFeedback-URJaAzXm.js",
+      "checkedVia": "HTTP",
+      "bytes": 5018,
+      "sha256": "329e5fddad129dc8b5030ce2290f50da78e65cf55dc92c70fa636503510fc68a"
+    },
+    {
+      "file": "assets/CoinPusherLayout-DH6Brccd.js",
+      "checkedVia": "HTTP",
+      "bytes": 976,
+      "sha256": "ef3b491d6571eae318e15f3392a7471d4df903ae2b31c08cb25b49ad5f220bc0"
+    },
+    {
+      "file": "assets/CoinPusherModel-BMCEQKzB.js",
+      "checkedVia": "HTTP",
+      "bytes": 224010,
+      "sha256": "3f4e61042ef4cb66af13ebf178c0398c5ce9bfcd4bff67198010eceb55086879"
+    },
+    {
+      "file": "assets/CoinPusherScene-D5ehq8Ke.js",
+      "checkedVia": "HTTP",
+      "bytes": 643649,
+      "sha256": "0e8d8b27c6be89e1a194a2cadf5f326a63fa89e052203c72685cc5e121707f1d"
+    },
+    {
+      "file": "assets/controller-ChZw08ua.js",
+      "checkedVia": "HTTP",
+      "bytes": 685191,
+      "sha256": "1d20eb948a738d2e7a7ed4ef201641b9ed83bcbc77476b7b7f38725a71bb077d"
+    },
+    {
+      "file": "assets/controller-D1d1c7Bp.css",
+      "checkedVia": "HTTP",
+      "bytes": 80314,
+      "sha256": "3e5720a1e6e22a7b688f59edd29b0e84e93d4eea5cb43088cf606970bb839946"
+    },
+    {
+      "file": "assets/controller-dKwzv4mf.js",
+      "checkedVia": "HTTP",
+      "bytes": 241581,
+      "sha256": "3d2c26242b0c324c56aed66e0722e463b773b2815be89975aa713a200023a55c"
+    },
+    {
+      "file": "assets/controller-Dlfm6Hm0.css",
+      "checkedVia": "HTTP",
+      "bytes": 35950,
+      "sha256": "1bb1d7d843ca2592cd6f85e58d8ddd3612ad5c3d1a157e277c7bb638700ae5b1"
+    },
+    {
+      "file": "assets/index-C_b5k1Pl.css",
+      "checkedVia": "HTTP",
+      "bytes": 122238,
+      "sha256": "5d073353962d3d25b447dd507470a3d8277044675e25a13216639a2f42d53290"
+    },
+    {
+      "file": "assets/index-Fl294BSA.js",
+      "checkedVia": "HTTP",
+      "bytes": 226656,
+      "sha256": "84aca62fa0409d1acef67616e6bd61feba566b7b5809e8be8e3f5f878a923e0e"
+    },
+    {
+      "file": "assets/phaser-P1E8uaLi.js",
+      "checkedVia": "HTTP",
+      "bytes": 1374829,
+      "sha256": "7d1ea2187a4452e8f5383d740ae7e67d8e11400e3a8f268a76d28596f3277f24"
+    },
+    {
+      "file": "assets/quiet-focus-garden-v1-BCjCGyKf.webp",
+      "checkedVia": "HTTP",
+      "bytes": 228540,
+      "sha256": "d18fa61de071e05ad9054c5858388ed74bb583365f6453906011fe4ceb0eb5fd"
+    },
+    {
+      "file": "assets/rank-display-4sPWHcRZ.css",
+      "checkedVia": "HTTP",
+      "bytes": 654,
+      "sha256": "8f308049b80e1a48aa4dcc24cf422327da944cc7c29c4e523ef82105c5206584"
+    },
+    {
+      "file": "assets/rank-display-BU7O6pRA.js",
+      "checkedVia": "HTTP",
+      "bytes": 5781,
+      "sha256": "c8bc42a00ccd723517bf543b59d8eb9a2f90ea94af6bb799d773fa4ebfece4fd"
+    },
+    {
+      "file": "assets/rapier_wasm3d_bg-CCK6hj8V.wasm",
+      "checkedVia": "HTTP",
+      "bytes": 2021200,
+      "sha256": "4d621b86d803ce9922ac44c1829902f1b60fd02d3c8b364e05374938af15ead4"
+    },
+    {
+      "file": "assets/world-art-assets-CY54SXc3.js",
+      "checkedVia": "HTTP",
+      "bytes": 16462,
+      "sha256": "83b317f4a50f21961706f17686be957322f012494602e9f01efb1097bf2bafa3"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/ground-v1-644668151f96.webp",
+      "checkedVia": "HTTP",
+      "bytes": 813996,
+      "sha256": "644668151f9627ac9955253043d9fb9260085c6c8617722089de24c22ce1cf17"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/fountain-v1-01ce0c907674.webp",
+      "checkedVia": "HTTP",
+      "bytes": 210116,
+      "sha256": "01ce0c90767498907bb1712dd60a49c4678f9568349761c764f4a56c814c12be"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/tree-v1-5989bba75649.webp",
+      "checkedVia": "HTTP",
+      "bytes": 404406,
+      "sha256": "5989bba75649ea1dc6e5136e9f7c9cb9ebb824c1dd264249ef956155f8bcbc59"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/bear-v1-0ce5c2bca51d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 41094,
+      "sha256": "0ce5c2bca51d6b1c9f8eb6ac4b79ea238d0cb229376c6ffd26774d876b848b93"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/board-v1-879df93830a1.webp",
+      "checkedVia": "HTTP",
+      "bytes": 94420,
+      "sha256": "879df93830a1a506640165e213839f65c75a2f57dbe4e4c2a717a5aba2a7feab"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/bench-v1-e74c08041c8a.webp",
+      "checkedVia": "HTTP",
+      "bytes": 72798,
+      "sha256": "e74c08041c8a2d2328e85637513ec6bbb1effcd56123863b7e2b8dc55c3f5045"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/chime-v1-d7e77417b5a2.webp",
+      "checkedVia": "HTTP",
+      "bytes": 90668,
+      "sha256": "d7e77417b5a2d8236261c27bd8516282ad8f10a523f7564699b43a914b01248c"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/drum-v1-77e78761741d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 57958,
+      "sha256": "77e78761741daf743d9bb51cbcc422d94925a8993dcb67489558e8eb9649c45d"
+    },
+    {
+      "file": "assets/art/park/wish-plaza-v1/bell-v1-170f01c7c0ea.webp",
+      "checkedVia": "HTTP",
+      "bytes": 78228,
+      "sha256": "170f01c7c0eafa0d5e5d7c2bc85075d4477f4727337ed35ca12f783099eede8c"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/home-ground-v1-8d40a3d8f916.webp",
+      "checkedVia": "HTTP",
+      "bytes": 846782,
+      "sha256": "8d40a3d8f916e1bf7e82ae844b3a66c6539a64144df326b679b870c03e2111d9"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/garden-ground-v1-c6fc27e944c1.webp",
+      "checkedVia": "HTTP",
+      "bytes": 897468,
+      "sha256": "c6fc27e944c197a1923fba2e837a9d3a02bde57d8a9bd6d3d2a020f9acaf5d37"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/forest-ground-v1-5bd07ab33747.webp",
+      "checkedVia": "HTTP",
+      "bytes": 851302,
+      "sha256": "5bd07ab337471b490969ed8cf80c4907c6c5d8709398ea6af55fb20f5cf9fc1d"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/grass-v1-cdac26186685.webp",
+      "checkedVia": "HTTP",
+      "bytes": 169888,
+      "sha256": "cdac26186685fdd2ba545652b302bb3801aca05205f74001a3b8ab68d936d710"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/paving-v1-243d3f326564.webp",
+      "checkedVia": "HTTP",
+      "bytes": 135616,
+      "sha256": "243d3f3265640a40e967934e573b7143b72318165fc513a0d6b9321ab4eb2aee"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/house-v1-945eeb59e505.webp",
+      "checkedVia": "HTTP",
+      "bytes": 340686,
+      "sha256": "945eeb59e505151c20a3bb678bf01d7cd1ecf095e05e1c902b0086c3eefdde90"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/mailbox-v1-2ef6c23634a8.webp",
+      "checkedVia": "HTTP",
+      "bytes": 24842,
+      "sha256": "2ef6c23634a8a3094e6b6adcb3e0cdef4a746b173d6519af789d4c75683b3208"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/rabbit-v1-8c168dd8efb6.webp",
+      "checkedVia": "HTTP",
+      "bytes": 48328,
+      "sha256": "8c168dd8efb6bea0de2b6ddcd1e8b1055e6e1447407881c4857b06cb1f5732f2"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/deer-v1-2241619442b8.webp",
+      "checkedVia": "HTTP",
+      "bytes": 44998,
+      "sha256": "2241619442b8582507b86232dc1849ce8d6b20d93d6f3d3d2828a82443a96cd7"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/squirrel-v1-bc758f3eb8c5.webp",
+      "checkedVia": "HTTP",
+      "bytes": 55796,
+      "sha256": "bc758f3eb8c565c3df13f1c7e0c31b49f354295e3671c0362cc58e6d368c85a2"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/sunflowers-v1-070dfd1a1d01.webp",
+      "checkedVia": "HTTP",
+      "bytes": 103484,
+      "sha256": "070dfd1a1d01d124e06855851dfccf5982140cb8e3e0c8002ab03f840e7bb12e"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/tulips-v1-d10f3ab7ac5d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 98682,
+      "sha256": "d10f3ab7ac5dd1a4d31c407f11e5fe8949e9f34726a504efc8f60ed46ae6ef86"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/daisies-v1-6f82603fb890.webp",
+      "checkedVia": "HTTP",
+      "bytes": 106130,
+      "sha256": "6f82603fb8900c7be26b1ee5afc8f8bc56e34e30aaa1842ce262749c2a923869"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/pond-v1-80c8dafac9e9.webp",
+      "checkedVia": "HTTP",
+      "bytes": 177920,
+      "sha256": "80c8dafac9e92bf29a44e24166621889a8118e7e89ef0ccfbf27a20956c5f6b9"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/apple-v1-47402d1641cd.webp",
+      "checkedVia": "HTTP",
+      "bytes": 239126,
+      "sha256": "47402d1641cdd245728ae75c73c6c6907f1e7c15b0c6ff5103b85bad7e970ed1"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/hollow-v1-efa432e899e9.webp",
+      "checkedVia": "HTTP",
+      "bytes": 286692,
+      "sha256": "efa432e899e960a046613b0aeb0195c05f6f374afad839ef8125b9f1f47b4bea"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/acorn-v1-848948d81a90.webp",
+      "checkedVia": "HTTP",
+      "bytes": 15412,
+      "sha256": "848948d81a903dba3a14ffa0c18f2c68eb2e06250a503bc8abbe3a95452fc147"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/litter-v1-2450fd6de205.webp",
+      "checkedVia": "HTTP",
+      "bytes": 11130,
+      "sha256": "2450fd6de2055eed4203863cb0c8fa1f5517fcd07fb1cfe3d6207652d235d462"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/mushrooms-v1-a5d19e26a83a.webp",
+      "checkedVia": "HTTP",
+      "bytes": 73210,
+      "sha256": "a5d19e26a83a3491668448e952a39050d34c65e8ee277b220768838ccc318d23"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/bush-v1-10d833f11884.webp",
+      "checkedVia": "HTTP",
+      "bytes": 121618,
+      "sha256": "10d833f118844dfaf59b1a128fef965d73d6122eb7ee028a4474a10383851640"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/conifer-v1-387c9ba3753a.webp",
+      "checkedVia": "HTTP",
+      "bytes": 163336,
+      "sha256": "387c9ba3753a41741a8572a5ed825ff4b872a8deeb14a28412709b16481d701c"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/log-v1-ad818c0ce1d6.webp",
+      "checkedVia": "HTTP",
+      "bytes": 56524,
+      "sha256": "ad818c0ce1d68242d209bc87ee26e418451b17137095fea503149a169f230bc4"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/sign-v1-8e0ddae9f88a.webp",
+      "checkedVia": "HTTP",
+      "bytes": 36606,
+      "sha256": "8e0ddae9f88a7237eef394636c0d5d82edb0c048c3e3f4f1708cad5feb2d5e17"
+    },
+    {
+      "file": "assets/art/park/full-park-v1/portal-v1-3068c5e2b18e.webp",
+      "checkedVia": "HTTP",
+      "bytes": 103460,
+      "sha256": "3068c5e2b18e24eb7c9bb6bc861d887230078240376701cb4b5060f209d3cd3f"
+    },
+    {
+      "file": "assets/art/park/adventure-v2/meadow-1381dcab5b4d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 309498,
+      "sha256": "1381dcab5b4d767e183a4a82de8ac845f3b72dfaf95edb22c729dc79493d8043"
+    },
+    {
+      "file": "assets/art/park/adventure-v2/banana-e2b0dd80f21c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 30312,
+      "sha256": "e2b0dd80f21c09055f6dc792ae4578aa67b4b43657e1bb61be6c47734ff8545b"
+    },
+    {
+      "file": "assets/art/park/adventure-v2/banana-stand-f5f377f9a26e.webp",
+      "checkedVia": "HTTP",
+      "bytes": 135318,
+      "sha256": "f5f377f9a26e9986f6955fe736b49d0a4eec1387782086f5c9ce8d9df8e14d1a"
+    },
+    {
+      "file": "assets/art/park/adventure-v2/sky-stand-0669c73030c2.webp",
+      "checkedVia": "HTTP",
+      "bytes": 180694,
+      "sha256": "0669c73030c2b525ed0c6c5595efb029ee925e460a35d90d0c0e3d8347d8e7e2"
+    },
+    {
+      "file": "assets/art/park/storybook-v3/garden-terrain-ad9318fad2b9.webp",
+      "checkedVia": "HTTP",
+      "bytes": 974156,
+      "sha256": "ad9318fad2b927b123739bcbdda7273dde40d2296889fefa0d4f35d5340b44cf"
+    },
+    {
+      "file": "assets/art/park/modular-v4/grass-3d163a8a28fd.webp",
+      "checkedVia": "HTTP",
+      "bytes": 501722,
+      "sha256": "3d163a8a28fd22174ae90d8315c6191ec2ee685d1392c16b12a4c0bbbb372f91"
+    },
+    {
+      "file": "assets/art/park/modular-v4/stone-ab409dc6b737.webp",
+      "checkedVia": "HTTP",
+      "bytes": 418784,
+      "sha256": "ab409dc6b737878ce965022b9eb8b16f5de63b78a87e3aa858dc84973910d7e1"
+    },
+    {
+      "file": "assets/art/park/modular-v4/soil-19e5b56f65c4.webp",
+      "checkedVia": "HTTP",
+      "bytes": 575088,
+      "sha256": "19e5b56f65c4e3844039f50e068f60d1a2a427552f9f83b094bc0cac39afb0b2"
+    },
+    {
+      "file": "assets/art/park/modular-v4/water-d2b0d36d505d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 433274,
+      "sha256": "d2b0d36d505dda4d7617857f21931f87877ebeb90a1a41b3db89e523c1f8884b"
+    },
+    {
+      "file": "assets/art/park/modular-v4/sprout-e14740248979.webp",
+      "checkedVia": "HTTP",
+      "bytes": 37398,
+      "sha256": "e147402489790ee673769ff7563a45e5d6916c8ac6ed20614ee28ae62250c33c"
+    },
+    {
+      "file": "assets/art/park/modular-v4/crop-tulips-f1d19fddf136.webp",
+      "checkedVia": "HTTP",
+      "bytes": 64120,
+      "sha256": "f1d19fddf136224964b9f098c7e80e982980fbad98167aefeb86d8ed127429db"
+    },
+    {
+      "file": "assets/art/park/modular-v4/crop-sunflowers-0b56d19560ec.webp",
+      "checkedVia": "HTTP",
+      "bytes": 77826,
+      "sha256": "0b56d19560ecf66aee19635b2b4ba4e0207418079cc7d6d4205464093024c23d"
+    },
+    {
+      "file": "assets/art/park/modular-v4/crop-daisies-ee12d632c906.webp",
+      "checkedVia": "HTTP",
+      "bytes": 73760,
+      "sha256": "ee12d632c906ef2118c9a812e09188ec6bfcf658edaa4a833750b32495162447"
+    },
+    {
+      "file": "assets/art/park/modular-v4/border-flowers-e205d0960b6e.webp",
+      "checkedVia": "HTTP",
+      "bytes": 132900,
+      "sha256": "e205d0960b6e15913dc53176978a237d7c6eb3434004f436acf9fb163f6a84ae"
+    },
+    {
+      "file": "assets/art/park/modular-v4/border-lavender-1a18044af4c6.webp",
+      "checkedVia": "HTTP",
+      "bytes": 141320,
+      "sha256": "1a18044af4c6d5ce1ed8fb49f545c2e2cf3648ce6e3ef3017e6e890a8eb291f7"
+    },
+    {
+      "file": "assets/art/park/modular-v4/waterworks-a0e54d530f0a.webp",
+      "checkedVia": "HTTP",
+      "bytes": 71406,
+      "sha256": "a0e54d530f0ada03389b6493a732627431a3532320eed7a2dd85dc25d3fcf5d7"
+    },
+    {
+      "file": "assets/art/park/modular-v4/bank-rocks-890f50c0c371.webp",
+      "checkedVia": "HTTP",
+      "bytes": 52012,
+      "sha256": "890f50c0c3713b7afc9de9dd7983a15b1eb4fd6c8b90496454ec4485d05519c2"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/swift-665f02f4416e.webp",
+      "checkedVia": "HTTP",
+      "bytes": 71094,
+      "sha256": "665f02f4416e04a3b06cd087354726ed9ddcb68a7387230cb0e4ecadd78ac744"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/petal-7c69f129873f.webp",
+      "checkedVia": "HTTP",
+      "bytes": 68342,
+      "sha256": "7c69f129873f51bc575ad4ad28f5b2faef803102e7d539d67ea164041d88fc4e"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/nova-b6390f86947c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 80310,
+      "sha256": "b6390f86947c90c789570b303f710658a8d87ac1e9cafe41634b76c4f5bc4a58"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/valley-c12ba39d140b.webp",
+      "checkedVia": "HTTP",
+      "bytes": 777940,
+      "sha256": "c12ba39d140b5eee3a4869dc4c90cf0de99a3baf663c27d0ab4387ab8e606341"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/scout-7b8842383f49.webp",
+      "checkedVia": "HTTP",
+      "bytes": 68008,
+      "sha256": "7b8842383f49e6b13e9d860788ac9332678a866bbbb1c3f14df1582d8a6e7b86"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/interceptor-13d806b068c2.webp",
+      "checkedVia": "HTTP",
+      "bytes": 62938,
+      "sha256": "13d806b068c28d179c198965f32f3420b1b9771a5d868bfdc05e4f4be77ee5ce"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/bomber-e62f0be6d821.webp",
+      "checkedVia": "HTTP",
+      "bytes": 50024,
+      "sha256": "e62f0be6d82152367e1591e0d263de3151dd7bf5b8ee291dee738bfa4ed613ba"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/boss-eb4646d16639.webp",
+      "checkedVia": "HTTP",
+      "bytes": 126750,
+      "sha256": "eb4646d16639729c094d824cae3d3c9101c51f40f0bf02cd8adbb0504cef9958"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/cloud-b40e8cd83ae9.webp",
+      "checkedVia": "HTTP",
+      "bytes": 52468,
+      "sha256": "b40e8cd83ae99cfa8ffc9e39fc890869e58c10efc08795ee022989bd1e2dafcd"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/basket-0cf80ca64f6e.webp",
+      "checkedVia": "HTTP",
+      "bytes": 75820,
+      "sha256": "0cf80ca64f6e387286abe68c71f5547b4f4883f54a1431267ff2c00bc050ee54"
+    },
+    {
+      "file": "assets/art/park/sky-patrol-v2/grove-22064992cf3d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 566998,
+      "sha256": "22064992cf3df24c29582e5ccf6c5c971a382aeedbdf9ce8bf974829ace1b5fe"
+    },
+    {
+      "file": "assets/art/park/leisure-v1/pond-4fbb2206c4ca.webp",
+      "checkedVia": "HTTP",
+      "bytes": 318524,
+      "sha256": "4fbb2206c4ca1376424d2284484a5d93a707be2546941b56442be9e669b8aea6"
+    },
+    {
+      "file": "assets/art/park/leisure-v1/meadow-8c400a805ec3.webp",
+      "checkedVia": "HTTP",
+      "bytes": 203336,
+      "sha256": "8c400a805ec32bb7bbb467653f77435dba81f554fa9f7abbc282f0697935a611"
+    },
+    {
+      "file": "assets/art/park/community-v1/wood-deck-d319e87c6fa5.webp",
+      "checkedVia": "HTTP",
+      "bytes": 227804,
+      "sha256": "d319e87c6fa517ce39773faa9f2ffec1e85bc9c3d2bc90a4e43decd7f460326d"
+    },
+    {
+      "file": "assets/art/park/community-v1/wood-rail-cf0f32e664a2.webp",
+      "checkedVia": "HTTP",
+      "bytes": 126358,
+      "sha256": "cf0f32e664a2f626d161138486f24e3dadaedd199823fa32a1763f845b77a2ee"
+    },
+    {
+      "file": "assets/art/park/community-v1/stone-deck-a18261350f6b.webp",
+      "checkedVia": "HTTP",
+      "bytes": 219930,
+      "sha256": "a18261350f6b4c20ae60cb916967dabd9bda73d7ac05ee052bfbc63c2e752ca4"
+    },
+    {
+      "file": "assets/art/park/community-v1/stone-rail-a2342dee1abe.webp",
+      "checkedVia": "HTTP",
+      "bytes": 109662,
+      "sha256": "a2342dee1abed012c2cfc033343f6f53fd83d6a5a3a4cb7059319ce8cfa8a263"
+    },
+    {
+      "file": "assets/art/park/community-v1/garden-bed-2095dce46082.webp",
+      "checkedVia": "HTTP",
+      "bytes": 100136,
+      "sha256": "2095dce4608221261701a25c51770471059a775f98d74abff5c10ed6c26c2c5a"
+    },
+    {
+      "file": "assets/art/park/community-v1/garland-6fc916e4b8c1.webp",
+      "checkedVia": "HTTP",
+      "bytes": 38260,
+      "sha256": "6fc916e4b8c1100bc4fd1a59061db22582ec340f7ee174c0347fba127c6e5ba0"
+    },
+    {
+      "file": "assets/art/park/community-v1/lily-7a2214282987.webp",
+      "checkedVia": "HTTP",
+      "bytes": 20158,
+      "sha256": "7a221428298793bf0643d525bb005e5279d7f024c150f17e3ac56ab63980055c"
+    },
+    {
+      "file": "assets/art/park/community-v1/lantern-4ceec4c2745c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 38882,
+      "sha256": "4ceec4c2745c6a123ffa2c08d9cd3be338866e5821f65baa0fc129a66eed4d67"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/fish-sunny-cb9ace63a943.webp",
+      "checkedVia": "HTTP",
+      "bytes": 42638,
+      "sha256": "cb9ace63a9438dd5067fb1c62bac609e8e5c8ed88250eda2616d26fa892cced2"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/fish-mint-95cbd9f9e177.webp",
+      "checkedVia": "HTTP",
+      "bytes": 37394,
+      "sha256": "95cbd9f9e17778fb46b7a8af178455fd2e61c2e996fd97547bc628cfdae9a696"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/fish-moon-8995319f0fc2.webp",
+      "checkedVia": "HTTP",
+      "bytes": 39066,
+      "sha256": "8995319f0fc24264d849c55cb98289ef294ce8daa25f97cf60e0f0ff9ca71c60"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/fish-peach-d8d351e7d2c9.webp",
+      "checkedVia": "HTTP",
+      "bytes": 51984,
+      "sha256": "d8d351e7d2c9a43b4688f35e88a0d07cbd54734d514dec4d43381c5bb49522ce"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/fish-blue-171a83fead8d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 47806,
+      "sha256": "171a83fead8d3b044997237e2e7a6b8dd3e316441e997eae72bc36a33657bb7b"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/fish-gold-2cb22b115066.webp",
+      "checkedVia": "HTTP",
+      "bytes": 56666,
+      "sha256": "2cb22b11506620c82a5c1d979fa87d2d44aeeebdf2200f86adf23ef1b0ef09b1"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/rod-0dda24bc94a6.webp",
+      "checkedVia": "HTTP",
+      "bytes": 30714,
+      "sha256": "0dda24bc94a60fbd535fa31aca5d26ddbacaf922dad9a13540b44e372954049c"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/bobber-b659192c3d27.webp",
+      "checkedVia": "HTTP",
+      "bytes": 19032,
+      "sha256": "b659192c3d27d22a0cc4f686ae46a2d127c747b1b5aa90febfbfc19805cb29eb"
+    },
+    {
+      "file": "assets/art/park/fishing-v2/splash-874f6ae594b2.webp",
+      "checkedVia": "HTTP",
+      "bytes": 40872,
+      "sha256": "874f6ae594b2d6698ba1c1f5b68d334b41fd2ce94b791a58772b1a3cd46e127c"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-crucian-2f32f199ce2c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 58126,
+      "sha256": "2f32f199ce2c2a695e9fc3b42ac69ed07046aa4f24f4ac4d7beaa820c6680a4b"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-perch-bf5fe6d17c43.webp",
+      "checkedVia": "HTTP",
+      "bytes": 49144,
+      "sha256": "bf5fe6d17c43d53cc04f19d6ccb6c54aa7458bf63a84b624efb742c417575f11"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-loach-181c1b33e859.webp",
+      "checkedVia": "HTTP",
+      "bytes": 32264,
+      "sha256": "181c1b33e85951e7ac3fd1ef87f8011a9b59c6671f9dfb7a32aae94f52e64017"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-catfish-5f7d7105adae.webp",
+      "checkedVia": "HTTP",
+      "bytes": 37604,
+      "sha256": "5f7d7105adae135ed0fbaf0ebf81f6818d46382ff7c7c4ec234b8083bdbfe8c2"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-rainbow-22b228b4e51e.webp",
+      "checkedVia": "HTTP",
+      "bytes": 46592,
+      "sha256": "22b228b4e51e88dfe773d48bd79ad7ccd0cca3cecf89217cedf5f82909ba9a25"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-koi-32d5ea332d34.webp",
+      "checkedVia": "HTTP",
+      "bytes": 47434,
+      "sha256": "32d5ea332d348587f5cf7c01f978fe8d30a968c6f9643661996844117aa66b63"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-bitterling-bc28d76b6b84.webp",
+      "checkedVia": "HTTP",
+      "bytes": 41640,
+      "sha256": "bc28d76b6b84a78a915a94b727161f9b1efe332a1d8b71f207c865ce15106364"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-bass-1685925cb08a.webp",
+      "checkedVia": "HTTP",
+      "bytes": 48462,
+      "sha256": "1685925cb08ac1c4c7e517524788578f0c540e140e468e5256cdab0af9d3a6fd"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-tilapia-719fc8948597.webp",
+      "checkedVia": "HTTP",
+      "bytes": 59708,
+      "sha256": "719fc894859716718c4510f2be335fc4f990a12be8e0237a1a877109f8292fa7"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-sturgeon-3dfa5d2a9a42.webp",
+      "checkedVia": "HTTP",
+      "bytes": 31370,
+      "sha256": "3dfa5d2a9a421c08716964664d963363d3a139611d8ee2ce29bfca50e9b259ab"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-arowana-9efdafec994b.webp",
+      "checkedVia": "HTTP",
+      "bytes": 39836,
+      "sha256": "9efdafec994b55ab4ff7c483e2d9d62b0dccb90ffc8c7687ea1ba4868eb11acc"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-betta-246387b0064d.webp",
+      "checkedVia": "HTTP",
+      "bytes": 70534,
+      "sha256": "246387b0064dcb26e0c62e7b34a24a97c11d3a98c4eea1cfc61c118543ab1620"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-chub-bd2f2f02a585.webp",
+      "checkedVia": "HTTP",
+      "bytes": 41410,
+      "sha256": "bd2f2f02a58510a1360408504dbb7e3c49e3e05a3155cbe82df9cd8c42fb9ced"
+    },
+    {
+      "file": "assets/art/park/market-v1/fish-crystal-decc62d6d2cb.webp",
+      "checkedVia": "HTTP",
+      "bytes": 50728,
+      "sha256": "decc62d6d2cb66462210c84e2dfcee90179cf076d81ae884a7ddd3f2403f585d"
+    },
+    {
+      "file": "assets/art/park/market-v1/merchant-23535e0b46bb.webp",
+      "checkedVia": "HTTP",
+      "bytes": 90734,
+      "sha256": "23535e0b46bbab469fd1dae995803ed351a40fa42235df7c5812686c7bc6bae1"
+    },
+    {
+      "file": "assets/art/park/market-v1/eco-117efc92780c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 105022,
+      "sha256": "117efc92780cc23bab031f1726c9c4394918b13d483bc3ada3d8a4dc2e96dc20"
+    },
+    {
+      "file": "assets/art/park/market-v1/apple-f498d4fdabf3.webp",
+      "checkedVia": "HTTP",
+      "bytes": 26612,
+      "sha256": "f498d4fdabf35a3dfc2bc8dd234161192a872d33c8c99c639f783575bad37feb"
+    },
+    {
+      "file": "assets/art/park/market-v1/flowers-9da849d3fee5.webp",
+      "checkedVia": "HTTP",
+      "bytes": 28676,
+      "sha256": "9da849d3fee55aaf9aee7e4cbdeec47e1ce31b58ed70037d8c39713f4abde536"
+    },
+    {
+      "file": "assets/art/park/market-v1/trash-can-b2b4e5b9ad4e.webp",
+      "checkedVia": "HTTP",
+      "bytes": 20080,
+      "sha256": "b2b4e5b9ad4e3f48149ba44a89a0613e9f82efb6084a2210bc5b1ca20a6a90e2"
+    },
+    {
+      "file": "assets/art/park/market-v1/trash-bottle-28de8e88f710.webp",
+      "checkedVia": "HTTP",
+      "bytes": 16974,
+      "sha256": "28de8e88f7100dc86b80968ef4ea76272e5b9a0e47f15a0656b41b649a85eb2d"
+    },
+    {
+      "file": "assets/art/park/market-v1/trash-paper-bd710e1336b5.webp",
+      "checkedVia": "HTTP",
+      "bytes": 12748,
+      "sha256": "bd710e1336b51630c59f6c45e6ef42336edfaa0298b0e9469a6d104bd9c05264"
+    },
+    {
+      "file": "assets/art/brawl/manifest.json",
+      "checkedVia": "published filesystem entry",
+      "bytes": 130132,
+      "sha256": "bb913f2f76f0f736d6cf47b3b942ccf112e16fe6088cf64d9c89b5fe20ee6017"
+    },
+    {
+      "file": "assets/art/brawl/starpatch-cat-runtime-3de80874308c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 905620,
+      "sha256": "3de80874308ca347d84b8ab6344213f4d3cc97d1cab31bbbc85b575cf2f58e4f"
+    },
+    {
+      "file": "assets/art/brawl/starpatch-cat-casts-fe51562ec17b.webp",
+      "checkedVia": "HTTP",
+      "bytes": 748254,
+      "sha256": "fe51562ec17b54ecab48c34c6c0888b87f7fdb56f66a035e6c55e68229cc037d"
+    },
+    {
+      "file": "assets/art/brawl/starpatch-cat-normal-ground-b346cfb2349b.webp",
+      "checkedVia": "HTTP",
+      "bytes": 769760,
+      "sha256": "b346cfb2349bb40f9cc21605bc80d6483e89fd2090d8f0c6e2c9c0cb442fd823"
+    },
+    {
+      "file": "assets/art/brawl/starpatch-cat-normal-finish-air-7b8961e95703.webp",
+      "checkedVia": "HTTP",
+      "bytes": 748474,
+      "sha256": "7b8961e957033bc1a10d683f1deec303021d68ed02ca007324f9fdba90a1a4b5"
+    },
+    {
+      "file": "assets/art/brawl/cloud-ear-dog-runtime-db1e16f188d3.webp",
+      "checkedVia": "HTTP",
+      "bytes": 918534,
+      "sha256": "db1e16f188d3c525e544aca8f790316e18e9bf115a3106b002741914e61bfc97"
+    },
+    {
+      "file": "assets/art/brawl/cloud-ear-dog-casts-f261df00d6b6.webp",
+      "checkedVia": "HTTP",
+      "bytes": 751734,
+      "sha256": "f261df00d6b6b04b5d9e6c8c178aa123ee92cfbae6d2e86165c68a71b841bb92"
+    },
+    {
+      "file": "assets/art/brawl/cloud-ear-dog-normal-ground-a264612e45a4.webp",
+      "checkedVia": "HTTP",
+      "bytes": 713922,
+      "sha256": "a264612e45a43d135ce6bd3919cae8725557dc137d5d56b021ac01fe6698125e"
+    },
+    {
+      "file": "assets/art/brawl/cloud-ear-dog-normal-finish-air-87315d686f68.webp",
+      "checkedVia": "HTTP",
+      "bytes": 842706,
+      "sha256": "87315d686f68e4ada31e71cf9d58b625a837c793049076aaaabf95483968fa9c"
+    },
+    {
+      "file": "assets/art/brawl/pudding-pig-runtime-bea4684ecc1b.webp",
+      "checkedVia": "HTTP",
+      "bytes": 769636,
+      "sha256": "bea4684ecc1b2b8a9d353ed796bee99ba013f88a2a63d9544a1856083dc835af"
+    },
+    {
+      "file": "assets/art/brawl/pudding-pig-casts-f6d5290afd7c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 594096,
+      "sha256": "f6d5290afd7cfb807a2edd42c30414115b88d5e87c44143b6d7541dfd49c5c9d"
+    },
+    {
+      "file": "assets/art/brawl/pudding-pig-normal-ground-54bb9aa95d4c.webp",
+      "checkedVia": "HTTP",
+      "bytes": 652516,
+      "sha256": "54bb9aa95d4ce8d0056c1bb2addd6edb862045ec5f03a694fdb587a588afbdc7"
+    },
+    {
+      "file": "assets/art/brawl/pudding-pig-normal-finish-air-7fd40b4689d8.webp",
+      "checkedVia": "HTTP",
+      "bytes": 593440,
+      "sha256": "7fd40b4689d84f8ffdabf9faf92c061c4c716b98ce96098c8b2aa0cc9dd6831e"
+    }
+  ]
+}

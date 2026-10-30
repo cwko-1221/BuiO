@@ -11,6 +11,7 @@ const THEMES: Record<string, { tempo: number; root: number; scale: number[]; pat
   flight: { tempo: 124, root: 62, scale: [0,3,5,7,10], pattern: [0,2,4,3,2,1,3,4,0,2,3,4,2,1,0,3] },
   banana: { tempo: 106, root: 65, scale: [0,2,4,7,9], pattern: [0,3,2,1,4,2,3,1] },
   fishing: { tempo: 72, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,2,1] },
+  'fishing-fight': { tempo: 112, root: 57, scale: [0,2,3,7,10], pattern: [0,2,3,1,4,2,3,1] },
 };
 
 export class AudioEngine {
@@ -152,13 +153,17 @@ export class AudioEngine {
       const midi = theme.root + theme.scale[index % theme.scale.length] + (this.step % 16 > 11 ? 12 : 0);
       this.tone(440 * Math.pow(2, (midi - 69) / 12), duration * .82, 'triangle', .08, this.music);
       if (this.step % 4 === 0) this.tone(440 * Math.pow(2, (theme.root - 24 - 69) / 12), duration * 1.8, 'sine', .06, this.music);
-      if (this.step % 2 === 0) this.noise(.025, .025, this.music);
+      if (this.step % 2 === 0 && !this.theme.startsWith('fishing')) this.noise(.025, .025, this.music);
+      if(this.theme.startsWith('fishing')&&this.step%8===0){
+        for(const offset of [0,4,7])this.tone(440*Math.pow(2,(theme.root+offset-12-69)/12),duration*6,'sine',.018,this.music);
+      }
       if(this.theme==='brawl'){
         if(this.step%4===0)this.tone(62,.15,'sine',.22,this.music);
         if(this.step%4===2)this.noise(.09,.075,this.music);
         this.noise(.018,.026,this.music);
         if(this.step%8===0)for(const offset of [0,3,7])this.tone(440*Math.pow(2,(theme.root+offset-69)/12),duration*5,'triangle',.035,this.music);
       }
+      if(this.theme==='fishing-fight'&&this.step%2===0)this.tone(this.step%4?85:62,.13,'sine',.055,this.music);
       if(this.theme==='flight'){
         if(this.step%4===0)for(const offset of [0,3,7])this.tone(440*Math.pow(2,(theme.root+offset-69)/12),duration*3.5,'sine',.024,this.music);
         if(this.step%2===0)this.tone(78,duration*.85,'sine',.045,this.music);

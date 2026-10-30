@@ -1,0 +1,1317 @@
+{
+  "scope": "160 deterministic 120-second pond simulations using real input counters; no browser or physical-device performance claim",
+  "sourceSha256": "d2da766a8ead0ca74d5d86ae3c65422fe218b0deb73cae1a4420f1ae5ff6d135",
+  "runs": 160,
+  "firstNoticeSeconds": {
+    "min": 2.8666666666666667,
+    "p25": 7.7,
+    "median": 12.033333333333333,
+    "p75": 19,
+    "max": 66.66666666666667
+  },
+  "firstBiteSeconds": {
+    "min": 6.233333333333333,
+    "p25": 18.166666666666668,
+    "median": 27.266666666666666,
+    "p75": 45.36666666666667,
+    "max": 115.86666666666666
+  },
+  "catches": {
+    "min": 0,
+    "p25": 2,
+    "median": 2,
+    "p75": 3,
+    "max": 4
+  },
+  "qualified": 121,
+  "zeroCatch": 2,
+  "departures": {
+    "min": 0,
+    "p25": 1,
+    "median": 2,
+    "p75": 3,
+    "max": 6
+  },
+  "runsDetail": [
+    {
+      "seed": 1,
+      "caught": 1,
+      "firstNotice": 33.3,
+      "firstBite": 99.63333333333334,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 2,
+      "caught": 1,
+      "firstNotice": 29.9,
+      "firstBite": 48.5,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 3,
+      "caught": 3,
+      "firstNotice": 8.966666666666667,
+      "firstBite": 17.2,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 4,
+      "caught": 2,
+      "firstNotice": 12.133333333333333,
+      "firstBite": 46.03333333333333,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 5,
+      "caught": 3,
+      "firstNotice": 9.366666666666667,
+      "firstBite": 14.066666666666666,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 6,
+      "caught": 2,
+      "firstNotice": 5.1,
+      "firstBite": 34.3,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 7,
+      "caught": 3,
+      "firstNotice": 13.233333333333333,
+      "firstBite": 21.733333333333334,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 8,
+      "caught": 1,
+      "firstNotice": 66.66666666666667,
+      "firstBite": 94.9,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 9,
+      "caught": 4,
+      "firstNotice": 18.7,
+      "firstBite": 23.7,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 10,
+      "caught": 3,
+      "firstNotice": 14.5,
+      "firstBite": 20.366666666666667,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 11,
+      "caught": 0,
+      "firstNotice": 7.966666666666667,
+      "firstBite": 115.86666666666666,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 12,
+      "caught": 2,
+      "firstNotice": 13.833333333333334,
+      "firstBite": 29.4,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 13,
+      "caught": 2,
+      "firstNotice": 12.6,
+      "firstBite": 20.966666666666665,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 14,
+      "caught": 3,
+      "firstNotice": 4.166666666666667,
+      "firstBite": 9.433333333333334,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 15,
+      "caught": 3,
+      "firstNotice": 26.2,
+      "firstBite": 33.266666666666666,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 16,
+      "caught": 2,
+      "firstNotice": 39.46666666666667,
+      "firstBite": 45.36666666666667,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 17,
+      "caught": 1,
+      "firstNotice": 13.133333333333333,
+      "firstBite": 61.1,
+      "shy": 5,
+      "snaps": 0
+    },
+    {
+      "seed": 18,
+      "caught": 1,
+      "firstNotice": 11.3,
+      "firstBite": 20.9,
+      "shy": 2,
+      "snaps": 1
+    },
+    {
+      "seed": 19,
+      "caught": 3,
+      "firstNotice": 2.933333333333333,
+      "firstBite": 35.233333333333334,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 20,
+      "caught": 1,
+      "firstNotice": 9.166666666666666,
+      "firstBite": 88.2,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 21,
+      "caught": 3,
+      "firstNotice": 17.966666666666665,
+      "firstBite": 29.966666666666665,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 22,
+      "caught": 2,
+      "firstNotice": 5.2,
+      "firstBite": 12.8,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 23,
+      "caught": 3,
+      "firstNotice": 12.266666666666667,
+      "firstBite": 15.7,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 24,
+      "caught": 1,
+      "firstNotice": 27.9,
+      "firstBite": 52.766666666666666,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 25,
+      "caught": 2,
+      "firstNotice": 3.5,
+      "firstBite": 53.46666666666667,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 26,
+      "caught": 2,
+      "firstNotice": 5.333333333333333,
+      "firstBite": 9.6,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 27,
+      "caught": 1,
+      "firstNotice": 10.833333333333334,
+      "firstBite": 55,
+      "shy": 5,
+      "snaps": 0
+    },
+    {
+      "seed": 28,
+      "caught": 2,
+      "firstNotice": 3.8,
+      "firstBite": 23.733333333333334,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 29,
+      "caught": 1,
+      "firstNotice": 9.666666666666666,
+      "firstBite": 61.333333333333336,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 30,
+      "caught": 2,
+      "firstNotice": 7.466666666666667,
+      "firstBite": 11.633333333333333,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 31,
+      "caught": 0,
+      "firstNotice": 13.133333333333333,
+      "firstBite": 101.3,
+      "shy": 6,
+      "snaps": 1
+    },
+    {
+      "seed": 32,
+      "caught": 2,
+      "firstNotice": 12.333333333333334,
+      "firstBite": 31.7,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 33,
+      "caught": 3,
+      "firstNotice": 18.4,
+      "firstBite": 26.8,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 34,
+      "caught": 3,
+      "firstNotice": 11.5,
+      "firstBite": 15.4,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 35,
+      "caught": 2,
+      "firstNotice": 11.833333333333334,
+      "firstBite": 25.7,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 36,
+      "caught": 2,
+      "firstNotice": 2.8666666666666667,
+      "firstBite": 15.833333333333334,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 37,
+      "caught": 1,
+      "firstNotice": 23.533333333333335,
+      "firstBite": 30.1,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 38,
+      "caught": 1,
+      "firstNotice": 8.666666666666666,
+      "firstBite": 98.33333333333333,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 39,
+      "caught": 2,
+      "firstNotice": 16.4,
+      "firstBite": 20,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 40,
+      "caught": 2,
+      "firstNotice": 5,
+      "firstBite": 63.46666666666667,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 41,
+      "caught": 1,
+      "firstNotice": 19,
+      "firstBite": 23.766666666666666,
+      "shy": 1,
+      "snaps": 1
+    },
+    {
+      "seed": 42,
+      "caught": 2,
+      "firstNotice": 25.933333333333334,
+      "firstBite": 34.266666666666666,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 43,
+      "caught": 2,
+      "firstNotice": 17.233333333333334,
+      "firstBite": 22.866666666666667,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 44,
+      "caught": 3,
+      "firstNotice": 15.133333333333333,
+      "firstBite": 19.833333333333332,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 45,
+      "caught": 3,
+      "firstNotice": 7.4,
+      "firstBite": 13.2,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 46,
+      "caught": 1,
+      "firstNotice": 44.6,
+      "firstBite": 50.43333333333333,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 47,
+      "caught": 2,
+      "firstNotice": 10.133333333333333,
+      "firstBite": 51.2,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 48,
+      "caught": 2,
+      "firstNotice": 7.166666666666667,
+      "firstBite": 10.266666666666667,
+      "shy": 1,
+      "snaps": 1
+    },
+    {
+      "seed": 49,
+      "caught": 2,
+      "firstNotice": 10.066666666666666,
+      "firstBite": 13.533333333333333,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 50,
+      "caught": 2,
+      "firstNotice": 23.733333333333334,
+      "firstBite": 28.033333333333335,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 51,
+      "caught": 3,
+      "firstNotice": 4.333333333333333,
+      "firstBite": 15.866666666666667,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 52,
+      "caught": 3,
+      "firstNotice": 8.333333333333334,
+      "firstBite": 23.166666666666668,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 53,
+      "caught": 1,
+      "firstNotice": 31.4,
+      "firstBite": 72.53333333333333,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 54,
+      "caught": 1,
+      "firstNotice": 6.866666666666666,
+      "firstBite": 18.433333333333334,
+      "shy": 3,
+      "snaps": 1
+    },
+    {
+      "seed": 55,
+      "caught": 1,
+      "firstNotice": 18.333333333333332,
+      "firstBite": 83.86666666666666,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 56,
+      "caught": 3,
+      "firstNotice": 36.166666666666664,
+      "firstBite": 38.43333333333333,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 57,
+      "caught": 1,
+      "firstNotice": 7.566666666666666,
+      "firstBite": 15.433333333333334,
+      "shy": 4,
+      "snaps": 1
+    },
+    {
+      "seed": 58,
+      "caught": 2,
+      "firstNotice": 14.033333333333333,
+      "firstBite": 21.366666666666667,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 59,
+      "caught": 3,
+      "firstNotice": 3.4,
+      "firstBite": 29.733333333333334,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 60,
+      "caught": 2,
+      "firstNotice": 53.2,
+      "firstBite": 67.26666666666667,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 61,
+      "caught": 2,
+      "firstNotice": 10.466666666666667,
+      "firstBite": 17.366666666666667,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 62,
+      "caught": 1,
+      "firstNotice": 24.733333333333334,
+      "firstBite": 29.633333333333333,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 63,
+      "caught": 3,
+      "firstNotice": 5.533333333333333,
+      "firstBite": 12.266666666666667,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 64,
+      "caught": 2,
+      "firstNotice": 7.366666666666666,
+      "firstBite": 15.866666666666667,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 65,
+      "caught": 1,
+      "firstNotice": 7.7,
+      "firstBite": 18.2,
+      "shy": 6,
+      "snaps": 0
+    },
+    {
+      "seed": 66,
+      "caught": 2,
+      "firstNotice": 5.833333333333333,
+      "firstBite": 35.63333333333333,
+      "shy": 4,
+      "snaps": 1
+    },
+    {
+      "seed": 67,
+      "caught": 3,
+      "firstNotice": 21.733333333333334,
+      "firstBite": 30.333333333333332,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 68,
+      "caught": 2,
+      "firstNotice": 29.833333333333332,
+      "firstBite": 36.63333333333333,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 69,
+      "caught": 1,
+      "firstNotice": 27.066666666666666,
+      "firstBite": 68.16666666666667,
+      "shy": 5,
+      "snaps": 0
+    },
+    {
+      "seed": 70,
+      "caught": 2,
+      "firstNotice": 12.033333333333333,
+      "firstBite": 22.6,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 71,
+      "caught": 3,
+      "firstNotice": 16.7,
+      "firstBite": 20.233333333333334,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 72,
+      "caught": 1,
+      "firstNotice": 14.966666666666667,
+      "firstBite": 37.666666666666664,
+      "shy": 2,
+      "snaps": 1
+    },
+    {
+      "seed": 73,
+      "caught": 3,
+      "firstNotice": 28.333333333333332,
+      "firstBite": 34.266666666666666,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 74,
+      "caught": 2,
+      "firstNotice": 10.066666666666666,
+      "firstBite": 14.866666666666667,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 75,
+      "caught": 3,
+      "firstNotice": 6.733333333333333,
+      "firstBite": 9.266666666666667,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 76,
+      "caught": 2,
+      "firstNotice": 28.233333333333334,
+      "firstBite": 39.56666666666667,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 77,
+      "caught": 3,
+      "firstNotice": 8.033333333333333,
+      "firstBite": 56.266666666666666,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 78,
+      "caught": 2,
+      "firstNotice": 7.033333333333333,
+      "firstBite": 42.766666666666666,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 79,
+      "caught": 2,
+      "firstNotice": 3.6333333333333333,
+      "firstBite": 6.233333333333333,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 80,
+      "caught": 2,
+      "firstNotice": 28.4,
+      "firstBite": 46.833333333333336,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 81,
+      "caught": 3,
+      "firstNotice": 26.033333333333335,
+      "firstBite": 29.766666666666666,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 82,
+      "caught": 2,
+      "firstNotice": 3.933333333333333,
+      "firstBite": 6.8,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 83,
+      "caught": 1,
+      "firstNotice": 8.6,
+      "firstBite": 63.06666666666667,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 84,
+      "caught": 2,
+      "firstNotice": 13.6,
+      "firstBite": 21.166666666666668,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 85,
+      "caught": 2,
+      "firstNotice": 7.1,
+      "firstBite": 16.6,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 86,
+      "caught": 1,
+      "firstNotice": 10.066666666666666,
+      "firstBite": 14.3,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 87,
+      "caught": 1,
+      "firstNotice": 16.933333333333334,
+      "firstBite": 31.066666666666666,
+      "shy": 5,
+      "snaps": 0
+    },
+    {
+      "seed": 88,
+      "caught": 2,
+      "firstNotice": 20.966666666666665,
+      "firstBite": 27.266666666666666,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 89,
+      "caught": 2,
+      "firstNotice": 6.366666666666666,
+      "firstBite": 55.2,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 90,
+      "caught": 2,
+      "firstNotice": 7.133333333333334,
+      "firstBite": 9.533333333333333,
+      "shy": 3,
+      "snaps": 1
+    },
+    {
+      "seed": 91,
+      "caught": 2,
+      "firstNotice": 11.033333333333333,
+      "firstBite": 20.166666666666668,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 92,
+      "caught": 3,
+      "firstNotice": 20.133333333333333,
+      "firstBite": 26,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 93,
+      "caught": 2,
+      "firstNotice": 3.3,
+      "firstBite": 57.333333333333336,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 94,
+      "caught": 2,
+      "firstNotice": 5.133333333333334,
+      "firstBite": 13.666666666666666,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 95,
+      "caught": 3,
+      "firstNotice": 22.266666666666666,
+      "firstBite": 26.4,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 96,
+      "caught": 2,
+      "firstNotice": 16.7,
+      "firstBite": 22.5,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 97,
+      "caught": 2,
+      "firstNotice": 13.633333333333333,
+      "firstBite": 22.766666666666666,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 98,
+      "caught": 2,
+      "firstNotice": 10.2,
+      "firstBite": 49,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 99,
+      "caught": 2,
+      "firstNotice": 3.9,
+      "firstBite": 11.5,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 100,
+      "caught": 2,
+      "firstNotice": 22.5,
+      "firstBite": 27.266666666666666,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 101,
+      "caught": 3,
+      "firstNotice": 19.933333333333334,
+      "firstBite": 24.4,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 102,
+      "caught": 3,
+      "firstNotice": 16.966666666666665,
+      "firstBite": 21.833333333333332,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 103,
+      "caught": 2,
+      "firstNotice": 6.033333333333333,
+      "firstBite": 37.9,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 104,
+      "caught": 3,
+      "firstNotice": 11.733333333333333,
+      "firstBite": 31.3,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 105,
+      "caught": 2,
+      "firstNotice": 4.5,
+      "firstBite": 32.3,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 106,
+      "caught": 3,
+      "firstNotice": 6.333333333333333,
+      "firstBite": 13.833333333333334,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 107,
+      "caught": 2,
+      "firstNotice": 12.766666666666667,
+      "firstBite": 18.833333333333332,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 108,
+      "caught": 2,
+      "firstNotice": 9.066666666666666,
+      "firstBite": 15.2,
+      "shy": 6,
+      "snaps": 0
+    },
+    {
+      "seed": 109,
+      "caught": 2,
+      "firstNotice": 8.7,
+      "firstBite": 13.233333333333333,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 110,
+      "caught": 2,
+      "firstNotice": 17.433333333333334,
+      "firstBite": 22.7,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 111,
+      "caught": 3,
+      "firstNotice": 10.4,
+      "firstBite": 19.7,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 112,
+      "caught": 2,
+      "firstNotice": 12.266666666666667,
+      "firstBite": 60.96666666666667,
+      "shy": 2,
+      "snaps": 1
+    },
+    {
+      "seed": 113,
+      "caught": 2,
+      "firstNotice": 8.766666666666667,
+      "firstBite": 47.43333333333333,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 114,
+      "caught": 1,
+      "firstNotice": 29.933333333333334,
+      "firstBite": 88.93333333333334,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 115,
+      "caught": 2,
+      "firstNotice": 10.233333333333333,
+      "firstBite": 13.633333333333333,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 116,
+      "caught": 3,
+      "firstNotice": 15.1,
+      "firstBite": 23.066666666666666,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 117,
+      "caught": 1,
+      "firstNotice": 8.3,
+      "firstBite": 55.13333333333333,
+      "shy": 5,
+      "snaps": 1
+    },
+    {
+      "seed": 118,
+      "caught": 3,
+      "firstNotice": 18.366666666666667,
+      "firstBite": 23.433333333333334,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 119,
+      "caught": 2,
+      "firstNotice": 8.466666666666667,
+      "firstBite": 16.266666666666666,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 120,
+      "caught": 3,
+      "firstNotice": 7.7,
+      "firstBite": 24.7,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 121,
+      "caught": 3,
+      "firstNotice": 7.8,
+      "firstBite": 31.566666666666666,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 122,
+      "caught": 3,
+      "firstNotice": 12.766666666666667,
+      "firstBite": 16.8,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 123,
+      "caught": 1,
+      "firstNotice": 18.766666666666666,
+      "firstBite": 87.76666666666667,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 124,
+      "caught": 2,
+      "firstNotice": 16.733333333333334,
+      "firstBite": 33.93333333333333,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 125,
+      "caught": 3,
+      "firstNotice": 34.4,
+      "firstBite": 38.7,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 126,
+      "caught": 1,
+      "firstNotice": 27.833333333333332,
+      "firstBite": 32.166666666666664,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 127,
+      "caught": 2,
+      "firstNotice": 3.2,
+      "firstBite": 8.033333333333333,
+      "shy": 2,
+      "snaps": 1
+    },
+    {
+      "seed": 128,
+      "caught": 2,
+      "firstNotice": 5.033333333333333,
+      "firstBite": 20.5,
+      "shy": 1,
+      "snaps": 1
+    },
+    {
+      "seed": 129,
+      "caught": 2,
+      "firstNotice": 8.9,
+      "firstBite": 11.733333333333333,
+      "shy": 0,
+      "snaps": 1
+    },
+    {
+      "seed": 130,
+      "caught": 3,
+      "firstNotice": 16.2,
+      "firstBite": 18.966666666666665,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 131,
+      "caught": 2,
+      "firstNotice": 12.6,
+      "firstBite": 52.03333333333333,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 132,
+      "caught": 1,
+      "firstNotice": 19.266666666666666,
+      "firstBite": 70.63333333333334,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 133,
+      "caught": 2,
+      "firstNotice": 11.466666666666667,
+      "firstBite": 30.566666666666666,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 134,
+      "caught": 1,
+      "firstNotice": 17,
+      "firstBite": 21.233333333333334,
+      "shy": 2,
+      "snaps": 1
+    },
+    {
+      "seed": 135,
+      "caught": 2,
+      "firstNotice": 15.233333333333333,
+      "firstBite": 22.9,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 136,
+      "caught": 1,
+      "firstNotice": 50.2,
+      "firstBite": 80.03333333333333,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 137,
+      "caught": 1,
+      "firstNotice": 57.93333333333333,
+      "firstBite": 92.43333333333334,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 138,
+      "caught": 2,
+      "firstNotice": 30.333333333333332,
+      "firstBite": 49.93333333333333,
+      "shy": 2,
+      "snaps": 1
+    },
+    {
+      "seed": 139,
+      "caught": 2,
+      "firstNotice": 13.633333333333333,
+      "firstBite": 18.166666666666668,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 140,
+      "caught": 2,
+      "firstNotice": 29.333333333333332,
+      "firstBite": 34.766666666666666,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 141,
+      "caught": 2,
+      "firstNotice": 26.666666666666668,
+      "firstBite": 32.03333333333333,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 142,
+      "caught": 1,
+      "firstNotice": 24.933333333333334,
+      "firstBite": 68.73333333333333,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 143,
+      "caught": 2,
+      "firstNotice": 9.333333333333334,
+      "firstBite": 40.56666666666667,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 144,
+      "caught": 2,
+      "firstNotice": 19.833333333333332,
+      "firstBite": 22.366666666666667,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 145,
+      "caught": 2,
+      "firstNotice": 10.5,
+      "firstBite": 44.6,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 146,
+      "caught": 1,
+      "firstNotice": 16.933333333333334,
+      "firstBite": 37.53333333333333,
+      "shy": 5,
+      "snaps": 0
+    },
+    {
+      "seed": 147,
+      "caught": 2,
+      "firstNotice": 5.966666666666667,
+      "firstBite": 9,
+      "shy": 5,
+      "snaps": 0
+    },
+    {
+      "seed": 148,
+      "caught": 1,
+      "firstNotice": 39.9,
+      "firstBite": 63.86666666666667,
+      "shy": 2,
+      "snaps": 1
+    },
+    {
+      "seed": 149,
+      "caught": 1,
+      "firstNotice": 10.3,
+      "firstBite": 14.7,
+      "shy": 3,
+      "snaps": 0
+    },
+    {
+      "seed": 150,
+      "caught": 2,
+      "firstNotice": 12.133333333333333,
+      "firstBite": 26.5,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 151,
+      "caught": 2,
+      "firstNotice": 35.666666666666664,
+      "firstBite": 44.1,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 152,
+      "caught": 2,
+      "firstNotice": 11.366666666666667,
+      "firstBite": 19.233333333333334,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 153,
+      "caught": 2,
+      "firstNotice": 7.433333333333334,
+      "firstBite": 40.6,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 154,
+      "caught": 1,
+      "firstNotice": 5.866666666666666,
+      "firstBite": 42.86666666666667,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 155,
+      "caught": 3,
+      "firstNotice": 9.7,
+      "firstBite": 15.133333333333333,
+      "shy": 2,
+      "snaps": 0
+    },
+    {
+      "seed": 156,
+      "caught": 2,
+      "firstNotice": 8.666666666666666,
+      "firstBite": 59.13333333333333,
+      "shy": 4,
+      "snaps": 0
+    },
+    {
+      "seed": 157,
+      "caught": 3,
+      "firstNotice": 6.166666666666667,
+      "firstBite": 13.2,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 158,
+      "caught": 4,
+      "firstNotice": 11.566666666666666,
+      "firstBite": 15.533333333333333,
+      "shy": 0,
+      "snaps": 0
+    },
+    {
+      "seed": 159,
+      "caught": 3,
+      "firstNotice": 7.1,
+      "firstBite": 14.966666666666667,
+      "shy": 1,
+      "snaps": 0
+    },
+    {
+      "seed": 160,
+      "caught": 2,
+      "firstNotice": 6.466666666666667,
+      "firstBite": 33.53333333333333,
+      "shy": 3,
+      "snaps": 0
+    }
+  ]
+}

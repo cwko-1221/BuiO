@@ -1,0 +1,209 @@
+{
+  "pass": true,
+  "build": "C:\\Users\\kochu\\Documents\\BuiO\\artifacts\\park-fishing-v4-build-1",
+  "htmlSha256": "2875fb67bcaf49c827b0956508abe373a96da4a984c52edf0186906889d0fd16",
+  "checks": [
+    "four native swipe directions still land freely; nearby fish do not instantly take a new cast",
+    "bite has no exclamation mark, button colour cue or revealing text; mashing against the fish visibly bends and snaps the line",
+    "easing during random runs and tapping during rests lands a measured catch; touch layouts, music and inventory remain functional",
+    "the harder fishing result still sells through the trader and credits its exact price to the wallet"
+  ],
+  "observed": [
+    {
+      "type": "cast",
+      "t": 0.4,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "plop",
+      "t": 1,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "miss",
+      "t": 1.1333333333333333,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "cast",
+      "t": 1.5333333333333334,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "plop",
+      "t": 2.1333333333333333,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "miss",
+      "t": 2.2666666666666666,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "cast",
+      "t": 2.6666666666666665,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "plop",
+      "t": 3.2666666666666666,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "miss",
+      "t": 3.3666666666666667,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "cast",
+      "t": 3.7666666666666666,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "plop",
+      "t": 4.366666666666666,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "miss",
+      "t": 4.466666666666667,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "cast",
+      "t": 4.9,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "plop",
+      "t": 5.5,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "notice",
+      "t": 9.733333333333333,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "nibble",
+      "t": 12.6,
+      "nibbles": 1,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "shy",
+      "t": 13.7,
+      "nibbles": 1,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0",
+      "screenshot": true
+    },
+    {
+      "type": "notice",
+      "t": 21.933333333333334,
+      "nibbles": 0,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "nibble",
+      "t": 24.2,
+      "nibbles": 1,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "nibble",
+      "t": 26.166666666666668,
+      "nibbles": 2,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "nibble",
+      "t": 27.2,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "bite",
+      "t": 28.466666666666665,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "hook",
+      "t": 28.733333333333334,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "surge",
+      "t": 28.733333333333334,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "reel",
+      "t": 28.933333333333334,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "reel",
+      "t": 29.133333333333333,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "reel",
+      "t": 29.6,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "recover",
+      "t": 29.733333333333334,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "reel",
+      "t": 29.766666666666666,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "reel",
+      "t": 29.933333333333334,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "reel",
+      "t": 30.133333333333333,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    },
+    {
+      "type": "snap",
+      "t": 30.133333333333333,
+      "nibbles": 3,
+      "session": "f85c6066-e31d-4108-84cb-ecbd2e2173a0"
+    }
+  ],
+  "sale": 150,
+  "errors": [],
+  "scope": "Windows Chrome with real isolated logins and emulated tablet/phone touch; no physical iPad"
+}
