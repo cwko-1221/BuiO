@@ -84,7 +84,7 @@ try {
             return box.width > 0 && box.right > innerWidth + 1 && style.position !== 'absolute' && style.position !== 'fixed';
           }).slice(0, 5).map(element => element.className)
         }));
-        assert.equal(geometry.app, '0.1.1', `${engine} ${label}: document-start helper`);
+        assert.equal(geometry.app, '0.2.0', `${engine} ${label}: document-start helper`);
         assert.ok(geometry.scrollWidth <= geometry.width + 1, `${engine} ${label}: ${JSON.stringify(geometry)}`);
       };
       await page.goto(fallback);
@@ -134,6 +134,32 @@ try {
         assert.equal(response.status(), 200, `${engine} teacher ${module.path}`);
         assert.match(response.headers()['content-type'], /text\/html/);
       }
+      const layoutIssues = [];
+      if (engine.startsWith('webkit-iphone')) {
+        for (const module of modules) {
+          console.log(`${engine}: layout ${module.id}`);
+          const modulePage = await context.newPage();
+          await modulePage.goto(backend + module.path, { waitUntil: 'load' });
+          if (['chinese', 'english'].includes(module.id)) await modulePage.waitForURL(/\/teacher$/);
+          await modulePage.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+          await modulePage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+          const geometry = await modulePage.evaluate(() => ({
+            width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
+            title: document.title,
+            wideElements: [...document.querySelectorAll('body *')].filter(element => {
+              const box = element.getBoundingClientRect();
+              return box.width > innerWidth + 1 && getComputedStyle(element).position !== 'absolute';
+            }).slice(0, 5).map(element => ({ tag: element.tagName, id: element.id, className: String(element.className) }))
+          }));
+          await modulePage.screenshot({ path: path.join(output, `${engine}-module-${module.id}.png`) });
+          if (geometry.scrollWidth > geometry.width + 1) layoutIssues.push({ engine, module: module.id, ...geometry });
+          await modulePage.close();
+        }
+      }
+      if (layoutIssues.length) {
+        await writeFile(path.join(output, `${engine}-layout-issues.json`), JSON.stringify(layoutIssues, null, 2));
+        assert.fail(JSON.stringify(layoutIssues, null, 2));
+      }
       // The native injected code receives browser events without altering a match.
       await page.goto(backend + '/');
       await page.addScriptTag({ path: path.join(webRoot, 'runtime.js') });
@@ -143,13 +169,16 @@ try {
       await page.getByText('網絡已中斷，正在等待重新連線').waitFor({ state: 'detached' });
       await context.close();
       report.checks.push({ engine, login: 'passed', modules: modules.length, permissions: 'role checks passed', fallback: 'passed', reconnectNotice: 'passed' });
-    } finally { await browser.close(); }
+    } finally { await Promise.race([browser.close(), new Promise(resolve => setTimeout(resolve, 10000))]); }
   }
   await writeFile(path.join(output, 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
   if (staticServer) await new Promise(resolve => staticServer.close(resolve));
   child.kill('SIGTERM');
-  if (child.exitCode === null) await once(child, 'exit');
+  if (child.exitCode === null) {
+    await Promise.race([once(child, 'exit'), new Promise(resolve => setTimeout(resolve, 3000))]);
+    if (child.exitCode === null) child.kill('SIGKILL');
+  }
   await writeFile(path.join(output, 'fixture-server.log'), logs);
 }

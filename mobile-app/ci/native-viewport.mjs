@@ -21,32 +21,44 @@ const run = async (command, args, env = {}) => {
   if (code !== 0) throw Error(`${command} ${args.join(' ')} failed (${code}): ${result.slice(-6000)}`);
   return result;
 };
-let received;
+let received, nextPath;
 const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
 html,body{height:100%;width:100%;margin:0;font:16px -apple-system,sans-serif;background:#edf5f1;color:#203c3b}
-#viewport{height:100vh;width:100vw;box-sizing:border-box;border:4px solid #234c44;position:relative}
-header,footer{position:fixed;left:0;right:0;padding:12px;background:#234c44;color:white;text-align:center}
-header{top:0}footer{bottom:0}main{padding:90px 24px}h1{font-size:24px}input{font-size:12px;padding:12px;width:100%;box-sizing:border-box}
+#viewport{height:100vh;width:100vw;box-sizing:border-box;border:4px solid #234c44;position:fixed;inset:0;pointer-events:none}
+header,footer{position:fixed;left:env(safe-area-inset-left);right:env(safe-area-inset-right);padding:12px;background:#234c44;color:white;text-align:center}
+header{top:env(safe-area-inset-top)}footer{bottom:env(safe-area-inset-bottom)}main{padding:90px 24px}h1{font-size:24px}input{font-size:12px;padding:12px;width:100%;box-sizing:border-box}
+#safeProbe{position:fixed;visibility:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 </style><script>window.helperAtHead=!!window.BuiOMobile;</script></head><body>
 <div id="viewport"><header>杯澳 App · 可用範圍頂部</header><main><h1>原生螢幕適應檢查</h1>
-<p>整個綠色邊框及底部橫列應位於系統安全範圍內。</p><input placeholder="輸入文字不應觸發頁面自動放大">
+<p>背景填滿螢幕；上下按鈕應避開系統安全範圍。</p><input placeholder="輸入文字不應觸發頁面自動放大">
 <pre id="result"></pre></main><footer>底部按鈕 · 不應被 Home 橫條遮擋</footer></div>
+<div id="safeProbe"></div>
 <script>
-addEventListener('load',()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+let timer;
+const reportLayout=()=>{
   const box=document.querySelector('#viewport').getBoundingClientRect();
   const bottom=document.querySelector('footer').getBoundingClientRect();
+  const safe=getComputedStyle(document.querySelector('#safeProbe'));
   const report={helperAtHead:window.helperAtHead,version:window.BuiOMobile?.version,
+    path:location.pathname,native:window.BuiONativeLayout,
+    safe:{top:parseFloat(safe.paddingTop),right:parseFloat(safe.paddingRight),bottom:parseFloat(safe.paddingBottom),left:parseFloat(safe.paddingLeft)},
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
     cssWidth:box.width,cssHeight:box.height,footerBottom:bottom.bottom,scrollWidth:document.documentElement.scrollWidth,
     scale:visualViewport.scale,inputFont:parseFloat(getComputedStyle(document.querySelector('input')).fontSize),
     meta:document.querySelector('meta[name="viewport"]').content};
   document.querySelector('#result').textContent=report.width+' × '+report.height+' pt\\n100vh: '+report.cssHeight+'\\nApp helper: '+report.version;
   fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
-})));
+};
+const schedule=()=>{clearTimeout(timer);timer=setTimeout(reportLayout,250)};
+addEventListener('load',schedule);addEventListener('resize',schedule);addEventListener('buio:native-layout',schedule);
+const poll=setInterval(async()=>{const next=await fetch('/next').then(r=>r.json());if(next){clearInterval(poll);location.assign(next)}},250);
 </script></body></html>`;
 const server = createServer(async (req, res) => {
-  if (req.method === 'POST' && req.url === '/report') {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.url === '/next') {
+    res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(nextPath || null)); nextPath = undefined;
+  } else if (req.method === 'POST' && req.url === '/report') {
     let body = '';
     for await (const chunk of req) { body += chunk; if (body.length > 10000) { res.writeHead(413).end(); return; } }
     received = JSON.parse(body);
@@ -69,27 +81,39 @@ try {
       if (device.state !== 'Booted') await run('xcrun', ['simctl', 'boot', device.udid]);
       await run('xcrun', ['simctl', 'bootstatus', device.udid, '-b']);
       await run('xcrun', ['simctl', 'install', device.udid, 'releases/ios-simulator/Build/Products/Debug-iphonesimulator/App.app']);
-      received = undefined;
+      received = undefined; nextPath = undefined;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot']);
-      const deadline = Date.now() + 45000;
-      while (!received && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250));
-      assert.ok(received, `${type}: WKWebView did not report its layout`);
-      const report = { device: device.name, ...received };
-      reports.push(report);
-      await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}.png`)]);
-      await writeFile(path.join(output, 'report.json'), JSON.stringify(reports, null, 2));
-      assert.equal(report.helperAtHead, true, `${type}: helper missing before page code`);
-      assert.equal(report.version, '0.1.1');
-      assert.equal(report.scale, 1);
-      assert.ok(Math.abs(report.cssWidth - report.width) <= 1);
-      assert.ok(Math.abs(report.cssHeight - report.height) <= 1);
-      assert.ok(Math.abs(report.footerBottom - report.height) <= 1);
-      assert.ok(report.scrollWidth <= report.width + 1);
-      assert.ok(report.inputFont >= 16);
-      assert.ok(report.height < report.screenHeight - 10, `${type}: viewport must exclude system safe areas`);
-      assert.ok(report.height > report.screenHeight - 160, `${type}: unexpected excess inset`);
-      assert.ok(!/maximum-scale|user-scalable/.test(report.meta));
-      console.log(JSON.stringify(report));
+      let originalPortrait;
+      for (const route of ['/', '/science-lab', '/pet']) {
+        if (route !== '/') { received = undefined; nextPath = route; }
+        const deadline = Date.now() + 45000;
+        const ready = () => received?.path === route && received.native &&
+          (route !== '/science-lab' || received.width > received.height) &&
+          (route !== '/pet' || (received.height > received.width) === originalPortrait);
+        while (!ready() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250));
+        assert.ok(ready(), `${type} ${route}: missing native layout or automatic orientation: ${JSON.stringify(received)}`);
+        const report = { device: device.name, ...received };
+        if (route === '/') originalPortrait = report.height > report.width;
+        reports.push(report);
+        await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-${route === '/' ? 'home' : route.slice(1)}.png`)]);
+        await writeFile(path.join(output, 'report.json'), JSON.stringify(reports, null, 2));
+        assert.equal(report.helperAtHead, true, `${type}: helper missing before page code`);
+        assert.equal(report.version, '0.2.0');
+        assert.equal(report.scale, 1);
+        for (const dimension of ['width', 'height']) {
+          assert.ok(Math.abs(report[dimension] - report.native[dimension]) <= 1);
+          assert.ok(Math.abs(report.native[dimension] - report.native['container' + dimension[0].toUpperCase() + dimension.slice(1)]) <= 1, 'No native letterboxing');
+        }
+        assert.equal(report.native.x, 0); assert.equal(report.native.y, 0);
+        assert.ok(Math.abs(report.cssWidth - report.width) <= 1);
+        assert.ok(Math.abs(report.cssHeight - report.height) <= 1);
+        assert.ok(Math.abs(report.footerBottom - (report.height - report.safe.bottom)) <= 1);
+        for (const edge of ['top', 'right', 'bottom', 'left']) assert.ok(Math.abs(report.safe[edge] - report.native[edge]) <= 1, `CSS safe area ${edge}`);
+        assert.ok(report.scrollWidth <= report.width + 1);
+        assert.ok(report.inputFont >= 16);
+        assert.ok(!/maximum-scale|user-scalable/.test(report.meta));
+        console.log(JSON.stringify(report));
+      }
     } finally { await run('xcrun', ['simctl', 'shutdown', device.udid]); }
   }
 } finally { await new Promise(resolve => server.close(resolve)); }

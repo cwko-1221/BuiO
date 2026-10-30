@@ -48,24 +48,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // custom cookie stores or changes to the game's simulation/network timing.
 @objc(BuiOViewController)
 class BuiOViewController: CAPBridgeViewController {
+    private var keyboardBottom: NSLayoutConstraint?
+    private var landscapeModule = false
+    private var immersive = false
+    private var returnOrientation: UIInterfaceOrientation = .portrait
+
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
         guard let webView = webView else { return }
 
-        // Size the viewport itself, rather than adding scroll insets to a
-        // full-screen viewport. Fixed controls and 100vh game canvases then
-        // agree on the usable size in portrait, landscape and with a keyboard.
+        // Paint edge to edge. Each module places its controls within CSS safe
+        // areas; the native host must not create white strips around the page.
         let container = UIView(frame: webView.frame)
-        container.backgroundColor = .systemBackground
+        container.backgroundColor = UIColor(red: 0.96, green: 0.97, blue: 0.98, alpha: 1)
         view = container
         webView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(webView)
+        let bottom = webView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        keyboardBottom = bottom
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor),
-            webView.leadingAnchor.constraint(equalTo: container.safeAreaLayoutGuide.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: container.safeAreaLayoutGuide.trailingAnchor),
-            webView.bottomAnchor.constraint(equalTo: container.keyboardLayoutGuide.topAnchor)
+            webView.topAnchor.constraint(equalTo: container.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: container.trailingAnchor), bottom
         ])
+        webView.isOpaque = false
+        webView.scrollView.showsVerticalScrollIndicator = false
+        webView.scrollView.showsHorizontalScrollIndicator = false
+        webView.allowsBackForwardNavigationGestures = true
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardFrameChanged(_:)),
+            name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        webView.configuration.userContentController.add(BuiOLayoutHandler(owner: self), name: "buioLayout")
 
         // Capacitor replaces the configuration's userContentController when
         // creating its bridge. Install our script on the final controller,
@@ -77,6 +89,89 @@ class BuiOViewController: CAPBridgeViewController {
         }
     }
 
+    deinit { NotificationCenter.default.removeObserver(self) }
+
+    @objc private func keyboardFrameChanged(_ notification: Notification) {
+        guard let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let local = view.convert(frame, from: nil)
+        // A floating iPad keyboard should not collapse the entire canvas.
+        let docked = local.width >= view.bounds.width * 0.8 && local.maxY >= view.bounds.maxY
+        keyboardBottom?.constant = docked ? -max(0, view.bounds.maxY - local.minY) : 0
+        let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double ?? 0.25
+        UIView.animate(withDuration: duration) { self.view.layoutIfNeeded() }
+    }
+
+    fileprivate func applyLayout(_ message: WKScriptMessage) {
+        guard message.frameInfo.isMainFrame,
+              let url = message.frameInfo.request.url, let expected = bridge?.config.serverURL,
+              url.scheme == expected.scheme, url.host == expected.host, url.port == expected.port,
+              let body = message.body as? [String: Any] else { return }
+        let science = url.path == "/science-lab" || url.path.hasPrefix("/science-lab/")
+        let game = ["/pet", "/pet/", "/game", "/game/", "/tower-defense"].contains(url.path)
+        immersive = science || (game && (body["immersive"] as? Bool == true))
+        setStatusBarVisible(!immersive)
+        setStatusBarStyle(body["lightStatus"] as? Bool == true ? .lightContent : .darkContent)
+        setNeedsUpdateOfHomeIndicatorAutoHidden()
+        webView?.allowsBackForwardNavigationGestures = !immersive
+        if let hex = body["background"] as? String, hex.range(of: "^#[0-9a-fA-F]{6}$", options: .regularExpression) != nil,
+           let value = UInt32(hex.dropFirst(), radix: 16) {
+            let color = UIColor(red: CGFloat((value >> 16) & 255) / 255,
+                green: CGFloat((value >> 8) & 255) / 255, blue: CGFloat(value & 255) / 255, alpha: 1)
+            view.backgroundColor = color
+            webView?.backgroundColor = color
+            webView?.scrollView.backgroundColor = color
+        }
+        if landscapeModule != science {
+            if science {
+                returnOrientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
+                if returnOrientation == .unknown { returnOrientation = .portrait }
+            }
+            landscapeModule = science
+            updateOrientation()
+        }
+    }
+
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        landscapeModule ? .landscape : (UIDevice.current.userInterfaceIdiom == .pad ? .all : .allButUpsideDown)
+    }
+    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        landscapeModule ? .landscapeRight : returnOrientation
+    }
+    override var prefersHomeIndicatorAutoHidden: Bool { immersive }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if landscapeModule { updateOrientation() }
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        #if DEBUG
+        // Anonymous loopback CI fixture only; absent from the release app.
+        if bridge?.config.serverURL.host == "127.0.0.1", let webView = webView {
+            let insets = webView.safeAreaInsets
+            let values: [String: Double] = [
+                "containerWidth": Double(view.bounds.width), "containerHeight": Double(view.bounds.height),
+                "width": Double(webView.bounds.width), "height": Double(webView.bounds.height),
+                "x": Double(webView.frame.minX), "y": Double(webView.frame.minY),
+                "top": Double(insets.top), "right": Double(insets.right),
+                "bottom": Double(insets.bottom), "left": Double(insets.left)
+            ]
+            if let data = try? JSONSerialization.data(withJSONObject: values), let json = String(data: data, encoding: .utf8) {
+                webView.evaluateJavaScript("window.BuiONativeLayout=\(json);window.dispatchEvent(new Event('buio:native-layout'));")
+            }
+        }
+        #endif
+    }
+
+    private func updateOrientation() {
+        if #available(iOS 16.0, *) {
+            setNeedsUpdateOfSupportedInterfaceOrientations()
+            let previous = UIInterfaceOrientationMask(rawValue: 1 << returnOrientation.rawValue)
+            view.window?.windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: landscapeModule ? .landscape : previous))
+        } else { UIViewController.attemptRotationToDeviceOrientation() }
+    }
+
     override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
         let configuration = super.webViewConfiguration(for: instanceConfiguration)
         configuration.websiteDataStore = .default()
@@ -84,5 +179,13 @@ class BuiOViewController: CAPBridgeViewController {
         // Follow normal iOS audio rules: learning audio starts with a gesture.
         configuration.mediaTypesRequiringUserActionForPlayback = .audio
         return configuration
+    }
+}
+
+private final class BuiOLayoutHandler: NSObject, WKScriptMessageHandler {
+    weak var owner: BuiOViewController?
+    init(owner: BuiOViewController) { self.owner = owner }
+    func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
+        owner?.applyLayout(message)
     }
 }

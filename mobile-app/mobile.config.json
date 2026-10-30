@@ -2,6 +2,6 @@
   "appId": "com.buiosch.learning.pilot",
   "appName": "杯澳學習平台",
   "backendUrl": "https://buiosch.onrender.com",
-  "version": "0.1.1",
-  "buildNumber": 2
+  "version": "0.2.0",
+  "buildNumber": 3
 }

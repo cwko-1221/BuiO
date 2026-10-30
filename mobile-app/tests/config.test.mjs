@@ -46,6 +46,8 @@ test('iOS permissions, persistent website data and native runtime are wired into
   assert.ok(!plist.includes('NSAllowsArbitraryLoads'));
   const storyboard = await readFile(new URL('../ios/App/App/Base.lproj/Main.storyboard', import.meta.url), 'utf8');
   assert.ok(storyboard.includes('customClass="BuiOViewController" customModule="App"'));
+  const scene = await readFile(new URL('../ios/App/App/SceneDelegate.swift', import.meta.url), 'utf8');
+  assert.ok(scene.includes('window?.rootViewController = BuiOViewController()'));
   const swift = await readFile(new URL('../ios/App/App/AppDelegate.swift', import.meta.url), 'utf8');
   assert.ok(swift.includes('configuration.websiteDataStore = .default()'));
   assert.ok(swift.includes('injectionTime: .atDocumentStart'));
