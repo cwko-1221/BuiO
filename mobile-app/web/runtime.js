@@ -15,8 +15,8 @@
     root.setAttribute('data-buio-page', /^\/(?:index\.html)?$/.test(location.pathname) ? 'hub' : 'module');
     const section = location.pathname.split('/')[1].replace(/\.html$/, '');
     root.setAttribute('data-buio-module', ['math', 'login', 'quiz', 'dashboard', 'teacher-topics', 'tag-picker'].includes(section) ? 'math' : section);
-    // Keep text zoom available; remove old scale caps on learning pages. The
-    // native frame already excludes the notch and home indicator on all sides.
+    // Keep text zoom available; remove old scale caps on learning pages.
+    // Backgrounds cover the glass; controls use the CSS system-safe insets.
     let viewports = [...document.querySelectorAll('meta[name="viewport"]')];
     if (!viewports.length) {
       const viewport = document.createElement('meta');
@@ -60,9 +60,64 @@
     document.querySelectorAll(formSelector).forEach(fitFormField);
     layoutObserver.disconnect();
     updatePresentation();
-    const shell = document.querySelector('.pet-shell');
-    if (shell) new MutationObserver(updatePresentation).observe(shell, { attributes: true, attributeFilter: ['data-screen'] });
+    if (document.documentElement.getAttribute('data-buio-module') === 'pet') {
+      const attach = () => {
+        const shell = document.querySelector('.pet-shell');
+        if (shell) {
+          new MutationObserver(updatePresentation).observe(shell, { attributes: true, attributeFilter: ['data-screen'] });
+          setupPetNavigation(shell);
+          updatePresentation();
+        }
+        return Boolean(shell || document.querySelector('.teacher-shell'));
+      };
+      if (!attach()) {
+        const bootObserver = new MutationObserver(() => { if (attach()) bootObserver.disconnect(); });
+        bootObserver.observe(document.body, { childList: true, subtree: true });
+      }
+    }
   };
+  function setupPetNavigation(shell) {
+    const nav = shell.querySelector('.pet-nav');
+    if (!nav || nav.querySelector('[data-buio-more]')) return;
+    const secondary = [...nav.querySelectorAll('[data-tab]')].filter(button => !['home', 'park', 'collection', 'brawl'].includes(button.dataset.tab));
+    for (const button of secondary) button.setAttribute('data-buio-secondary', '');
+    const more = document.createElement('button');
+    more.type = 'button'; more.setAttribute('data-buio-more', '');
+    more.setAttribute('aria-haspopup', 'dialog');
+    const english = document.documentElement.lang.startsWith('en');
+    more.innerHTML = '<span aria-hidden="true" class="buio-more-icon">•••</span><span>' + (english ? 'More' : '更多') + '</span>';
+    nav.append(more);
+    const sheet = document.createElement('dialog');
+    sheet.setAttribute('data-buio-sheet', '');
+    sheet.setAttribute('aria-label', english ? 'More pet activities' : '更多寵物活動');
+    shell.append(sheet);
+    const backdrop = document.createElement('div');
+    backdrop.className = 'buio-sheet-backdrop'; backdrop.hidden = true; shell.append(backdrop);
+    const close = () => {
+      if (sheet.close) sheet.close(); else sheet.removeAttribute('open');
+      backdrop.hidden = true; more.focus();
+    };
+    backdrop.addEventListener('click', close);
+    more.addEventListener('click', event => {
+      event.stopPropagation();
+      sheet.replaceChildren();
+      const heading = document.createElement('h2'); heading.textContent = english ? 'More activities' : '更多活動'; sheet.append(heading);
+      const closeButton = document.createElement('button');
+      closeButton.type = 'button'; closeButton.className = 'buio-sheet-close'; closeButton.textContent = '×';
+      closeButton.setAttribute('aria-label', english ? 'Close' : '關閉'); closeButton.addEventListener('click', close); sheet.append(closeButton);
+      const items = document.createElement('div'); items.className = 'buio-sheet-items';
+      for (const button of secondary) { const item = button.cloneNode(true); item.removeAttribute('data-buio-secondary'); items.append(item); }
+      sheet.append(items);
+      if (sheet.showModal) sheet.showModal(); else { sheet.setAttribute('open', ''); backdrop.hidden = false; }
+    });
+    sheet.addEventListener('click', event => {
+      if (event.target.closest('[data-tab]')) { if (sheet.close) sheet.close(); else sheet.removeAttribute('open'); backdrop.hidden = true; }
+      if (event.target === sheet) {
+        const box = sheet.getBoundingClientRect();
+        if (event.clientY < box.top || event.clientX < box.left || event.clientX > box.right) close();
+      }
+    });
+  }
   let lastPresentation = '';
   function updatePresentation() {
     if (!document.body) return;

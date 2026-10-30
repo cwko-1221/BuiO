@@ -111,7 +111,6 @@ class BuiOViewController: CAPBridgeViewController {
         immersive = science || (game && (body["immersive"] as? Bool == true))
         setStatusBarVisible(!immersive)
         setStatusBarStyle(body["lightStatus"] as? Bool == true ? .lightContent : .darkContent)
-        setNeedsUpdateOfHomeIndicatorAutoHidden()
         webView?.allowsBackForwardNavigationGestures = !immersive
         if let hex = body["background"] as? String, hex.range(of: "^#[0-9a-fA-F]{6}$", options: .regularExpression) != nil,
            let value = UInt32(hex.dropFirst(), radix: 16) {
@@ -137,7 +136,6 @@ class BuiOViewController: CAPBridgeViewController {
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         landscapeModule ? .landscapeRight : returnOrientation
     }
-    override var prefersHomeIndicatorAutoHidden: Bool { immersive }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)

@@ -144,6 +144,7 @@ html[data-buio-module="science-lab"] :is(.lab-screen, .catalog-screen) {
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 8px;
+    backdrop-filter: none !important;
   }
   html[data-buio-page="hub"] .sidebar-footer { margin: 0; }
   html[data-buio-page="hub"] .sidebar-footer > span { display: none; }
@@ -170,6 +171,40 @@ html[data-buio-module="science-lab"] :is(.lab-screen, .catalog-screen) {
     font-size: 12px;
     text-align: center;
   }
+}
+
+html[data-buio-app] [data-buio-sheet] {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 300;
+  width: min(100%, 560px);
+  margin: 0 auto;
+  padding: 24px max(20px, var(--buio-safe-right)) calc(24px + var(--buio-safe-bottom)) max(20px, var(--buio-safe-left));
+  border: 0;
+  border-radius: 24px 24px 0 0;
+  color: #22314a;
+  background: #fffcf6;
+  box-shadow: 0 -8px 40px #0003;
+}
+html[data-buio-app] [data-buio-sheet]::backdrop { background: #17212d88; }
+html[data-buio-app] [data-buio-sheet] h2 { margin: 0 44px 20px 0; font-size: 22px; }
+html[data-buio-app] .buio-sheet-close { position: absolute; top: 12px; right: 16px; width: 44px; border: 0; border-radius: 50%; background: #f0e9dc; font-size: 28px; }
+html[data-buio-app] .buio-sheet-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+html[data-buio-app] .buio-sheet-items button { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 12px; border: 1px solid #e6dbc9; border-radius: 16px; color: #22314a; background: #f6efe4; font: inherit; }
+html[data-buio-app] .buio-sheet-backdrop { position: fixed; inset: 0; z-index: 299; background: #17212d88; }
+html[data-buio-app] .pet-nav [data-buio-more] { display: none; }
+@media (max-width: 899px) {
+  html[data-buio-module="pet"] .pet-nav { justify-content: space-between; gap: 4px; overflow-x: hidden; }
+  html[data-buio-module="pet"] .pet-nav > [data-buio-secondary] { display: none; }
+  html[data-buio-module="pet"] .pet-nav > button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 52px;
+    padding-inline: 2px;
+  }
+  html[data-buio-module="pet"] .pet-nav [data-buio-more] { display: flex; }
+  html[data-buio-module="pet"] .pet-nav > button > span:last-child { font-size: 11px; white-space: nowrap; }
+  html[data-buio-module="pet"] .buio-more-icon { font-size: 20px; line-height: 1.2; }
 }
 @media (min-width: 900px) {
   html[data-buio-page="hub"] .app-shell { grid-template-columns: 220px minmax(0, 1fr) !important; }
