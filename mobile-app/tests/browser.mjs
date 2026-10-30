@@ -74,6 +74,19 @@ try {
     const browser = await browserType.launch({ headless: true });
     try {
       const context = await browser.newContext({ viewport, hasTouch: true });
+      const originalViewports = new WeakMap();
+      await context.exposeBinding('__buioNativePresentation', async ({ page }, message) => {
+        if (message.landscape) {
+          if (!originalViewports.has(page)) originalViewports.set(page, page.viewportSize());
+          const size = page.viewportSize();
+          if (size.height > size.width) await page.setViewportSize({ width: size.height, height: size.width });
+        } else if (originalViewports.has(page)) {
+          const size = originalViewports.get(page); originalViewports.delete(page); await page.setViewportSize(size);
+        }
+      });
+      await context.addInitScript(() => {
+        window.webkit = { messageHandlers: { buioLayout: { postMessage: message => { void window.__buioNativePresentation(message).catch(() => {}); } } } };
+      });
       await context.addInitScript({ path: path.join(webRoot, 'runtime.js') });
       await context.addInitScript(({ tablet, small }) => {
         const updateInsets = () => {
@@ -160,11 +173,10 @@ try {
       if (deep) {
         const petTab = async tab => {
           const direct = page.locator(`.pet-nav > [data-tab="${tab}"]`);
-          if (await direct.isVisible()) await direct.click();
-          else {
+          if (page.viewportSize().width < 900 && ['shop', 'coinPusher', 'visit', 'settings'].includes(tab)) {
             await page.locator('[data-buio-more]').click();
             await page.locator(`[data-buio-sheet] [data-tab="${tab}"]`).click();
-          }
+          } else await direct.click();
         };
         if (await page.locator('[data-action="hatch"]').count()) {
           await page.locator('[data-action="hatch"]').click();
@@ -182,9 +194,10 @@ try {
         await page.screenshot({ path: path.join(output, `${engine}-pet-battle.png`) });
         await assertFits('pet battle');
         const controls = await page.locator('.brawl-controls').boundingBox();
-        assert.ok(controls && controls.y + controls.height <= viewport.height, 'Battle touch controls stay on screen');
+        assert.ok(controls && controls.y + controls.height <= page.viewportSize().height, 'Battle touch controls stay on screen');
         await page.keyboard.press('Escape');
         await page.locator('[data-brawl="lobby"]').click();
+        await page.waitForFunction(() => !document.querySelector('.pet-shell.brawl-active'));
         await petTab('home');
         await page.waitForFunction(() => window.__petGame?.scene.isActive('Bedroom'));
         console.log(`${engine}: hatch, collection, shop, practice battle and return passed`);

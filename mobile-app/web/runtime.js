@@ -118,7 +118,7 @@
       const attach = () => {
         const shell = document.querySelector('.pet-shell');
         if (shell) {
-          new MutationObserver(updatePresentation).observe(shell, { attributes: true, attributeFilter: ['data-screen'] });
+          new MutationObserver(updatePresentation).observe(shell, { attributes: true, attributeFilter: ['data-screen', 'class'] });
           setupPetNavigation(shell);
           updatePresentation();
         }
@@ -186,9 +186,11 @@
       games: '#0d1023', game: '#111827', 'tower-defense': '#101b30'
     };
     const background = palette[module] || '#f6f8fb';
-    const immersive = module === 'science-lab' || (module === 'pet' && ['park', 'coin-pusher'].includes(petScreen));
+    const battle = Boolean(document.querySelector('.pet-shell.brawl-active'));
+    const gameCanvas = Boolean(document.querySelector('#rotateNotice, #gameCanvas'));
+    const immersive = module === 'science-lab' || gameCanvas || battle || (module === 'pet' && ['park', 'coin-pusher'].includes(petScreen));
     root.setAttribute('data-buio-immersive', String(immersive));
-    const landscape = module === 'science-lab' || Boolean(document.querySelector('#rotateNotice, #gameCanvas'));
+    const landscape = module === 'science-lab' || battle || gameCanvas;
     const message = { immersive, landscape, background, lightStatus: ['math', 'games', 'game', 'tower-defense', 'science-lab'].includes(module) };
     const serialized = JSON.stringify(message);
     if (serialized !== lastPresentation) {

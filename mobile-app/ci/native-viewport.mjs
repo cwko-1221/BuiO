@@ -41,7 +41,7 @@ const reportLayout=()=>{
   const bottom=document.querySelector('footer').getBoundingClientRect();
   const safe=getComputedStyle(document.querySelector('#safeProbe'));
   const report={helperAtHead:window.helperAtHead,version:window.BuiOMobile?.version,
-    path:location.pathname,native:window.BuiONativeLayout,
+    path:location.pathname+location.search,native:window.BuiONativeLayout,
     safe:{top:parseFloat(safe.paddingTop),right:parseFloat(safe.paddingRight),bottom:parseFloat(safe.paddingBottom),left:parseFloat(safe.paddingLeft)},
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
     cssWidth:box.width,cssHeight:box.height,footerBottom:bottom.bottom,scrollWidth:document.documentElement.scrollWidth,
@@ -63,7 +63,10 @@ const server = createServer(async (req, res) => {
     for await (const chunk of req) { body += chunk; if (body.length > 10000) { res.writeHead(413).end(); return; } }
     received = JSON.parse(body);
     res.writeHead(204).end();
-  } else { res.setHeader('Content-Type', 'text/html; charset=utf-8'); res.end(html); }
+  } else {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.end(req.url.includes('battle=1') ? html.replace('<body>', '<body><div class="pet-shell brawl-active"></div>') : html);
+  }
 });
 server.listen(0, '127.0.0.1');
 await once(server, 'listening');
@@ -84,18 +87,18 @@ try {
       received = undefined; nextPath = undefined;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot']);
       let originalPortrait;
-      for (const route of ['/', '/science-lab', '/pet']) {
+      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1']) {
         if (route !== '/') { received = undefined; nextPath = route; }
         const deadline = Date.now() + 45000;
         const ready = () => received?.path === route && received.native &&
-          (route !== '/science-lab' || received.width > received.height) &&
-          (route !== '/pet' || (received.height > received.width) === originalPortrait);
+          (!['/science-lab', '/pet?battle=1'].includes(route) || received.width > received.height) &&
+          (!['/pet', '/pet?home=1'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250));
         assert.ok(ready(), `${type} ${route}: missing native layout or automatic orientation: ${JSON.stringify(received)}`);
         const report = { device: device.name, ...received };
         if (route === '/') originalPortrait = report.height > report.width;
         reports.push(report);
-        await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-${route === '/' ? 'home' : route.slice(1)}.png`)]);
+        await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-${route === '/' ? 'home' : route.slice(1).replace(/[?=]/g, '-')}.png`)]);
         await writeFile(path.join(output, 'report.json'), JSON.stringify(reports, null, 2));
         assert.equal(report.helperAtHead, true, `${type}: helper missing before page code`);
         assert.equal(report.version, '0.2.0');

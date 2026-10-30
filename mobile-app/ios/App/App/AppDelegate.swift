@@ -109,11 +109,13 @@ class BuiOViewController: CAPBridgeViewController {
               let body = message.body as? [String: Any] else { return }
         let science = url.path == "/science-lab" || url.path.hasPrefix("/science-lab/")
         let game = ["/pet", "/pet/", "/game", "/game/", "/tower-defense"].contains(url.path)
-        let forceLandscape = science || (game && !url.path.hasPrefix("/pet") && (body["landscape"] as? Bool == true))
+        let forceLandscape = science || (game && (body["landscape"] as? Bool == true))
         immersive = science || (game && (body["immersive"] as? Bool == true))
         setStatusBarVisible(!immersive)
         setStatusBarStyle(body["lightStatus"] as? Bool == true ? .lightContent : .darkContent)
         webView?.allowsBackForwardNavigationGestures = !immersive
+        webView?.scrollView.bounces = !immersive
+        webView?.scrollView.pinchGestureRecognizer?.isEnabled = !immersive
         if let hex = body["background"] as? String, hex.range(of: "^#[0-9a-fA-F]{6}$", options: .regularExpression) != nil,
            let value = UInt32(hex.dropFirst(), radix: 16) {
             let color = UIColor(red: CGFloat((value >> 16) & 255) / 255,

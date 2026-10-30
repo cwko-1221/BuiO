@@ -8,7 +8,7 @@ html[data-buio-app] {
   -webkit-text-size-adjust: 100% !important;
   text-size-adjust: 100% !important;
 }
-html[data-buio-app], html[data-buio-app] * { scrollbar-width: none !important; }
+html[data-buio-app], html[data-buio-app] * { scrollbar-width: none !important; scrollbar-gutter: auto !important; }
 html[data-buio-app] ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
 html[data-buio-app][data-buio-layout="document"] body {
   box-sizing: border-box;
@@ -19,6 +19,7 @@ html[data-buio-app][data-buio-layout="document"] body {
 }
 html[data-buio-app] :is(button, [role="button"], .portal-link, .back-link, .primary-action, .secondary-action) {
   min-height: 44px;
+  min-width: 44px;
 }
 html[data-buio-app] :is(dialog, .modal-card, .modal-content) {
   max-height: calc(100dvh - var(--buio-safe-top) - var(--buio-safe-bottom) - 24px) !important;

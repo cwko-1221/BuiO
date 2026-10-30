@@ -33,9 +33,10 @@ export async function configuration({ backendUrl, development = false } = {}) {
         errorPath: 'offline.html'
       },
       ios: {
-        // The native container owns safe-area and keyboard layout. Do not
-        // also inset a full-size web viewport inside its scroll view.
+        // Paint edge to edge; native insets are applied to module controls,
+        // rather than introducing separate white scroll-view margins.
         contentInset: 'never',
+        zoomEnabled: true,
         preferredContentMode: 'mobile',
         scrollEnabled: true,
         limitsNavigationsToAppBoundDomains: false,
