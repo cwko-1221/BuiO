@@ -133,7 +133,10 @@ try {
       for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/game/', '/tower-defense/', '/?return=1', '/export-probe']) {
         console.log(`[native] ${device.name}: ${route}`);
         if (route !== '/') { received = undefined; nextPath = route; }
-        const deadline = Date.now() + 45000;
+        // A freshly booted simulator may spend over 45s starting WebKit.
+        // Only the first navigation gets a cold-start allowance; orientation
+        // and export phases retain their existing 45s readiness deadline.
+        const deadline = Date.now() + (route === '/' ? 120000 : 45000);
         let dismissedFirstExport = false;
         const ready = () => received?.path === route && received.native &&
           (!(route.startsWith('/pet') || ['/science-lab', '/game/', '/tower-defense/'].includes(route)) || received.width > received.height) &&
@@ -148,7 +151,7 @@ try {
         if (!ready()) {
           await writeFile(path.join(output, `${type}-failed.json`), JSON.stringify({ route, received }, null, 2));
           await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-failed.png`)], {}, 20000).catch(error => console.error(error.message));
-          await run('xcrun', ['simctl', 'spawn', device.udid, 'log', 'show', '--last', '2m', '--style', 'compact', '--predicate', 'process == "App" AND eventMessage CONTAINS "BuiO"'], {}, 20000)
+          await run('xcrun', ['simctl', 'spawn', device.udid, 'log', 'show', '--last', '3m', '--style', 'compact', '--predicate', 'process == "App" OR process CONTAINS "WebKit"'], {}, 20000)
             .then(log => writeFile(path.join(output, `${type}-native.log`), log)).catch(error => console.error(error.message));
         }
         assert.ok(ready(), `${type} ${route}: missing native layout, automatic orientation or export: ${JSON.stringify(received)}`);

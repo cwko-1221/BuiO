@@ -34,7 +34,7 @@ Capacitor 的 `server.url` 設定是試用／開發用途，[官方設定文件]
 
 **沒有付費開發者會員、先在自己裝置試用：**可使用普通 Apple ID，在 Windows 以第三方工具 Sideloadly 為實機 IPA 簽署及安裝，詳見 [Windows 個人試用指引](WINDOWS-INSTALL.md)。
 
-需要 Node.js 22+、Xcode 26+、iOS／iPadOS 15+ 裝置及可用的 Apple 開發團隊。此 Windows 工作環境沒有 Xcode；IPA 由 GitHub 的 macOS runner 編譯，再在 Windows 驗證及個人簽署。
+需要 Node.js 22+、Xcode 26+、iOS／iPadOS 15.4+ 裝置及可用的 Apple 開發團隊。15.4 是對話框與行動版面功能的最低要求；自動橫向仍要求 16+，15.4 可手動轉向。此 Windows 工作環境沒有 Xcode；IPA 由 GitHub 的 macOS runner 編譯，再在 Windows 驗證及個人簽署。
 
 1. 將此資料夾（或提供的 source ZIP 解壓內容）放到 Mac。
 2. 在此資料夾執行：

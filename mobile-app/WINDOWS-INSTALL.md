@@ -2,11 +2,11 @@
 
 路線：**雲端編譯實機 ARM64 App → 未簽署 IPA → Windows 的 Sideloadly 用普通 Apple ID 簽署 → USB 安裝到自己的 iPhone／iPad**。
 
-這是個人開發測試，與學校透過 TestFlight／App Store 分發不同。專案的 iOS 最低版本是 iOS／iPadOS 15。
+這是個人開發測試，與學校透過 TestFlight／App Store 分發不同。專案的 iOS 最低版本是 iOS／iPadOS 15.4；自動橫向需要 16+。
 
 ## 更新已安裝的 App
 
-最終 0.2.0 build 5 已通過 iPhone／iPad 全部 18 個原生階段，並在 2026-10-31 透過 Sideloadly 覆蓋安裝到用戶 iPhone，工具顯示 Done／100%。檔案為 `releases/buio-pilot-0.2.0-unsigned.ipa`，狀態及雜湊記在 [VALIDATION.md](VALIDATION.md)。其他裝置仍須自行簽署及安裝。
+用戶 iPhone 於 2026-10-31 已安裝 0.2.0 build 5，當時 Sideloadly 顯示 Done／100%。最新 build 7 已完成原生編譯，正在最後驗證，尚未安裝；用戶表示稍後才能接駁 USB。通過後提供的檔案為 `releases/buio-pilot-0.2.0-unsigned.ipa`，狀態及雜湊記在 [VALIDATION.md](VALIDATION.md)。其他裝置仍須自行簽署及安裝。
 
 - 使用本次提供的 `buio-pilot-0.2.0-unsigned.ipa`。它必須先經簽署，不能在 iPhone 的 Files 裡點開便安裝。
 - 沿用上次的 Apple ID 及 Sideloadly Bundle ID 設定，直接覆蓋更新；毋須先刪除現有 App。安全區、轉向及 App 導覽程式已內嵌在新版，單純重新載入舊 App 不會取得這些修正。
