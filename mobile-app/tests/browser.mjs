@@ -53,9 +53,10 @@ try {
   const webRoot = fileURLToPath(new URL('../www/', import.meta.url));
   staticServer = createServer(async (req, res) => {
     const name = new URL(req.url, 'http://localhost').pathname.slice(1) || 'offline.html';
-    if (!['offline.html', 'offline.css', 'offline.js', 'runtime.js', 'settings.js'].includes(name)) { res.writeHead(404).end(); return; }
+    if (!['offline.html', 'offline.css', 'offline.js', 'runtime.js', 'settings.js', 'inset-probe.html'].includes(name)) { res.writeHead(404).end(); return; }
     res.setHeader('Content-Type', name.endsWith('.css') ? 'text/css' : name.endsWith('.js') ? 'text/javascript' : 'text/html');
-    if (name === 'settings.js') res.end(`window.BuiOAppSettings={backendUrl:${JSON.stringify(backend)},version:'test'};`);
+    if (name === 'inset-probe.html') res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>.probe{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}</style><div class="probe">safe area shorthand</div>');
+    else if (name === 'settings.js') res.end(`window.BuiOAppSettings={backendUrl:${JSON.stringify(backend)},version:'test'};`);
     else res.end(await readFile(path.join(webRoot, name)));
   });
   staticServer.listen(0, '127.0.0.1'); await once(staticServer, 'listening');
@@ -98,6 +99,15 @@ try {
         addEventListener('resize', updateInsets);
       }, { tablet: engine.includes('ipad'), small: engine.includes('small') });
       const page = await context.newPage();
+      const insetPage = await context.newPage();
+      await insetPage.goto(fallback.replace('offline.html', 'inset-probe.html'));
+      const probe = await insetPage.evaluate(() => {
+        window.BuiOApplyInsets({ top: 9, right: 8, bottom: 7, left: 6 });
+        const css = getComputedStyle(document.querySelector('.probe'));
+        return [css.paddingTop, css.paddingRight, css.paddingBottom, css.paddingLeft];
+      });
+      assert.deepEqual(probe, ['9px', '8px', '7px', '6px'], 'Native safe-area updates must reach CSS shorthands');
+      await insetPage.close();
       const assertFits = async label => {
         const geometry = await page.evaluate(() => ({
           width: innerWidth,
@@ -195,6 +205,9 @@ try {
         await assertFits('pet battle');
         const controls = await page.locator('.brawl-controls').boundingBox();
         assert.ok(controls && controls.y + controls.height <= page.viewportSize().height, 'Battle touch controls stay on screen');
+        const hud = await page.locator('.brawl-hud').boundingBox();
+        const safeLeft = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--buio-safe-left')));
+        assert.ok(hud && hud.x >= safeLeft, 'Battle health and pause controls avoid the camera housing');
         await page.keyboard.press('Escape');
         await page.locator('[data-brawl="lobby"]').click();
         await page.waitForFunction(() => !document.querySelector('.pet-shell.brawl-active'));

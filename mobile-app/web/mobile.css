@@ -51,6 +51,17 @@ html[data-buio-module="pet"] .room-bar {
 html[data-buio-module="pet"] .modal-root {
   padding: max(12px, var(--buio-safe-top)) max(12px, var(--buio-safe-right)) max(12px, var(--buio-safe-bottom)) max(12px, var(--buio-safe-left));
 }
+html[data-buio-module="pet"] .brawl-hud {
+  top: max(8px, var(--buio-safe-top));
+  left: max(12px, var(--buio-safe-left));
+  right: max(12px, var(--buio-safe-right));
+}
+html[data-buio-module="pet"] .brawl-unlimited { left: max(12px, var(--buio-safe-left)); }
+html[data-buio-module="pet"] .brawl-story-panel {
+  max-height: calc(100dvh - var(--buio-safe-top) - var(--buio-safe-bottom) - 24px);
+  max-width: calc(100vw - var(--buio-safe-left) - var(--buio-safe-right) - 24px);
+  overflow-y: auto;
+}
 
 html[data-buio-module="science-lab"] .topbar {
   padding-inline: max(12px, var(--buio-safe-left)) max(12px, var(--buio-safe-right));

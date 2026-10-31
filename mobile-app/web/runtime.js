@@ -59,14 +59,18 @@
         for (const rule of rules) {
           if (rule.cssRules) visit(rule.cssRules);
           if (!rule.style) continue;
-          for (const property of [...rule.style]) {
-            if (property.startsWith('--buio-safe-')) continue;
-            const value = rule.style.getPropertyValue(property);
-            if (!value.includes('env(safe-area-inset-')) continue;
-            const next = value.replace(/env\(\s*safe-area-inset-(top|right|bottom|left)\s*(?:,\s*([^)]*))?\)/g,
-              (_, edge, fallback) => 'var(--buio-safe-' + edge + ',' + (fallback || '0px') + ')');
-            rule.style.setProperty(property, next, rule.style.getPropertyPriority(property));
-          }
+          const value = rule.style.cssText;
+          if (!value.includes('env(safe-area-inset-')) continue;
+          // Pending-substitution shorthands can return empty longhand values
+          // in WebKit. Rewrite the declaration block, preserving our own env
+          // defaults so they never become self-referencing CSS variables.
+          const defaults = ['top', 'right', 'bottom', 'left'].map(edge => {
+            const property = '--buio-safe-' + edge;
+            return [property, rule.style.getPropertyValue(property), rule.style.getPropertyPriority(property)];
+          });
+          rule.style.cssText = value.replace(/env\(\s*safe-area-inset-(top|right|bottom|left)\s*(?:,\s*([^)]*))?\)/g,
+            (_, edge, fallback) => 'var(--buio-safe-' + edge + ',' + (fallback || '0px') + ')');
+          for (const [property, original, priority] of defaults) if (original) rule.style.setProperty(property, original, priority);
         }
       };
       visit(sheet.cssRules); processedSheets.add(sheet);
