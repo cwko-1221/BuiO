@@ -9,6 +9,17 @@ html[data-buio-app] {
   text-size-adjust: 100% !important;
 }
 html[data-buio-app], html[data-buio-app] * { scrollbar-width: none !important; scrollbar-gutter: auto !important; }
+html[data-buio-app] * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+html[data-buio-app] :is(input, textarea, [contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"]),
+html[data-buio-app] :is([contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"]) * {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
 html[data-buio-app] ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
 html[data-buio-app] [data-buio-status-shield] { display: none; }
 html[data-buio-app][data-buio-layout="document"] [data-buio-status-shield] {
@@ -149,6 +160,130 @@ html[data-buio-module="pet"] .park-mini-footer {
   left: var(--buio-safe-left);
   right: var(--buio-safe-right);
   width: auto;
+}
+
+/* App fighter selection: browse portraits beside preparation, with a fixed
+   mode strip and launch action. Detailed kits and chapter text are disclosed
+   in a sheet instead of repeating them on every portrait. */
+html[data-buio-module="pet"] .brawl-lobby { overflow: hidden; }
+html[data-buio-module="pet"] [data-buio-brawl-menu] {
+  display: grid;
+  grid-template-rows: 44px minmax(0, 1fr);
+  gap: 6px;
+  box-sizing: border-box;
+  width: 100%; height: 100%; max-width: none;
+  padding: 6px max(10px, var(--buio-safe-right)) 6px max(10px, var(--buio-safe-left));
+}
+html[data-buio-module="pet"] [data-buio-brawl-menu] > [hidden] { display: none !important; }
+html[data-buio-module="pet"] .buio-brawl-toolbar { display: flex; gap: 6px; min-width: 0; }
+html[data-buio-module="pet"] .buio-brawl-toolbar .brawl-mode-tabs {
+  flex: 1; min-width: 0; margin: 0; gap: 4px; flex-wrap: nowrap;
+  overflow-x: auto; overscroll-behavior-x: contain;
+}
+html[data-buio-module="pet"] .buio-brawl-toolbar .brawl-mode-tabs button {
+  flex: 1 0 auto; min-height: 44px; padding: 6px 10px;
+  font-size: 12px; white-space: nowrap; border-radius: 12px;
+}
+html[data-buio-module="pet"] :is(.buio-brawl-info,.buio-brawl-ability,.buio-brawl-pages button,.buio-brawl-stage-info) {
+  min-width: 44px; min-height: 44px; padding: 4px 6px;
+  border: 1px solid #c9d5c5; border-radius: 10px;
+  color: #3d6053; background: #fffdf3; font-size: 12px; font-weight: 700;
+}
+html[data-buio-module="pet"] .buio-brawl-workspace {
+  display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(228px, 1fr);
+  gap: 10px; min-width: 0; min-height: 0;
+}
+html[data-buio-module="pet"] .buio-brawl-workspace[data-buio-single-panel] { grid-template-columns: minmax(0, 1fr); }
+html[data-buio-module="pet"] .buio-brawl-roster { display: grid; grid-template-rows: 44px minmax(0, 1fr); gap: 6px; min-width: 0; min-height: 0; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-roster-head {
+  margin: 0; gap: 2px; flex-wrap: nowrap; min-width: 0;
+}
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-roster-head > b { font-size: 12px; margin-right: auto; white-space: nowrap; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-roster-filters { gap: 2px; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-roster-filters button { min-height: 44px; min-width: 44px; font-size: 11px; padding: 4px 6px; border-radius: 9px; }
+html[data-buio-module="pet"] .buio-brawl-pages { display: flex; align-items: center; gap: 2px; margin-left: auto; }
+html[data-buio-module="pet"] .buio-brawl-pages span { min-width: 24px; text-align: center; font-size: 10px; white-space: nowrap; }
+html[data-buio-module="pet"] .buio-brawl-pages button { font-size: 25px; padding: 0; }
+html[data-buio-module="pet"] .buio-brawl-pages button:disabled { opacity: .35; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighters {
+  position: relative; display: grid; grid-auto-flow: column; grid-template-columns: none;
+  grid-template-rows: repeat(2, minmax(0, 1fr)); grid-auto-columns: 90px;
+  gap: 6px; min-width: 0; min-height: 0; height: 100%; max-height: none;
+  padding: 0; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+  align-content: stretch; scroll-snap-type: x proximity;
+}
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighter {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 44px; min-height: 44px; padding: 12px 4px 2px;
+  border-radius: 12px; gap: 0; scroll-snap-align: start; overflow: hidden;
+}
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighter.selected { border-color: #446d60; box-shadow: inset 0 0 0 1px #446d60; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighter img { width: 100%; height: var(--buio-fighter-art, 48px); flex-shrink: 0; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighter h2 { max-width: 100%; margin: 0; font-size: 12px; line-height: 1.25; overflow-wrap: anywhere; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighter :is(p,small,.brawl-skill-names,.brawl-owned) { display: none; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-rarity { top: 4px; right: 5px; font-size: 8px; }
+html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighter.locked::after { content: '◇'; position: absolute; top: 3px; left: 5px; font-size: 11px; color: #7c6b59; }
+html[data-buio-module="pet"] .buio-brawl-preparation {
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 6px; min-width: 0; min-height: 0; overflow-y: auto;
+  padding: 0; border-left: 1px solid #d6ddcd; padding-left: 10px;
+}
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-head { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 0; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-head h2 { display: none; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-head label { display: flex; min-width: 0; gap: 3px; font-size: 10px; white-space: nowrap; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-head select { min-width: 0; max-width: 100%; width: 100%; min-height: 44px; padding: 4px; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-head label:has(#brawlOpponent) { grid-column: 1 / -1; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: repeat(2,minmax(44px,1fr)); gap: 6px; min-height: 94px; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card { position: relative; display: grid; min-width: 0; min-height: 44px; border-radius: 12px; border: 2px solid #e0e5d6; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card[data-buio-stage-selected] { border-color: #446d60; background: #e1ecdc; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card > img { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; opacity: .22; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card > div { position: relative; padding: 5px; align-self: center; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card h3 { font-size: 12px; margin: 0; line-height: 1.3; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card .brawl-eyebrow { font-size: 8px !important; letter-spacing: 0; margin: 0 0 3px; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card :is(p:not(.brawl-eyebrow),ol,[data-brawl]) { display: none; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card .buio-brawl-stage-pick { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 44px; border: 0; border-radius: 10px; background: transparent; padding: 0; }
+html[data-buio-module="pet"] .buio-brawl-launch { display: grid; grid-template-columns: 44px minmax(0,1fr); gap: 6px; }
+html[data-buio-module="pet"] .buio-brawl-start { min-height: 44px; border: 0; border-radius: 12px; background: #446d60; color: #fffdf0; font-size: 14px; font-weight: 800; padding: 5px 8px; }
+html[data-buio-module="pet"] .buio-brawl-start:disabled { background: #e0e5d8; color: #6d7b68; }
+html[data-buio-module="pet"] .buio-brawl-preparation .brawl-notice:empty { display: none; }
+html[data-buio-module="pet"] .buio-brawl-preparation :is(.pvp-panel,.rank-summary) { margin: 0; padding: 12px; }
+html[data-buio-module="pet"] .buio-brawl-preparation[data-buio-online],
+html[data-buio-module="pet"] [data-buio-single-panel] .buio-brawl-preparation { display: block; }
+html[data-buio-module="pet"] .buio-brawl-preparation[data-buio-online] .rank-summary { margin-bottom: 8px; }
+html[data-buio-module="pet"] .buio-brawl-preparation .pvp-panel { overflow-y: auto; }
+html[data-buio-module="pet"] .buio-brawl-preparation .pvp-panel-head { align-items: stretch; flex-direction: column; gap: 8px; }
+html[data-buio-module="pet"] .buio-brawl-preparation .pvp-panel-head h2 { font-size: 17px; }
+html[data-buio-module="pet"] .buio-brawl-preparation .pvp-panel :is(p,small) { font-size: 12px; }
+html[data-buio-module="pet"] .buio-brawl-dialog {
+  width: min(600px, calc(100vw - var(--buio-safe-left) - var(--buio-safe-right) - 24px));
+  max-height: calc(100dvh - var(--buio-safe-top) - var(--buio-safe-bottom) - 24px);
+  box-sizing: border-box; overflow-y: auto; padding: 16px; border: 1px solid #d6ddcd;
+  border-radius: 20px; background: #fffcf3; color: #344d48;
+}
+html[data-buio-module="pet"] .buio-brawl-dialog::backdrop { background: #152c36aa; }
+html[data-buio-module="pet"] .buio-brawl-dialog > header { display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+html[data-buio-module="pet"] .buio-brawl-dialog h2 { font-size: 20px; margin: 0; }
+html[data-buio-module="pet"] .buio-brawl-dialog-close { min-width: 44px; min-height: 44px; border: 0; background: #ede9dc; border-radius: 50%; font-size: 25px; }
+html[data-buio-module="pet"] .buio-brawl-fighter-detail { position: relative; padding: 24px 8px 8px; }
+html[data-buio-module="pet"] .buio-brawl-fighter-detail > img { display: block; height: 120px; max-width: 100%; margin: auto; object-fit: contain; }
+html[data-buio-module="pet"] .buio-brawl-fighter-detail > h2 { text-align: center; }
+html[data-buio-module="pet"] .buio-brawl-stage-detail > img { width: 100%; max-height: 130px; object-fit: cover; border-radius: 12px; }
+html[data-buio-module="pet"] .buio-brawl-dialog .brawl-heading :is(h1,p) { font-size: 14px; }
+@media (max-height:599px), (max-width:600px) {
+  html[data-buio-module="pet"] .buio-brawl-roster .brawl-roster-head > b { display: none; }
+  html[data-buio-module="pet"] .buio-brawl-roster .brawl-fighter h2 { font-size: 11px; }
+}
+@media (max-height:599px) and (orientation:landscape) {
+  html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card .brawl-eyebrow { display: none; }
+  html[data-buio-module="pet"] .buio-brawl-preparation .brawl-stage-card h3 {
+    font-size: 11px; line-height: 1.25; display: -webkit-box;
+    -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  }
+  html[data-buio-module="pet"] .buio-brawl-preparation:has(#brawlOpponent) .brawl-stage-grid { grid-template-columns: repeat(4,minmax(0,1fr)); grid-template-rows: minmax(44px,1fr); min-height: 44px; }
+}
+@media (orientation:portrait) and (max-width:700px) {
+  html[data-buio-module="pet"] .buio-brawl-workspace { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) minmax(220px,.8fr); }
+  html[data-buio-module="pet"] .buio-brawl-preparation { border-left: 0; padding-left: 0; }
 }
 
 html[data-buio-module="science-lab"] .topbar {

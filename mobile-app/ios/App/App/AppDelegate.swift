@@ -80,6 +80,7 @@ class BuiOViewController: CAPBridgeViewController {
         webView.scrollView.showsVerticalScrollIndicator = false
         webView.scrollView.showsHorizontalScrollIndicator = false
         webView.allowsBackForwardNavigationGestures = true
+        webView.allowsLinkPreview = false
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardFrameChanged(_:)),
             name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resumeExports),

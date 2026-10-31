@@ -128,6 +128,7 @@
         if (shell) {
           new MutationObserver(updatePresentation).observe(shell, { attributes: true, attributeFilter: ['data-screen', 'class'] });
           setupPetNavigation(shell);
+          setupPetBrawl(shell);
           updatePresentation();
         }
         return Boolean(shell || document.querySelector('.teacher-shell'));
@@ -180,6 +181,187 @@
       }
     });
   }
+  function setupPetBrawl(shell) {
+    const surface = shell.querySelector('#playSurface');
+    if (!surface) return;
+    let current;
+    const watch = () => {
+      const root = surface.querySelector('#brawl-root');
+      if (current?.root === root) return;
+      current?.state.resize?.disconnect(); current?.observer.disconnect(); current = null;
+      if (!root) return;
+      const state = { scroll: 0, selected: '', stage: '', details: new Map(), resize: null };
+      root.addEventListener('click', event => {
+        const fighter = event.target.closest('[data-brawl="fighter"]');
+        if (fighter) { state.scroll = root.querySelector('.brawl-fighters')?.scrollLeft || 0; state.selected = fighter.dataset.id; }
+        if (event.target.closest('[data-brawl="filter"]')) state.scroll = 0;
+      }, true);
+      const enhance = () => {
+        state.resize?.disconnect();
+        const content = root.querySelector('.brawl-lobby-content');
+        if (!content || content.hasAttribute('data-buio-brawl-menu')) return;
+        content.setAttribute('data-buio-brawl-menu', '');
+        const english = content.querySelector('[data-brawl="mode"][data-id="campaign"]')?.textContent.trim() === 'Adventure' || document.documentElement.lang.startsWith('en');
+        const text = (zh, en) => english ? en : zh;
+        const button = (label, className) => {
+          const item = document.createElement('button'); item.type = 'button'; item.textContent = label;
+          if (className) item.className = className;
+          return item;
+        };
+        const original = [...content.children];
+        const metadata = document.createElement('div'); metadata.hidden = true;
+        const modes = content.querySelector('.brawl-mode-tabs');
+        if (!modes) return;
+        const toolbar = document.createElement('div'); toolbar.className = 'buio-brawl-toolbar';
+        const help = button(text('說明', 'Info'), 'buio-brawl-info');
+        toolbar.append(modes, help);
+        const workspace = document.createElement('div'); workspace.className = 'buio-brawl-workspace';
+        const roster = content.querySelector('.brawl-fighters');
+        const rosterHead = content.querySelector('.brawl-roster-head');
+        const preparation = document.createElement('section'); preparation.className = 'buio-brawl-preparation';
+        preparation.setAttribute('aria-label', text('戰前準備', 'Battle preparation'));
+        const dialog = document.createElement('dialog'); dialog.className = 'buio-brawl-dialog';
+        const closeDialog = () => dialog.close();
+        const openDialog = (title, nodes) => {
+          dialog.replaceChildren();
+          const heading = document.createElement('header'); const h2 = document.createElement('h2'); h2.textContent = title;
+          const close = button('×', 'buio-brawl-dialog-close'); close.setAttribute('aria-label', text('關閉', 'Close'));
+          close.addEventListener('click', closeDialog); heading.append(h2, close); dialog.append(heading);
+          for (const node of nodes.filter(Boolean)) dialog.append(node.cloneNode(true));
+          dialog.showModal();
+        };
+        dialog.addEventListener('click', event => {
+          if (event.target.closest('[data-brawl]')) closeDialog();
+          if (event.target === dialog) {
+            const box = dialog.getBoundingClientRect();
+            if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeDialog();
+          }
+        });
+        help.addEventListener('click', () => openDialog(text('玩法與獎勵', 'Rules and rewards'),
+          original.filter(node => node.matches('.brawl-heading,.brawl-adventure-intro,.brawl-kit-note,.brawl-note,.brawl-resume'))));
+        const resume = original.find(node => node.matches('.brawl-resume'));
+        if (resume) {
+          const progress = button(text('進度', 'Saved run'), 'buio-brawl-info');
+          progress.addEventListener('click', () => openDialog(text('上次冒險', 'Saved adventure'), [resume]));
+          toolbar.insertBefore(progress, help);
+        }
+        if (roster && rosterHead) {
+          state.selected = roster.querySelector('.brawl-fighter.selected')?.dataset.id || state.selected;
+          const rosterPanel = document.createElement('section'); rosterPanel.className = 'buio-brawl-roster';
+          rosterPanel.setAttribute('aria-label', text('選擇出戰角色', 'Choose your fighter'));
+          const ability = button(text('能力', 'Skills'), 'buio-brawl-ability');
+          ability.addEventListener('click', () => {
+            const selected = roster.querySelector('.brawl-fighter.selected');
+            const card = state.details.get(selected?.dataset.id || state.selected);
+            if (!card) return;
+            const detail = document.createElement('article'); detail.className = 'buio-brawl-fighter-detail';
+            for (const child of card.children) detail.append(child.cloneNode(true));
+            openDialog(text('角色能力', 'Fighter skills'), [detail, original.find(node => node.matches('.brawl-kit-note'))]);
+          });
+          for (const card of roster.querySelectorAll('.brawl-fighter')) state.details.set(card.dataset.id, card.cloneNode(true));
+          const paging = document.createElement('div'); paging.className = 'buio-brawl-pages';
+          const previous = button('‹'); previous.setAttribute('aria-label', text('上一頁角色', 'Previous fighters'));
+          const next = button('›'); next.setAttribute('aria-label', text('下一頁角色', 'Next fighters'));
+          const pageNumber = document.createElement('span'); pageNumber.setAttribute('aria-live', 'polite');
+          paging.append(previous, pageNumber, next);
+          rosterHead.append(ability, paging);
+          rosterPanel.append(rosterHead, roster); workspace.append(rosterPanel);
+          const fitRoster = () => {
+            const width = roster.clientWidth, height = roster.clientHeight;
+            if (!width || !height) return;
+            const short = innerHeight < 600;
+            const columns = Math.max(2, Math.floor((width + 6) / (short ? 82 : 96)));
+            const rows = Math.max(1, Math.min(4, Math.floor((height + 6) / (short ? 68 : 106))));
+            const cardWidth = (width - 6 * (columns - 1)) / columns;
+            roster.style.gridAutoColumns = cardWidth + 'px';
+            roster.style.gridTemplateRows = `repeat(${rows},minmax(0,1fr))`;
+            roster.style.setProperty('--buio-fighter-art', Math.max(30, Math.min(72, (height - 6 * (rows - 1)) / rows - 32)) + 'px');
+            const count = roster.querySelectorAll('.brawl-fighter').length;
+            [...roster.querySelectorAll('.brawl-fighter')].forEach((card, index) => {
+              const page = Math.floor(index / (columns * rows));
+              const within = index % (columns * rows);
+              card.style.gridColumn = String(page * columns + within % columns + 1);
+              card.style.gridRow = String(Math.floor(within / columns) + 1);
+            });
+            const pages = Math.ceil(count / (columns * rows)) || 1;
+            const atEnd = roster.scrollLeft >= roster.scrollWidth - width - 2;
+            const page = atEnd ? pages : Math.min(pages, Math.round(roster.scrollLeft / (width + 6)) + 1);
+            pageNumber.textContent = page + ' / ' + pages;
+            previous.disabled = roster.scrollLeft <= 1; next.disabled = atEnd;
+          };
+          previous.addEventListener('click', () => roster.scrollBy({ left: -roster.clientWidth - 6, behavior: 'smooth' }));
+          next.addEventListener('click', () => roster.scrollBy({ left: roster.clientWidth + 6, behavior: 'smooth' }));
+          roster.addEventListener('scroll', () => { state.scroll = roster.scrollLeft; fitRoster(); }, { passive: true });
+          state.resize = new ResizeObserver(fitRoster); state.resize.observe(roster);
+          const restoreScroll = state.scroll;
+          requestAnimationFrame(() => { fitRoster(); roster.scrollLeft = restoreScroll; fitRoster(); });
+        } else workspace.setAttribute('data-buio-single-panel', '');
+        const stageHead = content.querySelector('.brawl-stage-head');
+        const stages = content.querySelector('.brawl-stage-grid');
+        if (stageHead && stages) {
+          const acts = content.querySelector('.brawl-act-tabs');
+          if (acts) {
+            const label = document.createElement('label'); label.className = 'buio-brawl-act-select';
+            label.append(document.createTextNode(text('篇章', 'Act')));
+            const select = document.createElement('select'); select.setAttribute('aria-label', text('選擇篇章', 'Choose an act'));
+            for (const act of acts.querySelectorAll('button')) {
+              const option = document.createElement('option'); option.value = act.dataset.id;
+              option.textContent = act.textContent; option.selected = act.classList.contains('selected'); select.append(option);
+            }
+            select.addEventListener('change', () => [...acts.querySelectorAll('button')].find(act => act.dataset.id === select.value)?.click());
+            label.append(select); stageHead.append(label); metadata.append(acts);
+          }
+          const footer = document.createElement('footer'); footer.className = 'buio-brawl-launch';
+          const detail = button(text('詳情', 'Details'), 'buio-brawl-stage-info');
+          let selectedCard;
+          const picks = [...stages.querySelectorAll('.brawl-stage-card')];
+          const chooseStage = card => {
+            if (!card) return;
+            selectedCard = card;
+            const source = card.querySelector('[data-brawl="start"]'); if (!source) return;
+            state.stage = source.dataset.stage;
+            for (const other of picks) {
+              const selected = other === card; other.toggleAttribute('data-buio-stage-selected', selected);
+              other.querySelector('.buio-brawl-stage-pick')?.setAttribute('aria-pressed', String(selected));
+            }
+            const launch = source.cloneNode(true); launch.setAttribute('data-buio-brawl-start', '');
+            launch.className = 'buio-brawl-start';
+            footer.replaceChildren(detail, launch);
+          };
+          detail.addEventListener('click', () => {
+            if (!selectedCard) return;
+            const copy = selectedCard.cloneNode(true); copy.className = 'buio-brawl-stage-detail';
+            copy.querySelector('.buio-brawl-stage-pick')?.remove(); copy.querySelector('[data-brawl="start"]')?.remove();
+            openDialog(text('關卡詳情', 'Stage details'), [copy]);
+          });
+          for (const card of picks) {
+            const pick = button('', 'buio-brawl-stage-pick');
+            pick.setAttribute('aria-label', (card.querySelector('h3')?.textContent || '') + ' · ' + (card.querySelector('[data-brawl="start"]')?.textContent || ''));
+            pick.addEventListener('click', () => chooseStage(card)); card.append(pick);
+          }
+          chooseStage(picks.find(card => card.querySelector('[data-brawl="start"]')?.dataset.stage === state.stage) ||
+            picks.find(card => !card.querySelector('[data-brawl="start"]')?.disabled) || picks[0]);
+          preparation.append(stageHead, stages, footer);
+        }
+        for (const child of original) {
+          if (child.parentElement !== content) continue;
+          if (child.matches('.pvp-panel,.rank-summary,.rank-leaderboard,.ranked-leaderboard,.brawl-notice')) preparation.append(child);
+          else metadata.append(child);
+        }
+        // Unknown future lobby panels stay reachable in the preparation pane.
+        for (const child of [...metadata.children]) {
+          if (!child.matches('.brawl-heading,.brawl-adventure-intro,.brawl-kit-note,.brawl-note,.brawl-act-tabs,.brawl-resume')) preparation.append(child);
+        }
+        if (preparation.querySelector('.pvp-panel')) preparation.setAttribute('data-buio-online', '');
+        workspace.append(preparation);
+        content.append(toolbar, workspace, metadata, dialog);
+      };
+      const observer = new MutationObserver(enhance);
+      observer.observe(root, { childList: true }); current = { root, state, observer };
+      enhance();
+    };
+    new MutationObserver(watch).observe(surface, { childList: true }); watch();
+  }
   let lastPresentation = '';
   function updatePresentation() {
     if (!document.body) return;
@@ -213,6 +395,13 @@
   // authored text (for example the maths answer box) keeps its original size.
   document.addEventListener('pointerdown', event => fitFormField(event.target.closest?.(formSelector)), true);
   document.addEventListener('focusin', event => fitFormField(event.target), true);
+  const editableTarget = target => {
+    const element = target instanceof Element ? target : target?.parentElement;
+    return Boolean(element?.closest('input,textarea') || element?.isContentEditable);
+  };
+  for (const type of ['contextmenu', 'selectstart']) {
+    document.addEventListener(type, event => { if (!editableTarget(event.target)) event.preventDefault(); }, true);
+  }
   addEventListener('pageshow', updatePresentation);
   addEventListener('popstate', updatePresentation);
   let notice;

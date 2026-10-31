@@ -247,6 +247,18 @@ try {
         `${engine}: pet destinations share one horizontal row`);
       await page.screenshot({ path: path.join(output, `${engine}-pet.png`), fullPage: true });
       await assertFits('pet entry');
+      const selectionPolicy = await page.evaluate(() => {
+        const label = document.querySelector('.pet-nav [data-tab="home"] span');
+        const ui = label.dispatchEvent(new Event('contextmenu', { bubbles: true, cancelable: true }));
+        const select = label.dispatchEvent(new Event('selectstart', { bubbles: true, cancelable: true }));
+        const input = document.createElement('input'); document.body.append(input);
+        const editable = input.dispatchEvent(new Event('contextmenu', { bubbles: true, cancelable: true }));
+        const editableStyle = getComputedStyle(input).webkitUserSelect || getComputedStyle(input).userSelect;
+        input.remove();
+        return { ui, select, editable, editableStyle, labelStyle: getComputedStyle(label).webkitUserSelect || getComputedStyle(label).userSelect };
+      });
+      assert.deepEqual(selectionPolicy, { ui: false, select: false, editable: true, editableStyle: 'text', labelStyle: 'none' },
+        'UI long-press selection is suppressed while editing remains available');
       if (deep) {
         const petTab = async tab => {
           const direct = page.locator(`.pet-nav > [data-tab="${tab}"]`);
@@ -265,6 +277,8 @@ try {
         const roomLandscape = page.viewportSize();
         for (const size of [roomLandscape, { width: Math.min(viewport.width, viewport.height), height: Math.max(viewport.width, viewport.height) }]) {
           await page.setViewportSize(size);
+          await page.waitForFunction(() => !document.body.innerText.includes('正在載入遊戲素材'));
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
           const statusFits = await page.locator('#petStatus').evaluate(status => {
             const container = status.getBoundingClientRect();
             return [...status.querySelectorAll('b,.room-bar-stage')].every(element => {
@@ -303,6 +317,15 @@ try {
         await page.locator('.park-interact').waitFor({ state: 'visible' });
         for (const size of [viewport, { width: viewport.height, height: viewport.width }]) {
           await page.setViewportSize(size);
+          await page.waitForFunction(({ tablet, small }) => {
+            const expected = tablet ? [24, 0, 20, 0] : small ? [20, 0, 0, 0] : innerWidth > innerHeight ? [0, 62, 21, 62] : [62, 0, 34, 0];
+            const style = getComputedStyle(document.documentElement);
+            const scale = window.__petPark?.game?.scale;
+            const host = document.querySelector('[data-park-canvas]').getBoundingClientRect();
+            return ['top', 'right', 'bottom', 'left'].every((edge, index) => parseFloat(style.getPropertyValue('--buio-safe-' + edge)) === expected[index]) &&
+              scale && Math.abs(scale.gameSize.width - host.width) < 2 && Math.abs(scale.gameSize.height - host.height) < 2;
+          }, { tablet: engine.includes('ipad'), small: engine.includes('small') });
+          await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
           await page.screenshot({ path: path.join(output, `${engine}-pet-park-${size.width}.png`), animations: 'disabled' });
           const geometry = await page.locator('.pet-shell').evaluate(shell => ({
             height: shell.getBoundingClientRect().height, viewport: innerHeight,
@@ -342,8 +365,55 @@ try {
         await page.setViewportSize(viewport);
         await page.locator('.park-hud [data-park="home"]').click();
         await page.locator('.pet-nav [data-tab="home"].active').waitFor({ state: 'attached' });
-        await petTab('brawl'); await page.locator('[data-brawl="mode"][data-id="practice"]').click();
-        await page.locator('[data-brawl="start"]:enabled').first().click();
+        await page.setViewportSize(roomLandscape);
+        await petTab('brawl');
+        await page.locator('[data-buio-brawl-menu] .buio-brawl-roster').waitFor();
+        await page.locator('[data-brawl="filter"][data-id="all"]').click();
+        await page.locator('[data-buio-brawl-menu] .buio-brawl-roster').waitFor();
+        assert.ok(await page.locator('.brawl-fighter').count() >= 29, 'All fighters remain in the paged roster');
+        await page.waitForFunction(() => {
+          const roster = document.querySelector('.brawl-fighters');
+          return parseFloat(roster.style.gridAutoColumns) > 0;
+        });
+        const lobbyLayout = await page.evaluate(() => {
+          const roster = document.querySelector('.brawl-fighters').getBoundingClientRect();
+          const layer = document.querySelector('.brawl-lobby');
+          const launch = document.querySelector('[data-buio-brawl-start]').getBoundingClientRect();
+          const cards = [...document.querySelectorAll('.brawl-fighter')].map(card => card.getBoundingClientRect());
+          return { width: innerWidth, height: innerHeight, layerScroll: layer.scrollHeight, layerHeight: layer.clientHeight,
+            visibleFighters: cards.filter(box => box.left >= roster.left - 1 && box.right <= roster.right + 1 && box.top >= roster.top - 1 && box.bottom <= roster.bottom + 1).length,
+            launchBottom: launch.bottom, launchHeight: launch.height };
+        });
+        assert.ok(lobbyLayout.layerScroll <= lobbyLayout.layerHeight + 1, `Brawl lobby avoids whole-page scrolling: ${JSON.stringify(lobbyLayout)}`);
+        assert.ok(lobbyLayout.visibleFighters >= (engine.includes('ipad') ? 12 : 6), `More fighters fit together: ${JSON.stringify(lobbyLayout)}`);
+        assert.ok(lobbyLayout.launchBottom <= roomLandscape.height && lobbyLayout.launchHeight >= 44, 'Launch action stays on screen');
+        await page.screenshot({ path: path.join(output, `${engine}-brawl-roster.png`) });
+        const nextPage = page.getByRole('button', { name: '下一頁角色' });
+        if (await nextPage.isEnabled()) {
+          await nextPage.click();
+          await page.waitForFunction(() => document.querySelector('.brawl-fighters').scrollLeft > 50);
+          await page.getByRole('button', { name: '上一頁角色' }).click();
+          await page.waitForFunction(() => document.querySelector('.brawl-fighters').scrollLeft < 2);
+        }
+        await page.locator('.brawl-fighter.locked').first().click();
+        await page.locator('[data-buio-brawl-start]:disabled').waitFor();
+        await page.locator('.buio-brawl-ability').click();
+        await page.locator('.buio-brawl-dialog[open] .brawl-skill-names').waitFor();
+        await page.screenshot({ path: path.join(output, `${engine}-brawl-skills.png`) });
+        await page.getByRole('button', { name: '關閉', exact: true }).click();
+        await page.locator('[data-brawl="filter"][data-id="owned"]').click();
+        await page.locator('.brawl-fighter').first().click();
+        for (const mode of ['tutorial','duel','pvp','ranked','leaderboard','campaign','practice']) {
+          await page.locator(`.buio-brawl-toolbar [data-brawl="mode"][data-id="${mode}"]`).click();
+          await page.locator(`.buio-brawl-toolbar [data-brawl="mode"].selected[data-id="${mode}"]`).waitFor();
+          await page.locator('[data-buio-brawl-menu]').waitFor();
+          await assertFits('brawl ' + mode);
+          if (mode === 'pvp') await page.locator('.buio-brawl-preparation .pvp-panel').waitFor();
+        }
+        await page.locator('.buio-brawl-stage-info').click();
+        await page.locator('.buio-brawl-dialog[open] .buio-brawl-stage-detail h3').waitFor();
+        await page.getByRole('button', { name: '關閉', exact: true }).click();
+        await page.locator('[data-buio-brawl-start]:enabled').click();
         await page.waitForFunction(() => window.__petGame?.scene.isActive('Brawl') && !document.querySelector('.brawl-loading'), { timeout: 45000 });
         await page.screenshot({ path: path.join(output, `${engine}-pet-battle.png`) });
         await assertFits('pet battle');
