@@ -265,8 +265,8 @@ class BuiOViewController: CAPBridgeViewController {
                 self?.presentNextExport()
             }
             if let share = share, share.presentingViewController != nil {
-                if let transition = share.transitionCoordinator,
-                   transition.animate(alongsideTransition: nil, completion: { _ in advance() }) { return }
+                if share.isBeingDismissed, let transition = share.transitionCoordinator,
+                   transition.animate(alongsideTransition: nil, completion: { _ in DispatchQueue.main.async(execute: advance) }) { return }
                 share.dismiss(animated: true, completion: advance)
             } else { DispatchQueue.main.async(execute: advance) }
         }
