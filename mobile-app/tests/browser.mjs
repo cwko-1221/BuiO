@@ -53,9 +53,10 @@ try {
   const webRoot = fileURLToPath(new URL('../www/', import.meta.url));
   staticServer = createServer(async (req, res) => {
     const name = new URL(req.url, 'http://localhost').pathname.slice(1) || 'offline.html';
-    if (!['offline.html', 'offline.css', 'offline.js', 'runtime.js', 'settings.js', 'inset-probe.html'].includes(name)) { res.writeHead(404).end(); return; }
+    if (!['offline.html', 'offline.css', 'offline.js', 'runtime.js', 'settings.js', 'inset-probe.html', 'inset-late.css'].includes(name)) { res.writeHead(404).end(); return; }
     res.setHeader('Content-Type', name.endsWith('.css') ? 'text/css' : name.endsWith('.js') ? 'text/javascript' : 'text/html');
     if (name === 'inset-probe.html') res.end('<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><style>.probe{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}</style><div class="probe">safe area shorthand</div>');
+    else if (name === 'inset-late.css') res.end('.late-probe{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}');
     else if (name === 'settings.js') res.end(`window.BuiOAppSettings={backendUrl:${JSON.stringify(backend)},version:'test'};`);
     else res.end(await readFile(path.join(webRoot, name)));
   });
@@ -107,6 +108,16 @@ try {
         return [css.paddingTop, css.paddingRight, css.paddingBottom, css.paddingLeft];
       });
       assert.deepEqual(probe, ['9px', '8px', '7px', '6px'], 'Native safe-area updates must reach CSS shorthands');
+      const lateProbe = await insetPage.evaluate(async () => {
+        const link = document.createElement('link'); link.rel = 'stylesheet'; link.href = 'inset-late.css';
+        const loaded = new Promise(resolve => { link.onload = resolve; });
+        document.head.append(link); await loaded;
+        const element = document.createElement('div'); element.className = 'late-probe'; document.body.append(element);
+        await new Promise(requestAnimationFrame);
+        const style = getComputedStyle(element);
+        return [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft];
+      });
+      assert.deepEqual(lateProbe, ['9px', '8px', '7px', '6px'], 'Late-loaded module CSS must receive native safe areas');
       await insetPage.close();
       const assertFits = async label => {
         const geometry = await page.evaluate(() => ({
@@ -198,6 +209,31 @@ try {
         await page.screenshot({ path: path.join(output, `${engine}-pet-collection.png`) });
         await petTab('shop'); await page.locator('.shop-feature').waitFor();
         await page.screenshot({ path: path.join(output, `${engine}-pet-shop.png`) });
+        await petTab('park'); await page.locator('.park-root').waitFor();
+        await page.locator('[data-park-loading]').waitFor({ state: 'hidden', timeout: 45000 });
+        for (const size of [viewport, { width: viewport.height, height: viewport.width }]) {
+          await page.setViewportSize(size);
+          await page.screenshot({ path: path.join(output, `${engine}-pet-park-${size.width}.png`), animations: 'disabled' });
+          const geometry = await page.locator('.pet-shell').evaluate(shell => ({
+            height: shell.getBoundingClientRect().height, viewport: innerHeight,
+            navigationBottom: document.querySelector('.pet-nav').getBoundingClientRect().bottom
+          }));
+          assert.ok(geometry.height <= size.height + 1 && geometry.navigationBottom <= size.height + 1,
+            `Park layout must fit after rotation: ${JSON.stringify(geometry)}`);
+          const safeControls = await page.locator('.park-hud button:visible').evaluateAll(buttons => {
+            const style = getComputedStyle(document.documentElement);
+            const safe = edge => parseFloat(style.getPropertyValue('--buio-safe-' + edge)) || 0;
+            return buttons.every(button => {
+              const box = button.getBoundingClientRect();
+              return box.left >= safe('left') && box.right <= innerWidth - safe('right') + 1 &&
+                box.top >= safe('top') && box.bottom <= innerHeight - safe('bottom') + 1;
+            });
+          });
+          assert.ok(safeControls, 'Park floating controls must avoid the camera and home indicator');
+        }
+        await page.setViewportSize(viewport);
+        await page.locator('.park-hud [data-park="home"]').click();
+        await page.locator('.pet-nav [data-tab="home"].active').waitFor({ state: 'attached' });
         await petTab('brawl'); await page.locator('[data-brawl="mode"][data-id="practice"]').click();
         await page.locator('[data-brawl="start"]:enabled').first().click();
         await page.waitForFunction(() => window.__petGame?.scene.isActive('Brawl') && !document.querySelector('.brawl-loading'), { timeout: 45000 });

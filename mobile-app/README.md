@@ -10,6 +10,9 @@
 - 手機首頁使用底部分頁，寬 iPad 使用側欄；寵物手機導覽為四個常用入口加「更多」，商店、推銀仔、同班參觀及設定仍全部保留。
 - 科學島、多人闖關、學生塔防及寵物實戰以原生 API 切換橫屏，退出後恢復先前方向。自動方向要求 iOS／iPadOS 16+；15.x 仍可手動轉向。
 - 科學島離開按鈕、白板視窗、數學教師導覽／學生選單、對戰 HUD、故事視窗及小手機登入佈局均有 App 專用調整。
+- 匯出交由 WebKit 原生下載及 iOS 分享面板處理，沿用 WebView 的登入 Cookie；沒有把私人附件改成公開網址或複製登入權杖。
+
+iPad 本版正驗證全螢幕相容模式，以自動遊戲轉向優先。它不是分割視窗版本；`UIRequiresFullScreen` 在 iPadOS 26 已被 Apple 標示棄用，不能視作長期多視窗架構。[Apple 的遷移說明](https://developer.apple.com/documentation/technotes/tn3192-migrating-your-app-from-the-deprecated-uirequiresfullscreen-key)指出，現代可縮放視窗不保證接受方向鎖定要求。最終原生測試狀態見 `VALIDATION.md`。
 
 這仍是 Capacitor 混合 App，現有學習模組不是全部改寫成 SwiftUI。Android 原生編譯及相同裝置級適配尚未驗收；目前交付檔針對 iOS／iPadOS。
 

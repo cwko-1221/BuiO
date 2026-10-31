@@ -12,19 +12,23 @@ if (process.platform !== 'darwin') throw Error('Native viewport checks require X
 const root = fileURLToPath(new URL('../', import.meta.url));
 const output = path.join(root, 'test-results/native-viewport');
 await mkdir(output, { recursive: true });
+const commandStreams = [];
 const run = async (command, args, env = {}, timeout = 180000) => {
   console.log(`[native] ${command} ${args.join(' ')}`);
-  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+  commandStreams.push(child.stdout, child.stderr);
   let result = '';
   let timedOut = false;
   const timer = setTimeout(() => {
     timedOut = true;
-    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already exited */ }
+    child.kill('SIGKILL');
   }, timeout);
   child.stdout.on('data', chunk => { result += chunk; });
   child.stderr.on('data', chunk => { result += chunk; });
   let code;
-  try { [code] = await once(child, 'close'); } finally { clearTimeout(timer); }
+  // CoreSimulator helpers may inherit a pipe after simctl itself exits.
+  // The exit event is the command result; pipe closure is not its lifetime.
+  try { [code] = await once(child, 'exit'); } finally { clearTimeout(timer); }
   if (timedOut) throw Error(`${command} ${args.join(' ')} timed out after ${timeout / 1000}s: ${result.slice(-6000)}`);
   if (code !== 0) throw Error(`${command} ${args.join(' ')} failed (${code}): ${result.slice(-6000)}`);
   return result;
@@ -107,7 +111,7 @@ try {
       await run('xcrun', ['simctl', 'bootstatus', device.udid, '-b'], {}, 600000);
       await run('xcrun', ['simctl', 'install', device.udid, 'releases/ios-simulator/Build/Products/Debug-iphonesimulator/App.app']);
       received = undefined; nextPath = undefined; attachmentCookieReceived = false;
-      await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot']);
+      await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot'], {}, 600000);
       let originalPortrait;
       for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/export-probe']) {
         console.log(`[native] ${device.name}: ${route}`);
@@ -159,4 +163,7 @@ try {
       }
     } finally { await run('xcrun', ['simctl', 'shutdown', device.udid], {}, 30000).catch(error => console.error(error.message)); }
   }
-} finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
+} finally {
+  server.closeAllConnections(); await new Promise(resolve => server.close(resolve));
+  for (const stream of commandStreams) stream.destroy();
+}

@@ -112,7 +112,7 @@
           if (node.tagName === 'STYLE') { processedSheets.delete(node.sheet); rewriteSafeAreas(node.sheet); }
           if (node.tagName === 'LINK' && node.rel === 'stylesheet') {
             rewriteSafeAreas(node.sheet);
-            node.addEventListener('load', () => rewriteSafeAreas(node.sheet), { once: true });
+            node.addEventListener('load', () => { processedSheets.delete(node.sheet); rewriteSafeAreas(node.sheet); }, { once: true });
           }
         }
       }

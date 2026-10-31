@@ -62,6 +62,27 @@ html[data-buio-module="pet"] .brawl-story-panel {
   max-width: calc(100vw - var(--buio-safe-left) - var(--buio-safe-right) - 24px);
   overflow-y: auto;
 }
+html[data-buio-module="pet"] .pet-shell[data-screen="park"] { min-height: 0; }
+html[data-buio-module="pet"] .pet-shell[data-screen="park"] > :is(.pet-topbar, .pet-nav) { display: none !important; }
+html[data-buio-module="pet"] .park-hud {
+  inset: var(--buio-safe-top) var(--buio-safe-right) var(--buio-safe-bottom) var(--buio-safe-left);
+  width: auto;
+  height: auto;
+}
+html[data-buio-module="pet"] :is(.park-loading, .park-drawer-backdrop, .park-dialog-backdrop, .park-garden-backdrop, .park-social-backdrop, .park-activity-root, .park-mini-panel) {
+  padding: max(12px, var(--buio-safe-top)) max(12px, var(--buio-safe-right)) max(12px, var(--buio-safe-bottom)) max(12px, var(--buio-safe-left));
+}
+html[data-buio-module="pet"] :is(.park-mini-bar, .park-leisure-bar) {
+  top: var(--buio-safe-top);
+  left: var(--buio-safe-left);
+  right: var(--buio-safe-right);
+}
+html[data-buio-module="pet"] .park-mini-footer {
+  bottom: var(--buio-safe-bottom);
+  left: var(--buio-safe-left);
+  right: var(--buio-safe-right);
+  width: auto;
+}
 
 html[data-buio-module="science-lab"] .topbar {
   padding-inline: max(12px, var(--buio-safe-left)) max(12px, var(--buio-safe-right));
