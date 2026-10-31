@@ -6,7 +6,7 @@
 
 ## 更新已安裝的 App
 
-0.1.0 已由用戶在 iPhone 安裝並確認能開啟。0.2.0 為介面適配修訂版，使用 `releases/buio-pilot-0.2.0-unsigned.ipa`；本次建置及驗證結果記在 [VALIDATION.md](VALIDATION.md)。0.2.0 尚需個人簽署及安裝，不能把舊版能開啟當作新版已驗收。
+0.2.0 build 3 已在 2026-10-31 透過 Sideloadly 覆蓋安裝到用戶 iPhone，工具顯示 Done／100%。build 4 另修正 iPad 轉向後的輸入欄字體，驗證中；最終來源檔為 `releases/buio-pilot-0.2.0-unsigned.ipa`，狀態及雜湊記在 [VALIDATION.md](VALIDATION.md)。其他裝置仍須自行簽署及安裝。
 
 - 使用本次提供的 `buio-pilot-0.2.0-unsigned.ipa`。它必須先經簽署，不能在 iPhone 的 Files 裡點開便安裝。
 - 沿用上次的 Apple ID 及 Sideloadly Bundle ID 設定，直接覆蓋更新；毋須先刪除現有 App。安全區、轉向及 App 導覽程式已內嵌在新版，單純重新載入舊 App 不會取得這些修正。

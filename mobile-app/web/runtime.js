@@ -77,7 +77,7 @@
     } catch { /* Cross-origin sheets keep their normal browser behavior. */ }
   };
   const fitFormField = field => {
-    if (field?.matches(formSelector) && matchMedia('(max-width: 1100px)').matches &&
+    if (field?.matches(formSelector) &&
         parseFloat(getComputedStyle(field).fontSize) < 16) {
       field.style.setProperty('font-size', '16px', 'important');
     }

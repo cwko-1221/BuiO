@@ -171,7 +171,7 @@ try {
         assert.ok(Math.abs(report.footerBottom - (report.height - report.safe.bottom)) <= 1);
         for (const edge of ['top', 'right', 'bottom', 'left']) assert.ok(Math.abs(report.safe[edge] - report.native[edge]) <= 1, `CSS safe area ${edge}`);
         assert.ok(report.scrollWidth <= report.width + 1);
-        if (report.width <= 1100) assert.ok(report.inputFont >= 16);
+        assert.ok(report.inputFont >= 16);
         assert.ok(!/maximum-scale|user-scalable/.test(report.meta));
         if (route === '/export-probe') {
           assert.equal(attachmentCookieReceived, true, 'HTTP export must retain the WebView cookie context');

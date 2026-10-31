@@ -40,4 +40,4 @@ Apple Developer Program 的標準費用為每會員年度 99 USD，所在地價�
 
 ## 目前仍待完成
 
-目前先以普通 Apple ID 在 Windows 完成個人簽署及 USB 安裝；日後 TestFlight 分發才需確認付費／獲豁免的開發者會員及相關簽署方式。目前沒有簽署後的 IPA，也沒有 TestFlight 安裝連結。這版仍是在線相容性試用版，尚未完成素材離線化或對戰延遲改善。
+目前已用普通 Apple ID 在 Windows 完成個人簽署及 USB 安裝；日後 TestFlight 分發才需確認付費／獲豁免的開發者會員及相關簽署方式。交付的是未簽署 IPA，沒有可供其他人直接安裝的已簽署 IPA 或 TestFlight 連結。這版仍是在線相容性試用版，尚未完成素材離線化或對戰延遲改善。

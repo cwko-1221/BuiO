@@ -1,6 +1,6 @@
 # 杯澳 Capacitor App 試用版
 
-版本 0.2.0（build 3）。iPhone／iPad 的 App 介面適配修訂版，同時保留 Android 專案。
+版本 0.2.0（build 4）。iPhone／iPad 的 App 介面適配修訂版，同時保留 Android 專案。
 
 ## 0.2.0 介面適配
 
@@ -12,13 +12,13 @@
 - 科學島離開按鈕、白板視窗、數學教師導覽／學生選單、對戰 HUD、故事視窗及小手機登入佈局均有 App 專用調整。
 - 匯出交由 WebKit 原生下載及 iOS 分享面板處理，沿用 WebView 的登入 Cookie；沒有把私人附件改成公開網址或複製登入權杖。
 
-iPad 本版正驗證全螢幕相容模式，以自動遊戲轉向優先。它不是分割視窗版本；`UIRequiresFullScreen` 在 iPadOS 26 已被 Apple 標示棄用，不能視作長期多視窗架構。[Apple 的遷移說明](https://developer.apple.com/documentation/technotes/tn3192-migrating-your-app-from-the-deprecated-uirequiresfullscreen-key)指出，現代可縮放視窗不保證接受方向鎖定要求。最終原生測試狀態見 `VALIDATION.md`。
+iPad 按用戶選擇以全螢幕及自動遊戲轉向優先。**iPadOS 26 必須在「設定 → 多工處理與手勢 → 全螢幕 App」使用**；App 的 `UIRequiresFullScreen` 不能代替這項系統設定。在「視窗化 App」或 Stage Manager 模式，系統可能把橫向場景縮放到直向視窗，亦不保證依 App 要求恢復方向。[Apple 的設定鍵說明](https://developer.apple.com/documentation/BundleResources/Information-Property-List/UIRequiresFullScreen)明確描述了這個限制；該相容模式已棄用，亦不是長期多視窗架構。最終原生測試狀態見 `VALIDATION.md`。
 
 這仍是 Capacitor 混合 App，現有學習模組不是全部改寫成 SwiftUI。Android 原生編譯及相同裝置級適配尚未驗收；目前交付檔針對 iOS／iPadOS。
 
 ## 此版本的界線
 
-這是 **online compatibility pilot**。App 以第一方 HTTPS 載入 `https://buiosch.onrender.com`，保留原有 cookie、相對網址、權限、私人媒體及 Socket.IO 流程。所有 16 個模組入口列在 `modules.json`，沒有刪減教師功能或寵物內的玩法，也沒有改動既有網站／後端。
+這是 **online compatibility pilot**。App 以第一方 HTTPS 載入 `https://buiosch.onrender.com`，保留原有 cookie、相對網址、權限、私人媒體及 Socket.IO 流程。17 個模組入口列在 `modules.json`，包括工作目錄新增的「寶可夢物語」；沒有刪減教師功能或寵物內的玩法，也沒有改動既有網站／後端。模組頁仍跟隨線上平台提供的入口，清單本身不代替網站導覽。
 
 **現有模組和遊戲素材仍從網站下載，沿用網站快取。只有錯誤／重試畫面及少量原生輔助程式已打包在 App。這一版不是素材離線版，不宣稱已降低對戰延遲。** 對戰維持伺服器判定，未加入預測、回滾或提前命中。
 
@@ -83,7 +83,7 @@ npm run prepare:app
 npm test
 ```
 
-在完整 BuiO repository 可執行 `npm run test:browser`。它用獨立 JSON fixture、測試帳戶及 Chromium／WebKit 桌面引擎，檢查七組手機／平板／分割視窗尺寸、登入、16 個模組入口、教師權限、登出、重試頁和斷線提示；另檢查安全區 shorthand、固定分頁及寵物「更多」選單。
+在完整 BuiO repository 可執行 `npm run test:browser`。它用獨立 JSON fixture、測試帳戶及 Chromium／WebKit 桌面引擎，檢查七組手機／平板／分割視窗尺寸、登入、17 個模組入口、教師權限、登出、重試頁和斷線提示；另檢查安全區 shorthand、固定分頁及寵物「更多」選單。中文／英文教師版面的三個資料讀取 API 使用隔離的合成資料，並等待真正的儀表板渲染；登入及角色驗證沒有模擬。這項版面檢查不能代替正式 PostgreSQL 作業流程驗收。
 
 `npm run test:app-ui` 再操作孵化、圖鑑、商店、練習對戰、返回房間，以及科學島預測、器材、任務、設定和離開。兩項測試均不使用正式學生帳戶或寫入正式服務。JSON fixture 無法取代完整 PostgreSQL 教師資料、錄音上傳及雙機課堂流程的驗收。
 

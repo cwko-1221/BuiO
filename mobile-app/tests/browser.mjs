@@ -351,7 +351,10 @@ try {
   await writeFile(path.join(output, deep ? 'deep-report.json' : 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } finally {
-  if (staticServer) await new Promise(resolve => staticServer.close(resolve));
+  if (staticServer) {
+    staticServer.closeAllConnections();
+    await new Promise(resolve => staticServer.close(resolve));
+  }
   child.kill('SIGTERM');
   if (child.exitCode === null) {
     await Promise.race([once(child, 'exit'), new Promise(resolve => setTimeout(resolve, 3000))]);
