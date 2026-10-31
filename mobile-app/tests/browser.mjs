@@ -297,12 +297,27 @@ try {
         for (const module of modules) {
           console.log(`${engine}: layout ${module.id}`);
           const modulePage = await context.newPage();
+          if (['chinese', 'english'].includes(module.id)) {
+            // These read models require Postgres. Supply isolated UI data,
+            // while authentication and the real page remain unmocked.
+            await modulePage.route(url => url.origin === backend &&
+              /^\/api\/(chinese|english)\/teacher\/(groups|assignments|bank\/categories)$/.test(url.pathname), route => {
+              assert.equal(route.request().method(), 'GET');
+              return route.fulfill({ json: { success: true,
+                groups: [{ classname: 'P4', group: 'A', label: 'P4 A', count: 1 }],
+                assignments: [], categories: [{ category: '手機版面測試', count: 5 }] } });
+            });
+          }
           await modulePage.goto(backend + module.path, { waitUntil: 'load' });
           if (module.id === 'science-lab' && viewport.height > viewport.width) {
             // The native simulator separately proves automatic scene rotation.
             await modulePage.setViewportSize({ width: viewport.height, height: viewport.width });
           }
-          if (['chinese', 'english'].includes(module.id)) await modulePage.waitForURL(/\/teacher$/);
+          if (['chinese', 'english'].includes(module.id)) {
+            await modulePage.waitForURL(/\/teacher$/);
+            await modulePage.locator('#root .container .card').first().waitFor();
+            await modulePage.locator('#root .page-head h1').waitFor();
+          }
           await modulePage.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
           await modulePage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
           const geometry = await modulePage.evaluate(() => ({

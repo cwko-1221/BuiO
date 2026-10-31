@@ -29,7 +29,7 @@ test('unsafe backend URLs are rejected and development HTTP is loopback-only', (
 test('all current hub modules remain accounted for, including teacher flows', async t => {
   const modules = JSON.parse(await readFile(new URL('../modules.json', import.meta.url)));
   const ids = new Set(modules.map(module => module.id));
-  assert.equal(ids.size, 16);
+  assert.equal(ids.size, 17);
   for (const module of modules) {
     assert.match(module.path, /^\/[a-z-]+(?:\.html)?$/);
     assert.ok(module.roles.length);
@@ -58,7 +58,7 @@ test('iOS permissions, persistent website data and native runtime are wired into
 test('prepared local fallback contains no account data and is explicit about online-only modules', async () => {
   const manifest = JSON.parse(await readFile(new URL('../www/pilot-manifest.json', import.meta.url)));
   assert.equal(manifest.mode, 'online-compatibility-pilot');
-  assert.equal(manifest.modules.length, 16);
+  assert.equal(manifest.modules.length, 17);
   for (const file of manifest.bundledAssets) {
     await access(new URL('../www/' + file, import.meta.url));
     const source = await readFile(new URL('../www/' + file, import.meta.url), 'utf8');

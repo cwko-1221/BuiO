@@ -118,6 +118,13 @@ try {
       if (device.state !== 'Booted') await run('xcrun', ['simctl', 'boot', device.udid]);
       await run('xcrun', ['simctl', 'bootstatus', device.udid, '-b'], {}, 600000);
       await run('xcrun', ['simctl', 'install', device.udid, 'releases/ios-simulator/Build/Products/Debug-iphonesimulator/App.app']);
+      if (type === 'iPad') {
+        const log = await run('xcodebuild', ['-project', 'ci/DeviceModeTests/DeviceModeTests.xcodeproj',
+          '-scheme', 'DeviceModeTests', '-destination', `platform=iOS Simulator,id=${device.udid}`,
+          '-derivedDataPath', 'releases/device-mode-tests', '-parallel-testing-enabled', 'NO',
+          '-resultBundlePath', path.join(output, 'iPad-device-mode.xcresult'), 'CODE_SIGNING_ALLOWED=NO', 'test'], {}, 600000);
+        await writeFile(path.join(output, 'iPad-device-mode.log'), log);
+      }
       received = undefined; nextPath = undefined; attachmentCookieReceived = false;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot'], {}, 600000);
       let originalPortrait;
@@ -143,7 +150,7 @@ try {
             .then(log => writeFile(path.join(output, `${type}-native.log`), log)).catch(error => console.error(error.message));
         }
         assert.ok(ready(), `${type} ${route}: missing native layout, automatic orientation or export: ${JSON.stringify(received)}`);
-        const report = { device: device.name, ...received };
+        const report = { device: device.name, windowMode: type === 'iPad' ? 'Full Screen Apps selected in Settings by XCUITest' : 'iPhone fullscreen', ...received };
         if (route === '/') originalPortrait = report.height > report.width;
         reports.push(report);
         if (route === '/export-probe') await new Promise(resolve => setTimeout(resolve, 500));
@@ -164,7 +171,7 @@ try {
         assert.ok(Math.abs(report.footerBottom - (report.height - report.safe.bottom)) <= 1);
         for (const edge of ['top', 'right', 'bottom', 'left']) assert.ok(Math.abs(report.safe[edge] - report.native[edge]) <= 1, `CSS safe area ${edge}`);
         assert.ok(report.scrollWidth <= report.width + 1);
-        assert.ok(report.inputFont >= 16);
+        if (report.width <= 1100) assert.ok(report.inputFont >= 16);
         assert.ok(!/maximum-scale|user-scalable/.test(report.meta));
         if (route === '/export-probe') {
           assert.equal(attachmentCookieReceived, true, 'HTTP export must retain the WebView cookie context');

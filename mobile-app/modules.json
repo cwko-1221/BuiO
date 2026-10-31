@@ -10,6 +10,7 @@
   { "id": "buzzer", "name": "搶答器", "path": "/buzzer", "roles": ["student", "teacher"] },
   { "id": "quiz-mode", "name": "即時測驗", "path": "/quiz-mode", "roles": ["student", "teacher"] },
   { "id": "games", "name": "遊戲中心", "path": "/games", "roles": ["student", "teacher"] },
+  { "id": "pokemon-rpg", "name": "寶可夢物語", "path": "/pokemon-rpg", "roles": ["student", "teacher"] },
   { "id": "game", "name": "多人闖關", "path": "/game", "roles": ["student", "teacher"] },
   { "id": "tower-defense", "name": "晶核守衛", "path": "/tower-defense", "roles": ["student", "teacher"] },
   { "id": "pet", "name": "寵物樂園及對戰", "path": "/pet", "roles": ["student", "teacher"] },
