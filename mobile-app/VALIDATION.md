@@ -1,6 +1,6 @@
 # 杯澳 App 0.2.0 驗證紀錄
 
-日期：2026-10-31（香港時間）。版本 0.2.0；build 3 已安裝，最新 build 5 正進行原生驗證。
+日期：2026-10-31（香港時間）。版本 0.2.0；build 5 已完成編譯及原生驗證，並已透過 Sideloadly 覆蓋安裝到用戶 iPhone，工具顯示 Done／100%。
 
 ## 已通過的版面及操作檢查
 
@@ -20,20 +20,22 @@
 
 - 已確認及修正 SceneDelegate 原本建立預設控制器，導致 App 專用控制器沒有執行的根因。
 - 已修正 Capacitor 替換 userContentController 的接線，以及 WebKit 安全區 env 與原生 UIKit 數值不同的情況。
-- [iPhone 原生驗證（第 2 次執行）](https://github.com/cwko-1221/BuiO/actions/runs/41167679211)：iPhone 17 Pro 全部九個階段通過。已確認完整視窗、安全區、科學島／寵物實戰／多人闖關／塔防橫向及返回原方向、Blob 下載、沿用 Cookie 的 HTTP 附件下載，以及兩個 UIKit 分享面板依序展示。檔案名稱及長度分別為 `buio-export-check.txt`／24 bytes、`buio-http-export.txt`／38 bytes；第一個面板只作取消，沒有向收件人傳送檔案。
-- iPhone 的九張原生截圖另在 Windows 逐一核對實體畫面四邊的測試邊框及短長邊比例，通過；Simulator framebuffer 保持裝置座標，橫向 UIKit 內容會在 PNG 中呈 90 度方向，並非 CSS 旋轉。
-- 該輪 iPad 在「視窗化 App」模式失敗，**不是 iPad 驗收通過**。截圖顯示橫向場景被系統縮放進直向桌面視窗，返回方向亦不符合要求。`UIRequiresFullScreen` 本身不能替代用戶的多工模式設定。[Apple 文件](https://developer.apple.com/documentation/BundleResources/Information-Property-List/UIRequiresFullScreen)有描述這個系統行為。
-- 用戶已選擇「自動橫向優先、全螢幕、不保留分割視窗」。iPadOS 26 的使用條件因此是「設定 → 多工處理與手勢 → 全螢幕 App」；[全螢幕原生覆核](https://github.com/cwko-1221/BuiO/actions/runs/41185071433)已確認系統設定選取、科學島橫向及返回直向。該輪因輸入欄在轉向期間仍保留 12px 字體而停止，不能當作完整通過；build 4 已修正輸入欄最小字體，正覆核全部階段。隔離的 XCUITest 只在可丟棄的 CI iPad 模擬器選擇該模式，不修改使用者裝置設定或以私人 API 強制轉向。
+- [Build 5 最終原生驗證](https://github.com/cwko-1221/BuiO/actions/runs/41188889479)：來源 `15c8cc5b836bc6970fe7a619f818aceda47994d6`。iPhone 17 Pro 及 iPad Pro 13 吋（M5）各九個階段，共 18 個全部通過。
+- 階段包括首頁、科學島、寵物入口／房間／實戰、多人闖關、塔防、返回首頁及匯出。整個寵物模組維持橫向，離開模組返回原方向；首頁狀態列有背景遮罩，輸入欄轉向後仍至少 16px。
+- 已確認 Blob 下載、沿用 Cookie 的 HTTP 附件下載，以及兩個 UIKit 分享面板依序展示。檔案名稱及長度分別為 `buio-export-check.txt`／24 bytes、`buio-http-export.txt`／38 bytes；第一個面板只作取消，沒有向收件人傳送檔案。兩個裝置的分享次數均為二。
+- 18 張原生截圖另在 Windows 核對實體畫面四邊及短長邊比例，全部通過；文件頁頂部依狀態列遮罩顏色核對，其餘邊緣核對測試邊框。Simulator framebuffer 保持裝置座標，橫向 UIKit 內容會在 PNG 中呈 90 度方向，並非 CSS 旋轉。原生 fixture 不等同完整正式業務頁面驗收。
+- 用戶已選擇「自動橫向優先、全螢幕、不保留分割視窗」。iPadOS 26 的使用條件是「設定 → 多工處理與手勢 → 全螢幕 App」。最終原生驗證包含選取此模式的獨立 XCUITest 紀錄；它只修改可丟棄的 CI 模擬器，沒有修改使用者裝置設定或以私人 API 強制轉向。
+- 此前 iPad「視窗化 App」模式的驗證失敗，不列為通過。`UIRequiresFullScreen` 本身不能替代用戶的多工模式設定；[Apple 文件](https://developer.apple.com/documentation/BundleResources/Information-Property-List/UIRequiresFullScreen)有描述相容縮放行為。
 
-已安裝的 iPhone IPA 來自 `509c467551a72126c20261cb424ea17112c637a8`、上述第 2 次建置：486,576 bytes；SHA-256 `3d1fe593ee00a71e4cb2d42087cb6a8436f48b7e5a44b409927124acc80e6596`。Windows 已核對 ZIP CRC、ARM64／iPhoneOS、0.2.0／build 3、最低 iOS 15、全螢幕設定、正式 HTTPS 後端，以及內嵌 runtime／CSS 與來源一致。Release 沒有 loopback 測試、分享計數或測試取消控制介面。
+最終 IPA `releases/buio-pilot-0.2.0-unsigned.ipa`：487,558 bytes；SHA-256 `af60d46131cb7ced86a5aca920356a833619842d08445666d6bbe8a481595fcf`。Windows 已核對 ZIP CRC、ARM64／iPhoneOS、0.2.0／build 5、最低 iOS 15、全螢幕設定、正式 HTTPS 後端、完整 17 模組清單，以及內嵌 runtime／CSS 與來源一致。Release 沒有 loopback 測試、分享計數或測試取消控制介面。
 
-Build 4 的 [18 個原生階段](https://github.com/cwko-1221/BuiO/actions/runs/41186099361)及實體畫面邊緣檢查已全部通過。依實機回饋增加的 build 5 包括整個寵物模組自動橫屏、Stage 狀態欄重排、課堂卡片及短按鈕排版，以及捲動時的狀態列背景；最新來源尚待本輪原生覆核。App 的實際入口由線上首頁提供，不由內嵌的清單限制。
+Build 5 包括整個寵物模組自動橫屏、Stage 狀態欄重排、課堂卡片及短按鈕排版，以及捲動時的狀態列背景；上述最終原生驗證使用本次來源。App 的實際入口由線上首頁提供，不由內嵌清單限制。
 
 ## 實機狀態與尚未驗收項目
 
-0.2.0 已在 2026-10-31（香港時間）由 Sideloadly 覆蓋更新到用戶 iPhone，工具及用戶均回報 Done／安裝完成；沒有先刪除原 App。Apple 密碼及驗證由用戶在工具內自行處理，沒有加入專案。
+Build 5 已在 2026-10-31（香港時間）由 Sideloadly 覆蓋更新到用戶 iPhone。重新接駁並由用戶按信任後，工具成功列出裝置；安裝流程由 Installing／89% 進入 Done／100%，已直接觀察完成畫面。沿用原有 Apple ID 及 App 身份，沒有先刪除原 App。此前 build 3 的 Done 不作為本次完成證據。Apple 密碼及驗證一向由用戶在工具內自行處理，沒有加入專案。本次尚未取得用戶對 build 5 啟動及實機版面的確認。
 
-- 0.2.0 在用戶實體裝置的開啟、版面、軟鍵盤／硬件鍵盤及觸控。
+- Build 5 在用戶實體裝置的開啟、版面、軟鍵盤／硬件鍵盤及觸控。
 - 中文／英文錄音、科學錄影、拒絕權限後重試及相簿上傳。
 - 正式私人 Excel／PDF、檔案匯入、白板、搶答器、雙機對戰、鎖屏／背景後重連及長時間記憶體。
 - Android 專案保留；尚未接入與 iOS 等價的原生安全區／方向輔助，未編譯或安裝 APK。
