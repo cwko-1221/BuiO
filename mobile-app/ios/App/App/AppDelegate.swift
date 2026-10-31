@@ -126,7 +126,7 @@ class BuiOViewController: CAPBridgeViewController {
         }
         #endif
         let science = url.path == "/science-lab" || url.path.hasPrefix("/science-lab/")
-        let game = ["/pet", "/pet/", "/game", "/game/", "/tower-defense"].contains(url.path)
+        let game = ["/pet", "/pet/", "/game", "/game/", "/tower-defense", "/tower-defense/"].contains(url.path)
         let forceLandscape = science || (game && (body["landscape"] as? Bool == true))
         immersive = science || (game && (body["immersive"] as? Bool == true))
         setStatusBarVisible(!immersive)
@@ -188,6 +188,7 @@ class BuiOViewController: CAPBridgeViewController {
         guard let data = try? JSONSerialization.data(withJSONObject: edges, options: .sortedKeys),
               let json = String(data: data, encoding: .utf8) else { return }
         var script = "window.BuiOApplyInsets?.(\(json));"
+        var layoutState = json
         #if DEBUG
         // Anonymous loopback CI fixture only; absent from the release app.
         if bridge?.config.serverURL.host == "127.0.0.1" {
@@ -199,12 +200,13 @@ class BuiOViewController: CAPBridgeViewController {
                 "bottom": Double(insets.bottom), "left": Double(insets.left)
             ]
             if let data = try? JSONSerialization.data(withJSONObject: values), let json = String(data: data, encoding: .utf8) {
+                layoutState += json
                 script += "window.BuiONativeLayout=\(json);window.dispatchEvent(new Event('buio:native-layout'));"
             }
         }
         #endif
-        if force || json != lastInsets {
-            lastInsets = json
+        if force || layoutState != lastInsets {
+            lastInsets = layoutState
             webView.evaluateJavaScript(script)
         }
     }

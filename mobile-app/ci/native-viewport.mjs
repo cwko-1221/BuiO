@@ -95,7 +95,10 @@ const server = createServer(async (req, res) => {
   } else {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Set-Cookie', 'buio_fixture=ready; Path=/; HttpOnly; SameSite=Lax');
-    res.end(req.url.includes('battle=1') ? html.replace('<body>', '<body><div class="pet-shell brawl-active"></div>') : html);
+    let document = html;
+    if (req.url.includes('battle=1')) document = html.replace('<body>', '<body><div class="pet-shell brawl-active"></div>');
+    if (req.url.startsWith('/game/') || req.url.startsWith('/tower-defense/')) document = html.replace('<body>', '<body><canvas id="gameCanvas"></canvas>');
+    res.end(document);
   }
 });
 server.listen(0, '127.0.0.1');
@@ -118,15 +121,15 @@ try {
       received = undefined; nextPath = undefined; attachmentCookieReceived = false;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot'], {}, 600000);
       let originalPortrait;
-      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/export-probe']) {
+      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/game/', '/tower-defense/', '/pet?home=2', '/export-probe']) {
         console.log(`[native] ${device.name}: ${route}`);
         if (route !== '/') { received = undefined; nextPath = route; }
         const deadline = Date.now() + 45000;
         let dismissedFirstExport = false;
         const ready = () => received?.path === route && received.native &&
-          (!['/science-lab', '/pet?battle=1'].includes(route) || received.width > received.height) &&
+          (!['/science-lab', '/pet?battle=1', '/game/', '/tower-defense/'].includes(route) || received.width > received.height) &&
           (route !== '/export-probe' || (received.downloads?.length === 2 && received.shareCount === 2)) &&
-          (!['/pet', '/pet?home=1'].includes(route) || (received.height > received.width) === originalPortrait);
+          (!['/pet', '/pet?home=1', '/pet?home=2'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) {
           if (route === '/export-probe' && received?.downloads?.length === 2 && received.shareCount === 1 && !dismissedFirstExport) {
             nextPath = { dismissExport: true }; dismissedFirstExport = true;
@@ -144,7 +147,7 @@ try {
         if (route === '/') originalPortrait = report.height > report.width;
         reports.push(report);
         if (route === '/export-probe') await new Promise(resolve => setTimeout(resolve, 500));
-        await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-${route === '/' ? 'home' : route.slice(1).replace(/[?=]/g, '-')}.png`)]);
+        await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-${route === '/' ? 'home' : route.slice(1).replace(/[/?=]/g, '-')}.png`)]);
         await writeFile(path.join(output, 'report.json'), JSON.stringify(reports, null, 2));
         assert.equal(report.helperAtHead, true, `${type}: helper missing before page code`);
         assert.equal(report.version, '0.2.0');

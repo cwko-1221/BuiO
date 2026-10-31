@@ -21,7 +21,7 @@
 - 已修正 Capacitor 替換 userContentController 的接線，以及 WebKit 安全區 env 與原生 UIKit 數值不同的情況。
 - 前一輪 iPhone 原生測試已確認完整視窗、安全區、科學島／實戰橫向及返回原方向；Blob 亦已完成原生檔案下載。UIKit 分享面板的完成展示另納入最終驗證。
 - iPad 可縮放視窗曾忽略橫向要求；用戶明確選擇「自動橫向優先、全螢幕、不保留分割視窗」。本版依此測試全螢幕相容模式。
-- [原生建置流程](https://github.com/cwko-1221/BuiO/actions/workflows/buio-ios-pilot.yml)正在驗證最終來源：iPhone／iPad 各六個階段、實際轉向及恢復、Blob 與登入 Cookie 附件下載、檔案名稱／長度，以及兩個 UIKit 分享面板依序展示。第一個測試面板只作取消，不向任何收件人傳送檔案。
+- [原生建置流程](https://github.com/cwko-1221/BuiO/actions/workflows/buio-ios-pilot.yml)正在驗證最終來源：iPhone／iPad 各九個階段、科學島／寵物實戰／多人闖關／塔防的原生轉向及恢復、Blob 與登入 Cookie 附件下載、檔案名稱／長度，以及兩個 UIKit 分享面板依序展示。第一個測試面板只作取消，不向任何收件人傳送檔案。
 
 最終狀態、IPA 雜湊及證據在完成後更新於此。
 
