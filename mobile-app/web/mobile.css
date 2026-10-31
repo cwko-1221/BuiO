@@ -10,6 +10,16 @@ html[data-buio-app] {
 }
 html[data-buio-app], html[data-buio-app] * { scrollbar-width: none !important; scrollbar-gutter: auto !important; }
 html[data-buio-app] ::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+html[data-buio-app] [data-buio-status-shield] { display: none; }
+html[data-buio-app][data-buio-layout="document"] [data-buio-status-shield] {
+  display: block;
+  position: fixed;
+  inset: 0 0 auto;
+  height: var(--buio-safe-top);
+  z-index: 2147483645;
+  pointer-events: none;
+  background: var(--buio-chrome-background, #f6f8fb);
+}
 html[data-buio-app][data-buio-layout="document"] body {
   box-sizing: border-box;
   padding-top: calc(var(--buio-body-pad-top, 0px) + var(--buio-safe-top)) !important;
@@ -48,6 +58,33 @@ html[data-buio-module="pet"] .room-bar {
   padding-left: max(16px, var(--buio-safe-left));
   padding-right: max(16px, var(--buio-safe-right));
 }
+html[data-buio-module="pet"] .pet-status {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) max-content;
+  gap: 4px 8px;
+  overflow: visible;
+  border-radius: 18px;
+}
+html[data-buio-module="pet"] .pet-status:empty { display: none; }
+html[data-buio-module="pet"] .pet-status > .rarity { grid-column: 1; grid-row: 1; }
+html[data-buio-module="pet"] .pet-status > b {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  overflow: visible;
+  line-height: 1.3;
+}
+html[data-buio-module="pet"] .pet-status > .room-bar-stage {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+html[data-buio-module="pet"] .pet-status > .progress { grid-column: 1 / -1; grid-row: 2; min-width: 0; width: 100%; max-width: none; }
+html[data-buio-module="pet"] .pet-status > small { grid-column: 1 / -1; grid-row: 3; white-space: normal; }
 html[data-buio-module="pet"] .modal-root {
   padding: max(12px, var(--buio-safe-top)) max(12px, var(--buio-safe-right)) max(12px, var(--buio-safe-bottom)) max(12px, var(--buio-safe-left));
 }
@@ -129,6 +166,39 @@ html[data-buio-module="game"] .screen:not(#gameScreen) {
 }
 
 @media (max-width: 600px) {
+  html[data-buio-module="chinese"] .row:has(> .btn),
+  html[data-buio-module="english"] .row:has(> .btn) { flex-wrap: wrap; gap: 8px; }
+  html[data-buio-module="chinese"] .btn,
+  html[data-buio-module="english"] .btn { white-space: nowrap; font-size: clamp(13px, 3.4vw, 15px); padding-inline: 12px; }
+  html[data-buio-module="chinese"] .row > .btn-primary,
+  html[data-buio-module="english"] .row > .btn-primary { flex: 1 0 100%; }
+  html[data-buio-module="chinese"] .row > .btn:not(.btn-primary),
+  html[data-buio-module="english"] .row > .btn:not(.btn-primary) { flex: 1 1 auto; }
+  html[data-buio-page="hub"] .session-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 12px;
+    padding: 14px;
+  }
+  html[data-buio-page="hub"] .session-info { min-width: 0; }
+  html[data-buio-page="hub"] .session-teacher { font-size: clamp(15px, 4vw, 17px); overflow-wrap: anywhere; }
+  html[data-buio-page="hub"] .session-meta {
+    font-size: clamp(12px, 3.2vw, 14px);
+    line-height: 1.5;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+    text-wrap: pretty;
+  }
+  html[data-buio-page="hub"] :is(.primary-action, .secondary-action, .danger-action, .homework-total-records-toggle) {
+    white-space: nowrap;
+    font-size: clamp(13px, 3.4vw, 15px);
+    line-height: 1.3;
+    padding-inline: 12px;
+    gap: 6px;
+  }
+  html[data-buio-page="hub"] .session-join-btn { flex-shrink: 0; width: auto; }
+  html[data-buio-page="hub"] .session-join-btn svg { flex: 0 0 18px; width: 18px; height: 18px; }
+  html[data-buio-page="hub"] .hero-copy > p { text-wrap: pretty; }
   html[data-buio-module="math"] .navbar { flex-wrap: wrap; gap: 10px; }
   html[data-buio-module="math"] .navbar-brand { white-space: nowrap; }
   html[data-buio-module="math"] .navbar-user { margin-left: auto; }
@@ -252,7 +322,7 @@ html[data-buio-app] .buio-sheet-items { display: grid; grid-template-columns: re
 html[data-buio-app] .buio-sheet-items button { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 12px; border: 1px solid #e6dbc9; border-radius: 16px; color: #22314a; background: #f6efe4; font: inherit; }
 html[data-buio-app] .buio-sheet-backdrop { position: fixed; inset: 0; z-index: 299; background: #17212d88; }
 html[data-buio-app] .pet-nav [data-buio-more] { display: none; }
-@media (max-width: 899px) {
+@media (max-width: 899px), (max-height: 599px) and (max-width: 1100px) {
   html[data-buio-module="pet"] .pet-nav { justify-content: space-between; gap: 4px; overflow-x: hidden; }
   html[data-buio-module="pet"] .pet-nav > [data-buio-secondary] { display: none; }
   html[data-buio-module="pet"] .pet-nav > button {
@@ -264,6 +334,40 @@ html[data-buio-app] .pet-nav [data-buio-more] { display: none; }
   html[data-buio-module="pet"] .pet-nav [data-buio-more] { display: flex; }
   html[data-buio-module="pet"] .pet-nav > button > span:last-child { font-size: 11px; white-space: nowrap; }
   html[data-buio-module="pet"] .buio-more-icon { font-size: 20px; line-height: 1.2; }
+}
+@media (max-width: 560px) {
+  html[data-buio-module="pet"] .pet-status { grid-template-columns: auto minmax(0, 1fr); gap: 2px 6px; }
+  html[data-buio-module="pet"] .pet-status > .room-bar-stage { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
+}
+/* Landscape phones use a right-hand activity rail so room controls and
+   navigation do not consume most of the short playfield's height. */
+@media (max-height: 500px) and (max-width: 1100px) {
+  html[data-buio-module="pet"] .pet-shell:not(.brawl-active):not([data-screen="park"]):not([data-screen="coin-pusher"]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) calc(72px + var(--buio-safe-right));
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  html[data-buio-module="pet"] .pet-shell > .pet-topbar { grid-column: 1; grid-row: 1; padding-right: 8px; gap: 8px; }
+  html[data-buio-module="pet"] .pet-shell > .pet-main { grid-column: 1; grid-row: 2; }
+  html[data-buio-module="pet"] .pet-topbar .brand span:last-child { display: none; }
+  html[data-buio-module="pet"] .pet-status > :is(.progress, small) { display: none; }
+  html[data-buio-module="pet"] .room-bar { padding-block: 6px; padding-right: 8px; }
+  html[data-buio-module="pet"] .room-bar-actions button { min-height: 48px; padding: 4px; }
+  html[data-buio-module="pet"] .pet-shell:not(.brawl-active):not([data-screen="park"]):not([data-screen="coin-pusher"]) > .pet-nav {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: minmax(44px, 1fr);
+    gap: 4px;
+    min-height: 0;
+    padding: 8px calc(8px + var(--buio-safe-right)) calc(8px + var(--buio-safe-bottom)) 8px;
+    border-top: 0;
+    border-left: 1px solid #d9c8ac;
+  }
+  html[data-buio-module="pet"] .pet-nav > button { min-height: 44px; padding: 4px 2px; }
+  html[data-buio-module="pet"] .pet-nav > button > span { display: inline-block; }
+  html[data-buio-module="pet"] .pet-nav > button > span:last-child { white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
 }
 @media (min-width: 900px) {
   html[data-buio-page="hub"] .app-shell { grid-template-columns: 220px minmax(0, 1fr) !important; }

@@ -67,15 +67,26 @@ try {
     ['chromium-iphone', chromium, { width: 390, height: 844 }],
     ['webkit-iphone', webkit, { width: 402, height: 874 }],
     ['webkit-iphone-landscape', webkit, { width: 874, height: 402 }],
+    ['webkit-iphone-wide', webkit, { width: 956, height: 440 }],
     ['webkit-ipad', webkit, { width: 1024, height: 768 }],
+    ['webkit-ipad-large', webkit, { width: 1376, height: 1032 }],
     ['webkit-ipad-portrait', webkit, { width: 768, height: 1024 }],
     ['webkit-iphone-small', webkit, { width: 375, height: 667 }],
     ['webkit-ipad-split', webkit, { width: 600, height: 900 }]
   ]) {
-    if (deep && !['chromium-iphone', 'webkit-ipad'].includes(engine)) continue;
+    if (deep && !['chromium-iphone', 'webkit-iphone', 'webkit-ipad'].includes(engine)) continue;
     const browser = await browserType.launch({ headless: true });
     try {
       const context = await browser.newContext({ viewport, hasTouch: true });
+      // Render a real classroom card using synthetic read-only directory data.
+      // Authentication and all navigation continue to use the fixture server.
+      await context.route(url => url.origin === backend && url.pathname === '/api/classroom/sessions', route => {
+        assert.equal(route.request().method(), 'GET');
+        return route.fulfill({ json: { success: true, buzzers: [], whiteboards: [{
+          teacherId: 'MOBILETEACHER', teacherName: '試用老師', roomCode: '試用老師',
+          startTime: '2026-10-31T02:59:00.000Z'
+        }] } });
+      });
       const originalViewports = new WeakMap();
       await context.exposeBinding('__buioNativePresentation', async ({ page }, message) => {
         if (message.landscape) {
@@ -155,6 +166,34 @@ try {
       await assertFits('student home');
       await page.screenshot({ path: path.join(output, `${engine}-student.png`), fullPage: true });
       await page.screenshot({ path: path.join(output, `${engine}-home-screen.png`) });
+      await page.locator('.session-join-btn').first().waitFor();
+      const classTypography = await page.locator('.session-card').first().evaluate(card => {
+        const button = card.querySelector('.session-join-btn');
+        const tops = [];
+        const walker = document.createTreeWalker(button, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+          const node = walker.currentNode;
+          if (!node.textContent.trim()) continue;
+          const range = document.createRange(); range.selectNodeContents(node);
+          for (const rect of range.getClientRects()) if (rect.width > 1) tops.push(Math.round(rect.top));
+        }
+        const meta = card.querySelector('.session-meta');
+        const index = meta.textContent.indexOf('開課');
+        const characterTops = [];
+        if (index >= 0) for (const offset of [index, index + 1]) {
+          const range = document.createRange(); range.setStart(meta.firstChild, offset); range.setEnd(meta.firstChild, offset + 1);
+          characterTops.push(Math.round(range.getBoundingClientRect().top));
+        }
+        return { lines: new Set(tops).size, characterTops, scroll: button.scrollWidth, width: button.clientWidth };
+      });
+      assert.equal(classTypography.lines, 1, `${engine}: Join Class stays on one line`);
+      assert.ok(classTypography.scroll <= classTypography.width + 1);
+      assert.equal(new Set(classTypography.characterTops).size, 1, `${engine}: 開課 must not split across lines`);
+      await page.locator('.session-card').first().evaluate(card => card.scrollIntoView({ block: 'center' }));
+      const chrome = await page.locator('[data-buio-status-shield]').boundingBox();
+      const safeTop = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--buio-safe-top')));
+      assert.ok(chrome && chrome.y === 0 && Math.abs(chrome.height - safeTop) <= 1, 'Status background remains fixed while content scrolls');
+      await page.screenshot({ path: path.join(output, `${engine}-home-classroom.png`) });
       if (viewport.width < 900) {
         const tabBar = await page.locator('.side-nav').boundingBox();
         assert.ok(Math.abs(tabBar.y + tabBar.height - viewport.height) <= 1, 'Phone tabs stay at the window bottom');
@@ -175,9 +214,16 @@ try {
       await page.goto(backend + '/pet');
       await page.waitForFunction(() => document.body.innerText.includes('寵物'), { timeout: 20000 });
       await page.locator('.pet-nav').waitFor();
-      if (viewport.width < 900) {
+      await page.waitForFunction(() => innerWidth > innerHeight);
+      const compactPet = () => {
+        const size = page.viewportSize();
+        return size.width < 900 || (size.height <= 599 && size.width <= 1100);
+      };
+      if (compactPet()) {
         await page.locator('[data-buio-more]').waitFor();
         assert.equal(await page.locator('.pet-nav > button:visible').count(), 5);
+        assert.equal(await page.locator('.pet-nav > button:visible > span:last-child:visible').count(), 5,
+          'All five compact pet destinations must keep their visible labels');
         const navSize = await page.locator('.pet-nav').evaluate(nav => ({ client: nav.clientWidth, scroll: nav.scrollWidth }));
         assert.ok(navSize.scroll <= navSize.client + 1, 'Pet navigation fits five phone destinations');
         await page.locator('[data-buio-more]').click();
@@ -194,7 +240,7 @@ try {
       if (deep) {
         const petTab = async tab => {
           const direct = page.locator(`.pet-nav > [data-tab="${tab}"]`);
-          if (page.viewportSize().width < 900 && ['shop', 'coinPusher', 'visit', 'settings'].includes(tab)) {
+          if (compactPet() && ['shop', 'coinPusher', 'visit', 'settings'].includes(tab)) {
             await page.locator('[data-buio-more]').click();
             await page.locator(`[data-buio-sheet] [data-tab="${tab}"]`).click();
           } else await direct.click();
@@ -205,6 +251,22 @@ try {
           await page.locator('.modal-card [data-action="back-home"]').click();
         }
         await page.locator('#game-root canvas').waitFor();
+        await page.locator('#petStatus .room-bar-stage').waitFor();
+        const roomLandscape = page.viewportSize();
+        for (const size of [roomLandscape, { width: Math.min(viewport.width, viewport.height), height: Math.max(viewport.width, viewport.height) }]) {
+          await page.setViewportSize(size);
+          const statusFits = await page.locator('#petStatus').evaluate(status => {
+            const container = status.getBoundingClientRect();
+            return [...status.querySelectorAll('b,.room-bar-stage')].every(element => {
+              const range = document.createRange(); range.selectNodeContents(element);
+              return [...range.getClientRects()].every(rect => rect.left >= container.left && rect.right <= container.right + 1 &&
+                rect.top >= container.top && rect.bottom <= container.bottom + 1);
+            });
+          });
+          await page.screenshot({ path: path.join(output, `${engine}-pet-room-stage-${size.width}.png`) });
+          assert.ok(statusFits, `${engine}: pet name and full Stage text stay inside the status pill`);
+        }
+        await page.setViewportSize(roomLandscape);
         await petTab('collection'); await page.locator('.pet-card').first().waitFor();
         await page.screenshot({ path: path.join(output, `${engine}-pet-collection.png`) });
         await petTab('shop'); await page.locator('.shop-feature').waitFor();
@@ -293,7 +355,7 @@ try {
         assert.match(response.headers()['content-type'], /text\/html/);
       }
       const layoutIssues = [];
-      if (!deep && ['webkit-iphone', 'webkit-iphone-landscape', 'webkit-ipad'].includes(engine)) {
+      if (!deep && ['webkit-iphone', 'webkit-iphone-landscape', 'webkit-iphone-wide', 'webkit-ipad', 'webkit-ipad-large'].includes(engine)) {
         for (const module of modules) {
           console.log(`${engine}: layout ${module.id}`);
           const modulePage = await context.newPage();
@@ -317,19 +379,44 @@ try {
             await modulePage.waitForURL(/\/teacher$/);
             await modulePage.locator('#root .container .card').first().waitFor();
             await modulePage.locator('#root .page-head h1').waitFor();
+            const titleField = modulePage.locator('#root .container input[type="text"]').first();
+            await titleField.click();
+            assert.ok(await titleField.evaluate(field => parseFloat(getComputedStyle(field).fontSize) >= 16),
+              `${engine} ${module.id}: focused teacher input must remain readable`);
+            await modulePage.evaluate(() => { document.activeElement?.blur(); scrollTo(0, 0); });
           }
           await modulePage.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
           await modulePage.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
           const geometry = await modulePage.evaluate(() => ({
             width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
             title: document.title,
+            wrappedShortLabels: [...document.querySelectorAll('button')].flatMap(button => {
+              const box = button.getBoundingClientRect();
+              if (!box.width || !box.height) return [];
+              const label = button.innerText.trim();
+              const letters = label.replace(/[^\p{L}]/gu, '');
+              if (!/^\p{Script=Han}{2,4}$/u.test(letters)) return [];
+              const tops = [];
+              const walker = document.createTreeWalker(button, NodeFilter.SHOW_TEXT);
+              while (walker.nextNode()) {
+                const node = walker.currentNode; let offset = 0;
+                for (const character of node.textContent) {
+                  if (/\p{Script=Han}/u.test(character)) {
+                    const range = document.createRange(); range.setStart(node, offset); range.setEnd(node, offset + character.length);
+                    const rect = range.getBoundingClientRect(); if (rect.width && rect.height) tops.push(rect.top);
+                  }
+                  offset += character.length;
+                }
+              }
+              return tops.length && Math.max(...tops) - Math.min(...tops) > 2 ? [{ label, className: button.className }] : [];
+            }),
             wideElements: [...document.querySelectorAll('body *')].filter(element => {
               const box = element.getBoundingClientRect();
               return box.width > innerWidth + 1 && getComputedStyle(element).position !== 'absolute';
             }).slice(0, 5).map(element => ({ tag: element.tagName, id: element.id, className: String(element.className) }))
           }));
           await modulePage.screenshot({ path: path.join(output, `${engine}-module-${module.id}.png`) });
-          if (geometry.scrollWidth > geometry.width + 1) layoutIssues.push({ engine, module: module.id, ...geometry });
+          if (geometry.scrollWidth > geometry.width + 1 || geometry.wrappedShortLabels.length) layoutIssues.push({ engine, module: module.id, ...geometry });
           await modulePage.close();
         }
       }

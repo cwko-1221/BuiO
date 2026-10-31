@@ -52,7 +52,9 @@ const reportLayout=()=>{
   const box=document.querySelector('#viewport').getBoundingClientRect();
   const bottom=document.querySelector('footer').getBoundingClientRect();
   const safe=getComputedStyle(document.querySelector('#safeProbe'));
+  const shield=document.querySelector('[data-buio-status-shield]');
   const report={helperAtHead:window.helperAtHead,version:window.BuiOMobile?.version,
+    statusShield:{height:shield?.getBoundingClientRect().height||0,background:shield?getComputedStyle(shield).backgroundColor:''},
     path:location.pathname+location.search,native:window.BuiONativeLayout,downloads:window.BuiODownloads||[],sharePresented:!!window.BuiOSharePresented,shareCount:window.BuiOShareCount||0,
     safe:{top:parseFloat(safe.paddingTop),right:parseFloat(safe.paddingRight),bottom:parseFloat(safe.paddingBottom),left:parseFloat(safe.paddingLeft)},
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
@@ -128,15 +130,15 @@ try {
       received = undefined; nextPath = undefined; attachmentCookieReceived = false;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot'], {}, 600000);
       let originalPortrait;
-      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/game/', '/tower-defense/', '/pet?home=2', '/export-probe']) {
+      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/game/', '/tower-defense/', '/?return=1', '/export-probe']) {
         console.log(`[native] ${device.name}: ${route}`);
         if (route !== '/') { received = undefined; nextPath = route; }
         const deadline = Date.now() + 45000;
         let dismissedFirstExport = false;
         const ready = () => received?.path === route && received.native &&
-          (!['/science-lab', '/pet?battle=1', '/game/', '/tower-defense/'].includes(route) || received.width > received.height) &&
+          (!(route.startsWith('/pet') || ['/science-lab', '/game/', '/tower-defense/'].includes(route)) || received.width > received.height) &&
           (route !== '/export-probe' || (received.downloads?.length === 2 && received.shareCount === 2)) &&
-          (!['/pet', '/pet?home=1', '/pet?home=2'].includes(route) || (received.height > received.width) === originalPortrait);
+          (!['/?return=1', '/export-probe'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) {
           if (route === '/export-probe' && received?.downloads?.length === 2 && received.shareCount === 1 && !dismissedFirstExport) {
             nextPath = { dismissExport: true }; dismissedFirstExport = true;
@@ -172,6 +174,7 @@ try {
         for (const edge of ['top', 'right', 'bottom', 'left']) assert.ok(Math.abs(report.safe[edge] - report.native[edge]) <= 1, `CSS safe area ${edge}`);
         assert.ok(report.scrollWidth <= report.width + 1);
         assert.ok(report.inputFont >= 16);
+        assert.ok(Math.abs(report.statusShield.height - (['/', '/?return=1', '/export-probe'].includes(route) ? report.native.top : 0)) <= 1);
         assert.ok(!/maximum-scale|user-scalable/.test(report.meta));
         if (route === '/export-probe') {
           assert.equal(attachmentCookieReceived, true, 'HTTP export must retain the WebView cookie context');

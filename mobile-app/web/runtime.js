@@ -84,6 +84,10 @@
   };
   const finishLayout = () => {
     setupLayout();
+    const statusShield = document.createElement('div');
+    statusShield.setAttribute('data-buio-status-shield', '');
+    statusShield.setAttribute('aria-hidden', 'true');
+    document.body.append(statusShield);
     const style = document.getElementById('buio-mobile-layout');
     // Preserve each module's authored spacing while adding system safe areas.
     // Read once after its stylesheets load, before enabling document insets.
@@ -190,11 +194,12 @@
       games: '#0d1023', game: '#111827', 'tower-defense': '#101b30'
     };
     const background = palette[module] || '#f6f8fb';
+    root.style.setProperty('--buio-chrome-background', background);
     const battle = Boolean(document.querySelector('.pet-shell.brawl-active'));
     const gameCanvas = Boolean(document.querySelector('#rotateNotice, #gameCanvas'));
     const immersive = module === 'science-lab' || gameCanvas || battle || (module === 'pet' && ['park', 'coin-pusher'].includes(petScreen));
     root.setAttribute('data-buio-immersive', String(immersive));
-    const landscape = module === 'science-lab' || battle || gameCanvas;
+    const landscape = module === 'pet' || module === 'science-lab' || battle || gameCanvas;
     const message = { immersive, landscape, background, lightStatus: ['math', 'games', 'game', 'tower-defense', 'science-lab'].includes(module) };
     const serialized = JSON.stringify(message);
     if (serialized !== lastPresentation) {
