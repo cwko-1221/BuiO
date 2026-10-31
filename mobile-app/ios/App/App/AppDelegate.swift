@@ -53,6 +53,7 @@ class BuiOViewController: CAPBridgeViewController {
     private var immersive = false
     private var returnOrientation: UIInterfaceOrientation = .portrait
     private var lastInsets = ""
+    private var lastOrientationLock = false
     private var downloadDelegate: BuiODownloadDelegate?
     private var pendingExports: [URL] = []
 
@@ -149,7 +150,7 @@ class BuiOViewController: CAPBridgeViewController {
         landscapeModule ? .landscapeRight : returnOrientation
     }
     @available(iOS 26.0, *)
-    override var prefersInterfaceOrientationLocked: Bool { landscapeModule }
+    override var prefersInterfaceOrientationLocked: Bool { landscapeModule && view.bounds.width > view.bounds.height }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -158,6 +159,13 @@ class BuiOViewController: CAPBridgeViewController {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        if #available(iOS 26.0, *) {
+            let locked = prefersInterfaceOrientationLocked
+            if locked != lastOrientationLock {
+                lastOrientationLock = locked
+                setNeedsUpdateOfPrefersInterfaceOrientationLocked()
+            }
+        }
         publishLayout()
     }
 
@@ -218,7 +226,11 @@ class BuiOViewController: CAPBridgeViewController {
         pendingExports.append(url)
         #if DEBUG
         if bridge?.config.serverURL.host == "127.0.0.1" {
-            webView?.evaluateJavaScript("window.BuiODownloadReady=true;window.dispatchEvent(new Event('buio:native-layout'));")
+            let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
+            let details: [String: Any] = ["name": url.lastPathComponent, "bytes": size]
+            if let data = try? JSONSerialization.data(withJSONObject: details), let json = String(data: data, encoding: .utf8) {
+                webView?.evaluateJavaScript("window.BuiODownloads=window.BuiODownloads||[];window.BuiODownloads.push(\(json));window.BuiODownloadReady=true;window.dispatchEvent(new Event('buio:native-layout'));")
+            }
         }
         #endif
         presentNextExport()

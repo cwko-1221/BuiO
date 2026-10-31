@@ -12,16 +12,24 @@ if (process.platform !== 'darwin') throw Error('Native viewport checks require X
 const root = fileURLToPath(new URL('../', import.meta.url));
 const output = path.join(root, 'test-results/native-viewport');
 await mkdir(output, { recursive: true });
-const run = async (command, args, env = {}) => {
-  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] });
+const run = async (command, args, env = {}, timeout = 180000) => {
+  console.log(`[native] ${command} ${args.join(' ')}`);
+  const child = spawn(command, args, { cwd: root, env: { ...process.env, ...env }, detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
   let result = '';
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already exited */ }
+  }, timeout);
   child.stdout.on('data', chunk => { result += chunk; });
   child.stderr.on('data', chunk => { result += chunk; });
-  const [code] = await once(child, 'exit');
+  let code;
+  try { [code] = await once(child, 'close'); } finally { clearTimeout(timer); }
+  if (timedOut) throw Error(`${command} ${args.join(' ')} timed out after ${timeout / 1000}s: ${result.slice(-6000)}`);
   if (code !== 0) throw Error(`${command} ${args.join(' ')} failed (${code}): ${result.slice(-6000)}`);
   return result;
 };
-let received, nextPath;
+let received, nextPath, attachmentCookieReceived = false;
 const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
 html,body{height:100%;width:100%;margin:0;font:16px -apple-system,sans-serif;background:#edf5f1;color:#203c3b}
@@ -41,7 +49,7 @@ const reportLayout=()=>{
   const bottom=document.querySelector('footer').getBoundingClientRect();
   const safe=getComputedStyle(document.querySelector('#safeProbe'));
   const report={helperAtHead:window.helperAtHead,version:window.BuiOMobile?.version,
-    path:location.pathname+location.search,native:window.BuiONativeLayout,downloadReady:!!window.BuiODownloadReady,
+    path:location.pathname+location.search,native:window.BuiONativeLayout,downloads:window.BuiODownloads||[],
     safe:{top:parseFloat(safe.paddingTop),right:parseFloat(safe.paddingRight),bottom:parseFloat(safe.paddingBottom),left:parseFloat(safe.paddingLeft)},
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
     cssWidth:box.width,cssHeight:box.height,footerBottom:bottom.bottom,scrollWidth:document.documentElement.scrollWidth,
@@ -56,13 +64,20 @@ addEventListener('load',()=>{
   if(location.pathname==='/export-probe')setTimeout(()=>{
     const url=URL.createObjectURL(new Blob(['BuiO native export check'],{type:'text/plain'}));
     const anchor=document.createElement('a');anchor.href=url;anchor.download='buio-export-check.txt';anchor.click();URL.revokeObjectURL(url);
+    setTimeout(()=>{const link=document.createElement('a');link.href='/attachment';link.click()},1000);
   },500);
 });addEventListener('resize',schedule);addEventListener('buio:native-layout',schedule);
 const poll=setInterval(async()=>{const next=await fetch('/next').then(r=>r.json());if(next){clearInterval(poll);location.assign(next)}},250);
 </script></body></html>`;
 const server = createServer(async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  if (req.url === '/next') {
+  if (req.url === '/attachment') {
+    attachmentCookieReceived = /(?:^|; )buio_fixture=ready(?:;|$)/.test(req.headers.cookie || '');
+    if (!attachmentCookieReceived) { res.writeHead(401).end('Fixture cookie required'); return; }
+    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Disposition', 'attachment; filename="buio-http-export.txt"');
+    res.end('BuiO native authenticated export check');
+  } else if (req.url === '/next') {
     res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(nextPath || null)); nextPath = undefined;
   } else if (req.method === 'POST' && req.url === '/report') {
     let body = '';
@@ -71,6 +86,7 @@ const server = createServer(async (req, res) => {
     res.writeHead(204).end();
   } else {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Set-Cookie', 'buio_fixture=ready; Path=/; HttpOnly; SameSite=Lax');
     res.end(req.url.includes('battle=1') ? html.replace('<body>', '<body><div class="pet-shell brawl-active"></div>') : html);
   }
 });
@@ -80,7 +96,7 @@ const reports = [];
 try {
   await run(process.execPath, ['scripts/prepare.mjs', '--dev'], { BUIO_APP_URL: `http://127.0.0.1:${server.address().port}` });
   await run('npx', ['cap', 'sync', 'ios']);
-  await run(process.execPath, ['scripts/ios-simulator.mjs']);
+  await run(process.execPath, ['scripts/ios-simulator.mjs'], {}, 600000);
   const inventory = JSON.parse(await run('xcrun', ['simctl', 'list', 'devices', 'available', '--json']));
   const devices = Object.entries(inventory.devices).filter(([runtime]) => runtime.includes('iOS')).reverse().flatMap(([, values]) => values);
   for (const type of ['iPhone', 'iPad']) {
@@ -88,20 +104,27 @@ try {
     assert.ok(device, `No available ${type} simulator`);
     try {
       if (device.state !== 'Booted') await run('xcrun', ['simctl', 'boot', device.udid]);
-      await run('xcrun', ['simctl', 'bootstatus', device.udid, '-b']);
+      await run('xcrun', ['simctl', 'bootstatus', device.udid, '-b'], {}, 600000);
       await run('xcrun', ['simctl', 'install', device.udid, 'releases/ios-simulator/Build/Products/Debug-iphonesimulator/App.app']);
-      received = undefined; nextPath = undefined;
+      received = undefined; nextPath = undefined; attachmentCookieReceived = false;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot']);
       let originalPortrait;
       for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/export-probe']) {
+        console.log(`[native] ${device.name}: ${route}`);
         if (route !== '/') { received = undefined; nextPath = route; }
         const deadline = Date.now() + 45000;
         const ready = () => received?.path === route && received.native &&
           (!['/science-lab', '/pet?battle=1'].includes(route) || received.width > received.height) &&
-          (route !== '/export-probe' || received.downloadReady) &&
+          (route !== '/export-probe' || received.downloads?.length === 2) &&
           (!['/pet', '/pet?home=1'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250));
-        assert.ok(ready(), `${type} ${route}: missing native layout or automatic orientation: ${JSON.stringify(received)}`);
+        if (!ready()) {
+          await writeFile(path.join(output, `${type}-failed.json`), JSON.stringify({ route, received }, null, 2));
+          await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-failed.png`)], {}, 20000).catch(error => console.error(error.message));
+          await run('xcrun', ['simctl', 'spawn', device.udid, 'log', 'show', '--last', '2m', '--style', 'compact', '--predicate', 'process == "App" AND eventMessage CONTAINS "BuiO"'], {}, 20000)
+            .then(log => writeFile(path.join(output, `${type}-native.log`), log)).catch(error => console.error(error.message));
+        }
+        assert.ok(ready(), `${type} ${route}: missing native layout, automatic orientation or export: ${JSON.stringify(received)}`);
         const report = { device: device.name, ...received };
         if (route === '/') originalPortrait = report.height > report.width;
         reports.push(report);
@@ -118,13 +141,22 @@ try {
         assert.equal(report.native.x, 0); assert.equal(report.native.y, 0);
         assert.ok(Math.abs(report.cssWidth - report.width) <= 1);
         assert.ok(Math.abs(report.cssHeight - report.height) <= 1);
+        assert.deepEqual([report.width, report.height].sort((a, b) => a - b),
+          [report.screenWidth, report.screenHeight].sort((a, b) => a - b), 'Fullscreen content must fill the device display');
         assert.ok(Math.abs(report.footerBottom - (report.height - report.safe.bottom)) <= 1);
         for (const edge of ['top', 'right', 'bottom', 'left']) assert.ok(Math.abs(report.safe[edge] - report.native[edge]) <= 1, `CSS safe area ${edge}`);
         assert.ok(report.scrollWidth <= report.width + 1);
         assert.ok(report.inputFont >= 16);
         assert.ok(!/maximum-scale|user-scalable/.test(report.meta));
+        if (route === '/export-probe') {
+          assert.equal(attachmentCookieReceived, true, 'HTTP export must retain the WebView cookie context');
+          assert.deepEqual(report.downloads, [
+            { name: 'buio-export-check.txt', bytes: Buffer.byteLength('BuiO native export check') },
+            { name: 'buio-http-export.txt', bytes: Buffer.byteLength('BuiO native authenticated export check') }
+          ]);
+        }
         console.log(JSON.stringify(report));
       }
-    } finally { await run('xcrun', ['simctl', 'shutdown', device.udid]); }
+    } finally { await run('xcrun', ['simctl', 'shutdown', device.udid], {}, 30000).catch(error => console.error(error.message)); }
   }
-} finally { await new Promise(resolve => server.close(resolve)); }
+} finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
