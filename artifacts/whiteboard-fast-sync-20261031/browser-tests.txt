@@ -1,0 +1,340 @@
+
+> bui-o-learning-platform@2.0.0 check:whiteboard-live
+> node scripts/test-whiteboard-classroom-live.mjs && node scripts/test-whiteboard-views-live.mjs && node scripts/test-whiteboard-restart-live.mjs && node scripts/test-whiteboard-fast-sync-live.mjs
+
+[WB] User connected: I4fkoZ7ha01v4us3AAAA
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: oWWeMdEdYI17Zl3oAAAB
+[WB] Participant joined { role: 'student' }
+[WB] User connected: CfwN0mi5pxFpHSnbAAAC
+[WB] Participant joined { role: 'student' }
+{"browser":"chromium","offlineSize":{"width":2048,"height":1346},"onlineSize":{"width":2048,"height":1414},"restoredStrokeCount":46}
+[WB] User connected: Oj1kmhpk4w2sBF-iAAAD
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 2mQaRKhwA4dTAIJxAAAE
+[WB] Participant joined { role: 'student' }
+[WB] User connected: uJIeHQ_N6UI40QiKAAAF
+[WB] Participant joined { role: 'student' }
+[WB] User connected: AwoTa_lVmjH96ufmAAAG
+[WB] Participant joined { role: 'student' }
+[WB] User connected: risz0s6JNV1KQIXJAAAH
+[WB] Participant joined { role: 'student' }
+[WB] User connected: RqsQBDIinx4dzUoXAAAI
+[WB] Participant joined { role: 'student' }
+[WB] User connected: hF39CbZKlROphTh_AAAJ
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 5JxCv-aqoqoQU5tvAAAK
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 0oiUu1vHC5lUe24xAAAL
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 2qbm8dYvztMw6DTrAAAM
+[WB] Participant joined { role: 'student' }
+[WB] User connected: zwAr6hjcEGvSVJLtAAAN
+[WB] Participant joined { role: 'student' }
+[WB] User connected: nk5s3LLLgKjyRk5HAAAO
+[WB] Participant joined { role: 'student' }
+[WB] User connected: qYvUK5HuNnBB89NDAAAP
+[WB] Participant joined { role: 'student' }
+[WB] User connected: UsB2XdBqTMlyQFxcAAAQ
+[WB] Participant joined { role: 'student' }
+[WB] User connected: qrg-NIrcFOUa4B7eAAAR
+[WB] Participant joined { role: 'student' }
+[WB] User connected: aEmvWsBLNCTR822XAAAS
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 7bLfYXVw0J_MFsLuAAAT
+[WB] Participant joined { role: 'student' }
+[WB] User connected: Uh5Smyk9PpL91zMxAAAU
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 7CN62EvdcpOKIWeuAAAV
+[WB] Participant joined { role: 'student' }
+[WB] User connected: orEhSV2rpHdjvZJgAAAW
+[WB] Participant joined { role: 'student' }
+[WB] User connected: K5byXYwWjqltdPCgAAAX
+[WB] Participant joined { role: 'student' }
+[WB] User connected: BscYCY4WutiqDHs9AAAY
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 4kQ3g2cHL0RWopyfAAAZ
+[WB] Participant joined { role: 'student' }
+[WB] User connected: j6EdFzREzpHUPbspAAAa
+[WB] Participant joined { role: 'student' }
+[WB] User connected: i-0rotnvkumHRsj5AAAb
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 5teXeZ2K3d-6H8okAAAc
+[WB] Participant joined { role: 'student' }
+[WB] User connected: M2Nw63ivgT8ETsMnAAAd
+[WB] Participant joined { role: 'student' }
+[WB] User connected: TpzX_r6-H3SihIIZAAAe
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (forced close); retaining room for reconnect: load-chromium
+[WB] User connected: YTDRNRBnoVE55hFvAAAf
+[WB] Participant joined { role: 'teacher' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: load-chromium
+[WB] User connected: J6UZ-MUopjEWDL3iAAAg
+[WB] Participant joined { role: 'teacher' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: load-chromium
+[WB] User connected: fwroBYTCXrt43RxrAAAh
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: cTGonxlEZ2WQeHNZAAAi
+[WB] Participant joined { role: 'student' }
+[WB] User connected: o6Y969t4TJwBgeMxAAAj
+[WB] Participant joined { role: 'student' }
+{"browser":"webkit","offlineSize":{"width":2048,"height":1346},"onlineSize":{"width":2048,"height":1346},"restoredStrokeCount":46}
+[WB] User connected: N6d4SM7xOpUAI1yWAAAk
+[WB] Participant joined { role: 'student' }
+[WB] User connected: TjDGDuWbN4qHT2TgAAAl
+[WB] Participant joined { role: 'student' }
+[WB] User connected: fpP2OWL5BbGxM2E_AAAm
+[WB] Participant joined { role: 'student' }
+[WB] User connected: wRDfnwCRF3nzzd1wAAAn
+[WB] Participant joined { role: 'student' }
+[WB] User connected: sNAj5CF51VXee73cAAAo
+[WB] Participant joined { role: 'student' }
+[WB] User connected: ElA6SPfbPkqELUWAAAAp
+[WB] Participant joined { role: 'student' }
+[WB] User connected: SNovUx3vrKRCIoWAAAAq
+[WB] Participant joined { role: 'student' }
+[WB] User connected: eP44zpk8qKCKzjsmAAAr
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 5ulz4VpdoJo5sqYLAAAs
+[WB] Participant joined { role: 'student' }
+[WB] User connected: Kf3hYEnBIzhr6plpAAAt
+[WB] Participant joined { role: 'student' }
+[WB] User connected: R_bWoe9cb3f_AjrMAAAu
+[WB] Participant joined { role: 'student' }
+[WB] User connected: cSnDhUhFiyelZEuyAAAv
+[WB] Participant joined { role: 'student' }
+[WB] User connected: vZFQOpX7G4mc3oUvAAAw
+[WB] Participant joined { role: 'student' }
+[WB] User connected: O6BkALJSJoE6g7ZsAAAx
+[WB] Participant joined { role: 'student' }
+[WB] User connected: -pU-U386jX0nYFCvAAAy
+[WB] Participant joined { role: 'student' }
+[WB] User connected: Ui33h0cT41ImhLs9AAAz
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 5FZylmZoITancfaPAAA0
+[WB] Participant joined { role: 'student' }
+[WB] User connected: fYj1skMPaMczKTvzAAA1
+[WB] Participant joined { role: 'student' }
+[WB] User connected: uRsiR41AvrJejyrZAAA2
+[WB] Participant joined { role: 'student' }
+[WB] User connected: r4WZ0G-GA87PV72CAAA3
+[WB] Participant joined { role: 'student' }
+[WB] User connected: Pm6b1qYhwu8odr7oAAA4
+[WB] Participant joined { role: 'student' }
+[WB] User connected: DqQch4hBDxruKTlWAAA5
+[WB] Participant joined { role: 'student' }
+[WB] User connected: hNTTOCd-q0_mOq3PAAA6
+[WB] Participant joined { role: 'student' }
+[WB] User connected: TXj6TTYW2OQ72BZOAAA7
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 4xkHG1RXuuErn-syAAA8
+[WB] Participant joined { role: 'student' }
+[WB] User connected: 5SrMk5N-k0IXgAkvAAA9
+[WB] Participant joined { role: 'student' }
+[WB] User connected: npMht8YdoDN7R1uaAAA-
+[WB] Participant joined { role: 'student' }
+[WB] User connected: FoISQ7lK-fEWcMo5AAA_
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (forced close); retaining room for reconnect: load-webkit
+[WB] User connected: hfEvXMEndCqTU5k-AABA
+[WB] Participant joined { role: 'teacher' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: load-webkit
+[WB] User connected: EKI0sWh01UGvLj93AABB
+[WB] Participant joined { role: 'teacher' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: load-webkit
+{
+  "scope": "Local real whiteboard UI and Socket.IO; Windows browsers, not physical iPads or Render CPU quota",
+  "physicalIpadSafariVerified": false,
+  "results": [
+    {
+      "browser": "chromium",
+      "strokesCoalesced": true,
+      "singleCheckpointInFlight": true,
+      "lostAckRecovered": true,
+      "offlineInkPreserved": true,
+      "delayedDecodePreservesInk": true,
+      "delayedDecodeRespectsClear": true,
+      "teacherDisconnectRetainsClass": true,
+      "teacherReloadRetainsClass": true,
+      "closedTeacherTabExpires": true,
+      "closeDetectionMs": 45,
+      "idleBoardsDoNotRedraw": true,
+      "ordinaryCheckpointsEncodeNoPng": true,
+      "concurrentTeacherStudentInk": true,
+      "teacherEraseReconciled": true,
+      "longDrawingCompacted": true,
+      "paginationPainted": true,
+      "offlineTeacherClearWins": true,
+      "delayedTeacherBitmapRespectsClear": true,
+      "checkpointWireBytes": 496087,
+      "connectedParticipants": 29,
+      "peerDraws": 0,
+      "maxLocalHealthMs": 13,
+      "pageErrors": []
+    },
+    {
+      "browser": "webkit",
+      "strokesCoalesced": true,
+      "singleCheckpointInFlight": true,
+      "lostAckRecovered": true,
+      "offlineInkPreserved": true,
+      "delayedDecodePreservesInk": true,
+      "delayedDecodeRespectsClear": true,
+      "teacherDisconnectRetainsClass": true,
+      "teacherReloadRetainsClass": true,
+      "closedTeacherTabExpires": true,
+      "closeDetectionMs": 37,
+      "idleBoardsDoNotRedraw": true,
+      "ordinaryCheckpointsEncodeNoPng": true,
+      "concurrentTeacherStudentInk": true,
+      "teacherEraseReconciled": true,
+      "longDrawingCompacted": true,
+      "paginationPainted": true,
+      "offlineTeacherClearWins": true,
+      "delayedTeacherBitmapRespectsClear": true,
+      "checkpointWireBytes": 424062,
+      "connectedParticipants": 29,
+      "peerDraws": 0,
+      "maxLocalHealthMs": 3,
+      "pageErrors": []
+    }
+  ]
+}
+[WB] User connected: Ln2P4qSrSdw-VJhzAAAA
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: s76a_xGraWzYNmf-AAAB
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: views-teacher
+[WB] User connected: R9z5IY2rt5uER0VBAAAC
+[WB] Participant joined { role: 'teacher' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: views-teacher
+[WB] User connected: _E7PcTqwHCYaxiATAAAD
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: m13Yhcyz9Q3ExhN9AAAE
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: views-class-teacher
+[WB] User connected: 9-E5op6EOnKEhOA0AAAF
+[WB] Participant joined { role: 'teacher' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: views-class-teacher
+Both whiteboard entry points passed drawing, reload, idle, annotation and clear.
+Browser crash recovery, newer local ink, and persistent Clear passed.
+[WB] User connected: Uhvib689505OoeD8AAAA
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: zkIgIiTVDyfTPQzzAAAB
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: fast-chromium
+[WB] User connected: EN1uOste2OD8HNZBAAAC
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: HiGDOQ9MUgYKf_31AAAD
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: fast-webkit
+[
+  {
+    "browser": "chromium",
+    "cases": [
+      {
+        "label": "fast down/up without a delivered move",
+        "studentPixels": 2246,
+        "teacherPixels": 2248,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "fast erase across existing ink",
+        "studentPixels": 1224,
+        "teacherPixels": 1220,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "older accepted checkpoint arrives after newer live ink and erase",
+        "studentPixels": 3168,
+        "teacherPixels": 3468,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "settled authoritative checkpoint",
+        "studentPixels": 3168,
+        "teacherPixels": 3464,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "student writes between two parts of a teacher erase",
+        "studentPixels": 1968,
+        "teacherPixels": 2264,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "interleaved edits survive resizing and vector replay",
+        "studentPixels": 2264,
+        "teacherPixels": 2264,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "cases": [
+      {
+        "label": "fast down/up without a delivered move",
+        "studentPixels": 1684,
+        "teacherPixels": 1124,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "fast erase across existing ink",
+        "studentPixels": 927,
+        "teacherPixels": 614,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "older accepted checkpoint arrives after newer live ink and erase",
+        "studentPixels": 3167,
+        "teacherPixels": 1738,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "settled authoritative checkpoint",
+        "studentPixels": 3167,
+        "teacherPixels": 1738,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "student writes between two parts of a teacher erase",
+        "studentPixels": 1967,
+        "teacherPixels": 1138,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      },
+      {
+        "label": "interleaved edits survive resizing and vector replay",
+        "studentPixels": 1701,
+        "teacherPixels": 1138,
+        "missing": 0,
+        "extra": 0,
+        "agreement": 1
+      }
+    ],
+    "errors": []
+  }
+]

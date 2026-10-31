@@ -264,7 +264,7 @@ try {
             await teacher.mouse.down();
             await teacher.mouse.move(zr.x + zr.width * .6, zr.y + zr.height * .8, { steps: 8 });
             await teacher.mouse.up();
-            await until(() => typeof whiteboard.rooms.get(room).studentBoards.get('student:QA')?.baseImageData === 'string', 'teacher erase reconciled');
+            await until(() => whiteboard.rooms.get(room).studentBoards.get('student:QA')?.strokes.some(stroke=>stroke.isEraser&&stroke.color==='#ef4444'), 'teacher vector erase reconciled');
             await teacher.locator('[class*="closeZoomBtn"]').click();
             await sleep(300);
             const encodesBefore = await student.evaluate(() => window.__pngEncodes);

@@ -1,0 +1,35 @@
+{
+  "recordedAt": "2026-10-31T03:41:40.879Z",
+  "baseCommit": "02ab0307666fc318885c439eac22165d9d5729fb",
+  "node": "v24.16.0",
+  "platform": "win32",
+  "committed": false,
+  "pushed": false,
+  "hashes": {
+    "package.json": "eee846aa1b5c8df5cb6effadccbbd9dce7d2a81af9053708962b81e04eb2479c",
+    "whiteboard-app/server/socket.js": "edbe74d2c0a712f665305a81287bf71b506016205ae7d68e198c7de8bb2edb8f",
+    "whiteboard-app/server/socket.test.js": "ab7a1ac763cf86a1c45c8c94752b6b6f9f2e22da8c416ace3d82b11b0708e9c2",
+    "whiteboard-app/client/src/components/ClassStudent.jsx": "603f21fc6874a41a7be1d3754799dd21a8add9ff23282942cc6abc2b82808e89",
+    "whiteboard-app/client/src/components/Student.jsx": "46b947167c118120c3787ad543cb7b0d34856b849cdf14ddc306625f474fad25",
+    "whiteboard-app/client/src/components/ClassTeacher.jsx": "57bb7cdd96a240a79cec8d4b00a6d58e6ce21ab7fca07021ad0413b806da280f",
+    "whiteboard-app/client/src/components/Teacher.jsx": "158498378ba26d0c69fd61f8c3356f12268b9bee171ba2d87f59ab4bb5b8b934",
+    "whiteboard-app/client/src/utils/paintBoard.js": "0382f40a7a003c37a07f3cbba94a6e8e56ae7a0053639c4b244af612b5fa0ae8",
+    "whiteboard-app/client/src/utils/boardDelta.mjs": "b5a4d2415f553fa9ed528c48cdcb7495a2b903aa98a99ad390285b5bb0ec31ec",
+    "whiteboard-app/client/src/utils/boardSnapshots.mjs": "3d3f4aa4d74b0e4582c17a4992d40a4db37fb032b10a4ac3766738e0c300e80d",
+    "whiteboard-app/client/src/utils/boardSnapshots.test.mjs": "c20318fc94a1fbdcfe1ed481d19b9ab5891fb6f3015df0a9ec250222c51d03d2",
+    "whiteboard-app/client/src/utils/boardTimeline.mjs": "a504e3091e5a083e34fd424e2a7202f7efb33b6dac5f180dda164eeb7ec739d9",
+    "whiteboard-app/client/src/utils/boardTimeline.test.mjs": "2de3f550afac10c659dff3e06d0cfc2aee710d82e85c0824a3c154feb0134ba0",
+    "scripts/test-whiteboard-fast-sync-live.mjs": "96fb45400109e43720e0dc8d9e0131b638aaa1b5f9d1e872a8fe3542cce8ab0d",
+    "scripts/test-whiteboard-classroom-live.mjs": "ee30ebd022bd139061c8b837513f48bdf56a959b01d29d2ce11f3e04c235fbfa",
+    "scripts/test-whiteboard-views-live.mjs": "94f87b9f0d31cfd72ee34c332eeca67615ed7804bb1088960918e7ecf030fe1a",
+    "scripts/test-whiteboard-restart-live.mjs": "d0fb20e0cc76f7b9babc751c610310b254ac80e70d5b8464d620390fad651786",
+    "scripts/test-classroom-mixed-load.mjs": "066971a78dfbefeccf40edd186d9cbb4145584f9f36e9ca052b9bce6d38aa137"
+  },
+  "preview": {
+    "backendRestarted": false,
+    "existingPid": 28152,
+    "reason": "Automatic execution review rejected the restart command: blocked by policy; no more specific reason returned.",
+    "frontendBuild": "index-8QovmZQs.js"
+  },
+  "scope": "39 unit tests, browser flow and 12 normalized mask cases, isolated 60-second mixed load; no physical iPad or production deployment"
+}

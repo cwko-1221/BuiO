@@ -95,8 +95,8 @@
     "check:classroom-hot-paths": "node --test tests/classroom-hot-paths.test.cjs",
     "check:game-latency-live": "node scripts/test-game-latency-live.mjs",
     "check:pet-latency-live": "node scripts/test-pet-latency-live.cjs",
-    "check:whiteboard": "node --test whiteboard-app/server/socket.test.js whiteboard-app/server/checkpoints.test.js whiteboard-app/server/recovery.test.js whiteboard-app/client/src/utils/boardSnapshots.test.mjs whiteboard-app/client/src/utils/boardDelta.test.mjs whiteboard-app/client/src/utils/paintBoard.test.mjs tests/report-work.test.cjs",
-    "check:whiteboard-live": "node scripts/test-whiteboard-classroom-live.mjs && node scripts/test-whiteboard-views-live.mjs && node scripts/test-whiteboard-restart-live.mjs",
+    "check:whiteboard": "node --test whiteboard-app/server/socket.test.js whiteboard-app/server/checkpoints.test.js whiteboard-app/server/recovery.test.js whiteboard-app/client/src/utils/boardSnapshots.test.mjs whiteboard-app/client/src/utils/boardDelta.test.mjs whiteboard-app/client/src/utils/paintBoard.test.mjs whiteboard-app/client/src/utils/boardTimeline.test.mjs tests/report-work.test.cjs",
+    "check:whiteboard-live": "node scripts/test-whiteboard-classroom-live.mjs && node scripts/test-whiteboard-views-live.mjs && node scripts/test-whiteboard-restart-live.mjs && node scripts/test-whiteboard-fast-sync-live.mjs",
     "check:classroom-mixed-load": "node scripts/test-classroom-mixed-load.mjs"
   },
   "dependencies": {

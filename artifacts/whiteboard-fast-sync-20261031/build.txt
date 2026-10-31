@@ -1,0 +1,16 @@
+
+> client@0.0.0 build
+> vite build
+
+vite v7.3.1 building client environment for production...
+<script src="/shared/loading.js?v=20261011-1"> in "/index.html" can't be bundled without type="module" attribute
+
+/shared/loading.css?v=20261011-1 doesn't exist at build time, it will remain unchanged to be resolved at runtime
+transforming...
+✓ 1808 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.62 kB │ gzip:   0.36 kB
+dist/assets/index-B053H4vo.css   32.91 kB │ gzip:   6.22 kB
+dist/assets/index-8QovmZQs.js   375.08 kB │ gzip: 121.13 kB
+✓ built in 2.17s

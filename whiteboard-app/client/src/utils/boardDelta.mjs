@@ -7,6 +7,7 @@ export function createBoardDelta() {
     reset();
     return {
         reset,
+        get generationId() { return boardGeneration; },
         generation(value) { if (typeof value === 'string' && value !== boardGeneration) { boardGeneration = value; lastAccepted = null; reset(); } },
         isOlder(snapshot) { return !!lastAccepted && snapshot.epoch === lastAccepted.epoch && snapshot.seq < lastAccepted.seq; },
         build({ strokes, shapes, baseImageData }) {

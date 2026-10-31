@@ -1,6 +1,6 @@
-import { decodeStrokes } from '../utils/paintBoard';
+import { paintStrokes, paintStrokeSegment, decodeStrokes } from '../utils/paintBoard';
 import { createBoardDelta } from '../utils/boardDelta.mjs';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Pen, Eraser, Trash2, Lock, Shapes, Triangle, Square, Circle, Diamond } from 'lucide-react';
@@ -21,11 +21,19 @@ const SHAPE_OPTIONS = [
     { id: 'diamond', label: 'Diamond', icon: Diamond },
 ];
 
-function appendStrokePoint(stroke, x, y, width, height) {
+function appendStrokePoint(stroke, x, y) {
     if (!stroke || !Number.isFinite(x) || !Number.isFinite(y)) return;
     const previous = stroke.points[stroke.points.length - 1];
-    if (previous && Math.hypot((x - previous.x) * width, (y - previous.y) * height) < 0.75) return;
+    if (previous && previous.x === x && previous.y === y) return;
     stroke.points.push({ x, y });
+}
+
+function orderedStroke(history, reference) {
+    let stroke=reference.current;
+    if (stroke && history.at(-1)!==stroke) {
+        stroke={...stroke,points:[{...stroke.points.at(-1)}]}; history.push(stroke); reference.current=stroke;
+    }
+    return stroke;
 }
 
 export default function ClassStudent() {
@@ -39,7 +47,7 @@ export default function ClassStudent() {
     const [locked, setLocked] = useState(false);
     const [connectionStatus, setConnectionStatus] = useState('connecting');
     const [buzzerState, setBuzzerState] = useState(null);
-    const [buzzerNow, setBuzzerNow] = useState(Date.now());
+    const [buzzerNow, setBuzzerNow] = useState(Date.now);
     const [buzzerClockOffset, setBuzzerClockOffset] = useState(0);
     const [buzzerPending, setBuzzerPending] = useState(false);
     const [buzzerNotice, setBuzzerNotice] = useState('');
@@ -62,6 +70,8 @@ export default function ClassStudent() {
     const drawingHistoryRef = useRef([]);
     const activeStudentStrokeRef = useRef(null);
     const activeTeacherStrokeRef = useRef(null);
+    const teacherOrderRef = useRef(0);
+    const teacherEpochRef = useRef(null);
     const baseDrawingImageDataRef = useRef(null);
     const baseDrawingImageRef = useRef(null);
     const selectedShapeIdRef = useRef(null);
@@ -84,8 +94,8 @@ export default function ClassStudent() {
     const boardRestoreVersionRef = useRef(0);
     const boardRestoringRef = useRef(false);
     const snapshotsRef = useRef(null);
-    const deltaRef = useRef(null);
-    if (!deltaRef.current) deltaRef.current = createBoardDelta();
+    const [delta] = useState(createBoardDelta);
+    const deltaRef = useRef(delta);
 
     useEffect(() => { activeToolRef.current = activeTool; }, [activeTool]);
     useEffect(() => { penColorRef.current = penColor; }, [penColor]);
@@ -138,33 +148,14 @@ export default function ClassStudent() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.globalCompositeOperation = 'source-over';
-        if (baseDrawingImageRef.current?.complete && baseDrawingImageRef.current.naturalWidth > 0) {
+        if (baseDrawingImageRef.current instanceof HTMLCanvasElement || (baseDrawingImageRef.current?.complete && baseDrawingImageRef.current.naturalWidth > 0)) {
             ctx.drawImage(baseDrawingImageRef.current, 0, 0, rect.width, rect.height);
         }
 
-        for (const stroke of drawingHistoryRef.current) {
-            if (!stroke.points?.length) continue;
-            ctx.save();
-            ctx.globalCompositeOperation = stroke.isEraser ? 'destination-out' : 'source-over';
-            ctx.strokeStyle = stroke.color || '#111827';
-            ctx.lineWidth = stroke.size || 3;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.beginPath();
-            ctx.moveTo(stroke.points[0].x * rect.width, stroke.points[0].y * rect.height);
-            if (stroke.points.length === 1) {
-                ctx.lineTo(stroke.points[0].x * rect.width, stroke.points[0].y * rect.height);
-            } else {
-                for (let index = 1; index < stroke.points.length; index += 1) {
-                    ctx.lineTo(stroke.points[index].x * rect.width, stroke.points[index].y * rect.height);
-                }
-            }
-            ctx.stroke();
-            ctx.restore();
-        }
+        paintStrokes(ctx, drawingHistoryRef.current, rect.width, rect.height);
         ctx.restore();
     }, []);
-    redrawDrawingLayerRef.current = redrawDrawingLayer;
+    useLayoutEffect(() => { redrawDrawingLayerRef.current = redrawDrawingLayer; }, [redrawDrawingLayer]);
 
     const restoreBoardSnapshot = useCallback((snapshot) => {
         const canvas = canvasRef.current;
@@ -239,8 +230,8 @@ export default function ClassStudent() {
                 drawingHistoryRef.current = [];
                 deltaRef.current.reset();
             }
-            return deltaRef.current.build({ strokes: drawingHistoryRef.current,
-                baseImageData: baseDrawingImageDataRef.current, shapes: shapeObjectsRef.current });
+            return { ...deltaRef.current.build({ strokes: drawingHistoryRef.current,
+                baseImageData: baseDrawingImageDataRef.current, shapes: shapeObjectsRef.current }), teacherOrder: teacherOrderRef.current, teacherEpoch: teacherEpochRef.current };
         } catch (error) {
             console.warn('[WB] Could not save student board snapshot:', error);
         }
@@ -300,7 +291,7 @@ export default function ClassStudent() {
             if (deltaRef.current.isOlder(snapshot)) { snapshots.changed(); return; }
             // A stale saved checkpoint must not erase edits made while offline
             // or while the previous checkpoint's acknowledgement was lost.
-            if (!snapshots.pending()) restoreBoardSnapshot(snapshot);
+            if (!snapshots.pending()) { teacherOrderRef.current=snapshot.liveOrder?.teacher || 0; teacherEpochRef.current=snapshot.liveOrder?.epoch || null; restoreBoardSnapshot(snapshot); }
         });
 
         socket.on('buzzer-player-state', (state) => {
@@ -326,6 +317,7 @@ export default function ClassStudent() {
 
         // Handle teacher clearing ALL boards — only clear the drawing layer
         function clearFromTeacher(state = {}) {
+            isDrawing.current=false; activePointerId.current=null; teacherOrderRef.current=0;
             latestTeacherSync.current += 1;
             if (state.boardGeneration) joinedGeneration = state.boardGeneration;
             deltaRef.current.generation(state.boardGeneration);
@@ -371,57 +363,21 @@ export default function ClassStudent() {
         });
 
         // Handle teacher drawing on this student's board
-        socket.on('teacher-draw', (data) => {
-            const ctx = contextRef.current;
-            const canvas = canvasRef.current;
-            if (!ctx || !canvas) return;
-
-            const { x, y, state, color, size, isEraser } = data;
-            const rect = canvas.getBoundingClientRect();
-            const cssX = x * rect.width;
-            const cssY = y * rect.height;
-
-            if (state === 'start') {
-                const stroke = {
-                    color: color || '#ef4444',
-                    size: isEraser ? size * 2 : size,
-                    isEraser: !!isEraser,
-                    points: [{ x, y }],
-                };
-                drawingHistoryRef.current.push(stroke);
-                activeTeacherStrokeRef.current = stroke;
-            } else if (state === 'move' || state === 'end') {
-                appendStrokePoint(activeTeacherStrokeRef.current, x, y, rect.width, rect.height);
+        socket.on('teacher-draw', data => {
+            const ctx=contextRef.current, canvas=canvasRef.current;
+            if(!ctx||!canvas||!['start','move','end'].includes(data.state))return;
+            const point={x:data.x,y:data.y},rect=canvas.getBoundingClientRect();
+            if(data.state==='start'||!activeTeacherStrokeRef.current){
+                const stroke={id:data.strokeId||crypto.randomUUID(),color:data.color||'#ef4444',size:data.isEraser?data.size*2:data.size,
+                    isEraser:!!data.isEraser,surfaceWidth:data.surfaceWidth||800,surfaceHeight:data.surfaceHeight||600,points:[point]};
+                drawingHistoryRef.current.push(stroke); activeTeacherStrokeRef.current=stroke;
             }
-
-            if (state !== 'start' && state !== 'move' && state !== 'end') return;
-            ctx.save();
-            if (isEraser) {
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.lineWidth = size * 2;
-            } else {
-                ctx.globalCompositeOperation = 'source-over';
-                ctx.strokeStyle = color;
-                ctx.lineWidth = size;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-            }
-
-            if (state === 'start') {
-                ctx.beginPath();
-                ctx.moveTo(cssX, cssY);
-                ctx.lineTo(cssX, cssY);
-                ctx.stroke();
-                teacherLastPos.current = { x: cssX, y: cssY };
-            } else if (state === 'move' || state === 'end') {
-                ctx.beginPath();
-                ctx.moveTo(teacherLastPos.current.x, teacherLastPos.current.y);
-                ctx.lineTo(cssX, cssY);
-                ctx.stroke();
-                teacherLastPos.current = { x: cssX, y: cssY };
-            }
-            ctx.restore();
-            if (state === 'end') { activeTeacherStrokeRef.current = null; snapshots.changed(); }
+            const stroke=orderedStroke(drawingHistoryRef.current,activeTeacherStrokeRef),from=stroke.points.at(-1);
+            paintStrokeSegment(ctx,from,point,stroke,rect.width,rect.height);
+            appendStrokePoint(stroke,point.x,point.y);
+            if(data.liveOrder?.epoch!==teacherEpochRef.current){teacherOrderRef.current=0;teacherEpochRef.current=data.liveOrder?.epoch;}
+            teacherOrderRef.current=Math.max(teacherOrderRef.current,data.liveOrder?.order||0);
+            if(data.state==='end'){activeTeacherStrokeRef.current=null;snapshots.changed();snapshots.settled();}
         });
 
         // Reconcile the complete stroke layer after every teacher gesture. This
@@ -565,32 +521,22 @@ export default function ClassStudent() {
         };
     }, []);
 
-    const setupContextMode = useCallback((targetContext = contextRef.current) => {
-        const ctx = targetContext;
-        if (!ctx) return;
-
-        if (activeToolRef.current === 'eraser') {
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.lineWidth = 20;
-        } else {
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.strokeStyle = penColorRef.current;
-            ctx.lineWidth = 3;
-        }
-    }, []);
-
     const emitDrawEvent = useCallback((state, point) => {
+        const stroke = activeStudentStrokeRef.current;
         if (socketRef.current?.connected && joinedRef.current) {
             socketRef.current.emit('draw', {
+                strokeId:stroke?.id,boardGeneration:deltaRef.current.generationId,
+                surfaceWidth:stroke?.surfaceWidth,surfaceHeight:stroke?.surfaceHeight,
                 x: point.x,
                 y: point.y,
                 state,
-                color: penColorRef.current,
-                size: activeToolRef.current === 'eraser' ? 10 : 1.5,
-                isEraser: activeToolRef.current === 'eraser'
+                color: stroke?.color || penColorRef.current,
+                size: stroke ? (stroke.isEraser ? stroke.size/2 : stroke.size) : 3,
+                isEraser: !!stroke?.isEraser
             });
         }
         publishBoardSnapshot();
+        if(state==='end')snapshotsRef.current?.settled();
     }, [publishBoardSnapshot]);
 
     const renderShapes = useCallback((preview = null) => {
@@ -650,7 +596,7 @@ export default function ClassStudent() {
             ctx.restore();
         }
     }, []);
-    renderShapesRef.current = renderShapes;
+    useLayoutEffect(() => { renderShapesRef.current = renderShapes; }, [renderShapes]);
 
     const findShapeAtPoint = useCallback((point) => {
         const canvas = shapeCanvasRef.current;
@@ -705,6 +651,7 @@ export default function ClassStudent() {
         if (!socketRef.current || !joinedRef.current) return;
 
         if (socketRef.current.connected) socketRef.current.emit('draw', {
+            boardGeneration:deltaRef.current.generationId,
             state: 'shape',
             ...shapeObject,
             isEraser: false
@@ -716,6 +663,7 @@ export default function ClassStudent() {
         if (!socketRef.current || !joinedRef.current) return;
 
         if (socketRef.current.connected) socketRef.current.emit('draw', {
+            boardGeneration:deltaRef.current.generationId,
             state: 'shape-move',
             ...shapeObject,
             isEraser: false
@@ -799,24 +747,12 @@ export default function ClassStudent() {
 
             studentLastPos.current = { x: coords.rawX, y: coords.rawY };
             
-            const ctx = contextRef.current;
-            if (ctx) {
-                setupContextMode();
-                ctx.beginPath();
-                ctx.moveTo(coords.rawX, coords.rawY);
-                ctx.lineTo(coords.rawX, coords.rawY); // dot
-                ctx.stroke();
-            }
-
-            const isEraser = activeToolRef.current === 'eraser';
-            const stroke = {
-                color: penColorRef.current,
-                size: isEraser ? 20 : 3,
-                isEraser,
-                points: [{ x: coords.x, y: coords.y }],
-            };
-            drawingHistoryRef.current.push(stroke);
-            activeStudentStrokeRef.current = stroke;
+            const rect=canvas.getBoundingClientRect(),isEraser=activeToolRef.current==='eraser';
+            const stroke={id:crypto.randomUUID(),color:penColorRef.current,size:isEraser?20:3,isEraser,
+                surfaceWidth:rect.width,surfaceHeight:rect.height,points:[{x:coords.x,y:coords.y}]};
+            drawingHistoryRef.current.push(stroke);activeStudentStrokeRef.current=stroke;
+            if(contextRef.current)paintStrokeSegment(contextRef.current,coords,coords,stroke,rect.width,rect.height);
+            try{canvas.setPointerCapture(e.pointerId);}catch{ /* Synthetic tests and cancelled OS pointers have no capture target. */ }
 
             emitDrawEvent('start', coords);
         };
@@ -840,17 +776,11 @@ export default function ClassStudent() {
                 return;
             }
 
-            const ctx = contextRef.current;
-            if (ctx) {
-                setupContextMode();
-                ctx.beginPath();
-                ctx.moveTo(studentLastPos.current.x, studentLastPos.current.y);
-                ctx.lineTo(coords.rawX, coords.rawY);
-                ctx.stroke();
-                studentLastPos.current = { x: coords.rawX, y: coords.rawY };
-            }
-            const rect = canvas.getBoundingClientRect();
-            appendStrokePoint(activeStudentStrokeRef.current, coords.x, coords.y, rect.width, rect.height);
+            const stroke=orderedStroke(drawingHistoryRef.current,activeStudentStrokeRef),rect=canvas.getBoundingClientRect();
+            if(!stroke)return;
+            if(contextRef.current)paintStrokeSegment(contextRef.current,stroke.points.at(-1),coords,stroke,rect.width,rect.height);
+            appendStrokePoint(stroke,coords.x,coords.y);
+            studentLastPos.current={x:coords.rawX,y:coords.rawY};
 
             emitDrawEvent('move', coords);
         };
@@ -900,11 +830,12 @@ export default function ClassStudent() {
             isDrawing.current = false;
             activePointerId.current = null;
 
-            const rect = canvas.getBoundingClientRect();
-            appendStrokePoint(activeStudentStrokeRef.current, coords.x, coords.y, rect.width, rect.height);
-            activeStudentStrokeRef.current = null;
-
-            emitDrawEvent('end', coords);
+            const rect=canvas.getBoundingClientRect(),stroke=orderedStroke(drawingHistoryRef.current,activeStudentStrokeRef);
+            const end=(e.type==='pointercancel'||e.type==='lostpointercapture')&&stroke ? stroke.points.at(-1) : coords;
+            if(stroke){if(contextRef.current)paintStrokeSegment(contextRef.current,stroke.points.at(-1),end,stroke,rect.width,rect.height);appendStrokePoint(stroke,end.x,end.y);}
+            emitDrawEvent('end',end);
+            activeStudentStrokeRef.current=null;
+            try{if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);}catch{ /* Already cancelled. */ }
         };
 
         const handleTouchStart = (e) => {
@@ -918,6 +849,7 @@ export default function ClassStudent() {
         canvas.addEventListener('pointerup', handlePointerUp, { passive: false });
         canvas.addEventListener('pointerleave', handlePointerUp, { passive: false });
         canvas.addEventListener('pointercancel', handlePointerUp, { passive: false });
+        canvas.addEventListener('lostpointercapture', handlePointerUp);
         canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
 
         return () => {
@@ -926,14 +858,16 @@ export default function ClassStudent() {
             canvas.removeEventListener('pointerup', handlePointerUp);
             canvas.removeEventListener('pointerleave', handlePointerUp);
             canvas.removeEventListener('pointercancel', handlePointerUp);
+            canvas.removeEventListener('lostpointercapture', handlePointerUp);
             canvas.removeEventListener('touchstart', handleTouchStart);
         };
-        }, [joined, locked, buzzerLocked, getCoordinates, setupContextMode, emitDrawEvent, drawShapePreview, emitShapeEvent, emitShapeMoveEvent, findShapeAtPoint, renderShapes, updateDraggedShape]);
+        }, [joined, locked, buzzerLocked, getCoordinates, emitDrawEvent, drawShapePreview, emitShapeEvent, emitShapeMoveEvent, findShapeAtPoint, renderShapes, updateDraggedShape]);
 
 
     const [clearProgress, setClearProgress] = useState(0);
 
     const clearCanvas = () => {
+        isDrawing.current=false;activePointerId.current=null;
         snapshotsRef.current?.reset();
         latestTeacherSync.current += 1;
         deltaRef.current.reset();

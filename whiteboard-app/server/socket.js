@@ -27,6 +27,9 @@ module.exports = function(io, app, {
   };
 
   const rooms = new Map();
+  const liveEpoch = randomUUID(); let liveClock = 0;
+  const orders = (room,key) => { if (!room.liveOrders.has(key)) room.liveOrders.set(key,{student:0,teacher:0}); return room.liveOrders.get(key); };
+  const checkpointOrder = snapshot => snapshot.liveOrder?.epoch === liveEpoch ? snapshot.liveOrder : {epoch:liveEpoch,student:0,teacher:0};
   const checkpoints = createCheckpoints(checkpointStore, { intervalMs: checkpointIntervalMs });
   const repairs = new Map();
   const generation = (room, key) => room.boardEpochs.get(key) || room.boardGeneration;
@@ -86,7 +89,7 @@ module.exports = function(io, app, {
   function getRoom(roomId) {
     if (!rooms.has(roomId)) {
       rooms.set(roomId, {
-        sessionId: randomUUID(), boardGeneration: randomUUID(), boardEpochs: new Map(),
+        sessionId: randomUUID(), boardGeneration: randomUUID(), boardEpochs: new Map(), liveOrders: new Map(),
         teacherSocket: null,
         ownerId: null,
         audienceRules: [],
@@ -150,25 +153,26 @@ module.exports = function(io, app, {
     // Teachers render the finished PNG; only a returning student needs the
     // editable vector history and base image. PNG is already compressed.
     if (room.teacherSocket) io.to(room.teacherSocket).compress(false).emit('student-board-snapshot', {
-      studentId: participantKey, ...teacherBoard(snapshot),
+      studentId: participantKey, ...teacherBoard(snapshot), boardGeneration: generation(room, participantKey),
     });
     if (studentSocketId) io.to(studentSocketId).compress(false).emit('student-board-snapshot', {
-      studentId: participantKey, ...snapshot, boardGeneration: generation(room, participantKey),
+      studentId: participantKey, ...snapshot, liveOrder: checkpointOrder(snapshot), boardGeneration: generation(room, participantKey),
     });
   }
 
   function emitBoardSnapshotToSocket(roomId, participantKey, socketId) {
-    const snapshot = rooms.get(roomId)?.studentBoards.get(participantKey);
+    const room=rooms.get(roomId);
+    const snapshot = room?.studentBoards.get(participantKey);
     if (snapshot) io.to(socketId).compress(false).emit('student-board-snapshot', {
-      studentId: participantKey, ...teacherBoard(snapshot),
+      studentId: participantKey, ...teacherBoard(snapshot), boardGeneration: generation(room, participantKey),
     });
   }
 
 
   function teacherBoard(snapshot) {
     return snapshot.protocol === 2
-      ? { baseImageData: snapshot.baseImageData, strokes: snapshot.strokes, shapes: snapshot.shapes }
-      : { imageData: snapshot.imageData, shapes: snapshot.shapes };
+      ? { baseImageData: snapshot.baseImageData, strokes: snapshot.strokes, shapes: snapshot.shapes, liveOrder: checkpointOrder(snapshot) }
+      : { imageData: snapshot.imageData, shapes: snapshot.shapes, liveOrder: checkpointOrder(snapshot) };
   }
   function repair(roomId, key, immediate) {
     const id = JSON.stringify(roomId) + ':' + key;
@@ -211,6 +215,10 @@ module.exports = function(io, app, {
       }
       if (!points.length) continue;
       normalized.push({
+        ...(typeof stroke.id === 'string' && stroke.id.length <= 100 ? {id:stroke.id} : {}),
+        ...(Number.isFinite(stroke.surfaceWidth) && stroke.surfaceWidth > 0 && stroke.surfaceWidth <= 10000
+          && Number.isFinite(stroke.surfaceHeight) && stroke.surfaceHeight > 0 && stroke.surfaceHeight <= 10000
+          ? {surfaceWidth:stroke.surfaceWidth,surfaceHeight:stroke.surfaceHeight} : {}),
         color: typeof stroke.color === 'string' && /^#[\da-f]{3,8}$/i.test(stroke.color) ? stroke.color : '#111827',
         size: Number.isFinite(stroke.size) && stroke.size > 0 && stroke.size <= 100 ? stroke.size : 3,
         isEraser: stroke.isEraser === true,
@@ -557,10 +565,12 @@ module.exports = function(io, app, {
       const room = roomId ? rooms.get(roomId) : null;
       const participantKey = room?.studentSocketKeys.get(socket.id);
       if (room?.teacherSocket && !socket.data.isTeacher && participantKey) {
+        if (data.boardGeneration && data.boardGeneration !== generation(room, participantKey)) return;
+        const order=++liveClock; orders(room,participantKey).student=order;
         // Students display their own board only. Broadcasting each pointer
         // movement to every classmate multiplied the live traffic by class size.
         io.to(room.teacherSocket).compress(false).emit('draw', {
-          ...data,
+          ...data, origin:'student', liveOrder:{epoch:liveEpoch,order},
           studentId: participantKey,
           studentName: room.students.get(participantKey)?.name || socket.data.name,
         });
@@ -572,7 +582,12 @@ module.exports = function(io, app, {
       const room = roomId ? rooms.get(roomId) : null;
       const participant = room?.students.get(data?.studentId);
       if (!socket.data.isTeacher || room?.teacherSocket !== socket.id || !participant) return;
-      for (const socketId of participant.sockets) io.to(socketId).emit('teacher-draw', data);
+      if (data.boardGeneration && data.boardGeneration !== generation(room, data.studentId)) return;
+      const order=++liveClock; orders(room,data.studentId).teacher=order;
+      const event={...data,origin:'teacher',liveOrder:{epoch:liveEpoch,order}};
+      // Updated teachers match this acknowledgement to their optimistic edit.
+      if(typeof data.eventId==='string')io.to(room.teacherSocket).emit('draw',event);
+      for (const socketId of participant.sockets) io.to(socketId).emit('teacher-draw', event);
     });
 
     socket.on('teacher-board-sync', (data) => {
@@ -621,7 +636,9 @@ module.exports = function(io, app, {
         if (strokes.length > 2000 || pointCount(strokes) > 60000) return respond({ success: false, needsReset: true });
         room.studentBoards.set(participantKey, { protocol: 2, epoch: data.epoch, seq: data.seq,
           imageData: null, baseImageData: data.replace ? data.baseImageData : previous.baseImageData,
-          strokes, shapes: normalizeBoardShapes(data.shapes) });
+          strokes, shapes: normalizeBoardShapes(data.shapes), liveOrder:{epoch:liveEpoch,
+            student:orders(room,participantKey).student,
+            teacher:data.teacherEpoch===liveEpoch && Number.isSafeInteger(data.teacherOrder) ? Math.max(0,Math.min(data.teacherOrder,orders(room,participantKey).teacher)) : 0} });
         save(roomId, participantKey); repair(roomId, participantKey, data.replace);
         return respond({ success: true });
       }
@@ -652,6 +669,7 @@ module.exports = function(io, app, {
       const participantKey = room?.studentSocketKeys.get(socket.id);
       if (roomId && !socket.data.isTeacher && participantKey) {
         room.studentBoards.delete(participantKey);
+        room.liveOrders.delete(participantKey);
         save(roomId, participantKey);
         if (room.teacherSocket) io.to(room.teacherSocket).emit('student-clear', {
           studentId: participantKey, studentName: socket.data.name,
@@ -665,6 +683,7 @@ module.exports = function(io, app, {
       if (roomId && socket.data.isTeacher && room?.teacherSocket === socket.id) {
         const keys = [...room.studentBoards.keys()];
         room.studentBoards.clear();
+        room.liveOrders.clear();
         room.boardGeneration = randomUUID(); room.boardEpochs.clear();
         save(roomId); for (const key of keys) save(roomId, key);
         io.to(roomId).emit('clear-board', { boardGeneration: room.boardGeneration });

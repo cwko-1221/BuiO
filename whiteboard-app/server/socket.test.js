@@ -164,7 +164,7 @@ test('28 simultaneous writers send live strokes only to the teacher and restore 
     assert.equal(student.received.filter(item => item.event === 'draw').length, 0, 'classmates must receive no unnecessary pen traffic');
   }
   const checkpoint = teacher.received.find(item => item.event === 'student-board-snapshot').value;
-  assert.deepEqual(Object.keys(checkpoint).sort(), ['imageData', 'shapes', 'studentId']);
+  assert.deepEqual(Object.keys(checkpoint).sort(), ['boardGeneration', 'imageData', 'liveOrder', 'shapes', 'studentId']);
   for (let i = 0; i < 14; i++) students[i].io.engine.close();
   await delay(30);
   const restored = await Promise.all(Array.from({ length: 14 }, (_, i) => f.join('student', `LOAD${i}`)));
@@ -395,4 +395,56 @@ test('only the owner can edit or end a school classroom; malformed settings do n
   assert.equal((await f.api('/api/whiteboard/sessions/end', { roomId: 'lesson' }, { role: 'student', studentId: 'S3' })).status, 403);
   assert.equal((await f.api('/api/whiteboard/sessions/lesson/audience', { audienceRules: [{ classNames: 'P2' }] }, { method: 'PUT' })).status, 400);
   assert.equal((await f.api('/api/whiteboard/sessions', undefined, { role: 'student', studentId: 'S3' })).sessions.length, 0);
+});
+
+
+test('accepted checkpoints identify precisely which student and teacher live edits they cover', async t => {
+  const f=await fixture(t,undefined,{repairIntervalMs:20});
+  const teacher=await f.join('teacher','T1'),student=await f.join();
+  const boardGeneration=student.received.find(item=>item.event==='teacher-connection').value.boardGeneration;
+  const studentEdit=nextEvent(teacher,'draw');
+  student.emit('draw',{state:'start',x:.1,y:.2,strokeId:'student-stroke',size:3,surfaceWidth:1200,surfaceHeight:900,boardGeneration});
+  const live=await studentEdit;
+  const packet={protocol:2,epoch:'causal-test',seq:1,replace:true,start:0,baseImageData:null,boardGeneration,
+    strokes:[{id:'student-stroke',points:[{x:.1,y:.2}],size:3,color:'#111827',surfaceWidth:1200,surfaceHeight:900}],shapes:[]};
+  const send=body=>new Promise((resolve,reject)=>student.timeout(2000).emit('student-board-snapshot',body,(error,result)=>error?reject(error):resolve(result)));
+  const firstSnapshot=nextEvent(teacher,'student-board-snapshot');
+  assert.equal((await send(packet)).success,true);
+  const first=await firstSnapshot;
+  assert.equal(first.liveOrder.student,live.liveOrder.order);
+  assert.equal(first.strokes[0].surfaceWidth,1200);assert.equal(first.strokes[0].surfaceHeight,900);
+  assert.equal(first.strokes[0].id,'student-stroke');
+  const echo=nextEvent(teacher,'draw'),forward=nextEvent(student,'teacher-draw');
+  teacher.emit('teacher-draw',{studentId:'student:S1',state:'start',x:.5,y:.5,eventId:'teacher-event',strokeId:'teacher-stroke',boardGeneration});
+  const teacherEdit=await echo,received=await forward;
+  assert.equal(teacherEdit.eventId,'teacher-event');assert.equal(received.liveOrder.order,teacherEdit.liveOrder.order);
+  assert.equal(teacherEdit.liveOrder.epoch,live.liveOrder.epoch);assert.ok(teacherEdit.liveOrder.order>live.liveOrder.order);
+  const reconciled=nextEvent(teacher,'student-board-snapshot',value=>value.liveOrder.teacher===teacherEdit.liveOrder.order);
+  assert.equal((await send({...packet,seq:2,teacherEpoch:teacherEdit.liveOrder.epoch,teacherOrder:teacherEdit.liveOrder.order})).success,true);
+  const second=await reconciled;
+  assert.equal(second.liveOrder.student,live.liveOrder.order);
+});
+
+test('live edits queued before a classroom clear cannot reappear afterwards', async t => {
+  const f=await fixture(t),teacher=await f.join('teacher','T1'),student=await f.join();
+  const oldGeneration=student.received.find(item=>item.event==='teacher-connection').value.boardGeneration;
+  const cleared=nextEvent(student,'clear-board');teacher.emit('clear-board');
+  const state=await cleared;assert.notEqual(state.boardGeneration,oldGeneration);
+  const delivered=nextEvent(teacher,'draw');
+  student.emit('draw',{state:'start',x:.1,y:.1,strokeId:'obsolete',boardGeneration:oldGeneration});
+  student.emit('draw',{state:'start',x:.2,y:.2,strokeId:'current',boardGeneration:state.boardGeneration});
+  assert.equal((await delivered).strokeId,'current');
+  assert.equal(teacher.received.filter(item=>item.event==='draw'&&item.value.strokeId==='obsolete').length,0);
+});
+
+
+test('legacy teacher gestures are forwarded without being echoed back as student ink', async t => {
+  const f=await fixture(t),teacher=await f.join('teacher','T1'),student=await f.join();
+  const forwarded=nextEvent(student,'teacher-draw');
+  teacher.emit('teacher-draw',{studentId:'student:S1',state:'start',x:.1,y:.1,strokeId:'legacy-teacher'});
+  assert.equal((await forwarded).strokeId,'legacy-teacher');
+  const barrier=nextEvent(teacher,'draw');
+  student.emit('draw',{state:'start',x:.2,y:.2,strokeId:'ordering-barrier'});
+  assert.equal((await barrier).strokeId,'ordering-barrier');
+  assert.equal(teacher.received.filter(item=>item.event==='draw'&&item.value.strokeId==='legacy-teacher').length,0);
 });

@@ -1,0 +1,82 @@
+{
+  "pass": false,
+  "scope": "real UI handlers, actual Socket.IO, normalized ink masks with one-pixel tolerance; no physical iPad",
+  "results": [
+    {
+      "browser": "chromium",
+      "cases": [
+        {
+          "label": "fast down/up without a delivered move",
+          "studentPixels": 0,
+          "teacherPixels": 2252,
+          "missing": 0,
+          "extra": 2252,
+          "agreement": 0
+        },
+        {
+          "label": "fast erase across existing ink",
+          "studentPixels": 1997,
+          "teacherPixels": 604,
+          "missing": 1032,
+          "extra": 122,
+          "agreement": 0.556324490580546
+        },
+        {
+          "label": "older accepted checkpoint arrives after newer live ink and erase",
+          "studentPixels": 2913,
+          "teacherPixels": 2252,
+          "missing": 1997,
+          "extra": 1018,
+          "agreement": 0.4162633107454018
+        },
+        {
+          "label": "settled authoritative checkpoint",
+          "studentPixels": 2913,
+          "teacherPixels": 3464,
+          "missing": 189,
+          "extra": 492,
+          "agreement": 0.8932099733416967
+        }
+      ],
+      "errors": []
+    },
+    {
+      "browser": "webkit",
+      "cases": [
+        {
+          "label": "fast down/up without a delivered move",
+          "studentPixels": 0,
+          "teacherPixels": 2252,
+          "missing": 0,
+          "extra": 2252,
+          "agreement": 0
+        },
+        {
+          "label": "fast erase across existing ink",
+          "studentPixels": 1511,
+          "teacherPixels": 604,
+          "missing": 781,
+          "extra": 122,
+          "agreement": 0.5730496453900709
+        },
+        {
+          "label": "older accepted checkpoint arrives after newer live ink and erase",
+          "studentPixels": 2912,
+          "teacherPixels": 2252,
+          "missing": 1997,
+          "extra": 1014,
+          "agreement": 0.4169248644461657
+        },
+        {
+          "label": "settled authoritative checkpoint",
+          "studentPixels": 2912,
+          "teacherPixels": 3464,
+          "missing": 190,
+          "extra": 492,
+          "agreement": 0.8930363864491845
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

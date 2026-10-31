@@ -6,7 +6,7 @@ export function createBoardSnapshots({ build, send, intervalMs = 1500, ackTimeou
     let closed = false;
     let timer = null;
     let flight = null;
-    let nextAt = 0;
+    let nextAt = 0, publishedAt = -Infinity;
 
     const cancelTimer = () => { clearTimeout(timer); timer = null; };
     const schedule = () => {
@@ -19,7 +19,8 @@ export function createBoardSnapshots({ build, send, intervalMs = 1500, ackTimeou
         const token = {};
         flight = token;
         dirty = false;
-        nextAt = Date.now() + intervalMs;
+        publishedAt = Date.now();
+        nextAt = publishedAt + intervalMs;
         const finish = (saved) => {
             if (flight !== token) return;
             clearTimeout(token.timer);
@@ -44,6 +45,7 @@ export function createBoardSnapshots({ build, send, intervalMs = 1500, ackTimeou
     }
     return {
         changed() { dirty = true; schedule(); },
+        settled() { dirty = true; nextAt = Math.max(publishedAt + 250, Math.min(nextAt, Date.now() + 60)); cancelTimer(); schedule(); },
         pending() { return dirty || !!flight; },
         connected() { ready = true; schedule(); },
         disconnected() {

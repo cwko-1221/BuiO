@@ -1,10 +1,11 @@
-import { paintStrokes } from '../utils/paintBoard';
+import { createBoardTimeline } from '../utils/boardTimeline.mjs';
+import { paintStrokes, paintStrokeSegment } from '../utils/paintBoard';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { io } from 'socket.io-client';
 import styles from './ClassTeacher.module.css';
-import { createCompositeCanvas, renderShapeLayer } from '../utils/drawing';
+import { renderShapeLayer } from '../utils/drawing';
 import { pngFromWire } from '../utils/pngWire';
 import { watchRoomConnection } from '../utils/roomConnection';
 import ConnectionNotice from './ConnectionNotice';
@@ -36,7 +37,7 @@ export default function ClassTeacher() {
     const [buzzerDisplayCount, setBuzzerDisplayCount] = useState(3);
     const [buzzerDurationSeconds, setBuzzerDurationSeconds] = useState(30);
     const [buzzerState, setBuzzerState] = useState(null);
-    const [buzzerNow, setBuzzerNow] = useState(Date.now());
+    const [buzzerNow, setBuzzerNow] = useState(Date.now);
     const [buzzerClockOffset, setBuzzerClockOffset] = useState(0);
     const [buzzerResults, setBuzzerResults] = useState(null);
     const [buzzerError, setBuzzerError] = useState('');
@@ -53,7 +54,7 @@ export default function ClassTeacher() {
     const [teacherActiveTool, setTeacherActiveTool] = useState('pen');
     const isTeacherDrawing = useRef(false);
     const teacherLastPos = useRef({ normX: 0, normY: 0 });
-    const teacherSyncVersion = useRef(0);
+    const teacherGestureRef = useRef(null);
 
     // Special offscreen canvas for the Teacher Board
     const teacherOffscreenRef = useRef(null);
@@ -88,7 +89,7 @@ export default function ClassTeacher() {
             shapeCtx.lineCap = 'round';
             shapeCtx.lineJoin = 'round';
             // Canvas is transparent — strokes only, bg composited separately
-            offscreenCanvasesRef.current.set(studentId, { canvas, ctx, shapeCanvas, shapeCtx, shapes: [] });
+            offscreenCanvasesRef.current.set(studentId, { canvas, ctx, shapeCanvas, shapeCtx, shapes: [], timeline: createBoardTimeline() });
         }
         return offscreenCanvasesRef.current.get(studentId);
     }, []);
@@ -154,13 +155,14 @@ export default function ClassTeacher() {
             }
         });
 
-        const draw = (data) => {
+        const draw = (data, replaying = false) => {
             const { studentId, id, x, y, state, shape, startX, startY, endX, endY, color, size, isEraser } = data;
             if (!studentId) return;
 
             const offscreen = getOrCreateOffscreen(studentId);
+            if (!replaying && !offscreen.timeline.record(data)) return;
             markChanged(studentId);
-            if (offscreen.pendingDraws) {
+            if (offscreen.pendingDraws && !data.liveOrder) {
                 offscreen.pendingDraws.push(data);
                 return;
             }
@@ -184,36 +186,23 @@ export default function ClassTeacher() {
                 return;
             }
 
-            const localX = x * OFFSCREEN_WIDTH;
-            const localY = y * OFFSCREEN_HEIGHT;
 
             if (state === 'start' || state === 'move' || state === 'end') {
-                const previous = drawStateRef.current.get(studentId);
-                ctx.save();
-                if (isEraser) {
-                    ctx.globalCompositeOperation = 'destination-out';
-                    ctx.lineWidth = size * 2;
-                } else {
-                    ctx.globalCompositeOperation = 'source-over';
-                    ctx.strokeStyle = color;
-                    ctx.lineWidth = size;
-                }
-                // Draw just the new segment. Re-stroking the entire growing
-                // path costs progressively more and can repaint erased pixels.
-                ctx.beginPath();
-                ctx.moveTo(state === 'start' || !previous ? localX : previous.x,
-                    state === 'start' || !previous ? localY : previous.y);
-                ctx.lineTo(localX, localY);
-                ctx.stroke();
-                ctx.restore();
-                drawStateRef.current.set(studentId, { x: localX, y: localY });
+                let positions=drawStateRef.current.get(studentId);
+                if(!positions){positions=new Map();drawStateRef.current.set(studentId,positions);}
+                const key=data.strokeId||(data.origin||'student')+':legacy';
+                const point={x,y},previous=state==='start'?point:(positions.get(key)||point);
+                paintStrokeSegment(ctx,previous,point,{color,size:isEraser?size*2:size,isEraser,
+                    surfaceWidth:data.surfaceWidth||800,surfaceHeight:data.surfaceHeight||600},OFFSCREEN_WIDTH,OFFSCREEN_HEIGHT);
+                positions.set(key,point);
             }
         };
         socketRef.current.on('draw', draw);
 
-        socketRef.current.on('student-board-snapshot', ({ studentId, imageData, baseImageData, strokes, shapes }) => {
+        socketRef.current.on('student-board-snapshot', ({ studentId, imageData, baseImageData, strokes, shapes, liveOrder, boardGeneration }) => {
             if (!studentId) return;
             const offscreen = getOrCreateOffscreen(studentId);
+            offscreen.boardGeneration=boardGeneration;
             const version = (offscreen.snapshotVersion || 0) + 1;
             offscreen.snapshotVersion = version;
             const vector = Array.isArray(strokes);
@@ -223,19 +212,25 @@ export default function ClassTeacher() {
             const replay = () => {
                 const pending = offscreen.pendingDraws || [];
                 offscreen.pendingDraws = null;
-                for (const event of pending) draw(event);
+                for (const event of pending) draw(event,true);
                 markChanged(studentId);
             };
             const apply = image => {
                 if (offscreenCanvasesRef.current.get(studentId) !== offscreen || offscreen.snapshotVersion !== version) return;
+                const newer=liveOrder?offscreen.timeline.confirm(liveOrder):[];
+                if(newer===null){offscreen.pendingDraws=null;return;}
                 offscreen.ctx.globalCompositeOperation = 'source-over';
                 offscreen.ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 if (image) offscreen.ctx.drawImage(image, 0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 if (vector) paintStrokes(offscreen.ctx, strokes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 offscreen.shapes = Array.isArray(shapes) ? shapes.map(shape => ({ ...shape })) : [];
                 renderShapeLayer(offscreen.shapeCtx, offscreen.shapeCanvas, offscreen.shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
-                drawStateRef.current.delete(studentId);
-                replay();
+                const positions=new Map();
+                for(const stroke of strokes||[]){const n=stroke.pointData?stroke.pointData.length/2:stroke.points?.length;
+                    if(n)positions.set(stroke.id||'student:legacy',stroke.pointData?{x:stroke.pointData[(n-1)*2],y:stroke.pointData[(n-1)*2+1]}:stroke.points[n-1]);}
+                drawStateRef.current.set(studentId,positions);
+                if(liveOrder){offscreen.pendingDraws=null;for(const event of newer)draw(event,true);markChanged(studentId);}
+                else replay();
             };
             if (!source) { apply(null); return; }
             const image = new Image();
@@ -247,12 +242,14 @@ export default function ClassTeacher() {
         });
 
         socketRef.current.on('student-clear', ({ studentId }) => {
+            if(teacherGestureRef.current?.studentId===studentId){isTeacherDrawing.current=false;teacherGestureRef.current=null;}
             if (offscreenCanvasesRef.current.has(studentId)) {
                 const offscreen = offscreenCanvasesRef.current.get(studentId);
                 const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
                 markChanged(studentId);
                 offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1;
                 offscreen.pendingDraws = null;
+                offscreen.timeline.clear();drawStateRef.current.delete(studentId);
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 // Only clear strokes — bg image is composited separately in render loop
                 shapes.length = 0;
@@ -260,13 +257,16 @@ export default function ClassTeacher() {
             }
         });
 
-        socketRef.current.on('clear-board', () => {
+        socketRef.current.on('clear-board', (state = {}) => {
+            isTeacherDrawing.current=false;teacherGestureRef.current=null;
             drawStateRef.current.clear();
             for (const [studentId, offscreen] of offscreenCanvasesRef.current) {
+                if(state.boardGeneration)offscreen.boardGeneration=state.boardGeneration;
                 markChanged(studentId);
                 const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
                 offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1;
                 offscreen.pendingDraws = null;
+                offscreen.timeline.clear();drawStateRef.current.delete(studentId);
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 // Only clear strokes — bg image is composited separately in render loop
                 shapes.length = 0;
@@ -390,34 +390,12 @@ export default function ClassTeacher() {
         }
     };
 
-    const emitTeacherDraw = useCallback((studentId, state, normX, normY) => {
-        if (studentId === 'teacher') return; // Don't emit network events for local teacher board
-        if (socketRef.current) {
-            socketRef.current.emit('teacher-draw', {
-                studentId,
-                x: normX,
-                y: normY,
-                state,
-                color: '#ef4444', // Red for teacher
-                size: teacherActiveTool === 'eraser' ? 10 : 3,
-                isEraser: teacherActiveTool === 'eraser'
-            });
-        }
-    }, [teacherActiveTool]);
-
-    // Pointer events provide smooth live feedback, while a lossless snapshot at
-    // the end of each erase gesture guarantees that differently sized student
-    // canvases finish with exactly the same pixels as the teacher's board.
-    const syncTeacherBoard = useCallback((studentId, offscreen) => {
-        if (studentId === 'teacher' || !offscreen?.canvas || !socketRef.current) return;
-
-        teacherSyncVersion.current += 1;
-        const compositeCanvas = createCompositeCanvas(offscreen.canvas, offscreen.shapeCanvas);
-        socketRef.current.emit('teacher-board-sync', {
-            studentId,
-            version: teacherSyncVersion.current,
-            imageData: compositeCanvas.toDataURL('image/png')
-        });
+    const emitTeacherDraw = useCallback((studentId,state,normX,normY) => {
+        if(studentId==='teacher'||!socketRef.current)return;
+        const offscreen=offscreenCanvasesRef.current.get(studentId),gesture=teacherGestureRef.current;
+        const data={studentId,x:normX,y:normY,state,color:'#ef4444',size:gesture?.isEraser?10:3,isEraser:!!gesture?.isEraser,
+            strokeId:gesture?.id,eventId:crypto.randomUUID(),origin:'teacher',surfaceWidth:800,surfaceHeight:600,boardGeneration:offscreen?.boardGeneration};
+        offscreen?.timeline.record(data);socketRef.current.emit('teacher-draw',data);
     }, []);
 
     const getZoomNormCoords = (e) => {
@@ -447,6 +425,7 @@ export default function ClassTeacher() {
         const coords = getZoomNormCoords(e);
         if (!coords) return;
         
+        teacherGestureRef.current={id:crypto.randomUUID(),studentId:zoomedStudent,isEraser:teacherActiveTool==='eraser'};
         isTeacherDrawing.current = true;
         teacherLastPos.current = { normX: coords.normX, normY: coords.normY };
         
@@ -456,7 +435,7 @@ export default function ClassTeacher() {
         const pxY = normY * offscreen.canvas.height;
         
         ctx.beginPath();
-        if (teacherActiveTool === 'eraser') {
+        if (teacherGestureRef.current?.isEraser) {
             ctx.globalCompositeOperation = 'destination-out';
             ctx.lineWidth = 20;
         } else {
@@ -489,7 +468,7 @@ export default function ClassTeacher() {
         const endY = normY * offscreen.canvas.height;
         
         ctx.beginPath();
-        if (teacherActiveTool === 'eraser') {
+        if (teacherGestureRef.current?.isEraser) {
             ctx.globalCompositeOperation = 'destination-out';
             ctx.lineWidth = 20;
         } else {
@@ -512,14 +491,13 @@ export default function ClassTeacher() {
         if (!isTeacherDrawing.current || !zoomedStudent) return;
         if (e.cancelable) e.preventDefault();
         
+        if(e.type!=='pointercancel')handleZoomPointerMove(e);
         isTeacherDrawing.current = false;
         
-        const coords = getZoomNormCoords(e);
+        const coords = e.type==='pointercancel' ? teacherLastPos.current : getZoomNormCoords(e);
         if (coords) {
             emitTeacherDraw(zoomedStudent, 'end', coords.normX, coords.normY);
-            if (teacherActiveTool === 'eraser') {
-                syncTeacherBoard(zoomedStudent, coords.offscreen);
-            }
+
         }
     };
 

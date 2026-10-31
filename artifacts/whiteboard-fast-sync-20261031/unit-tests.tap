@@ -1,0 +1,298 @@
+
+> bui-o-learning-platform@2.0.0 check:whiteboard
+> node --test whiteboard-app/server/socket.test.js whiteboard-app/server/checkpoints.test.js whiteboard-app/server/recovery.test.js whiteboard-app/client/src/utils/boardSnapshots.test.mjs whiteboard-app/client/src/utils/boardDelta.test.mjs whiteboard-app/client/src/utils/paintBoard.test.mjs whiteboard-app/client/src/utils/boardTimeline.test.mjs tests/report-work.test.cjs
+
+✔ six class previews share one read without caching stale results (34.3636ms)
+✔ exports and uploads serialize with previews, failures release the queue, and overload is bounded (1.0836ms)
+✔ growing boards send only the mutable tail; lost acknowledgements do not omit ink (4.1024ms)
+✔ teacher clear, raster replacement and restart reject obsolete acknowledgements (0.313ms)
+✔ simultaneous teacher and student ink repairs an earlier growing stroke (0.4453ms)
+✔ a cold server checkpoint cannot replace newer acknowledged local ink (0.3421ms)
+✔ gesture ends publish the final state promptly without sending more than four settled checkpoints a second (2.8167ms)
+✔ short strokes share checkpoints, with only one whole board awaiting acknowledgement (1.4558ms)
+✔ offline edits survive a lost acknowledgement and wait for confirmed room membership (0.5578ms)
+✔ lost acknowledgements retry the latest checkpoint, and teacher clear cancels pending work (0.5514ms)
+✔ an older checkpoint keeps all newer edits, even those received before the checkpoint (1.7264ms)
+✔ teacher echoes acknowledge local ink without painting it twice (0.2639ms)
+✔ superseded checkpoints cannot replace newer accepted contents; process epochs reset orders (0.1943ms)
+✔ bounded history skips checkpoints that would lose evicted newer edits (14.2384ms)
+✔ compact checkpoints preserve pen/eraser geometry and render the same operations (1.47ms)
+✔ atomic JSON checkpoints survive a new store and retain an explicit end tombstone (9.7387ms)
+✔ slow or failed persistence coalesces newer boards and never overwrites a newer tombstone (1.1756ms)
+✔ PostgreSQL stores only changed parts in one batch and excludes expired checkpoints (1536.2911ms)
+[WB] User connected: PjUhMPVoNGgEzDN1AAAA
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: 5CBjPSK84aAQ4pGNAAAB
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (server shutting down); retaining room for reconnect: lesson
+[WB] User connected: vO5byxuSYPzJq3qXAAAC
+[WB] User connected: TB9yQIQGg6h4ngVdAAAD
+[WB] Participant joined { role: 'teacher' }
+✔ incremental checkpoints survive cold room restoration; end, clear and ownership stay authoritative (127.0493ms)
+[WB] User connected: wDpQv83cHdT_zZH6AAAE
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: 8bUqfC9cnJUF9SCwAAAF
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (server shutting down); retaining room for reconnect: lesson
+✔ legacy binary PNG checkpoints remain readable after a disk-backed restart (16.7717ms)
+[WB] User connected: L-wmkdFXd9p-FwCRAAAA
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: BdamKTSxG6sOI4XTAAAB
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+✔ teacher disconnect defaults to two minutes without ending the classroom immediately (90.8155ms)
+[WB] User connected: F1E48PN8VFaaGFIOAAAC
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: A9pj0zoEYRiM6DsmAAAD
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+✔ a closed teacher tab expires without relying on any browser exit notification (232.697ms)
+[WB] User connected: 5roI0bmqqs-BuB3ZAAAE
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: jfVFhJeJvDkeXunNAAAF
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+[WB] User connected: ktmxc5Zntj8Af-CIAAAG
+[WB] Participant joined { role: 'teacher' }
+✔ reload cancels expiry and preserves the original room and student boards (286.8896ms)
+[WB] User connected: Ycy_oYwQqLQSZFXCAAAH
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: yYC4Kh-etGlaqlEHAAAI
+[WB] User connected: 0DHOqrDdho0b8yDCAAAJ
+[WB] User connected: 6PLJ-zuLMezDVP3mAAAK
+[WB] User connected: G256QyVjOmOZOwYlAAAL
+[WB] User connected: 9JZ5Fm4yv3nEupB9AAAM
+[WB] User connected: _BuTfHQynZRRQBv0AAAN
+[WB] User connected: GuJzO_JgsYOQ7QKMAAAO
+[WB] User connected: HIOL3xWf59rLpZw_AAAP
+[WB] User connected: OWuu091JgkbzUB8YAAAQ
+[WB] User connected: IYEP8QE7KATyz9wJAAAR
+[WB] User connected: fmrieorkKOsqVxzgAAAS
+[WB] User connected: R2vt6TFMso2Gv9QmAAAT
+[WB] User connected: brtq9aIArixFUuadAAAU
+[WB] User connected: b-lWGJKiMHX1CCAtAAAV
+[WB] User connected: n7xW6dBrolfrQXreAAAW
+[WB] User connected: MejGAz4LE3pDDYMqAAAX
+[WB] User connected: 3DC6veeKyifQ-FlrAAAY
+[WB] User connected: 71ySuUWviSJOWDfbAAAZ
+[WB] User connected: zACe0hFOWHIbsUrRAAAa
+[WB] User connected: gf84wF5O4LRK35x4AAAb
+[WB] User connected: G9w1nqKCSBX-Cj4PAAAc
+[WB] User connected: SI_fPRJwclc9BRWJAAAd
+[WB] User connected: 4-_xGG3hZhfGJh65AAAe
+[WB] User connected: LWqs8I_nwAf37kmmAAAf
+[WB] User connected: WOJysvPJ4mNwSZ31AAAg
+[WB] User connected: 3xOZNQJWUYecwjQbAAAh
+[WB] User connected: 3RET4VG1gXUw1wYoAAAi
+[WB] User connected: BZq9eE9ddaoKUP4zAAAj
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] User connected: u6C2m7X4f-ovL9oIAAAk
+[WB] User connected: wL6a3qv336JeIWSdAAAl
+[WB] User connected: UIYOePCyH95rw5L5AAAm
+[WB] User connected: 08j73RpBootX3d_bAAAn
+[WB] User connected: YNX25LJ61vUxx97kAAAo
+[WB] User connected: 9PONsI0GTjUaaubcAAAp
+[WB] User connected: Qbte_L0F3a4jiMeGAAAq
+[WB] User connected: WqfIrN7oZJOB1T4pAAAr
+[WB] User connected: bFtO3HRXQObmslVAAAAs
+[WB] User connected: SdvV3Lby-SzasUugAAAt
+[WB] User connected: FwjeAC081wLdPs1HAAAu
+[WB] User connected: j0UoY07cOwWgcRRnAAAv
+[WB] User connected: BZ8HKx4Bg0QURFf3AAAw
+[WB] User connected: vJXBUlJZ-S3vUoE3AAAx
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+✔ 28 simultaneous writers send live strokes only to the teacher and restore 14 disconnected boards (753.4784ms)
+ℹ 3360 live points delivered once each; previous room broadcast would deliver 94080 copies (96.4% fewer); all 14 boards restored
+✔ anonymous sockets and HTTP requests cannot create or list classrooms (7.9781ms)
+[WB] User connected: Ej_U7kau_R6sBKsFAAAz
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: 28xLpCoeqN2T1FfdAAA0
+[WB] Participant joined { role: 'student' }
+[WB] User connected: V2dfebx6ZJjPNJO7AAA1
+[WB] Participant joined { role: 'student' }
+✔ binary PNG snapshots remain lossless through teacher and student reconnects (13.3641ms)
+[WB] User connected: C1NSZ6f5oMuAqX5DAAA2
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: 7v5aZYwlngT_odWFAAA3
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+[WB] User connected: SbXrn_H3vjw0uA_oAAA4
+[WB] Participant joined { role: 'teacher' }
+✔ teacher transport loss preserves the room, boards, image, lock and buzzer on reconnect (47.2475ms)
+[WB] User connected: Y5mYtqqPXOeVSiYCAAA5
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: 6WLWQp0yL6W5XAJUAAA6
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+[WB] User connected: h_Rbd1uOanS0roeAAAA7
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: zAbK8q8MQi3NLRaHAAA8
+[WB] Participant joined { role: 'student' }
+[WB] User connected: PpIG1zx3Z_FQUTQAAAA9
+[WB] Participant joined { role: 'student' }
+✔ room survives everyone disconnecting and restores the same student board (16.0245ms)
+[WB] User connected: DqhoNES68mUSvSpqAAA-
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: 8rW2dnns8bpUdbF3AAA_
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+[WB] User connected: HjRojIVoU1430ezgAABA
+[WB] Participant joined { role: 'teacher' }
+✔ explicit end is immediate during reconnect and cancels the old expiry timer (249.1025ms)
+[WB] User connected: v3jov8nb6njxwxS4AABB
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: GyGNCX0zGvPEihjCAABC
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+[WB] User connected: tCNsO14aHRQ7A9SvAABD
+✔ grace expiry reports a network timeout, and a late student cannot recreate the room (113.7094ms)
+[WB] User connected: aBlcIZoidWet0NJzAABE
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: KwfWnTfJAUvmQPTXAABF
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: x_150JupfustzjLnAABG
+[WB] Participant joined { role: 'student' }
+✔ a replaced teacher socket disconnecting does not interrupt the current teacher (171.146ms)
+[WB] User connected: 0hMpoQlx8BSiidGCAABH
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: FzPNHS2FlZNI7AagAABI
+[WB] User connected: bE6O_0EQy4Dh94ACAABJ
+[WB] User connected: aIGxFI7bayVrrb5wAABK
+[WB] User connected: 8V_mZW6jYRiFSAEHAABL
+[WB] User connected: vTJ9GmP6lLxD80R2AABM
+[WB] User connected: QUaHo3rfV3bX0oaTAABN
+[WB] User connected: ayUsmMpzWvXimMmXAABO
+[WB] User connected: otrdPIE1FEXRj-dtAABP
+[WB] User connected: h3Yl4ePm5A79UfrOAABQ
+[WB] User connected: BIcYQg58_EzBf0FxAABR
+[WB] User connected: _KsVawJ6lGV9mg9vAABS
+[WB] User connected: dFNP6NV0V3iZ34ITAABT
+[WB] User connected: 9tKWT5ON_lXIUhssAABU
+[WB] User connected: RS1a2e6s-9LitAfTAABV
+[WB] User connected: QFXdvDmpGQuFw_nrAABW
+[WB] User connected: Jw5J949oWXQX-HH1AABX
+[WB] User connected: ZXiXE1GU9FNbFeyrAABY
+[WB] User connected: tK7CeBB3t2uhW5PjAABZ
+[WB] User connected: OchV2wQ-PMKN461KAABa
+[WB] User connected: skkJld3MrmYFxeysAABb
+[WB] User connected: ha7oJIHQavt7t2UkAABc
+[WB] User connected: GTJZDvwGMM7-Pxv-AABd
+[WB] User connected: G69ntzKBPXMD8hMHAABe
+[WB] User connected: uIl_0EWdvwPJ2Q5rAABf
+[WB] User connected: AaSzv-cCnHJjPo95AABg
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+[WB] User connected: 229ukeL50D7elX5rAABh
+[WB] Participant joined { role: 'teacher' }
+✔ 25 concurrent students remain in the same classroom while the teacher reconnects (71.6333ms)
+✔ connection notices distinguish local reconnect from teacher reconnect and detach on cleanup (2.7718ms)
+[WB] User connected: EJajWoDaL0fBARRpAABi
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: __FEuXcZQVPFGwwfAABj
+[WB] Participant joined { role: 'student' }
+[WB] User connected: lpJ6QGfofx-v41i9AABk
+[WB] Participant joined { role: 'student' }
+[WB] User connected: CQndMuwhX7BOa8i4AABl
+✔ whiteboard audience filters the portal and direct joins using the authenticated student account (18.5303ms)
+[WB] User connected: maPX6VcMtLDcmbIOAABm
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: _YH4SD02G-sllxp9AABn
+[WB] Participant joined { role: 'student' }
+[WB] User connected: k6PaJx19zjbmsPklAABo
+[WB] Participant joined { role: 'student' }
+[WB] Teacher disconnected (transport close); retaining room for reconnect: lesson
+[WB] User connected: 71lvjU9JtUCDCPvcAABp
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: 1e8I5jKIE101eRXoAABq
+[WB] Participant joined { role: 'student' }
+✔ visibility changes apply immediately and survive teacher reconnect; clearing them restores public access (49.8704ms)
+[WB] User connected: 6quPb1ivlEBtrgmmAABr
+[WB] Participant joined { role: 'teacher' }
+✔ only the owner can edit or end a school classroom; malformed settings do not open access (11.6453ms)
+[WB] User connected: uPgSXtuhO3M0OBS4AABs
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: g4oPUqDOyjpHmx7WAABt
+[WB] Participant joined { role: 'student' }
+✔ accepted checkpoints identify precisely which student and teacher live edits they cover (11.6766ms)
+[WB] User connected: jYxFdvispDvtvmUvAABu
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: m1twJjd196IKuQ_cAABv
+[WB] Participant joined { role: 'student' }
+✔ live edits queued before a classroom clear cannot reappear afterwards (10.4104ms)
+[WB] User connected: 3OIjdRJzz70ngGHFAABw
+[WB] Participant joined { role: 'teacher' }
+[WB] User connected: HqM8iHXfFsggA00QAABx
+[WB] Participant joined { role: 'student' }
+✔ legacy teacher gestures are forwarded without being echoed back as student ink (9.1729ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2624.8142

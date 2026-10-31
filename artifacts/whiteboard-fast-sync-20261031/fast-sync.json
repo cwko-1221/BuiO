@@ -1,0 +1,114 @@
+{
+  "pass": true,
+  "scope": "real UI handlers, actual Socket.IO, normalized ink masks with one-pixel tolerance; no physical iPad",
+  "results": [
+    {
+      "browser": "chromium",
+      "cases": [
+        {
+          "label": "fast down/up without a delivered move",
+          "studentPixels": 2246,
+          "teacherPixels": 2248,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "fast erase across existing ink",
+          "studentPixels": 1224,
+          "teacherPixels": 1220,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "older accepted checkpoint arrives after newer live ink and erase",
+          "studentPixels": 3168,
+          "teacherPixels": 3468,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "settled authoritative checkpoint",
+          "studentPixels": 3168,
+          "teacherPixels": 3464,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "student writes between two parts of a teacher erase",
+          "studentPixels": 1968,
+          "teacherPixels": 2264,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "interleaved edits survive resizing and vector replay",
+          "studentPixels": 2264,
+          "teacherPixels": 2264,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        }
+      ],
+      "errors": []
+    },
+    {
+      "browser": "webkit",
+      "cases": [
+        {
+          "label": "fast down/up without a delivered move",
+          "studentPixels": 1684,
+          "teacherPixels": 1124,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "fast erase across existing ink",
+          "studentPixels": 927,
+          "teacherPixels": 614,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "older accepted checkpoint arrives after newer live ink and erase",
+          "studentPixels": 3167,
+          "teacherPixels": 1738,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "settled authoritative checkpoint",
+          "studentPixels": 3167,
+          "teacherPixels": 1738,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "student writes between two parts of a teacher erase",
+          "studentPixels": 1967,
+          "teacherPixels": 1138,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        },
+        {
+          "label": "interleaved edits survive resizing and vector replay",
+          "studentPixels": 1701,
+          "teacherPixels": 1138,
+          "missing": 0,
+          "extra": 0,
+          "agreement": 1
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

@@ -6,6 +6,15 @@ import { createBoardSnapshots } from './boardSnapshots.mjs';
 // the ordering being tested. The sustained load harness still uses real time.
 const clock = t => { t.mock.timers.enable({ apis: ['Date', 'setTimeout'], now: 1000 }); return ms => { t.mock.timers.tick(ms); t.mock.timers.tick(0); }; };
 
+test('gesture ends publish the final state promptly without sending more than four settled checkpoints a second',t=>{
+    const advance=clock(t),sent=[];let value=0;
+    const queue=createBoardSnapshots({build:()=>({value}),send:(data,ack)=>{sent.push(data.value);ack({success:true});}});t.after(()=>queue.close());queue.connected();
+    queue.changed();advance(0);
+    for(let i=1;i<=10;i++){value=i;queue.changed();queue.settled();advance(20);}
+    assert.equal(sent.length,1);advance(50);assert.deepEqual(sent,[0,10]);
+    assert.equal(queue.pending(),false);
+});
+
 test('short strokes share checkpoints, with only one whole board awaiting acknowledgement', t => {
     const advance = clock(t);
     const sent = [];
