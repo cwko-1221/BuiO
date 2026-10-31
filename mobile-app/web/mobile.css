@@ -281,6 +281,9 @@ html[data-buio-module="pet"] .buio-brawl-dialog .brawl-heading :is(h1,p) { font-
   }
   html[data-buio-module="pet"] .buio-brawl-preparation:has(#brawlOpponent) .brawl-stage-grid { grid-template-columns: repeat(4,minmax(0,1fr)); grid-template-rows: minmax(44px,1fr); min-height: 44px; }
 }
+@media (max-height:390px) and (orientation:landscape) {
+  html[data-buio-module="pet"] [data-buio-brawl-menu] { padding-top: 1px; padding-bottom: 1px; }
+}
 @media (orientation:portrait) and (max-width:700px) {
   html[data-buio-module="pet"] .buio-brawl-workspace { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) minmax(220px,.8fr); }
   html[data-buio-module="pet"] .buio-brawl-preparation { border-left: 0; padding-left: 0; }

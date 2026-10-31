@@ -147,7 +147,7 @@
     const more = document.createElement('button');
     more.type = 'button'; more.setAttribute('data-buio-more', '');
     more.setAttribute('aria-haspopup', 'dialog');
-    const english = document.documentElement.lang.startsWith('en');
+    const english = nav.querySelector('[data-tab="settings"]')?.textContent.trim() === 'Settings' || document.documentElement.lang.startsWith('en');
     more.innerHTML = '<span aria-hidden="true" class="buio-more-icon">•••</span><span>' + (english ? 'More' : '更多') + '</span>';
     nav.append(more);
     const sheet = document.createElement('dialog');
