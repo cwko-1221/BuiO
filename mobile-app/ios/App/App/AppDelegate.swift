@@ -199,7 +199,7 @@ class BuiOViewController: CAPBridgeViewController {
                 "top": Double(insets.top), "right": Double(insets.right),
                 "bottom": Double(insets.bottom), "left": Double(insets.left)
             ]
-            if let data = try? JSONSerialization.data(withJSONObject: values), let json = String(data: data, encoding: .utf8) {
+            if let data = try? JSONSerialization.data(withJSONObject: values, options: .sortedKeys), let json = String(data: data, encoding: .utf8) {
                 layoutState += json
                 script += "window.BuiONativeLayout=\(json);window.dispatchEvent(new Event('buio:native-layout'));"
             }
