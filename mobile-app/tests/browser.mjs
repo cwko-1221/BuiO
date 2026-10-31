@@ -235,6 +235,16 @@ try {
         await page.locator('.pet-nav [data-tab="home"]').click();
       }
       assert.ok(!page.url().endsWith('/'));
+      const petNavigation = await page.locator('.pet-nav').evaluate(nav => {
+        const box = nav.getBoundingClientRect();
+        const buttons = [...nav.querySelectorAll(':scope > button')].filter(button => button.getBoundingClientRect().width);
+        return { bottom: box.bottom, width: box.width, viewport: innerWidth, height: innerHeight,
+          tops: buttons.map(button => button.getBoundingClientRect().top) };
+      });
+      assert.ok(Math.abs(petNavigation.bottom - petNavigation.height) <= 1 && petNavigation.width >= petNavigation.viewport - 1,
+        `${engine}: pet navigation occupies the bottom edge, not a side column`);
+      assert.ok(Math.max(...petNavigation.tops) - Math.min(...petNavigation.tops) <= 1,
+        `${engine}: pet destinations share one horizontal row`);
       await page.screenshot({ path: path.join(output, `${engine}-pet.png`), fullPage: true });
       await assertFits('pet entry');
       if (deep) {
@@ -265,6 +275,19 @@ try {
           });
           await page.screenshot({ path: path.join(output, `${engine}-pet-room-stage-${size.width}.png`) });
           assert.ok(statusFits, `${engine}: pet name and full Stage text stay inside the status pill`);
+          if (size.width > size.height) {
+            const room = await page.evaluate(() => ({
+              top: document.querySelector('.pet-topbar').getBoundingClientRect().height + document.querySelector('.room-bar').getBoundingClientRect().height,
+              safeTop: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--buio-safe-top')) || 0,
+              playHeight: document.querySelector('.play-surface').getBoundingClientRect().height,
+              actions: [...document.querySelectorAll('.room-bar-actions button')].map(button => {
+                const box = button.getBoundingClientRect(); return { width: box.width, height: box.height };
+              })
+            }));
+            assert.ok(room.top <= 124 + room.safeTop, `${engine}: compact room information and actions: ${JSON.stringify(room)}`);
+            assert.ok(room.playHeight >= size.height / 2, `${engine}: the room keeps at least half the landscape viewport`);
+            assert.ok(room.actions.every(button => button.width >= 44 && button.height >= 44), 'Compact room actions retain touch targets');
+          }
         }
         await page.setViewportSize(roomLandscape);
         await petTab('collection'); await page.locator('.pet-card').first().waitFor();
@@ -273,6 +296,11 @@ try {
         await page.screenshot({ path: path.join(output, `${engine}-pet-shop.png`) });
         await petTab('park'); await page.locator('.park-root').waitFor();
         await page.locator('[data-park-loading]').waitFor({ state: 'hidden', timeout: 45000 });
+        // Exercise the real contextual HUD renderer with a deterministic nearby
+        // object. This checks placement, not walking or quest completion.
+        const { OBJECTS } = await import('../../pet-app/lib/park-world.mjs');
+        await page.evaluate(object => window.__petPark.setNear(object), OBJECTS.find(object => object.id === 'forest-sign'));
+        await page.locator('.park-interact').waitFor({ state: 'visible' });
         for (const size of [viewport, { width: viewport.height, height: viewport.width }]) {
           await page.setViewportSize(size);
           await page.screenshot({ path: path.join(output, `${engine}-pet-park-${size.width}.png`), animations: 'disabled' });
@@ -292,6 +320,24 @@ try {
             });
           });
           assert.ok(safeControls, 'Park floating controls must avoid the camera and home indicator');
+          const parkControls = await page.evaluate(() => {
+            const tools = document.querySelector('.park-bottom-tools').getBoundingClientRect();
+            const interact = document.querySelector('.park-interact').getBoundingClientRect();
+            const stick = document.querySelector('.park-joystick').getBoundingClientRect();
+            return { tools: { left: tools.left, right: tools.right, top: tools.top, bottom: tools.bottom },
+              interact: { right: interact.right, bottom: interact.bottom },
+              stick: { right: stick.right, bottom: stick.bottom, top: stick.top },
+              buttons: [...document.querySelectorAll('.park-bottom-tools button')].map(button => {
+                const box = button.getBoundingClientRect(); return { width: box.width, height: box.height };
+              }) };
+          });
+          assert.ok(parkControls.interact.bottom <= parkControls.tools.top - 8,
+            `The destination must sit above the six tools without overlap: ${JSON.stringify(parkControls)}`);
+          assert.ok(Math.abs(parkControls.interact.right - parkControls.tools.right) <= 1, 'Destination and tools share the right edge');
+          assert.ok(parkControls.tools.left >= parkControls.stick.right + 4 || parkControls.tools.bottom <= parkControls.stick.top - 4,
+            'Park tools must not cover the movement joystick');
+          assert.equal(parkControls.buttons.length, 6);
+          assert.ok(parkControls.buttons.every(button => button.width >= 44 && button.height >= 44), 'All six park tools retain touch targets');
         }
         await page.setViewportSize(viewport);
         await page.locator('.park-hud [data-park="home"]').click();

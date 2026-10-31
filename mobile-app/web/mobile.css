@@ -105,6 +105,36 @@ html[data-buio-module="pet"] .park-hud {
   inset: var(--buio-safe-top) var(--buio-safe-right) var(--buio-safe-bottom) var(--buio-safe-left);
   width: auto;
   height: auto;
+  --buio-park-tools-height: 56px;
+}
+/* Keep the contextual destination above the six persistent tools, leaving
+   the lower-right edge predictable while walking between objects. */
+html[data-buio-module="pet"] .park-bottom-tools {
+  left: auto;
+  right: 12px;
+  bottom: 16px;
+  transform: none;
+  box-sizing: border-box;
+  min-height: var(--buio-park-tools-height);
+  padding: 5px;
+  gap: 0;
+  align-items: center;
+}
+html[data-buio-module="pet"] .park-bottom-tools button {
+  flex: 0 0 auto;
+  min-width: 44px;
+  min-height: 44px;
+  height: 44px;
+}
+html[data-buio-module="pet"] .park-interact {
+  right: 12px;
+  bottom: calc(16px + var(--buio-park-tools-height) + 10px);
+  min-height: 48px;
+  max-width: calc(100% - 24px);
+}
+@media (max-width: 430px) {
+  html[data-buio-module="pet"] .park-hud { --buio-park-tools-height: 100px; }
+  html[data-buio-module="pet"] .park-bottom-tools { display: grid; grid-template-columns: repeat(3, 44px); }
 }
 html[data-buio-module="pet"] :is(.park-loading, .park-drawer-backdrop, .park-dialog-backdrop, .park-garden-backdrop, .park-social-backdrop, .park-activity-root, .park-mini-panel) {
   padding: max(12px, var(--buio-safe-top)) max(12px, var(--buio-safe-right)) max(12px, var(--buio-safe-bottom)) max(12px, var(--buio-safe-left));
@@ -339,35 +369,59 @@ html[data-buio-app] .pet-nav [data-buio-more] { display: none; }
   html[data-buio-module="pet"] .pet-status { grid-template-columns: auto minmax(0, 1fr); gap: 2px 6px; }
   html[data-buio-module="pet"] .pet-status > .room-bar-stage { grid-column: 1 / -1; grid-row: 2; justify-self: start; }
 }
-/* Landscape phones use a right-hand activity rail so room controls and
-   navigation do not consume most of the short playfield's height. */
-@media (max-height: 500px) and (max-width: 1100px) {
-  html[data-buio-module="pet"] .pet-shell:not(.brawl-active):not([data-screen="park"]):not([data-screen="coin-pusher"]) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) calc(72px + var(--buio-safe-right));
-    grid-template-rows: auto minmax(0, 1fr);
+/* Compact the room chrome itself; keep navigation along the bottom on both
+   phones and iPads instead of allocating a permanent right-hand column. */
+@media (orientation: landscape) {
+  html[data-buio-module="pet"] .pet-topbar {
+    min-height: calc(56px + var(--buio-safe-top));
+    padding-block: calc(4px + var(--buio-safe-top)) 4px;
+    gap: 8px;
   }
-  html[data-buio-module="pet"] .pet-shell > .pet-topbar { grid-column: 1; grid-row: 1; padding-right: 8px; gap: 8px; }
-  html[data-buio-module="pet"] .pet-shell > .pet-main { grid-column: 1; grid-row: 2; }
+  html[data-buio-module="pet"] .brand { padding-block: 0; }
+  html[data-buio-module="pet"] .brand-mark { width: 36px; height: 36px; font-size: 20px; }
+  html[data-buio-module="pet"] .round-button { width: 44px; height: 44px; font-size: 18px; }
+  html[data-buio-module="pet"] .pet-status { min-height: 36px; padding: 4px 10px; gap: 2px 8px; border-width: 2px; }
+  html[data-buio-module="pet"] .pet-status > b { font-size: clamp(13px, 1.5vw, 16px); }
+  html[data-buio-module="pet"] .pet-status > .rarity { font-size: 10px; padding: 3px 6px; }
+  html[data-buio-module="pet"] .pet-status > .room-bar-stage { font-size: 12px; }
+  html[data-buio-module="pet"] .pet-status > .progress { grid-column: 1; grid-row: 2; }
+  html[data-buio-module="pet"] .pet-status > small { grid-column: 2 / -1; grid-row: 2; justify-self: end; font-size: 11px; }
+  html[data-buio-module="pet"] .wallet > span { min-height: 36px; min-width: 80px; padding: 3px 10px; border-width: 2px; }
+  html[data-buio-module="pet"] .wallet b { font-size: 14px; }
+  html[data-buio-module="pet"] .wallet small { font-size: 10px; }
+  html[data-buio-module="pet"] .wallet .icon { font-size: 18px; }
+  html[data-buio-module="pet"] .room-bar { padding-block: 4px 8px; }
+  html[data-buio-module="pet"] .room-bar-actions { gap: 6px; }
+  html[data-buio-module="pet"] .room-bar-actions button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 4px 6px;
+    border-width: 2px;
+    border-radius: 14px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  html[data-buio-module="pet"] .room-bar-actions button .icon { font-size: 18px; }
+  html[data-buio-module="pet"] .pet-nav { padding-top: 4px; padding-bottom: calc(8px + var(--buio-safe-bottom)); }
+  html[data-buio-module="pet"] .pet-nav > button {
+    flex-direction: row;
+    gap: 6px;
+    min-height: 44px;
+    padding: 4px 6px;
+    border-width: 2px;
+    border-radius: 14px;
+  }
+  html[data-buio-module="pet"] .pet-nav > button > span { display: inline-block; }
+  html[data-buio-module="pet"] .pet-nav > button > span:last-child { white-space: nowrap; line-height: 1.2; }
+}
+@media (max-height: 599px) and (max-width: 1100px) and (orientation: landscape) {
   html[data-buio-module="pet"] .pet-topbar .brand span:last-child { display: none; }
   html[data-buio-module="pet"] .pet-status > :is(.progress, small) { display: none; }
-  html[data-buio-module="pet"] .room-bar { padding-block: 6px; padding-right: 8px; }
-  html[data-buio-module="pet"] .room-bar-actions button { min-height: 48px; padding: 4px; }
-  html[data-buio-module="pet"] .pet-shell:not(.brawl-active):not([data-screen="park"]):not([data-screen="coin-pusher"]) > .pet-nav {
-    grid-column: 2;
-    grid-row: 1 / -1;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: minmax(44px, 1fr);
-    gap: 4px;
-    min-height: 0;
-    padding: 8px calc(8px + var(--buio-safe-right)) calc(8px + var(--buio-safe-bottom)) 8px;
-    border-top: 0;
-    border-left: 1px solid #d9c8ac;
-  }
-  html[data-buio-module="pet"] .pet-nav > button { min-height: 44px; padding: 4px 2px; }
-  html[data-buio-module="pet"] .pet-nav > button > span { display: inline-block; }
-  html[data-buio-module="pet"] .pet-nav > button > span:last-child { white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
+  html[data-buio-module="pet"] .pet-topbar { min-height: 52px; }
+  html[data-buio-module="pet"] .pet-nav > button { max-width: none; }
 }
 @media (min-width: 900px) {
   html[data-buio-page="hub"] .app-shell { grid-template-columns: 220px minmax(0, 1fr) !important; }
