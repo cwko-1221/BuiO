@@ -202,6 +202,7 @@
         if (!content || content.hasAttribute('data-buio-brawl-menu')) return;
         content.setAttribute('data-buio-brawl-menu', '');
         const english = content.querySelector('[data-brawl="mode"][data-id="campaign"]')?.textContent.trim() === 'Adventure' || document.documentElement.lang.startsWith('en');
+        content.lang = english ? 'en' : 'zh-HK';
         const text = (zh, en) => english ? en : zh;
         const button = (label, className) => {
           const item = document.createElement('button'); item.type = 'button'; item.textContent = label;
@@ -271,11 +272,11 @@
             if (!width || !height) return;
             const short = innerHeight < 600;
             const columns = Math.max(2, Math.floor((width + 6) / (short ? 82 : 96)));
-            const rows = Math.max(1, Math.min(4, Math.floor((height + 6) / (short ? 68 : 106))));
+            const rows = Math.max(1, Math.min(4, Math.floor((height + 6) / (short ? (english ? 76 : 68) : 106))));
             const cardWidth = (width - 6 * (columns - 1)) / columns;
             roster.style.gridAutoColumns = cardWidth + 'px';
             roster.style.gridTemplateRows = `repeat(${rows},minmax(0,1fr))`;
-            roster.style.setProperty('--buio-fighter-art', Math.max(30, Math.min(72, (height - 6 * (rows - 1)) / rows - 32)) + 'px');
+            roster.style.setProperty('--buio-fighter-art', Math.max(30, Math.min(72, (height - 6 * (rows - 1)) / rows - (english ? 48 : 32))) + 'px');
             const count = roster.querySelectorAll('.brawl-fighter').length;
             [...roster.querySelectorAll('.brawl-fighter')].forEach((card, index) => {
               const page = Math.floor(index / (columns * rows));
