@@ -1,0 +1,27 @@
+{
+  "pass": true,
+  "results": [
+    {
+      "teacherPath": "teacher",
+      "studentPath": "student",
+      "sharedDeltaCheckpoints": true,
+      "reloadRestoresInk": true,
+      "idlePaints": 0,
+      "teacherAnnotation": true,
+      "shapeCreatedAndMoved": true,
+      "clear": true,
+      "errors": []
+    },
+    {
+      "teacherPath": "class-teacher",
+      "studentPath": "class-student",
+      "sharedDeltaCheckpoints": true,
+      "reloadRestoresInk": true,
+      "idlePaints": 0,
+      "teacherAnnotation": true,
+      "shapeCreatedAndMoved": true,
+      "clear": true,
+      "errors": []
+    }
+  ]
+}

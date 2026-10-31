@@ -1,3 +1,5 @@
+import { paintStrokes } from '../utils/paintBoard';
+import { pngFromWire } from '../utils/pngWire';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
@@ -22,7 +24,8 @@ export default function Teacher() {
 
     // students: [{ socketId, name }]
     const [students, setStudents] = useState([]);
-    const [page, setPage] = useState(0);
+    const [requestedPage, setPage] = useState(0);
+    const page = Math.min(requestedPage, Math.max(0, Math.ceil(students.length / STUDENTS_PER_PAGE) - 1));
     const [zoomedStudent, setZoomedStudent] = useState(null); // socketId or null
     const [showLargeQR, setShowLargeQR] = useState(false);
     const [locked, setLocked] = useState(false);
@@ -45,7 +48,12 @@ export default function Teacher() {
     const gridCanvasRefs = useRef(new Map());
     // Ref for zoomed canvas
     const zoomCanvasRef = useRef(null);
-    const animFrameRef = useRef(null);
+    const requestPaintRef = useRef(() => {});
+    const markChanged = useCallback((id) => {
+        const board = id === 'teacher' ? teacherOffscreenRef.current : offscreenCanvasesRef.current.get(id);
+        if (board) board.revision = (board.revision || 0) + 1;
+        requestPaintRef.current();
+    }, []);
 
     useEffect(() => {
         const canvas = document.createElement('canvas');
@@ -107,11 +115,16 @@ export default function Teacher() {
             }
         });
 
-        socketRef.current.on('draw', (data) => {
+        const draw = (data) => {
             const { studentId, id, x, y, state, shape, startX, startY, endX, endY, color, size, isEraser } = data;
             if (!studentId) return;
 
             const offscreen = getOrCreateOffscreen(studentId);
+            markChanged(studentId);
+            if (offscreen.pendingDraws) {
+                offscreen.pendingDraws.push(data);
+                return;
+            }
             const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
 
             if (state === 'shape' && shape) {
@@ -135,11 +148,9 @@ export default function Teacher() {
             const localX = x * OFFSCREEN_WIDTH;
             const localY = y * OFFSCREEN_HEIGHT;
 
-            if (state === 'start') {
-                ctx.beginPath();
-                ctx.moveTo(localX, localY);
-                drawStateRef.current.set(studentId, { drawing: true });
-            } else if (state === 'move') {
+            if (state === 'start' || state === 'move' || state === 'end') {
+                const previous = drawStateRef.current.get(studentId);
+                ctx.save();
                 if (isEraser) {
                     ctx.globalCompositeOperation = 'destination-out';
                     ctx.lineWidth = size * 2;
@@ -148,16 +159,60 @@ export default function Teacher() {
                     ctx.strokeStyle = color;
                     ctx.lineWidth = size;
                 }
+                // Draw just the new segment. Re-stroking the entire growing
+                // path costs progressively more and can repaint erased pixels.
+                ctx.beginPath();
+                ctx.moveTo(state === 'start' || !previous ? localX : previous.x,
+                    state === 'start' || !previous ? localY : previous.y);
                 ctx.lineTo(localX, localY);
                 ctx.stroke();
-            } else if (state === 'end') {
-                drawStateRef.current.set(studentId, { drawing: false });
+                ctx.restore();
+                drawStateRef.current.set(studentId, { x: localX, y: localY });
             }
+        };
+        socketRef.current.on('draw', draw);
+
+        socketRef.current.on('student-board-snapshot', ({ studentId, imageData, baseImageData, strokes, shapes }) => {
+            if (!studentId) return;
+            const offscreen = getOrCreateOffscreen(studentId);
+            const version = (offscreen.snapshotVersion || 0) + 1;
+            offscreen.snapshotVersion = version;
+            const vector = Array.isArray(strokes);
+            const source = pngFromWire(vector ? baseImageData : imageData);
+            if (!vector && (typeof source !== 'string' || !source.startsWith('data:image/png;base64,'))) return;
+            offscreen.pendingDraws = [];
+            const replay = () => {
+                const pending = offscreen.pendingDraws || [];
+                offscreen.pendingDraws = null;
+                for (const event of pending) draw(event);
+                markChanged(studentId);
+            };
+            const apply = image => {
+                if (offscreenCanvasesRef.current.get(studentId) !== offscreen || offscreen.snapshotVersion !== version) return;
+                offscreen.ctx.globalCompositeOperation = 'source-over';
+                offscreen.ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                if (image) offscreen.ctx.drawImage(image, 0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                if (vector) paintStrokes(offscreen.ctx, strokes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                offscreen.shapes = Array.isArray(shapes) ? shapes.map(shape => ({ ...shape })) : [];
+                renderShapeLayer(offscreen.shapeCtx, offscreen.shapeCanvas, offscreen.shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                drawStateRef.current.delete(studentId);
+                replay();
+            };
+            if (!source) { apply(null); return; }
+            const image = new Image();
+            image.onload = () => apply(image);
+            image.onerror = () => {
+                if (offscreenCanvasesRef.current.get(studentId) === offscreen && offscreen.snapshotVersion === version) replay();
+            };
+            image.src = source;
         });
 
         socketRef.current.on('student-clear', ({ studentId }) => {
             if (offscreenCanvasesRef.current.has(studentId)) {
-                const { ctx, shapeCanvas, shapeCtx, shapes } = offscreenCanvasesRef.current.get(studentId);
+                markChanged(studentId);
+                const offscreen = offscreenCanvasesRef.current.get(studentId);
+                offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1; offscreen.pendingDraws = null;
+                const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 ctx.fillStyle = '#ffffff';
@@ -169,7 +224,10 @@ export default function Teacher() {
 
         socketRef.current.on('clear-board', () => {
             // Clear all offscreen canvases
-            for (const [, { ctx, shapeCanvas, shapeCtx, shapes }] of offscreenCanvasesRef.current) {
+            for (const [studentId, offscreen] of offscreenCanvasesRef.current) {
+                markChanged(studentId);
+                offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1; offscreen.pendingDraws = null;
+                const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
                 ctx.fillStyle = '#ffffff';
@@ -183,78 +241,57 @@ export default function Teacher() {
             stopWatchingConnection();
             if (socketRef.current) socketRef.current.disconnect();
         };
-    }, [roomId, getOrCreateOffscreen]);
+    }, [roomId, getOrCreateOffscreen, markChanged]);
 
-    // Animation loop — copy offscreen canvases to visible grid canvases + zoom canvas
+    // Idle boards schedule no animation frames. A changed board, layout,
+    // background or newly visible page requests one coalesced paint.
     useEffect(() => {
+        let frame = null, cache = new WeakMap();
+        const paint = (canvas, board) => {
+            if (!canvas || !board) return;
+            if (cache.has(canvas) && cache.get(canvas) === board.revision) return;
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height || rect.bottom < 0 || rect.top > innerHeight) return;
+            const dpr = Math.min(2, window.devicePixelRatio || 1);
+            const width = Math.round(rect.width * dpr), height = Math.round(rect.height * dpr);
+            if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(board.canvas, 0, 0, width, height);
+            if (board.shapeCanvas) ctx.drawImage(board.shapeCanvas, 0, 0, width, height);
+            cache.set(canvas, board.revision);
+        };
         const render = () => {
-            // Render grid canvases
-            for (const [studentId, canvasEl] of gridCanvasRefs.current) {
-                if (!canvasEl) continue;
-                const offscreen = offscreenCanvasesRef.current.get(studentId);
-                if (!offscreen) continue;
-
-                const ctx = canvasEl.getContext('2d');
-                const rect = canvasEl.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-
-                // Ensure canvas buffer matches display size
-                if (canvasEl.width !== Math.round(rect.width * dpr) || canvasEl.height !== Math.round(rect.height * dpr)) {
-                    canvasEl.width = Math.round(rect.width * dpr);
-                    canvasEl.height = Math.round(rect.height * dpr);
-                }
-
-                ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-                ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
-                if (offscreen.shapeCanvas) {
-                    ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
-                }
-            }
-
-            // Render zoom canvas
-            if (zoomedStudent && zoomCanvasRef.current) {
-                const offscreen = zoomedStudent === 'teacher' 
-                    ? teacherOffscreenRef.current 
-                    : offscreenCanvasesRef.current.get(zoomedStudent);
-                
-                if (offscreen) {
-                    const canvasEl = zoomCanvasRef.current;
-                    const ctx = canvasEl.getContext('2d');
-                    const rect = canvasEl.getBoundingClientRect();
-                    const dpr = window.devicePixelRatio || 1;
-
-                    if (canvasEl.width !== Math.round(rect.width * dpr) || canvasEl.height !== Math.round(rect.height * dpr)) {
-                        canvasEl.width = Math.round(rect.width * dpr);
-                        canvasEl.height = Math.round(rect.height * dpr);
-                    }
-
-                    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-                    ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
-                    if (offscreen.shapeCanvas) {
-                        ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
-                    }
-                }
-            }
-
-            animFrameRef.current = requestAnimationFrame(render);
+            frame = null;
+            for (const [id, canvas] of gridCanvasRefs.current) paint(canvas, offscreenCanvasesRef.current.get(id));
+            paint(zoomCanvasRef.current, zoomedStudent === 'teacher' ? teacherOffscreenRef.current : offscreenCanvasesRef.current.get(zoomedStudent));
         };
-
-        animFrameRef.current = requestAnimationFrame(render);
+        const request = (layout = false) => {
+            if (layout === true) cache = new WeakMap();
+            if (frame === null && !document.hidden) frame = requestAnimationFrame(render);
+        };
+        const layout = () => request(true);
+        requestPaintRef.current = request;
+        const resize = new ResizeObserver(layout);
+        for (const canvas of gridCanvasRefs.current.values()) resize.observe(canvas);
+        if (zoomCanvasRef.current) resize.observe(zoomCanvasRef.current);
+        window.addEventListener('resize', layout);
+        window.addEventListener('scroll', layout, true);
+        document.addEventListener('visibilitychange', layout);
+        request();
         return () => {
-            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+            if (frame !== null) cancelAnimationFrame(frame);
+            resize.disconnect(); requestPaintRef.current = () => {};
+            window.removeEventListener('resize', layout);
+            window.removeEventListener('scroll', layout, true);
+            document.removeEventListener('visibilitychange', layout);
         };
-    }, [zoomedStudent]);
+    }, [zoomedStudent, page, students]);
 
     // Pagination
     const totalPages = Math.max(1, Math.ceil(students.length / STUDENTS_PER_PAGE));
     const visibleStudents = students.slice(page * STUDENTS_PER_PAGE, (page + 1) * STUDENTS_PER_PAGE);
-
-    // Adjust page if students leave and page is now out of bounds
-    useEffect(() => {
-        if (page >= totalPages) {
-            setPage(Math.max(0, totalPages - 1));
-        }
-    }, [page, totalPages]);
 
     const clearAllBoards = () => {
         if (socketRef.current) {
@@ -337,6 +374,7 @@ export default function Teacher() {
         ctx.lineTo(pxX, pxY);
         ctx.stroke();
         
+        markChanged(zoomedStudent);
         emitTeacherDraw(zoomedStudent, 'start', normX, normY);
     };
 
@@ -370,6 +408,7 @@ export default function Teacher() {
         ctx.stroke();
         
         teacherLastPos.current = { normX, normY };
+        markChanged(zoomedStudent);
         emitTeacherDraw(zoomedStudent, 'move', normX, normY);
     };
 
@@ -381,6 +420,7 @@ export default function Teacher() {
         
         const coords = getZoomNormCoords(e);
         if (coords) {
+            markChanged(zoomedStudent);
             emitTeacherDraw(zoomedStudent, 'end', coords.normX, coords.normY);
         }
     };
@@ -526,6 +566,7 @@ export default function Teacher() {
                                                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                                                 ctx.fillStyle = '#ffffff';
                                                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                                markChanged('teacher');
                                             }
                                         }}
                                     >Clear</button>

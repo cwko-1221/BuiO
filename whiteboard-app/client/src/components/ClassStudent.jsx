@@ -1,3 +1,5 @@
+import { decodeStrokes } from '../utils/paintBoard';
+import { createBoardDelta } from '../utils/boardDelta.mjs';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -6,7 +8,7 @@ import styles from './ClassStudent.module.css';
 import { drawShape, shapeContainsPoint } from '../utils/drawing';
 import { watchRoomConnection } from '../utils/roomConnection';
 import ConnectionNotice from './ConnectionNotice';
-import { pngToWire, pngFromWire } from '../utils/pngWire';
+import { pngFromWire } from '../utils/pngWire';
 import { createBoardSnapshots } from '../utils/boardSnapshots.mjs';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
@@ -82,6 +84,8 @@ export default function ClassStudent() {
     const boardRestoreVersionRef = useRef(0);
     const boardRestoringRef = useRef(false);
     const snapshotsRef = useRef(null);
+    const deltaRef = useRef(null);
+    if (!deltaRef.current) deltaRef.current = createBoardDelta();
 
     useEffect(() => { activeToolRef.current = activeTool; }, [activeTool]);
     useEffect(() => { penColorRef.current = penColor; }, [penColor]);
@@ -185,10 +189,7 @@ export default function ClassStudent() {
         if (hasStrokeState) {
             baseDrawingImageDataRef.current = isPng(snapshot.baseImageData) ? snapshot.baseImageData : null;
             baseDrawingImageRef.current = null;
-            drawingHistoryRef.current = snapshot.strokes.map((stroke) => ({
-                ...stroke,
-                points: Array.isArray(stroke.points) ? stroke.points.map((point) => ({ ...point })) : [],
-            }));
+            drawingHistoryRef.current = decodeStrokes(snapshot.strokes);
         } else {
             baseDrawingImageDataRef.current = isPng(snapshot?.imageData) ? snapshot.imageData : null;
             baseDrawingImageRef.current = null;
@@ -225,19 +226,21 @@ export default function ClassStudent() {
         const canvas = canvasRef.current;
         if (!canvas || !socketRef.current || !joinedRef.current) return;
         try {
-            const imageData = canvas.toDataURL('image/png');
-            const strokes = drawingHistoryRef.current.map((stroke) => ({
-                ...stroke,
-                points: stroke.points.map((point) => ({ ...point })),
-            }));
-            const vectorPointCount = strokes.reduce((total, stroke) => total + stroke.points.length, 0);
-            const useRasterFallback = strokes.length > 2_000 || vectorPointCount > 60_000;
-            return {
-                imageData: pngToWire(imageData),
-                baseImageData: pngToWire(useRasterFallback ? imageData : baseDrawingImageDataRef.current),
-                strokes: useRasterFallback ? [] : strokes,
-                shapes: shapeObjectsRef.current.map((shape) => ({ ...shape })),
-            };
+            const strokes = drawingHistoryRef.current;
+            const pointCount = strokes.reduce((n, stroke) => n + stroke.points.length, 0);
+            if ((strokes.length > 400 || pointCount > 10000) && !activeStudentStrokeRef.current && !activeTeacherStrokeRef.current) {
+                // Rare compaction bounds editable history. Ordinary checkpoints
+                // do not encode a PNG or clone the whole drawing.
+                const copy = document.createElement('canvas');
+                copy.width = canvas.width; copy.height = canvas.height;
+                copy.getContext('2d').drawImage(canvas, 0, 0);
+                baseDrawingImageDataRef.current = copy.toDataURL('image/png');
+                baseDrawingImageRef.current = copy;
+                drawingHistoryRef.current = [];
+                deltaRef.current.reset();
+            }
+            return deltaRef.current.build({ strokes: drawingHistoryRef.current,
+                baseImageData: baseDrawingImageDataRef.current, shapes: shapeObjectsRef.current });
         } catch (error) {
             console.warn('[WB] Could not save student board snapshot:', error);
         }
@@ -251,8 +254,10 @@ export default function ClassStudent() {
 
         const socket = io(SERVER_URL);
         socketRef.current = socket;
+        let joinedGeneration = null;
         const snapshots = createBoardSnapshots({
             build: buildBoardSnapshot,
+            onResult: (packet, result) => deltaRef.current.result(packet, result),
             // Socket.IO's timeout also removes its internal acknowledgement
             // callback if the connection loses a response.
             send: (snapshot, ack) => socket.timeout(5000).emit('student-board-snapshot', snapshot,
@@ -263,13 +268,21 @@ export default function ClassStudent() {
         socket.on('disconnect', () => snapshots.disconnected());
         // The socket connects before room membership is restored. Send the
         // latest local board only after the server confirms the room join.
-        socket.on('teacher-connection', () => snapshots.connected());
+        socket.on('teacher-connection', state => {
+            if (typeof state.boardGeneration === 'string') {
+                if (joinedGeneration && joinedGeneration !== state.boardGeneration) clearFromTeacher(state);
+                joinedGeneration = state.boardGeneration;
+                deltaRef.current.generation(joinedGeneration);
+            }
+            snapshots.connected();
+        });
         const flush = () => snapshots.flush();
         const onVisibility = () => { if (document.visibilityState === 'hidden') flush(); };
         window.addEventListener('pagehide', flush);
         document.addEventListener('visibilitychange', onVisibility);
 
         socket.on('connect', () => {
+            deltaRef.current.reset();
             socket.emit('join-room', { roomId, name, isTeacher: false });
         });
 
@@ -279,6 +292,12 @@ export default function ClassStudent() {
         });
 
         socket.on('student-board-snapshot', (snapshot) => {
+            if (snapshot.boardGeneration) {
+                if (joinedGeneration && joinedGeneration !== snapshot.boardGeneration) clearFromTeacher(snapshot);
+                joinedGeneration = snapshot.boardGeneration;
+                deltaRef.current.generation(joinedGeneration);
+            }
+            if (deltaRef.current.isOlder(snapshot)) { snapshots.changed(); return; }
             // A stale saved checkpoint must not erase edits made while offline
             // or while the previous checkpoint's acknowledgement was lost.
             if (!snapshots.pending()) restoreBoardSnapshot(snapshot);
@@ -306,8 +325,12 @@ export default function ClassStudent() {
         });
 
         // Handle teacher clearing ALL boards — only clear the drawing layer
-        socket.on('clear-board', () => {
+        function clearFromTeacher(state = {}) {
+            latestTeacherSync.current += 1;
+            if (state.boardGeneration) joinedGeneration = state.boardGeneration;
+            deltaRef.current.generation(state.boardGeneration);
             snapshots.reset();
+            deltaRef.current.reset();
             boardRestoreVersionRef.current += 1;
             boardRestoringRef.current = false;
             pendingBoardSnapshotRef.current = null;
@@ -334,7 +357,8 @@ export default function ClassStudent() {
                 shapeCtx.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height);
                 shapeCtx.restore();
             }
-        });
+        }
+        socket.on('clear-board', clearFromTeacher);
 
         // Handle teacher locking boards
         socket.on('lock-board', () => {
@@ -397,15 +421,18 @@ export default function ClassStudent() {
                 teacherLastPos.current = { x: cssX, y: cssY };
             }
             ctx.restore();
-            if (state === 'end') activeTeacherStrokeRef.current = null;
+            if (state === 'end') { activeTeacherStrokeRef.current = null; snapshots.changed(); }
         });
 
         // Reconcile the complete stroke layer after every teacher gesture. This
         // removes any residue caused by rapid erasing, event batching or the
         // teacher and student canvases having different aspect ratios.
-        socket.on('teacher-board-sync', ({ imageData }) => {
+        socket.on('teacher-board-sync', ({ imageData, boardGeneration }) => {
+            if (boardGeneration) joinedGeneration = boardGeneration;
+            deltaRef.current.generation(boardGeneration);
             if (typeof imageData !== 'string' || !imageData.startsWith('data:image/png;base64,')) return;
             snapshots.reset();
+            deltaRef.current.reset();
 
             const syncToken = latestTeacherSync.current + 1;
             latestTeacherSync.current = syncToken;
@@ -908,6 +935,8 @@ export default function ClassStudent() {
 
     const clearCanvas = () => {
         snapshotsRef.current?.reset();
+        latestTeacherSync.current += 1;
+        deltaRef.current.reset();
         const ctx = contextRef.current;
         const canvas = canvasRef.current;
         if (ctx && canvas) {

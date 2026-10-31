@@ -1,0 +1,1 @@
+PostgreSQL report schema, exact-file/observation persistence, atomic revision conflicts and task completion passed.

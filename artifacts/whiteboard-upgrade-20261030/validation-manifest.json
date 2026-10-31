@@ -1,0 +1,227 @@
+{
+  "pass": true,
+  "completedAt": "2026-10-30T11:40:25.059Z",
+  "preview": "http://localhost:3000/whiteboard",
+  "checks": {
+    "unitTests": 31,
+    "wholeClientLint": true,
+    "clientBuild": true,
+    "chromeAndWebkit": true,
+    "bothWhiteboardEntryPoints": true,
+    "shapeCreateAndMove": true,
+    "worksheetAndCrashRecovery": true,
+    "thirtyRealMinutes": 1801.072,
+    "unchangedLoadTestSources": true,
+    "homeworkIntegration": true,
+    "physicalIpad": false,
+    "schoolWifi": false,
+    "productionResourceLimits": false,
+    "pushed": false,
+    "homeworkExcelIntegration": true,
+    "postgreSQLReportRevision": true,
+    "visualReview": true,
+    "previewDatabaseUnchanged": true
+  },
+  "capacity": {
+    "localPeakRssMiB": 508.84765625,
+    "cpuP95PercentOfOneLocalCore": 47.002528736046074,
+    "notCapacityApprovalFor512MiB": true,
+    "notes": "Protocol load clients retain all vectors; browser clients compact long drawings. JSON database and Windows do not model production PostgreSQL and CPU limits."
+  },
+  "sources": [
+    {
+      "file": "package.json",
+      "sha256": "80d99c0e371d652cf1a255e99981d77c7e22e95afecb3e122e5e372694f5774a"
+    },
+    {
+      "file": "whiteboard-app/client/src/components/ClassTeacher.jsx",
+      "sha256": "8f113416914a3968bf2d9636addb9aee0706207aa839ffca0f0c49aa913adffd"
+    },
+    {
+      "file": "whiteboard-app/client/src/components/ClassStudent.jsx",
+      "sha256": "283ea8a03b006d2adde19b6076fccb6c55cfcee7c26c0ae6d1b5b19728193a4a"
+    },
+    {
+      "file": "whiteboard-app/client/src/components/Teacher.jsx",
+      "sha256": "22f315598731b57172604d4227611e995c855779e52e8f8ea763c2952ab939e9"
+    },
+    {
+      "file": "whiteboard-app/client/src/components/Student.jsx",
+      "sha256": "46b947167c118120c3787ad543cb7b0d34856b849cdf14ddc306625f474fad25"
+    },
+    {
+      "file": "whiteboard-app/client/src/utils/boardDelta.mjs",
+      "sha256": "f599cb0ae40b19085264550892f5237fddf7d8885ca29e5dfcb7f090893bcdbe"
+    },
+    {
+      "file": "whiteboard-app/client/src/utils/boardSnapshots.mjs",
+      "sha256": "ccb9257f8c220547ae226d836226c50d489fcbcbee96eec4d2ff2f171bdb67da"
+    },
+    {
+      "file": "whiteboard-app/client/src/utils/paintBoard.js",
+      "sha256": "28a205b4182aaadfe7d7c175a5214e05fbd62af5d580c6a8c93d524829611e1f"
+    },
+    {
+      "file": "whiteboard-app/server/socket.js",
+      "sha256": "c4d2aaa56826dfe843da964046cf859f8bfae7b659c2cae298b8f51358e1ed00"
+    },
+    {
+      "file": "whiteboard-app/server/checkpoints.js",
+      "sha256": "e45b18814395d28cc73ed7eb245a4fec551c428a3c612016e3dba864af287fca"
+    },
+    {
+      "file": "whiteboard-app/server/board-vectors.js",
+      "sha256": "73d61f3335e91d5f48309ee0e18fc28878272c6c3a694defb4c008db71d80da7"
+    },
+    {
+      "file": "homework-app/lib/weekly-reports.js",
+      "sha256": "9c133d1f9b0e8cb6136fe4f4ce58e8a4056439e109dec160f819bfda1dc6a0b8"
+    },
+    {
+      "file": "homework-app/lib/report-work.js",
+      "sha256": "39b342bc429b78c8b2ec46b778a85ede2f128b904364eaa8be67f840132d0360"
+    },
+    {
+      "file": "db/migrations/20261030_whiteboard_checkpoints.sql",
+      "sha256": "9d20baa12c9a08ab708a99370bee9111484f809ba67d3015118e50dcbac90718"
+    },
+    {
+      "file": "whiteboard-app/server/socket.test.js",
+      "sha256": "45bcb3bf5378718c6d26280aa51779507b315cae2ec6061c922e4d767b782a45"
+    },
+    {
+      "file": "whiteboard-app/server/checkpoints.test.js",
+      "sha256": "02103560454d58e5b4a7902656ca2b1bca37804b449614cbcaa467d884b7603b"
+    },
+    {
+      "file": "whiteboard-app/server/recovery.test.js",
+      "sha256": "a2e54f1469bced03230e7cdabac9bf24b0e95a1a470f381d23b529740c446536"
+    },
+    {
+      "file": "whiteboard-app/client/src/utils/boardDelta.test.mjs",
+      "sha256": "285075dfdbf248a8cb5c4a63e8dcbbd007b2d6a3e1f1cc7a66992eb62b3cb901"
+    },
+    {
+      "file": "whiteboard-app/client/src/utils/boardSnapshots.test.mjs",
+      "sha256": "fae1533afdf8f0d4fafbc7bfe2ca7702116ed120e509bf53687902bed2c64206"
+    },
+    {
+      "file": "whiteboard-app/client/src/utils/paintBoard.test.mjs",
+      "sha256": "08b818a54e9fa46679a2cbaf68a886a441b09f5bef1cc42cea8ec8ca06923349"
+    },
+    {
+      "file": "tests/report-work.test.cjs",
+      "sha256": "07e1715d1078990d9733f6ef98d47795fcc65f5de3d88ae2e928f02a0a2c6b25"
+    },
+    {
+      "file": "scripts/test-whiteboard-classroom-live.mjs",
+      "sha256": "617943894075a1bee25ab6e913ea6f5ddeb1825776419bd485b52a859a07694d"
+    },
+    {
+      "file": "scripts/test-whiteboard-views-live.mjs",
+      "sha256": "94f87b9f0d31cfd72ee34c332eeca67615ed7804bb1088960918e7ecf030fe1a"
+    },
+    {
+      "file": "scripts/test-whiteboard-restart-live.mjs",
+      "sha256": "d0fb20e0cc76f7b9babc751c610310b254ac80e70d5b8464d620390fad651786"
+    },
+    {
+      "file": "scripts/test-classroom-mixed-load.mjs",
+      "sha256": "441252ebcbc24ae61c62fdb0aa6c2bd6662af7cfc8abf8bf70f147a879ad7db9"
+    },
+    {
+      "file": "scripts/lib/classroom-load-server.cjs",
+      "sha256": "2c142d0668ae3edad955af23f65ee522282045064f420d7e314936221a62dc66"
+    },
+    {
+      "file": "docs/whiteboard-performance-recovery-20261030.md",
+      "sha256": "f8f834e5718c70ed9ee2a9947aeb9834c91ad7fd53f2f0597ef15a4349e53a60"
+    },
+    {
+      "file": "docs/whiteboard-classroom-load-20261030.md",
+      "sha256": "988d3a2d554c72d7912f4defa2469d4b3c0d50cb4405af8806d699a937012cce"
+    },
+    {
+      "file": "whiteboard-app/README.md",
+      "sha256": "e692e4448a013e2dbc0a79cac81f861cf391a3d21209ee69e3bef4094e1351b0"
+    }
+  ],
+  "evidence": [
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/unit-tests.tap",
+      "sha256": "2c78ede2c2bf2222b6a1e160e869cbbb5ee0e0a318e96deadc68f048f4b3fdc5"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/browser-classroom.json",
+      "sha256": "d3e5d419beb4fa017d75967a7a10b646d8a0cbc4c28e1446ab0bfcb8b5ba2456"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/browser-entry-points.json",
+      "sha256": "452a780411a6fd819726011cd05e031b791ce0261d86b3e50c643dc3d6cb3d4d"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/browser-crash-recovery.json",
+      "sha256": "ae97b5e2a0f5802320969ce716258855162613afbba257d45ee16165bab55ef5"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/mixed-load-30min.json",
+      "sha256": "297c60ccbc33d945aa62543260f44c7ada75ec56935dc3907dcea6cb30ab49e5"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/mixed-load-metrics.json",
+      "sha256": "851d166efb7a33a09de3f0c0e723e78d67e4697e699fe4b6b81958f269f68775"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/mixed-load-smoke.json",
+      "sha256": "7a5feb8dd4ea79a75f73d0d86ba69015c4fdc9fb5877aa58898210bff3734606"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/homework-integration.txt",
+      "sha256": "3e68e65534b537d057980fadf0e932491297e50c6c30b76ea1ec245cba809015"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/lint.txt",
+      "sha256": "27dd07fc01366c58b50be336aaab3407239818af284b20a5b1f2a24cf30ce73d"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/build.txt",
+      "sha256": "550fafbfc61d8f003dc0ea2833287dd8ecf3076b3ec59ab2079dda5ffb014314"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/chromium-teacher-zoom.png",
+      "sha256": "6ba8543df17054bee852f56a8748c7989950dce29a88f618ce6eb981f7baa45a"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/webkit-after-teacher-reload.png",
+      "sha256": "6e05790151f7cef24dc9e909e5e628d953c508aaccf587bf7c9dee62deaead7c"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/ordinary-whiteboard-zoom.png",
+      "sha256": "c759d4e94a76141179da1459070982ab27b006eef9847e27d331b6b6e4e96af5"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/after-crash-student.png",
+      "sha256": "a5b7c62eca3c1125fd45223fc548d72b575e53e092dbafec6370ae9148ccd8b4"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/homework-excel.txt",
+      "sha256": "1be2de8d2d668ca959d9277adbdab2a46e5d6657726a4bee8ceed47e6105db88"
+    },
+    {
+      "file": "artifacts/whiteboard-upgrade-20261030/homework-postgres.txt",
+      "sha256": "cdee0a7de96ae7e7d1be52f41f4f6ad3cbf1b780bec475f912e90a331ad30d28"
+    }
+  ],
+  "productionCapacityVerification": {
+    "status": "pending-workspace-confirmation",
+    "availableWorkspaceName": "Ko",
+    "reason": "Render has no selected workspace; user confirmation was requested before read-only resource inspection."
+  },
+  "otherObservations": [
+    {
+      "component": "local preview Google TTS warmup",
+      "code": "BILLING_DISABLED",
+      "productionConfigurationVerified": false
+    }
+  ]
+}

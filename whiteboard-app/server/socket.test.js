@@ -45,7 +45,7 @@ async function fixture(t, teacherReconnectGraceMs, serverOptions = {}) {
     { studentId: 'S3', name: 'Three', className: 'P2', chineseGroup: 'A', englishGroup: 'B', mathGroup: 'A' },
   ];
   registerWhiteboard(io, app, {
-    teacherReconnectGraceMs,
+    checkpointStore: null, teacherReconnectGraceMs,
     rosterProvider: async () => ({ academicYear: '2026-2027', students, classes: ['P1', 'P2'] }),
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

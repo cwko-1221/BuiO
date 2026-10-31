@@ -1,0 +1,1 @@
+Excel: immutable Week 6, exact fonts/layout, independent name/count colours, all detention marks, legacy regeneration, incremental weeks, all crossed tiers, no duplicate actions, late records, persistence and access controls passed.

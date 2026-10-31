@@ -7,7 +7,7 @@
     "check:science-inquiry-live": "node scripts/test-science-inquiry-live.mjs",
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs && node scripts/test-tower-defense.mjs && node scripts/test-phonics-module.mjs && node scripts/test-science-lab.mjs && node scripts/test-pet-module.mjs && node --test tests/science-inquiry.test.cjs",
+    "check": "node scripts/check.mjs && node scripts/audit-reference-map.mjs && node scripts/validate-game-v2.mjs && node scripts/test-checkpoint-themes.mjs && node scripts/test-game-physics.mjs && node scripts/test-game-recovery.mjs && node scripts/test-game-crumble.mjs && node scripts/test-game-launcher.mjs && node scripts/test-game-lasers.mjs && node scripts/test-game-network.mjs && node scripts/test-tower-defense.mjs && node scripts/test-phonics-module.mjs && node scripts/test-science-lab.mjs && node scripts/test-pet-module.mjs && node --test tests/science-inquiry.test.cjs && npm run check:whiteboard",
     "check:game": "node scripts/validate-game-v2.mjs",
     "check:game-ipad-ui": "node scripts/test-game-ipad-ui.mjs",
     "check:checkpoint-themes": "node scripts/test-checkpoint-themes.mjs",
@@ -94,7 +94,10 @@
     "check:classroom-performance": "node --test pet-app/tests/classroom-verifier.test.cjs tests/password-worker.test.cjs tests/password-auth.test.cjs && node scripts/test-pet-classroom-network.mjs",
     "check:classroom-hot-paths": "node --test tests/classroom-hot-paths.test.cjs",
     "check:game-latency-live": "node scripts/test-game-latency-live.mjs",
-    "check:pet-latency-live": "node scripts/test-pet-latency-live.cjs"
+    "check:pet-latency-live": "node scripts/test-pet-latency-live.cjs",
+    "check:whiteboard": "node --test whiteboard-app/server/socket.test.js whiteboard-app/server/checkpoints.test.js whiteboard-app/server/recovery.test.js whiteboard-app/client/src/utils/boardSnapshots.test.mjs whiteboard-app/client/src/utils/boardDelta.test.mjs whiteboard-app/client/src/utils/paintBoard.test.mjs tests/report-work.test.cjs",
+    "check:whiteboard-live": "node scripts/test-whiteboard-classroom-live.mjs && node scripts/test-whiteboard-views-live.mjs && node scripts/test-whiteboard-restart-live.mjs",
+    "check:classroom-mixed-load": "node scripts/test-classroom-mixed-load.mjs"
   },
   "dependencies": {
     "@ffprobe-installer/ffprobe": "^2.1.2",

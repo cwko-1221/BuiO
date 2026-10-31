@@ -1,0 +1,23 @@
+{
+  "health": 200,
+  "unauthenticatedWhiteboard": 302,
+  "pid": 28152,
+  "dbUnchangedAcrossRestart": true,
+  "files": [
+    {
+      "file": "index.html",
+      "bytes": 617,
+      "sha256": "98c0ae0906c06d74c0a54a9ddd78818c04df85b0d0363571ba5c39f92527498c"
+    },
+    {
+      "file": "assets/index-NV-0VPiG.js",
+      "bytes": 371454,
+      "sha256": "f3f21a194288859bb184131647a56bd3f2cad4288e3cb21ab8b99be87805d923"
+    },
+    {
+      "file": "assets/index-B053H4vo.css",
+      "bytes": 32913,
+      "sha256": "47aa3f27af8ac093dff2dda51ee3a1d406a4065c09b54d8c04f9e98802aeabec"
+    }
+  ]
+}

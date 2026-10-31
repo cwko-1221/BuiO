@@ -1,5 +1,7 @@
 const serverI18n = require('../../shared/server-i18n');
 const { randomUUID } = require('crypto');
+const { createStore, createCheckpoints } = require('./checkpoints');
+const { packStrokes, pointCount } = require('./board-vectors');
 const audience = require('../../shared/classroom-audience');
 const { requireAuth, requireTeacher } = require('../../math-app/middleware/auth');
 
@@ -11,6 +13,7 @@ const TEACHER_RECONNECT_GRACE_MS = 2 * 60 * 1000;
 module.exports = function(io, app, {
   teacherReconnectGraceMs = TEACHER_RECONNECT_GRACE_MS,
   rosterProvider = audience.roster,
+  checkpointStore = createStore(), checkpointIntervalMs = 10000, repairIntervalMs = 8000,
 } = {}) {
   // A room holds students who may have chosen different languages, so the
   // notice is rendered per socket rather than broadcast as one string.
@@ -24,6 +27,42 @@ module.exports = function(io, app, {
   };
 
   const rooms = new Map();
+  const checkpoints = createCheckpoints(checkpointStore, { intervalMs: checkpointIntervalMs });
+  const repairs = new Map();
+  const generation = (room, key) => room.boardEpochs.get(key) || room.boardGeneration;
+  function save(roomId, key) {
+    const room = rooms.get(roomId); if (!room || !room.ownerId) return;
+    checkpoints.put(roomId, 'room', { sessionId: room.sessionId, ownerId: room.ownerId,
+      audienceRules: room.audienceRules, type: room.type, startTime: room.startTime,
+      image: room.image, locked: room.locked, boardGeneration: room.boardGeneration,
+      boardEpochs: [...room.boardEpochs] });
+    if (key) checkpoints.put(roomId, key, { sessionId: room.sessionId, board: room.studentBoards.get(key) || null });
+  }
+  let loading;
+  function ready() {
+    if (!loading) loading = checkpoints.load().then(rows => {
+      for (const row of rows.filter(r => r.part === 'room' && !r.payload.ended)) {
+        const meta = row.payload;
+        if (!meta.ownerId || !meta.sessionId || !meta.boardGeneration) continue;
+        const room = getRoom(row.room);
+        Object.assign(room, meta, { boardEpochs: new Map(meta.boardEpochs || []), teacherDisconnectedAt: Date.now() });
+        for (const part of rows) if (part.room === row.room && part.part !== 'room' && part.payload.sessionId === meta.sessionId && part.payload.board) {
+          const board = part.payload.board;
+          if (board.protocol === 2) board.strokes = packStrokes(board.strokes);
+          for (const key of ['imageData','baseImageData']) if (board[key]?.type === 'Buffer') board[key] = Buffer.from(board[key].data);
+          room.studentBoards.set(part.part, board);
+        }
+        room.teacherReconnectTimer = setTimeout(() => endRoom(row.room, '老師連線中斷超過保留時間，課堂已關閉，請重新加入新課堂'), teacherReconnectGraceMs);
+        room.teacherReconnectTimer.unref?.();
+      }
+    }).catch(error => { loading = null; throw error; });
+    return loading;
+  }
+  io.httpServer?.once('close', () => {
+    for (const timer of repairs.values()) clearTimeout(timer);
+    for (const room of rooms.values()) { clearTimeout(room.teacherReconnectTimer); clearTimeout(room.buzzerTimer); }
+    void checkpoints.close().catch(error => console.error('[WB] checkpoint close:', error.message));
+  });
   app.use('/api/whiteboard', requireAuth);
   const fail = (message, status = 403) => { throw Object.assign(new Error(message), { status }); };
   const wrap = handler => async (req, res) => {
@@ -47,6 +86,7 @@ module.exports = function(io, app, {
   function getRoom(roomId) {
     if (!rooms.has(roomId)) {
       rooms.set(roomId, {
+        sessionId: randomUUID(), boardGeneration: randomUUID(), boardEpochs: new Map(),
         teacherSocket: null,
         ownerId: null,
         audienceRules: [],
@@ -69,7 +109,9 @@ module.exports = function(io, app, {
   function emitTeacherConnection(roomId, target = roomId) {
     const room = rooms.get(roomId);
     if (!room) return;
+    const key = room.studentSocketKeys.get(target);
     io.to(target).emit('teacher-connection', {
+      ...(key ? { boardGeneration: generation(room, key) } : {}),
       connected: !!room.teacherSocket,
       reconnecting: !!room.teacherReconnectTimer,
       reconnectUntil: room.teacherDisconnectedAt === null
@@ -84,6 +126,9 @@ module.exports = function(io, app, {
     clearTimeout(room.teacherReconnectTimer);
     clearTimeout(room.buzzerTimer);
     rooms.delete(roomId);
+    checkpoints.put(roomId, 'room', { ended: true, sessionId: room.sessionId });
+    for (const key of room.studentBoards.keys()) checkpoints.put(roomId, key, { sessionId: room.sessionId, board: null });
+    for (const [key,timer] of repairs) if (key.startsWith(JSON.stringify(roomId) + ':')) { clearTimeout(timer); repairs.delete(key); }
     io.to(roomId).emit('clear-board');
     notifyRoom(roomId, message);
   }
@@ -105,18 +150,32 @@ module.exports = function(io, app, {
     // Teachers render the finished PNG; only a returning student needs the
     // editable vector history and base image. PNG is already compressed.
     if (room.teacherSocket) io.to(room.teacherSocket).compress(false).emit('student-board-snapshot', {
-      studentId: participantKey, imageData: snapshot.imageData, shapes: snapshot.shapes,
+      studentId: participantKey, ...teacherBoard(snapshot),
     });
     if (studentSocketId) io.to(studentSocketId).compress(false).emit('student-board-snapshot', {
-      studentId: participantKey, ...snapshot,
+      studentId: participantKey, ...snapshot, boardGeneration: generation(room, participantKey),
     });
   }
 
   function emitBoardSnapshotToSocket(roomId, participantKey, socketId) {
     const snapshot = rooms.get(roomId)?.studentBoards.get(participantKey);
     if (snapshot) io.to(socketId).compress(false).emit('student-board-snapshot', {
-      studentId: participantKey, imageData: snapshot.imageData, shapes: snapshot.shapes,
+      studentId: participantKey, ...teacherBoard(snapshot),
     });
+  }
+
+
+  function teacherBoard(snapshot) {
+    return snapshot.protocol === 2
+      ? { baseImageData: snapshot.baseImageData, strokes: snapshot.strokes, shapes: snapshot.shapes }
+      : { imageData: snapshot.imageData, shapes: snapshot.shapes };
+  }
+  function repair(roomId, key, immediate) {
+    const id = JSON.stringify(roomId) + ':' + key;
+    if (immediate) { clearTimeout(repairs.get(id)); repairs.delete(id); emitBoardSnapshot(roomId, key); return; }
+    if (repairs.has(id)) return;
+    const timer = setTimeout(() => { repairs.delete(id); emitBoardSnapshot(roomId, key); }, repairIntervalMs);
+    timer.unref?.(); repairs.set(id, timer);
   }
 
   function normalizeBoardShapes(shapes) {
@@ -180,6 +239,7 @@ module.exports = function(io, app, {
     if (!room) return;
     const summary = buzzerSummary(room.buzzer);
     io.to(roomId).emit('buzzer-update', summary);
+    save(roomId);
 
     if (room.teacherSocket) {
       const teacher = io.sockets.sockets.get(room.teacherSocket);
@@ -263,11 +323,13 @@ module.exports = function(io, app, {
     }
     emitStudentList(roomId);
     const payload = { audienceRules: rules, audienceLabel: audience.describeRules(rules) };
+    save(req.params.roomId);
     if (room.teacherSocket) io.to(room.teacherSocket).emit('room-audience', payload);
     res.json({ success: true, ...payload });
   }));
 
   app.get('/api/room-type/:roomId', requireAuth, wrap(async (req, res) => {
+    await ready();
     const room = rooms.get(req.params.roomId);
     const students = room?.audienceRules.length && req.session?.role === 'student' ? (await rosterProvider()).students : [];
     res.json(room && canSee(room, req.session, students) ? { exists: true, type: room.type } : { exists: false, type: null });
@@ -277,6 +339,7 @@ module.exports = function(io, app, {
   // 白板課堂 API (供 Portal 查詢)
   // ========================================
   async function listSessions(session) {
+    await ready();
     const activeSessions = [];
     const needsRoster = session?.role === 'student' && [...rooms.values()].some(room => room.audienceRules.length);
     const students = needsRoster ? (await rosterProvider()).students : [];
@@ -299,11 +362,13 @@ module.exports = function(io, app, {
   }));
 
   app.post('/api/whiteboard/sessions/end', requireTeacher, wrap(async (req, res) => {
+    await ready();
     const { roomId } = req.body || {};
     if (roomId) {
       const room = rooms.get(roomId);
       if (room) requireOwner(room, req.session);
       endRoom(roomId, '老師已結束課堂');
+      await checkpoints.flush();
     }
     res.json({ success: true });
   }));
@@ -318,6 +383,8 @@ module.exports = function(io, app, {
 
     socket.on('join-room', async ({ roomId, name, isTeacher, roomType, audienceRules } = {}) => {
       try {
+        await ready();
+        if (!socket.connected) return;
         const session = socket.request.session || {};
         if (!session.studentId || !['teacher', 'student'].includes(session.role)) fail('請先登入。', 401);
         if (typeof roomId !== 'string' || !roomId.trim() || roomId.length > 100 || /[\x00-\x1f]/.test(roomId)) fail('課堂編號不正確。', 400);
@@ -330,6 +397,7 @@ module.exports = function(io, app, {
           if (!existingRoom && audienceRules !== undefined && audience.normalizeRules(audienceRules).length && session.role !== 'teacher') fail('請先以老師帳戶登入。');
         } else if (existingRoom?.audienceRules.length) {
           const { students } = await rosterProvider();
+          if (!socket.connected) return;
           if (rooms.get(roomId) !== existingRoom) fail('課堂已關閉，請重新開啟。', 404);
           if (!canSee(existingRoom, session, students)) fail('你不屬於這個課堂。');
         }
@@ -383,6 +451,8 @@ module.exports = function(io, app, {
           emitBoardSnapshot(roomId, participantKey, socket.id);
           emitTeacherConnection(roomId, socket.id);
         }
+        save(roomId);
+        if (isTeacher && !existingRoom) await checkpoints.flush();
         socket.emit(room.locked ? 'lock-board' : 'unlock-board');
         socket.to(roomId).emit('user-joined', { name, isTeacher });
       } catch (error) {
@@ -522,9 +592,11 @@ module.exports = function(io, app, {
           strokes: [],
           shapes: [],
         });
+        room.boardEpochs.set(data.studentId, randomUUID());
+        save(roomId, data.studentId);
         const participant = room.students.get(data.studentId);
         for (const socketId of participant.sockets) io.to(socketId).emit('teacher-board-sync', {
-          version: data.version,
+          version: data.version, boardGeneration: generation(room, data.studentId),
           imageData: data.imageData
         });
       }
@@ -534,6 +606,25 @@ module.exports = function(io, app, {
       const roomId = socket.data.roomId;
       const room = roomId ? rooms.get(roomId) : null;
       const participantKey = room?.studentSocketKeys.get(socket.id);
+      if (room && !socket.data.isTeacher && participantKey && data?.protocol === 2) {
+        const respond = value => { if (typeof ack === 'function') ack(value); };
+        const previous = room.studentBoards.get(participantKey);
+        if (data.boardGeneration !== generation(room, participantKey)) return respond({ success: false, needsReset: true, boardGeneration: generation(room, participantKey) });
+        if (typeof data.epoch !== 'string' || data.epoch.length > 80 || !Number.isSafeInteger(data.seq) || data.seq < 1
+          || !Number.isInteger(data.start) || data.start < 0 || !Array.isArray(data.strokes) || data.strokes.length > 2000) return respond({ success: false });
+        if (previous?.epoch === data.epoch && data.seq <= previous.seq) return respond({ success: true });
+        if (!data.replace && (previous?.epoch !== data.epoch || data.start > previous.strokes.length)) return respond({ success: false, needsReset: true });
+        if (data.replace && (data.start !== 0 || !(data.baseImageData === null || isPngSnapshot(data.baseImageData)))) return respond({ success: false });
+        const tail = packStrokes(normalizeBoardStrokes(data.strokes));
+        if (tail.length !== data.strokes.length) return respond({ success: false });
+        const strokes = [...(data.replace ? [] : previous.strokes.slice(0,data.start)), ...tail];
+        if (strokes.length > 2000 || pointCount(strokes) > 60000) return respond({ success: false, needsReset: true });
+        room.studentBoards.set(participantKey, { protocol: 2, epoch: data.epoch, seq: data.seq,
+          imageData: null, baseImageData: data.replace ? data.baseImageData : previous.baseImageData,
+          strokes, shapes: normalizeBoardShapes(data.shapes) });
+        save(roomId, participantKey); repair(roomId, participantKey, data.replace);
+        return respond({ success: true });
+      }
       if (!room || socket.data.isTeacher || !participantKey || !isPngSnapshot(data?.imageData)) {
         if (typeof ack === 'function') ack({ success: false });
         return;
@@ -550,6 +641,7 @@ module.exports = function(io, app, {
       });
       // Keep the teacher's offscreen board aligned with the last completed
       // student edit; other tabs restore the snapshot when they join.
+      save(roomId, participantKey);
       emitBoardSnapshot(roomId, participantKey);
       if (typeof ack === 'function') ack({ success: true });
     });
@@ -560,6 +652,7 @@ module.exports = function(io, app, {
       const participantKey = room?.studentSocketKeys.get(socket.id);
       if (roomId && !socket.data.isTeacher && participantKey) {
         room.studentBoards.delete(participantKey);
+        save(roomId, participantKey);
         if (room.teacherSocket) io.to(room.teacherSocket).emit('student-clear', {
           studentId: participantKey, studentName: socket.data.name,
         });
@@ -570,8 +663,11 @@ module.exports = function(io, app, {
       const roomId = socket.data.roomId;
       const room = roomId ? rooms.get(roomId) : null;
       if (roomId && socket.data.isTeacher && room?.teacherSocket === socket.id) {
+        const keys = [...room.studentBoards.keys()];
         room.studentBoards.clear();
-        io.to(roomId).emit('clear-board');
+        room.boardGeneration = randomUUID(); room.boardEpochs.clear();
+        save(roomId); for (const key of keys) save(roomId, key);
+        io.to(roomId).emit('clear-board', { boardGeneration: room.boardGeneration });
       }
     });
 
@@ -579,7 +675,7 @@ module.exports = function(io, app, {
       const roomId = socket.data.roomId;
       if (roomId && socket.data.isTeacher) {
         const room = rooms.get(roomId);
-        if (room) room.locked = true;
+        if (room) { room.locked = true; save(roomId); }
         socket.to(roomId).emit('lock-board');
       }
     });
@@ -588,7 +684,7 @@ module.exports = function(io, app, {
       const roomId = socket.data.roomId;
       if (roomId && socket.data.isTeacher) {
         const room = rooms.get(roomId);
-        if (room) room.locked = false;
+        if (room) { room.locked = false; save(roomId); }
         socket.to(roomId).emit('unlock-board');
       }
     });
@@ -598,7 +694,9 @@ module.exports = function(io, app, {
       if (roomId && socket.data.isTeacher) {
         const room = rooms.get(roomId);
         if (room) {
+          if (typeof imageData !== 'string' || !/^data:image\/(png|jpeg|webp);base64,/.test(imageData) || imageData.length > 5000000) return;
           room.image = imageData;
+          save(roomId);
           socket.to(roomId).emit('room-image', imageData);
           socket.emit('image-uploaded', true);
         }
@@ -638,5 +736,5 @@ module.exports = function(io, app, {
       socket.to(roomId).emit('user-left', { name: socket.data.name });
     });
   });
-  return { listSessions };
+  return { listSessions, ready, flush: () => checkpoints.flush(), rooms };
 };

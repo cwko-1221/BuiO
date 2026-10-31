@@ -1,5 +1,8 @@
 'use strict';
 
+// Load the Excel module at server boot, before classrooms accept connections.
+const ExcelJS = require('exceljs');
+const reportWork = require('./report-work').createReportWork();
 const { readFile } = require('node:fs/promises');
 const { createHash } = require('node:crypto');
 const homeworkRepo = require('../repositories/homework.repo');
@@ -202,7 +205,7 @@ function publicState(state) {
 }
 
 async function preview(period, className) {
-  const result = await prepare(period);
+  const result = await reportWork.preview(JSON.stringify(period), () => prepare(period));
   const report = result.reports.find(item => item.className === className);
   const tasks = [...result.state.tasks];
   for (const candidate of result.candidates) if (!tasks.some(task => task.id === candidate.id)) tasks.push({ ...candidate, preview: true });
@@ -275,4 +278,5 @@ async function upload(period, buffer, userId, expectedRevision) {
   return publicState(await reportRepo.saveState(period.academicYear, data.state, data.state.revision));
 }
 
-module.exports = { preview, generate, upload, openReport, checkArchive, nextStatus };
+module.exports = { preview, generate: (...args) => reportWork.run(() => generate(...args)),
+  upload: (...args) => reportWork.run(() => upload(...args)), openReport, checkArchive, nextStatus };

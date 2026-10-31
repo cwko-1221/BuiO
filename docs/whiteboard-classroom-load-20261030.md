@@ -1,5 +1,7 @@
 # Whiteboard classroom disconnects — 30 October 2026
 
+Follow-up: [invalidation-based rendering, incremental checkpoints and durable recovery](whiteboard-performance-recovery-20261030.md) supersede the memory-only recovery limitation described in this original incident record.
+
 Reported workload: about 28 students on iPad Safari, with roughly half losing
 their whiteboard connection during the lesson.
 

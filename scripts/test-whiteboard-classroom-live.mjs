@@ -39,7 +39,7 @@ io.engine.use(identify);
 const reconnectGraceMs = 4000;
 let explicitEndRequests = 0;
 app.use('/api/whiteboard/sessions/end', (_req, _res, next) => { explicitEndRequests++; next(); });
-register(io, app, { teacherReconnectGraceMs: reconnectGraceMs,
+const whiteboard = register(io, app, { checkpointStore: null, teacherReconnectGraceMs: reconnectGraceMs,
     rosterProvider: async () => ({ students: [], classes: [], academicYear: '2026-2027' }) });
 const stats = new Map();
 let suppressAck = false;
@@ -54,7 +54,7 @@ io.on('connection', socket => {
         const row = stats.get(id);
         if (event === 'join-room') row.joins++;
         if (event === 'draw') row.draws++;
-        if (event === 'student-board-snapshot') { row.snapshots++; row.last = data; }
+        if (event === 'student-board-snapshot') { row.snapshots++; row.wireBytes = (row.wireBytes || 0) + JSON.stringify(data).length; queueMicrotask(() => { row.last = whiteboard.rooms.get(socket.data.roomId)?.studentBoards.get('student:'+id); }); }
     });
 });
 app.use('/shared', express.static(path.join(root, 'shared'), { dotfiles: 'allow' }));
@@ -83,6 +83,22 @@ async function ink(page, strokes, offset = 0) {
         }
     }, { strokes, offset });
 }
+async function revealStudent(page, name) {
+    const tile = page.locator('[class*="studentTile"]').filter({ hasText: name }).locator('canvas');
+    await page.locator('[class*="studentTile"]').first().waitFor({timeout:12000});
+    const deadline=Date.now()+12000;
+    while(Date.now()<deadline) {
+        if (await tile.count()) { await tile.scrollIntoViewIfNeeded(); return tile; }
+        const next=page.getByRole('button',{name:'Next →',exact:true});
+        const previous=page.getByRole('button',{name:'← Previous',exact:true});
+        if(await next.count() && await next.isEnabled()) await next.click();
+        else { while(await previous.count() && await previous.isEnabled()) await previous.click(); }
+        await sleep(150);
+    }
+    const names=await page.locator('[class*="studentTile"]').allTextContents();
+    const members=[...whiteboard.rooms.values()].map(room=>({keys:[...room.students.keys()],teacher:!!room.teacherSocket}));
+    throw Error('Student absent from all pages: '+name+' '+JSON.stringify({names,members}));
+}
 const canvasSize = page => page.locator('canvas[class*="_canvas_"]').evaluate(canvas => ({ width: canvas.width, height: canvas.height }));
 
 try {
@@ -93,6 +109,12 @@ try {
         try {
             const teacherContext = await browser.newContext({ viewport: { width: 1280, height: 900 } });
             await teacherContext.addInitScript(() => {
+                const originalClear = CanvasRenderingContext2D.prototype.clearRect;
+                window.__visiblePaints = 0;
+                CanvasRenderingContext2D.prototype.clearRect = function (...args) {
+                    if (this.canvas.isConnected) window.__visiblePaints++;
+                    return originalClear.apply(this,args);
+                };
                 const NativeImage = window.Image;
                 window.Image = function (...args) {
                     const image = new NativeImage(...args);
@@ -110,6 +132,7 @@ try {
             teacher.on('pageerror', error => errors.push(error.message));
             student.on('pageerror', error => errors.push(error.message));
             const room = `load-${name}`;
+            await student.addInitScript(() => { const encode=HTMLCanvasElement.prototype.toDataURL; window.__pngEncodes=0; const NativeImage=window.Image; window.Image=function(...args){const image=new NativeImage(...args);Object.defineProperty(image,'onload',{set(callback){image.addEventListener('load',event=>setTimeout(()=>callback.call(image,event),window.__studentDecodeDelay||0));}});return image;};window.Image.prototype=NativeImage.prototype; HTMLCanvasElement.prototype.toDataURL=function(...args){window.__pngEncodes++;return encode.apply(this,args);}; });
             await teacher.goto(`${base}/whiteboard/class-teacher?room=${room}`);
             await until(() => stats.get('T1')?.joins === 1, 'teacher room');
             await student.goto(`${base}/whiteboard/class-student?room=${room}&name=QA`);
@@ -119,13 +142,19 @@ try {
             await ink(student, 25);
             await sleep(1800);
             assert.ok(stats.get('QA').snapshots <= 3, `coalesced 25 strokes, received ${stats.get('QA').snapshots} checkpoints`);
-            await teacher.locator('[class*="studentTile"]').filter({ hasText: 'QA' }).locator('canvas').waitFor();
+            await (await revealStudent(teacher,'QA')).waitFor();
             assert.ok(await teacher.locator('[class*="studentTile"]').filter({ hasText: 'QA' }).locator('canvas').evaluate(canvas => {
                 const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
                 let ink = 0;
                 for (let i = 0; i < data.length; i += 4) if (data[i] < 100 && data[i + 3] > 0) ink++;
                 return ink > 100;
             }), 'teacher renders the actual saved board');
+
+            assert.equal(await student.evaluate(() => window.__pngEncodes), 0, 'ordinary writing never encodes a full PNG');
+            await sleep(250);
+            const idlePaints = await teacher.evaluate(() => window.__visiblePaints);
+            await sleep(500);
+            assert.equal(await teacher.evaluate(() => window.__visiblePaints), idlePaints, 'idle boards do not redraw');
 
             // Lose the acknowledgement on a slow connection: one whole PNG is
             // allowed in flight, and the next checkpoint includes the newest ink.
@@ -156,14 +185,14 @@ try {
             // The reconnect notice changes the available canvas height. Compare
             // editable normalized strokes rather than PNG bytes at two sizes.
             assert.equal(stats.get('QA').last.strokes.length, strokesBeforeOffline + 5, 'stale server state must not replace offline ink');
-            assert.ok(stats.get('QA').last.strokes.slice(-5).every(stroke => stroke.points.length > 10));
+            assert.ok(stats.get('QA').last.strokes.slice(-5).every(stroke => (stroke.pointData?.length / 2 || stroke.points?.length) > 10));
             console.log(JSON.stringify({ browser: name, offlineSize, onlineSize: await canvasSize(student), restoredStrokeCount: stats.get('QA').last.strokes.length }));
 
             // Force PNG decode to finish after newer live ink and after Clear.
             // Both cases used to let an older bitmap overwrite the teacher view.
             await teacher.evaluate(() => { window.__decodeDelay = 180; });
             const teacherSocket = [...io.sockets.sockets.values()].find(socket => socket.request.session.studentId === 'T1');
-            const savedBoard = { studentId: 'student:QA', imageData: stats.get('QA').last.imageData, shapes: [] };
+            const savedBoard = { studentId: 'student:QA', imageData: await student.locator('canvas[class*="_canvas_"]').evaluate(canvas => canvas.toDataURL('image/png')), shapes: [] };
             teacherSocket.emit('student-board-snapshot', savedBoard);
             for (const [state, x] of [['start', 0.1], ['move', 0.7], ['end', 0.75]]) {
                 teacherSocket.emit('draw', { studentId: 'student:QA', state, x, y: 0.95, color: '#ff0000', size: 8 });
@@ -216,6 +245,63 @@ try {
             await teacher.screenshot({ path: path.join(out, `${name}-teacher.png`) });
             await student.screenshot({ path: path.join(out, `${name}-student.png`) });
 
+            // Concurrent teacher and student ink, teacher erase reconciliation,
+            // and a real long drawing that triggers rare raster compaction.
+            const qaTile = teacher.locator('[class*="studentTile"]').filter({ hasText: 'QA' });
+            await qaTile.click();
+            const zoom = teacher.locator('canvas[class*="zoomCanvas"]');
+            const zr = await zoom.boundingBox();
+            await teacher.mouse.move(zr.x + zr.width * .15, zr.y + zr.height * .8);
+            await teacher.mouse.down();
+            await ink(student, 3, 4);
+            await sleep(1600);
+            await teacher.mouse.move(zr.x + zr.width * .8, zr.y + zr.height * .8, { steps: 12 });
+            await teacher.mouse.up();
+            await until(() => stats.get('QA').last.strokes.some(stroke => stroke.color === '#ef4444' && (stroke.pointData?.length || stroke.points?.length) > 4), 'concurrent teacher ink saved');
+            await teacher.screenshot({ path: path.join(out, name + '-teacher-zoom.png') });
+            await teacher.getByRole('button', { name: 'Eraser', exact: true }).click();
+            await teacher.mouse.move(zr.x + zr.width * .4, zr.y + zr.height * .8);
+            await teacher.mouse.down();
+            await teacher.mouse.move(zr.x + zr.width * .6, zr.y + zr.height * .8, { steps: 8 });
+            await teacher.mouse.up();
+            await until(() => typeof whiteboard.rooms.get(room).studentBoards.get('student:QA')?.baseImageData === 'string', 'teacher erase reconciled');
+            await teacher.locator('[class*="closeZoomBtn"]').click();
+            await sleep(300);
+            const encodesBefore = await student.evaluate(() => window.__pngEncodes);
+            await ink(student, 450, 5);
+            await until(async () => await student.evaluate(() => window.__pngEncodes) > encodesBefore, 'long drawing compacted');
+            await until(() => stats.get('QA').last?.protocol === 2 && stats.get('QA').last.strokes.length < 400, 'compacted vectors acknowledged');
+            await teacher.getByRole('button', { name: 'Next →', exact: true }).click();
+            await teacher.screenshot({ path: path.join(out, name + '-second-page.png') });
+            await teacher.getByRole('button', { name: '← Previous', exact: true }).click();
+
+            // Clear also invalidates an already-decoding teacher erase bitmap.
+            await student.evaluate(() => { window.__studentDecodeDelay = 250; });
+            const studentSocket=[...io.sockets.sockets.values()].find(socket=>socket.request.session.studentId==='QA');
+            const currentRoom=whiteboard.rooms.get(room);
+            studentSocket.emit('teacher-board-sync',{imageData:savedBoard.imageData,boardGeneration:currentRoom.boardEpochs.get('student:QA')||currentRoom.boardGeneration});
+            await teacher.getByRole('button',{name:'Clear All',exact:true}).click();
+            await sleep(500);
+            assert.equal(await student.locator('canvas[class*="_canvas_"]').evaluate(canvas=>{const d=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;let n=0;for(let i=3;i<d.length;i+=4)if(d[i])n++;return n;}),0,'late teacher bitmap cannot restore cleared student ink');
+            await student.evaluate(() => { window.__studentDecodeDelay = 0; });
+
+            // A teacher clear made during a student's network outage must
+            // supersede that student's older offline edits on rejoin.
+            const joinsBeforeClear = stats.get('QA').joins;
+            await studentContext.setOffline(true);
+            for (const socket of io.sockets.sockets.values()) if (socket.request.session.studentId === 'QA') socket.conn.close();
+            await ink(student, 3, 7);
+            await teacher.getByRole('button', { name: 'Clear All', exact: true }).click();
+            await until(() => whiteboard.rooms.get(room).studentBoards.size === 0, 'teacher clear accepted');
+            await studentContext.setOffline(false);
+            await until(() => stats.get('QA').joins > joinsBeforeClear, 'student rejoins after missed clear');
+            await sleep(1800);
+            assert.ok(!whiteboard.rooms.get(room).studentBoards.get('student:QA')?.strokes?.length, 'offline ink cannot resurrect a teacher-cleared board');
+            assert.equal(await student.locator('canvas[class*="_canvas_"]').evaluate(canvas => {
+                const data = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+                let pixels=0;for(let i=3;i<data.length;i+=4)if(data[i])pixels++;return pixels;
+            }), 0);
+
             const sessions = async () => (await (await fetch(`${base}/api/whiteboard/sessions`, { headers: { Cookie: 'qa=T1' } })).json()).sessions;
             const startTime = (await sessions())[0].startTime;
             const studentJoins = stats.get('QA').joins;
@@ -230,7 +316,7 @@ try {
             assert.equal((await sessions())[0].startTime, startTime);
             await teacherContext.setOffline(false);
             await until(() => stats.get('T1').joins > teacherJoins, 'teacher automatically reconnects');
-            await teacher.locator('[class*="studentTile"]').filter({ hasText: 'QA' }).locator('canvas').waitFor();
+            await (await revealStudent(teacher,'QA')).waitFor();
 
             // A real browser reload emits pagehide, then rejoins before expiry.
             // Delay loading its JS to exercise a slower replacement page.
@@ -265,7 +351,9 @@ try {
                 offlineInkPreserved: true, delayedDecodePreservesInk: true, delayedDecodeRespectsClear: true,
                 teacherDisconnectRetainsClass: true, teacherReloadRetainsClass: true, closedTeacherTabExpires: true,
                 closeDetectionMs,
-                connectedParticipants: clients.length + 2, peerDraws, maxLocalHealthMs: Math.round(Math.max(...healthTimes)), pageErrors: errors });
+                idleBoardsDoNotRedraw: true, ordinaryCheckpointsEncodeNoPng: true,
+                concurrentTeacherStudentInk: true, teacherEraseReconciled: true, longDrawingCompacted: true, paginationPainted: true, offlineTeacherClearWins: true, delayedTeacherBitmapRespectsClear: true,
+                checkpointWireBytes: stats.get('QA').wireBytes, connectedParticipants: clients.length + 2, peerDraws, maxLocalHealthMs: Math.round(Math.max(...healthTimes)), pageErrors: errors });
         } finally {
             for (const client of clients) client.disconnect();
             await browser.close();

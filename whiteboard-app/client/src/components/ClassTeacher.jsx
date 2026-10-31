@@ -1,3 +1,4 @@
+import { paintStrokes } from '../utils/paintBoard';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
@@ -64,7 +65,12 @@ export default function ClassTeacher() {
     const buzzerRoundRef = useRef(null);
     const buzzerRoundIdRef = useRef(null);
     const zoomCanvasRef = useRef(null);
-    const animFrameRef = useRef(null);
+    const requestPaintRef = useRef(() => {});
+    const markChanged = useCallback((studentId) => {
+        const board = studentId === 'teacher' ? teacherOffscreenRef.current : offscreenCanvasesRef.current.get(studentId);
+        if (board) board.revision = (board.revision || 0) + 1;
+        requestPaintRef.current();
+    }, []);
     const bgImageRef = useRef(null); // HTMLImageElement for the background
 
     const getOrCreateOffscreen = useCallback((studentId) => {
@@ -153,6 +159,7 @@ export default function ClassTeacher() {
             if (!studentId) return;
 
             const offscreen = getOrCreateOffscreen(studentId);
+            markChanged(studentId);
             if (offscreen.pendingDraws) {
                 offscreen.pendingDraws.push(data);
                 return;
@@ -204,41 +211,46 @@ export default function ClassTeacher() {
         };
         socketRef.current.on('draw', draw);
 
-        socketRef.current.on('student-board-snapshot', ({ studentId, imageData, shapes }) => {
-            imageData = pngFromWire(imageData);
+        socketRef.current.on('student-board-snapshot', ({ studentId, imageData, baseImageData, strokes, shapes }) => {
             if (!studentId) return;
             const offscreen = getOrCreateOffscreen(studentId);
             const version = (offscreen.snapshotVersion || 0) + 1;
             offscreen.snapshotVersion = version;
-            if (typeof imageData !== 'string' || !imageData.startsWith('data:image/png;base64,')) return;
-            // Decoding PNG is asynchronous. Keep later live edits in order so
-            // an older checkpoint cannot paint over a more recent stroke.
+            const vector = Array.isArray(strokes);
+            const source = pngFromWire(vector ? baseImageData : imageData);
+            if (!vector && (typeof source !== 'string' || !source.startsWith('data:image/png;base64,'))) return;
             offscreen.pendingDraws = [];
             const replay = () => {
                 const pending = offscreen.pendingDraws || [];
                 offscreen.pendingDraws = null;
                 for (const event of pending) draw(event);
+                markChanged(studentId);
             };
-            const image = new Image();
-            image.onload = () => {
+            const apply = image => {
                 if (offscreenCanvasesRef.current.get(studentId) !== offscreen || offscreen.snapshotVersion !== version) return;
                 offscreen.ctx.globalCompositeOperation = 'source-over';
                 offscreen.ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
-                offscreen.ctx.drawImage(image, 0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
-                offscreen.shapes = Array.isArray(shapes) ? shapes.map((shape) => ({ ...shape })) : [];
+                if (image) offscreen.ctx.drawImage(image, 0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                if (vector) paintStrokes(offscreen.ctx, strokes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                offscreen.shapes = Array.isArray(shapes) ? shapes.map(shape => ({ ...shape })) : [];
                 renderShapeLayer(offscreen.shapeCtx, offscreen.shapeCanvas, offscreen.shapes, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+                drawStateRef.current.delete(studentId);
                 replay();
             };
+            if (!source) { apply(null); return; }
+            const image = new Image();
+            image.onload = () => apply(image);
             image.onerror = () => {
                 if (offscreenCanvasesRef.current.get(studentId) === offscreen && offscreen.snapshotVersion === version) replay();
             };
-            image.src = imageData;
+            image.src = source;
         });
 
         socketRef.current.on('student-clear', ({ studentId }) => {
             if (offscreenCanvasesRef.current.has(studentId)) {
                 const offscreen = offscreenCanvasesRef.current.get(studentId);
                 const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
+                markChanged(studentId);
                 offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1;
                 offscreen.pendingDraws = null;
                 ctx.clearRect(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
@@ -250,7 +262,8 @@ export default function ClassTeacher() {
 
         socketRef.current.on('clear-board', () => {
             drawStateRef.current.clear();
-            for (const [, offscreen] of offscreenCanvasesRef.current) {
+            for (const [studentId, offscreen] of offscreenCanvasesRef.current) {
+                markChanged(studentId);
                 const { ctx, shapeCanvas, shapeCtx, shapes } = offscreen;
                 offscreen.snapshotVersion = (offscreen.snapshotVersion || 0) + 1;
                 offscreen.pendingDraws = null;
@@ -273,6 +286,7 @@ export default function ClassTeacher() {
             const img = new Image();
             img.onload = () => {
                 bgImageRef.current = img;
+                requestPaintRef.current(true);
             };
             img.src = imageData;
         });
@@ -300,81 +314,54 @@ export default function ClassTeacher() {
             stopWatchingConnection();
             if (socketRef.current) socketRef.current.disconnect();
         };
-    }, [roomId, getOrCreateOffscreen]);
+    }, [roomId, getOrCreateOffscreen, markChanged]);
 
-    // Animation loop
+    // Idle boards schedule no animation frames. A changed board, layout,
+    // background or newly visible page requests one coalesced paint.
     useEffect(() => {
+        let frame = null, cache = new WeakMap();
+        const paint = (canvas, board) => {
+            if (!canvas || !board) return;
+            if (cache.has(canvas) && cache.get(canvas) === board.revision) return;
+            const rect = canvas.getBoundingClientRect();
+            if (!rect.width || !rect.height || rect.bottom < 0 || rect.top > innerHeight) return;
+            const dpr = Math.min(2, window.devicePixelRatio || 1);
+            const width = Math.round(rect.width * dpr), height = Math.round(rect.height * dpr);
+            if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+            if (bgImageRef.current) ctx.drawImage(bgImageRef.current, 0, 0, width, height);
+            else { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, width, height); }
+            ctx.drawImage(board.canvas, 0, 0, width, height);
+            if (board.shapeCanvas) ctx.drawImage(board.shapeCanvas, 0, 0, width, height);
+            cache.set(canvas, board.revision);
+        };
         const render = () => {
-            for (const [studentId, canvasEl] of gridCanvasRefs.current) {
-                if (!canvasEl) continue;
-                const offscreen = offscreenCanvasesRef.current.get(studentId);
-                if (!offscreen) continue;
-
-                const ctx = canvasEl.getContext('2d');
-                const rect = canvasEl.getBoundingClientRect();
-                const dpr = window.devicePixelRatio || 1;
-
-                if (canvasEl.width !== Math.round(rect.width * dpr) || canvasEl.height !== Math.round(rect.height * dpr)) {
-                    canvasEl.width = Math.round(rect.width * dpr);
-                    canvasEl.height = Math.round(rect.height * dpr);
-                }
-
-                ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-                // Draw background image first
-                if (bgImageRef.current) {
-                    ctx.drawImage(bgImageRef.current, 0, 0, canvasEl.width, canvasEl.height);
-                } else {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-                }
-                // Draw student strokes on top
-                ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
-                if (offscreen.shapeCanvas) {
-                    ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
-                }
-            }
-
-            // Render zoom canvas
-            if (zoomedStudent && zoomCanvasRef.current) {
-                const offscreen = zoomedStudent === 'teacher' 
-                    ? teacherOffscreenRef.current 
-                    : offscreenCanvasesRef.current.get(zoomedStudent);
-                
-                if (offscreen) {
-                    const canvasEl = zoomCanvasRef.current;
-                    const ctx = canvasEl.getContext('2d');
-                    const rect = canvasEl.getBoundingClientRect();
-                    const dpr = window.devicePixelRatio || 1;
-
-                    if (canvasEl.width !== Math.round(rect.width * dpr) || canvasEl.height !== Math.round(rect.height * dpr)) {
-                        canvasEl.width = Math.round(rect.width * dpr);
-                        canvasEl.height = Math.round(rect.height * dpr);
-                    }
-
-                    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
-                    // Draw background image first
-                    if (bgImageRef.current) {
-                        ctx.drawImage(bgImageRef.current, 0, 0, canvasEl.width, canvasEl.height);
-                    } else {
-                        ctx.fillStyle = '#ffffff';
-                        ctx.fillRect(0, 0, canvasEl.width, canvasEl.height);
-                    }
-                    // Draw student strokes on top
-                    ctx.drawImage(offscreen.canvas, 0, 0, canvasEl.width, canvasEl.height);
-                    if (offscreen.shapeCanvas) {
-                        ctx.drawImage(offscreen.shapeCanvas, 0, 0, canvasEl.width, canvasEl.height);
-                    }
-                }
-            }
-
-            animFrameRef.current = requestAnimationFrame(render);
+            frame = null;
+            for (const [id, canvas] of gridCanvasRefs.current) paint(canvas, offscreenCanvasesRef.current.get(id));
+            paint(zoomCanvasRef.current, zoomedStudent === 'teacher' ? teacherOffscreenRef.current : offscreenCanvasesRef.current.get(zoomedStudent));
         };
-
-        animFrameRef.current = requestAnimationFrame(render);
+        const request = (layout = false) => {
+            if (layout === true) cache = new WeakMap();
+            if (frame === null && !document.hidden) frame = requestAnimationFrame(render);
+        };
+        const layout = () => request(true);
+        requestPaintRef.current = request;
+        const resize = new ResizeObserver(layout);
+        for (const canvas of gridCanvasRefs.current.values()) resize.observe(canvas);
+        if (zoomCanvasRef.current) resize.observe(zoomCanvasRef.current);
+        window.addEventListener('resize', layout);
+        window.addEventListener('scroll', layout, true);
+        document.addEventListener('visibilitychange', layout);
+        request();
         return () => {
-            if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
+            if (frame !== null) cancelAnimationFrame(frame);
+            resize.disconnect(); requestPaintRef.current = () => {};
+            window.removeEventListener('resize', layout);
+            window.removeEventListener('scroll', layout, true);
+            document.removeEventListener('visibilitychange', layout);
         };
-    }, [zoomedStudent]);
+    }, [zoomedStudent, page, students, buzzerResults]);
 
     // Pagination
     const totalPages = Math.max(1, Math.ceil(students.length / STUDENTS_PER_PAGE));
@@ -482,6 +469,7 @@ export default function ClassTeacher() {
         ctx.moveTo(pxX, pxY);
         ctx.lineTo(pxX, pxY);
         ctx.stroke();
+        markChanged(zoomedStudent);
         
         emitTeacherDraw(zoomedStudent, 'start', normX, normY);
     };
@@ -516,6 +504,7 @@ export default function ClassTeacher() {
         ctx.stroke();
         
         teacherLastPos.current = { normX, normY };
+        markChanged(zoomedStudent);
         emitTeacherDraw(zoomedStudent, 'move', normX, normY);
     };
 
@@ -660,6 +649,7 @@ export default function ClassTeacher() {
                 const img = new Image();
                 img.onload = () => {
                     bgImageRef.current = img;
+                requestPaintRef.current(true);
                     // No need to repaint offscreen canvases — bg is composited in render loop
                 };
                 img.src = compressedBase64;
@@ -943,6 +933,7 @@ export default function ClassTeacher() {
                                             if (offscreen) {
                                                 const { ctx, canvas } = offscreen;
                                                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                                markChanged('teacher');
                                             }
                                         }}
                                     >Clear</button>

@@ -1,6 +1,6 @@
 // Keep one acknowledged checkpoint in flight. Short strokes share the next
 // checkpoint instead of encoding and sending the whole canvas after every dot.
-export function createBoardSnapshots({ build, send, intervalMs = 1500, ackTimeoutMs = 5000 }) {
+export function createBoardSnapshots({ build, send, intervalMs = 1500, ackTimeoutMs = 5000, onResult = () => {} }) {
     let ready = false;
     let dirty = false;
     let closed = false;
@@ -31,7 +31,7 @@ export function createBoardSnapshots({ build, send, intervalMs = 1500, ackTimeou
         try {
             const snapshot = build();
             if (!snapshot) return finish(false);
-            send(snapshot, (result) => finish(result?.success === true));
+            send(snapshot, (result) => { if (flight !== token) return; onResult(snapshot, result); finish(result?.success === true); });
         } catch {
             finish(false);
         }
