@@ -56,6 +56,7 @@ class BuiOViewController: CAPBridgeViewController {
     private var lastOrientationLock = false
     private var downloadDelegate: BuiODownloadDelegate?
     private var pendingExports: [URL] = []
+    private var exportPresentationPending = false
 
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
@@ -81,6 +82,8 @@ class BuiOViewController: CAPBridgeViewController {
         webView.allowsBackForwardNavigationGestures = true
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardFrameChanged(_:)),
             name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(resumeExports),
+            name: UIApplication.didBecomeActiveNotification, object: nil)
         webView.configuration.userContentController.add(BuiOLayoutHandler(owner: self), name: "buioLayout")
         if let original = webView.navigationDelegate {
             let downloads = BuiODownloadDelegate(owner: self, original: original)
@@ -115,6 +118,13 @@ class BuiOViewController: CAPBridgeViewController {
               let url = message.frameInfo.request.url, let expected = bridge?.config.serverURL,
               url.scheme == expected.scheme, url.host == expected.host, url.port == expected.port,
               let body = message.body as? [String: Any] else { return }
+        #if DEBUG
+        if expected.host == "127.0.0.1", body["dismissFixtureExport"] as? Bool == true,
+           let activity = presentedViewController as? UIActivityViewController {
+            activity.completionWithItemsHandler?(nil, false, nil, nil)
+            return
+        }
+        #endif
         let science = url.path == "/science-lab" || url.path.hasPrefix("/science-lab/")
         let game = ["/pet", "/pet/", "/game", "/game/", "/tower-defense"].contains(url.path)
         let forceLandscape = science || (game && (body["landscape"] as? Bool == true))
@@ -155,6 +165,7 @@ class BuiOViewController: CAPBridgeViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if landscapeModule { updateOrientation() }
+        presentNextExport()
     }
 
     override func viewDidLayoutSubviews() {
@@ -237,7 +248,9 @@ class BuiOViewController: CAPBridgeViewController {
     }
 
     private func presentNextExport() {
-        guard presentedViewController == nil, !pendingExports.isEmpty else { return }
+        guard !exportPresentationPending, presentedViewController == nil, !pendingExports.isEmpty,
+              viewIfLoaded?.window?.windowScene?.activationState == .foregroundActive else { return }
+        exportPresentationPending = true
         let url = pendingExports.removeFirst()
         let share = UIActivityViewController(activityItems: [url], applicationActivities: nil)
         if let popover = share.popoverPresentationController {
@@ -245,18 +258,28 @@ class BuiOViewController: CAPBridgeViewController {
             popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
             popover.permittedArrowDirections = []
         }
-        share.completionWithItemsHandler = { [weak self] _, _, _, _ in
+        share.completionWithItemsHandler = { [weak self, weak share] _, _, _, _ in
             try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
-            DispatchQueue.main.async { self?.presentNextExport() }
+            let advance: () -> Void = { [weak self] in
+                self?.exportPresentationPending = false
+                self?.presentNextExport()
+            }
+            if let share = share, share.presentingViewController != nil {
+                if let transition = share.transitionCoordinator,
+                   transition.animate(alongsideTransition: nil, completion: { _ in advance() }) { return }
+                share.dismiss(animated: true, completion: advance)
+            } else { DispatchQueue.main.async(execute: advance) }
         }
         present(share, animated: true) { [weak self] in
             #if DEBUG
             if self?.bridge?.config.serverURL.host == "127.0.0.1" {
-                self?.webView?.evaluateJavaScript("window.BuiOSharePresented=true;window.dispatchEvent(new Event('buio:native-layout'));")
+                self?.webView?.evaluateJavaScript("window.BuiOSharePresented=true;window.BuiOShareCount=(window.BuiOShareCount||0)+1;window.dispatchEvent(new Event('buio:native-layout'));")
             }
             #endif
         }
     }
+
+    @objc private func resumeExports() { presentNextExport() }
 
     fileprivate func exportFailed() {
         guard presentedViewController == nil else { return }
@@ -290,6 +313,7 @@ private final class BuiODownloadDelegate: NSObject, WKNavigationDelegate, WKDown
     weak var owner: BuiOViewController?
     let original: WKNavigationDelegate
     private var files: [ObjectIdentifier: URL] = [:]
+    private var convertingToDownload = false
     init(owner: BuiOViewController, original: WKNavigationDelegate) { self.owner = owner; self.original = original }
     override func responds(to selector: Selector!) -> Bool { super.responds(to: selector) || original.responds(to: selector) }
     override func forwardingTarget(for selector: Selector!) -> Any? {
@@ -298,8 +322,10 @@ private final class BuiODownloadDelegate: NSObject, WKNavigationDelegate, WKDown
     func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if action.shouldPerformDownload, owner?.permitsExportURL(action.sourceFrame.request.url) == true,
            owner?.permitsExportURL(action.request.url) == true {
+            convertingToDownload = true
             decisionHandler(.download); return
         }
+        if action.targetFrame?.isMainFrame == true { convertingToDownload = false }
         if original.responds(to: NSSelectorFromString("webView:decidePolicyForNavigationAction:decisionHandler:")) {
             original.webView?(webView, decidePolicyFor: action, decisionHandler: decisionHandler)
         } else { decisionHandler(.allow) }
@@ -307,6 +333,7 @@ private final class BuiODownloadDelegate: NSObject, WKNavigationDelegate, WKDown
     func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         let attachment = (response.response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Disposition")?.lowercased().contains("attachment") == true
         if response.isForMainFrame, (attachment || !response.canShowMIMEType), owner?.permitsExportURL(response.response.url) == true {
+            convertingToDownload = true
             decisionHandler(.download); return
         }
         if original.responds(to: NSSelectorFromString("webView:decidePolicyForNavigationResponse:decisionHandler:")) {
@@ -315,6 +342,20 @@ private final class BuiODownloadDelegate: NSObject, WKNavigationDelegate, WKDown
     }
     func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) { download.delegate = self }
     func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) { download.delegate = self }
+    private func expectedInterruption(_ error: Error) -> Bool {
+        let value = error as NSError
+        if value.domain == NSURLErrorDomain && value.code == NSURLErrorCancelled { return true }
+        // WebKit reports a navigation converted to WKDownload as a policy
+        // interruption (legacy WebKit code 102). It is not a network failure.
+        return convertingToDownload && value.code == 102 &&
+            ["WebKitErrorDomain", WKErrorDomain].contains(value.domain)
+    }
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        if !expectedInterruption(error) { original.webView?(webView, didFail: navigation, withError: error) }
+    }
+    func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        if !expectedInterruption(error) { original.webView?(webView, didFailProvisionalNavigation: navigation, withError: error) }
+    }
     func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("BuiO-Exports", isDirectory: true).appendingPathComponent(UUID().uuidString, isDirectory: true)
         do {

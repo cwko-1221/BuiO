@@ -53,7 +53,7 @@ const reportLayout=()=>{
   const bottom=document.querySelector('footer').getBoundingClientRect();
   const safe=getComputedStyle(document.querySelector('#safeProbe'));
   const report={helperAtHead:window.helperAtHead,version:window.BuiOMobile?.version,
-    path:location.pathname+location.search,native:window.BuiONativeLayout,downloads:window.BuiODownloads||[],sharePresented:!!window.BuiOSharePresented,
+    path:location.pathname+location.search,native:window.BuiONativeLayout,downloads:window.BuiODownloads||[],sharePresented:!!window.BuiOSharePresented,shareCount:window.BuiOShareCount||0,
     safe:{top:parseFloat(safe.paddingTop),right:parseFloat(safe.paddingRight),bottom:parseFloat(safe.paddingBottom),left:parseFloat(safe.paddingLeft)},
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
     cssWidth:box.width,cssHeight:box.height,footerBottom:bottom.bottom,scrollWidth:document.documentElement.scrollWidth,
@@ -71,7 +71,11 @@ addEventListener('load',()=>{
     setTimeout(()=>{const link=document.createElement('a');link.href='/attachment';link.click()},1000);
   },500);
 });addEventListener('resize',schedule);addEventListener('buio:native-layout',schedule);
-const poll=setInterval(async()=>{const next=await fetch('/next').then(r=>r.json());if(next){clearInterval(poll);location.assign(next)}},250);
+const poll=setInterval(async()=>{
+  const next=await fetch('/next').then(r=>r.json());
+  if(next?.dismissExport)window.webkit.messageHandlers.buioLayout.postMessage({dismissFixtureExport:true});
+  else if(next){clearInterval(poll);location.assign(next)}
+},250);
 </script></body></html>`;
 const server = createServer(async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -97,6 +101,7 @@ const server = createServer(async (req, res) => {
 server.listen(0, '127.0.0.1');
 await once(server, 'listening');
 const reports = [];
+const failures = [];
 try {
   await run(process.execPath, ['scripts/prepare.mjs', '--dev'], { BUIO_APP_URL: `http://127.0.0.1:${server.address().port}` });
   await run('npx', ['cap', 'sync', 'ios']);
@@ -117,11 +122,17 @@ try {
         console.log(`[native] ${device.name}: ${route}`);
         if (route !== '/') { received = undefined; nextPath = route; }
         const deadline = Date.now() + 45000;
+        let dismissedFirstExport = false;
         const ready = () => received?.path === route && received.native &&
           (!['/science-lab', '/pet?battle=1'].includes(route) || received.width > received.height) &&
-          (route !== '/export-probe' || (received.downloads?.length === 2 && received.sharePresented)) &&
+          (route !== '/export-probe' || (received.downloads?.length === 2 && received.shareCount === 2)) &&
           (!['/pet', '/pet?home=1'].includes(route) || (received.height > received.width) === originalPortrait);
-        while (!ready() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250));
+        while (!ready() && Date.now() < deadline) {
+          if (route === '/export-probe' && received?.downloads?.length === 2 && received.shareCount === 1 && !dismissedFirstExport) {
+            nextPath = { dismissExport: true }; dismissedFirstExport = true;
+          }
+          await new Promise(resolve => setTimeout(resolve, 250));
+        }
         if (!ready()) {
           await writeFile(path.join(output, `${type}-failed.json`), JSON.stringify({ route, received }, null, 2));
           await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-failed.png`)], {}, 20000).catch(error => console.error(error.message));
@@ -161,8 +172,12 @@ try {
         }
         console.log(JSON.stringify(report));
       }
+    } catch (error) {
+      failures.push(`${type}: ${error.message}`);
+      console.error(error);
     } finally { await run('xcrun', ['simctl', 'shutdown', device.udid], {}, 30000).catch(error => console.error(error.message)); }
   }
+  assert.equal(failures.length, 0, failures.join('\n'));
 } finally {
   server.closeAllConnections(); await new Promise(resolve => server.close(resolve));
   for (const stream of commandStreams) stream.destroy();

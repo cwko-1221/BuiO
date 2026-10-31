@@ -1,66 +1,43 @@
-# 0.1.0 驗證紀錄（2026-10-29，香港時間）
+# 杯澳 App 0.2.0 驗證紀錄
 
-## 0.2.0 App 適配修訂（2026-10-31，香港時間）
+日期：2026-10-31（香港時間）。版本 0.2.0、build 3。
 
-- 用戶已確認 0.1.0 能在 iPhone 開啟，並指出捲軸、方向切換及安全區留白等移植問題。
-- 修正 SceneDelegate 實際建立預設控制器、導致自訂控制器未執行的問題；同時修正 Capacitor 初始化會替換 userContentController 的接線。
-- 改成背景填滿原生視窗，由 UIKit 安全區及 App 專用樣式安排操作元件；安全區變動、鍵盤、沉浸模式、原生返回手勢及方向切換均由原生／網頁介面協調。
-- 手機首頁底部分頁、iPad 側欄、寵物四入口＋更多活動選單、隱藏捲軸、小手機登入、白板視窗、科學島離開及實驗操作區、數學教師頁及對戰 HUD 均列入本次適配。
-- `npm test` 五項通過。七組桌面瀏覽器尺寸測試及手機／iPad 操作測試正在按最終來源再次驗證；最終原生 CI 結果待填。
-- 不將入口寬度檢查等同全部學習功能驗收。正式資料、錄音／攝影機權限、硬件鍵盤、雙機對戰及 Android 原生裝置仍需各自驗收；本次沒有修改對戰判定、預測或後端部署。
+## 已通過的版面及操作檢查
 
-## 2026-10-30 雲端原生編譯補充
+- `npm test`：五項通過，包括 HTTPS／導覽範圍、危險 URL 拒絕、16 個模組覆蓋、實際 SceneDelegate／storyboard 接線、原生權限及本機備援內容。
+- `npm run test:browser`：七組尺寸通過，包括 390×844、402×874、874×402、1024×768、768×1024、375×667 及 600×900。使用 Windows 上的 Chromium／WebKit 桌面引擎模擬 viewport，不等同實體 WKWebView。
+- 七組均檢查學生／教師登入、16 個模組 HTML 入口、權限、登出、重試頁、斷線提示、安全區 shorthand 及延遲載入的樣式。另在 WebKit 手機直向、手機橫向及 iPad 橫向實際開啟全部 16 個初始頁面，共 48 組版面，無根元素水平溢出。
+- 手機底部分頁、寵物五個導覽位置、四個「更多」入口及固定導覽捲動後位置已檢查。
+- `npm run test:app-ui`：Chromium 手機及 WebKit iPad 的孵化、圖鑑、商店、戶外樂園、練習對戰、返回房間，以及科學島預測、器材、任務、設定及離開均通過。
+- 戶外樂園另檢查橫直向切換、浮動按鈕避開安全區及返回房間；已目視檢查兩種方向截圖。背景延伸至畫面邊緣，沒有用整頁縮放或裁切掩蓋版面問題。
 
-- [GitHub Actions 執行結果](https://github.com/cwko-1221/BuiO/actions/runs/40913058740)：completed／success。
-- 分支 `codex/capacitor-ios-pilot`，驗證 commit `ccef4aa77fa1e468d1f385611e87ab4297d4ec90`。
-- GitHub 標準 macOS runner，Xcode 26.3（17C529），實際執行 iOS Simulator target 建置，日誌確認 `BUILD SUCCEEDED`。
-- 此編譯不需 Apple 憑證，未簽署、未輸出可供實體裝置安裝的 IPA、未上傳 App Store Connect／TestFlight。雲端編譯通過不等於實機功能驗收。
-- 首次模擬器編譯流程當時不上傳 artifacts、不建立套件 cache；只保留 CI 日誌及摘要。後續實機 IPA 流程短期保存 artifacts 1 日。沒有變更正式網站分支或部署後端。
-- 沒有 Mac 的後續安裝路線已記在 [CLOUD-INSTALL.md](CLOUD-INSTALL.md)，仍待確認 Apple Developer Program 帳戶及簽署方式。
+測試使用獨立 JSON fixture 及合成帳戶，不使用正式學生資料。JSON fixture 無法取代完整 PostgreSQL 教師資料；入口版面通過不代表所有教師業務流程均已驗收。
 
-## 2026-10-30 Windows 個人側載準備
+## 原生 iOS／iPadOS 驗證
 
-- 用戶確認沒有付費開發者會員，選擇普通 Apple ID＋Windows 側載，並表示稍後才可 USB 接駁裝置。
-- [第二次雲端建置](https://github.com/cwko-1221/BuiO/actions/runs/40915067680) completed／success；commit `9eb34f9df1e631b5b47b3d90cb74a330892e26c2`。
-- 除模擬器檢查外，實際以 `iphoneos` SDK、Release、ARM64 編譯並打包 `buio-pilot-0.1.0-unsigned.ipa`；沒有 Apple 憑證或簽署。
-- 已下載到 `mobile-app/releases/buio-pilot-0.1.0-unsigned.ipa`，444,946 bytes。SHA-256：`3fb12a713fe9e81f59fcb47f89decb3e0760fbb899fddb3cc75ecf3cbf05b885`。
-- 在 Windows 再以 `node scripts/verify-ipa.mjs` 驗證 ZIP CRC、Mach-O ARM64 CPU type、LC_BUILD_VERSION 的平台為真實 iOS（2），確認不是模擬器 build。沒有 embedded.mobileprovision，安裝前仍需個人簽署。
-- 從 Sideloadly 官方下載了 Windows 安裝程式到 `releases/installers/SideloadlySetup64.exe`；未執行或安裝，未輸入任何 Apple ID。下載檔為 PE installer，Authenticode 顯示 NotSigned，未宣稱已通過發行者數位簽章驗證。
-- 尚未接駁裝置、簽署、安裝或完成實機功能測試。步驟已整理到 [WINDOWS-INSTALL.md](WINDOWS-INSTALL.md)。
+原生檢查使用 GitHub macOS runner、Xcode 26 及真正的 Simulator WKWebView。`ci/native-viewport.mjs` 只連到匿名 loopback 測試頁，不連到正式學習帳戶。
 
-## 已執行
+- 已確認及修正 SceneDelegate 原本建立預設控制器，導致 App 專用控制器沒有執行的根因。
+- 已修正 Capacitor 替換 userContentController 的接線，以及 WebKit 安全區 env 與原生 UIKit 數值不同的情況。
+- 前一輪 iPhone 原生測試已確認完整視窗、安全區、科學島／實戰橫向及返回原方向；Blob 亦已完成原生檔案下載。UIKit 分享面板的完成展示另納入最終驗證。
+- iPad 可縮放視窗曾忽略橫向要求；用戶明確選擇「自動橫向優先、全螢幕、不保留分割視窗」。本版依此測試全螢幕相容模式。
+- [原生建置流程](https://github.com/cwko-1221/BuiO/actions/workflows/buio-ios-pilot.yml)正在驗證最終來源：iPhone／iPad 各六個階段、實際轉向及恢復、Blob 與登入 Cookie 附件下載、檔案名稱／長度，以及兩個 UIKit 分享面板依序展示。第一個測試面板只作取消，不向任何收件人傳送檔案。
 
-### 2026-10-30 首次 iPhone 側載
+最終狀態、IPA 雜湊及證據在完成後更新於此。
 
-- Windows 已識別 USB 接駁的 iPhone；安裝 iTunes 後，Apple Mobile Device Service 已啟動，Sideloadly 已偵測到裝置。
-- iTunes／iCloud 安裝檔由 Apple 官方網址下載，兩者 Authenticode 驗證有效，簽署者為 Apple Inc.；本次確認完成安裝的是 iTunes。
-- Sideloadly 0.71.2 已安裝，載入上述已驗證的實機 IPA。Apple ID 登入及驗證由用戶自行處理，憑證未寫入專案。
-- Sideloadly 狀態顯示 `Done.`／`100%`，用戶亦確認安裝成功。首次開啟提示未受信任／需要開發者模式；已提供手機設定步驟，由用戶自行確認，尚未確認平台登入畫面。
+## 實機狀態與尚未驗收項目
 
-### 自動化與建置檢查
+0.1.0 已由 Sideloadly 完成個人簽署及安裝，用戶確認能在 iPhone 開啟。0.2.0 尚需以相同 Apple ID／Bundle ID 設定覆蓋更新；重新載入舊 App 不會取得內嵌原生程式及版面輔助程式的修正。
 
-- Capacitor 8.6.0 建立 iOS Swift Package Manager 及 Android 專案，`npm run sync` 成功。
-- `npm test`：5 項通過，包括 HTTPS／導覽範圍、危險 URL 拒絕、模組覆蓋、iOS 權限與實際 storyboard 接線、打包內容界線。
-- `npm run test:browser`：Chromium 的 390×844 手機 viewport、桌面 WebKit 的 1024×768 平板 viewport 通過。
-- 各引擎驗證：從本機重試頁進入平台、實際學生登入、寵物頁導航、學生可用模組 HTML 路由、老師的全部 16 個模組 HTML 路由、學生拒絕存取教師報告、登出失效、離線／恢復提示。
-- 功課 fixture 明確委任測試學生為科長，沿用原有權限；沒有為測試放寬後端權限。
-- XML parser 驗證 iOS Info.plist、Main.storyboard、AndroidManifest.xml 可解析。
-- `npm audit --omit=dev --audit-level=moderate`：當次快照 0 vulnerabilities。
-- 已目視檢查手機重試頁及平板學生首頁截圖，無水平溢出。
-- 對設定中的正式網址僅作兩次匿名唯讀探測：`/health/live` 和 `/` 當次均回覆 HTTP 200。沒有用它作延遲／容量測試。
+- 0.2.0 在用戶實體裝置的開啟、版面、軟鍵盤／硬件鍵盤及觸控。
+- 中文／英文錄音、科學錄影、拒絕權限後重試及相簿上傳。
+- 正式私人 Excel／PDF、檔案匯入、白板、搶答器、雙機對戰、鎖屏／背景後重連及長時間記憶體。
+- Android 專案保留；尚未接入與 iOS 等價的原生安全區／方向輔助，未編譯或安裝 APK。
 
-測試只使用 `mobile-app/test-results/fixture.json` 的合成帳戶；沒有登入正式服務、修改正式學習紀錄、改動對戰邏輯或部署後端。原工作目錄其他改動未被本試用版覆寫。
+本版仍以第一方 HTTPS 載入網站與遊戲素材，未完成素材離線化，也沒有對戰延遲改善的量測或成果。未修改正式網站／後端部署、遊戲判定、預測或其他工作目錄改動。
 
-## 尚未執行
+## 0.1.0 安裝記錄
 
-- Windows 本機沒有 Xcode；iOS 模擬器及實機 ARM64 原生編譯已於雲端執行成功。Sideloadly 已回報 iPhone 個人簽署及安裝完成，尚未完成實機功能驗收，未上傳 TestFlight。
-- 沒有 JDK／Android SDK，未編譯、簽署或安裝 APK。
-- 桌面 WebKit 的 viewport 檢查不能代表 WKWebView 的系統權限、背景生命週期、實機 GPU 或觸控表現。
-- 模組路由覆蓋不是所有模組完整功能驗收。錄音／錄影、檔案匯出、白板、雙機對戰及背景恢復仍待實機測試。
-- 沒有對戰延遲改善或素材離線化的量測／成果；這是保留現有平台的在線相容性試用版。
-
-## 下一個實機步驟
-
-在 iPhone 開啟「杯澳學習平台」，如有提示，由用戶完成開發者信任及開發者模式，再確認可看到登入畫面。隨後才進行平台登入、模組及雙機對戰測試。見 WINDOWS-INSTALL.md。
-
-雲端原生編譯、實機 IPA 及工具回報的個人簽署／安裝已完成；實機開啟及功能驗收待確認。TestFlight 分發仍是日後學校開發者帳戶的選項。
+- [原始實機 IPA 建置](https://github.com/cwko-1221/BuiO/actions/runs/40915067680)成功；ARM64、iPhoneOS、Release、未簽署。
+- `buio-pilot-0.1.0-unsigned.ipa`：444,946 bytes；SHA-256 `3fb12a713fe9e81f59fcb47f89decb3e0760fbb899fddb3cc75ecf3cbf05b885`。
+- Windows 核對 ZIP CRC、Mach-O ARM64 及 iOS device 平台；iTunes／Apple Mobile Device Service 及 Sideloadly 已準備。Apple 登入、驗證、信任及開發者模式由用戶自行處理，憑證沒有寫入專案。

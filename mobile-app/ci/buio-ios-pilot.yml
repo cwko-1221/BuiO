@@ -19,7 +19,7 @@ jobs:
   simulator:
     name: Compile iOS without signing
     runs-on: macos-15
-    timeout-minutes: 25
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: mobile-app
