@@ -1,6 +1,17 @@
 # 杯澳 Capacitor App 試用版
 
-版本 0.1.0。先以 iPhone／iPad 驗證登入、現有模組及裝置相容性，同時提供 Android 專案。
+版本 0.2.0（build 3）。iPhone／iPad 的 App 介面適配修訂版，同時保留 Android 專案。
+
+## 0.2.0 介面適配
+
+- 真正的 SceneDelegate 啟動入口使用自訂原生控制器；介面及遊戲背景填滿視窗，操作元件依 UIKit 安全區避開瀏海、狀態列及 Home 橫條。
+- 原生安全區會同步至現有 CSS，包括延遲載入樣式及 shorthand 宣告；鍵盤出現時調整 WebView，浮動 iPad 鍵盤不壓縮整個場景。
+- 隱藏原生及網頁捲軸，保留捲動；閱讀頁可縮放及使用返回手勢，沉浸遊戲保留自己的觸控操作。
+- 手機首頁使用底部分頁，寬 iPad 使用側欄；寵物手機導覽為四個常用入口加「更多」，商店、推銀仔、同班參觀及設定仍全部保留。
+- 科學島、多人闖關、學生塔防及寵物實戰以原生 API 切換橫屏，退出後恢復先前方向。自動方向要求 iOS／iPadOS 16+；15.x 仍可手動轉向。
+- 科學島離開按鈕、白板視窗、數學教師導覽／學生選單、對戰 HUD、故事視窗及小手機登入佈局均有 App 專用調整。
+
+這仍是 Capacitor 混合 App，現有學習模組不是全部改寫成 SwiftUI。Android 原生編譯及相同裝置級適配尚未驗收；目前交付檔針對 iOS／iPadOS。
 
 ## 此版本的界線
 
@@ -16,7 +27,7 @@ Capacitor 的 `server.url` 設定是試用／開發用途，[官方設定文件]
 
 **沒有付費開發者會員、先在自己裝置試用：**可使用普通 Apple ID，在 Windows 以第三方工具 Sideloadly 為實機 IPA 簽署及安裝，詳見 [Windows 個人試用指引](WINDOWS-INSTALL.md)。
 
-需要 Node.js 22+、Xcode 26+、iOS／iPadOS 15+ 裝置及可用的 Apple 開發團隊。此 Windows 工作環境沒有 Xcode，沒有產生或驗證 `.ipa`。
+需要 Node.js 22+、Xcode 26+、iOS／iPadOS 15+ 裝置及可用的 Apple 開發團隊。此 Windows 工作環境沒有 Xcode；IPA 由 GitHub 的 macOS runner 編譯，再在 Windows 驗證及個人簽署。
 
 1. 將此資料夾（或提供的 source ZIP 解壓內容）放到 Mac。
 2. 在此資料夾執行：
@@ -69,7 +80,11 @@ npm run prepare:app
 npm test
 ```
 
-在完整 BuiO repository 可再執行 `npm run test:browser`。它用獨立 JSON fixture、測試帳戶及 Chromium／WebKit 桌面引擎的手機／平板 viewport，驗證登入、16 個模組 HTML 路由、教師權限、登出、重試頁和斷線提示；不使用正式學生帳戶、不對正式服務寫入。
+在完整 BuiO repository 可執行 `npm run test:browser`。它用獨立 JSON fixture、測試帳戶及 Chromium／WebKit 桌面引擎，檢查七組手機／平板／分割視窗尺寸、登入、16 個模組入口、教師權限、登出、重試頁和斷線提示；另檢查安全區 shorthand、固定分頁及寵物「更多」選單。
+
+`npm run test:app-ui` 再操作孵化、圖鑑、商店、練習對戰、返回房間，以及科學島預測、器材、任務、設定和離開。兩項測試均不使用正式學生帳戶或寫入正式服務。JSON fixture 無法取代完整 PostgreSQL 教師資料、錄音上傳及雙機課堂流程的驗收。
+
+`ci/native-viewport.mjs` 在真正的 iPhone／iPad Simulator WKWebView 驗證 Scene 啟動、原生安全區、背景填滿、頁面縮放、橫屏及方向恢復；證據為匿名本機測試頁，並非正式學習帳戶畫面。
 
 **桌面 WebKit 不等於 iPhone WKWebView。尚需實機驗收：**
 

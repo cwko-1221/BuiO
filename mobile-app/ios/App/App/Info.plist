@@ -8,6 +8,12 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
         <string>杯澳學習平台</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>zh-HK</string>
+		<string>zh-Hant</string>
+		<string>en</string>
+	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

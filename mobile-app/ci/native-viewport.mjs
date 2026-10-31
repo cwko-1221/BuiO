@@ -41,7 +41,7 @@ const reportLayout=()=>{
   const bottom=document.querySelector('footer').getBoundingClientRect();
   const safe=getComputedStyle(document.querySelector('#safeProbe'));
   const report={helperAtHead:window.helperAtHead,version:window.BuiOMobile?.version,
-    path:location.pathname+location.search,native:window.BuiONativeLayout,
+    path:location.pathname+location.search,native:window.BuiONativeLayout,downloadReady:!!window.BuiODownloadReady,
     safe:{top:parseFloat(safe.paddingTop),right:parseFloat(safe.paddingRight),bottom:parseFloat(safe.paddingBottom),left:parseFloat(safe.paddingLeft)},
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
     cssWidth:box.width,cssHeight:box.height,footerBottom:bottom.bottom,scrollWidth:document.documentElement.scrollWidth,
@@ -51,7 +51,13 @@ const reportLayout=()=>{
   fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
 };
 const schedule=()=>{clearTimeout(timer);timer=setTimeout(reportLayout,250)};
-addEventListener('load',schedule);addEventListener('resize',schedule);addEventListener('buio:native-layout',schedule);
+addEventListener('load',()=>{
+  schedule();
+  if(location.pathname==='/export-probe')setTimeout(()=>{
+    const url=URL.createObjectURL(new Blob(['BuiO native export check'],{type:'text/plain'}));
+    const anchor=document.createElement('a');anchor.href=url;anchor.download='buio-export-check.txt';anchor.click();URL.revokeObjectURL(url);
+  },500);
+});addEventListener('resize',schedule);addEventListener('buio:native-layout',schedule);
 const poll=setInterval(async()=>{const next=await fetch('/next').then(r=>r.json());if(next){clearInterval(poll);location.assign(next)}},250);
 </script></body></html>`;
 const server = createServer(async (req, res) => {
@@ -87,17 +93,19 @@ try {
       received = undefined; nextPath = undefined;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot']);
       let originalPortrait;
-      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1']) {
+      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/export-probe']) {
         if (route !== '/') { received = undefined; nextPath = route; }
         const deadline = Date.now() + 45000;
         const ready = () => received?.path === route && received.native &&
           (!['/science-lab', '/pet?battle=1'].includes(route) || received.width > received.height) &&
+          (route !== '/export-probe' || received.downloadReady) &&
           (!['/pet', '/pet?home=1'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250));
         assert.ok(ready(), `${type} ${route}: missing native layout or automatic orientation: ${JSON.stringify(received)}`);
         const report = { device: device.name, ...received };
         if (route === '/') originalPortrait = report.height > report.width;
         reports.push(report);
+        if (route === '/export-probe') await new Promise(resolve => setTimeout(resolve, 500));
         await run('xcrun', ['simctl', 'io', device.udid, 'screenshot', path.join(output, `${type}-${route === '/' ? 'home' : route.slice(1).replace(/[?=]/g, '-')}.png`)]);
         await writeFile(path.join(output, 'report.json'), JSON.stringify(reports, null, 2));
         assert.equal(report.helperAtHead, true, `${type}: helper missing before page code`);

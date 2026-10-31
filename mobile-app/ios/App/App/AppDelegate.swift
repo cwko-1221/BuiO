@@ -53,6 +53,8 @@ class BuiOViewController: CAPBridgeViewController {
     private var immersive = false
     private var returnOrientation: UIInterfaceOrientation = .portrait
     private var lastInsets = ""
+    private var downloadDelegate: BuiODownloadDelegate?
+    private var pendingExports: [URL] = []
 
     override func capacitorDidLoad() {
         super.capacitorDidLoad()
@@ -79,6 +81,11 @@ class BuiOViewController: CAPBridgeViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardFrameChanged(_:)),
             name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         webView.configuration.userContentController.add(BuiOLayoutHandler(owner: self), name: "buioLayout")
+        if let original = webView.navigationDelegate {
+            let downloads = BuiODownloadDelegate(owner: self, original: original)
+            downloadDelegate = downloads
+            webView.navigationDelegate = downloads
+        }
 
         // Capacitor replaces the configuration's userContentController when
         // creating its bridge. Install our script on the final controller,
@@ -141,6 +148,8 @@ class BuiOViewController: CAPBridgeViewController {
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         landscapeModule ? .landscapeRight : returnOrientation
     }
+    @available(iOS 26.0, *)
+    override var prefersInterfaceOrientationLocked: Bool { landscapeModule }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -184,9 +193,58 @@ class BuiOViewController: CAPBridgeViewController {
     private func updateOrientation() {
         if #available(iOS 16.0, *) {
             setNeedsUpdateOfSupportedInterfaceOrientations()
-            let previous = UIInterfaceOrientationMask(rawValue: 1 << returnOrientation.rawValue)
-            view.window?.windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: landscapeModule ? .landscape : previous))
+            if #available(iOS 26.0, *) { setNeedsUpdateOfPrefersInterfaceOrientationLocked() }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                let previous = UIInterfaceOrientationMask(rawValue: 1 << self.returnOrientation.rawValue)
+                self.view.window?.windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: self.landscapeModule ? .landscape : previous)) { error in
+                    NSLog("BuiO orientation request: %@", error.localizedDescription)
+                }
+            }
         } else { UIViewController.attemptRotationToDeviceOrientation() }
+    }
+
+    fileprivate func permitsExportURL(_ url: URL?) -> Bool {
+        guard let url = url, let expected = bridge?.config.serverURL else { return false }
+        if url.scheme == "blob" {
+            let origin = expected.absoluteString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+            return url.absoluteString.hasPrefix("blob:" + origin + "/")
+        }
+        if url.scheme == "data" { return true }
+        return url.scheme == expected.scheme && url.host == expected.host && url.port == expected.port
+    }
+
+    fileprivate func shareExport(_ url: URL) {
+        pendingExports.append(url)
+        #if DEBUG
+        if bridge?.config.serverURL.host == "127.0.0.1" {
+            webView?.evaluateJavaScript("window.BuiODownloadReady=true;window.dispatchEvent(new Event('buio:native-layout'));")
+        }
+        #endif
+        presentNextExport()
+    }
+
+    private func presentNextExport() {
+        guard presentedViewController == nil, !pendingExports.isEmpty else { return }
+        let url = pendingExports.removeFirst()
+        let share = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+        if let popover = share.popoverPresentationController {
+            popover.sourceView = view
+            popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
+            popover.permittedArrowDirections = []
+        }
+        share.completionWithItemsHandler = { [weak self] _, _, _, _ in
+            try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
+            DispatchQueue.main.async { self?.presentNextExport() }
+        }
+        present(share, animated: true)
+    }
+
+    fileprivate func exportFailed() {
+        guard presentedViewController == nil else { return }
+        let alert = UIAlertController(title: "匯出未完成", message: "請返回原來頁面再試一次。", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "知道了", style: .default))
+        present(alert, animated: true)
     }
 
     override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
@@ -204,5 +262,57 @@ private final class BuiOLayoutHandler: NSObject, WKScriptMessageHandler {
     init(owner: BuiOViewController) { self.owner = owner }
     func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
         owner?.applyLayout(message)
+    }
+}
+
+// Keep Capacitor's normal navigation, authentication challenges and lifecycle
+// delegate intact. Only file-download policies are handled here; WebKit keeps
+// the original cookie context and streams the file directly to the sandbox.
+private final class BuiODownloadDelegate: NSObject, WKNavigationDelegate, WKDownloadDelegate {
+    weak var owner: BuiOViewController?
+    let original: WKNavigationDelegate
+    private var files: [ObjectIdentifier: URL] = [:]
+    init(owner: BuiOViewController, original: WKNavigationDelegate) { self.owner = owner; self.original = original }
+    override func responds(to selector: Selector!) -> Bool { super.responds(to: selector) || original.responds(to: selector) }
+    override func forwardingTarget(for selector: Selector!) -> Any? {
+        original.responds(to: selector) ? original : super.forwardingTarget(for: selector)
+    }
+    func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if action.shouldPerformDownload, owner?.permitsExportURL(action.sourceFrame.request.url) == true,
+           owner?.permitsExportURL(action.request.url) == true {
+            decisionHandler(.download); return
+        }
+        if original.responds(to: NSSelectorFromString("webView:decidePolicyForNavigationAction:decisionHandler:")) {
+            original.webView?(webView, decidePolicyFor: action, decisionHandler: decisionHandler)
+        } else { decisionHandler(.allow) }
+    }
+    func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        let attachment = (response.response as? HTTPURLResponse)?.value(forHTTPHeaderField: "Content-Disposition")?.lowercased().contains("attachment") == true
+        if response.isForMainFrame, (attachment || !response.canShowMIMEType), owner?.permitsExportURL(response.response.url) == true {
+            decisionHandler(.download); return
+        }
+        if original.responds(to: NSSelectorFromString("webView:decidePolicyForNavigationResponse:decisionHandler:")) {
+            original.webView?(webView, decidePolicyFor: response, decisionHandler: decisionHandler)
+        } else { decisionHandler(.allow) }
+    }
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) { download.delegate = self }
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) { download.delegate = self }
+    func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("BuiO-Exports", isDirectory: true).appendingPathComponent(UUID().uuidString, isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let name = (suggestedFilename as NSString).lastPathComponent
+            let safe = name.isEmpty || name == "." || name == ".." ? "export" : String(name.prefix(160))
+            let url = directory.appendingPathComponent(safe)
+            files[ObjectIdentifier(download)] = url
+            completionHandler(url)
+        } catch { completionHandler(nil); owner?.exportFailed() }
+    }
+    func downloadDidFinish(_ download: WKDownload) {
+        if let url = files.removeValue(forKey: ObjectIdentifier(download)) { owner?.shareExport(url) }
+    }
+    func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+        if let url = files.removeValue(forKey: ObjectIdentifier(download)) { try? FileManager.default.removeItem(at: url.deletingLastPathComponent()) }
+        owner?.exportFailed()
     }
 }
