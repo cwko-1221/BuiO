@@ -49,7 +49,7 @@ const reportLayout=()=>{
   const bottom=document.querySelector('footer').getBoundingClientRect();
   const safe=getComputedStyle(document.querySelector('#safeProbe'));
   const report={helperAtHead:window.helperAtHead,version:window.BuiOMobile?.version,
-    path:location.pathname+location.search,native:window.BuiONativeLayout,downloads:window.BuiODownloads||[],
+    path:location.pathname+location.search,native:window.BuiONativeLayout,downloads:window.BuiODownloads||[],sharePresented:!!window.BuiOSharePresented,
     safe:{top:parseFloat(safe.paddingTop),right:parseFloat(safe.paddingRight),bottom:parseFloat(safe.paddingBottom),left:parseFloat(safe.paddingLeft)},
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
     cssWidth:box.width,cssHeight:box.height,footerBottom:bottom.bottom,scrollWidth:document.documentElement.scrollWidth,
@@ -115,7 +115,7 @@ try {
         const deadline = Date.now() + 45000;
         const ready = () => received?.path === route && received.native &&
           (!['/science-lab', '/pet?battle=1'].includes(route) || received.width > received.height) &&
-          (route !== '/export-probe' || received.downloads?.length === 2) &&
+          (route !== '/export-probe' || (received.downloads?.length === 2 && received.sharePresented)) &&
           (!['/pet', '/pet?home=1'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 250));
         if (!ready()) {

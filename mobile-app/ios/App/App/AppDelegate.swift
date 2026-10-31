@@ -249,7 +249,13 @@ class BuiOViewController: CAPBridgeViewController {
             try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
             DispatchQueue.main.async { self?.presentNextExport() }
         }
-        present(share, animated: true)
+        present(share, animated: true) { [weak self] in
+            #if DEBUG
+            if self?.bridge?.config.serverURL.host == "127.0.0.1" {
+                self?.webView?.evaluateJavaScript("window.BuiOSharePresented=true;window.dispatchEvent(new Event('buio:native-layout'));")
+            }
+            #endif
+        }
     }
 
     fileprivate func exportFailed() {
