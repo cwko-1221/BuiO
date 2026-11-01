@@ -6,7 +6,7 @@
 
 ## 更新已安裝的 App
 
-用戶 iPhone 於 2026-10-31 已安裝 0.2.0 build 5，當時 Sideloadly 顯示 Done／100%。最新 build 11 的 IPA 已編譯及核對，原生 20 階段與畫面邊緣／分享核對已通過，尚未安裝；包含學生房間名稱、大亂鬥遊戲介面／選項面板及選關防橫向捲動，同時保留老師版各項修正。已準備的檔案為 `releases/buio-pilot-0.2.0-unsigned.ipa`，狀態及雜湊記在 [VALIDATION.md](VALIDATION.md)。其他裝置仍須自行簽署及安裝。
+用戶 iPhone 於 2026-10-31 已安裝 0.2.0 build 5，當時 Sideloadly 顯示 Done／100%。最新 build 12 已編譯並核對 IPA；新增日期欄位的 22 原生階段正執行。包含老師欠交功課／班級分析、學生戶外與大亂鬥浮動搖桿，以及按鈕邊緣修正。本輪沒有操作安裝工具，原生通過後才更新 `releases/buio-pilot-0.2.0-unsigned.ipa`，結果及雜湊記於 [VALIDATION.md](VALIDATION.md)。其他裝置仍須自行簽署及安裝。
 
 - 使用本次提供的 `buio-pilot-0.2.0-unsigned.ipa`。它必須先經簽署，不能在 iPhone 的 Files 裡點開便安裝。
 - 沿用上次的 Apple ID 及 Sideloadly Bundle ID 設定，直接覆蓋更新；毋須先刪除現有 App。安全區、轉向及 App 導覽程式已內嵌在新版，單純重新載入舊 App 不會取得這些修正。

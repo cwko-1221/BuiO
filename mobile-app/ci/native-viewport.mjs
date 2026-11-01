@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { once } from 'node:events';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import { FixtureNavigation } from './fixture-navigation.mjs';
 
 if (process.platform !== 'darwin') throw Error('Native viewport checks require Xcode/macOS.');
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -33,7 +34,8 @@ const run = async (command, args, env = {}, timeout = 180000) => {
   if (code !== 0) throw Error(`${command} ${args.join(' ')} failed (${code}): ${result.slice(-6000)}`);
   return result;
 };
-let received, nextPath, attachmentCookieReceived = false;
+let received, attachmentCookieReceived = false;
+const navigation = new FixtureNavigation();
 const html = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <style>
 html,body{height:100%;width:100%;margin:0;font:16px -apple-system,sans-serif;background:#edf5f1;color:#203c3b}
@@ -80,11 +82,16 @@ addEventListener('load',()=>{
 // UIKit and WebKit finish rotation on different frames. Keep measuring the
 // actual CSS layout until it agrees with the native scene, then assert it.
 setInterval(reportLayout,500);
-const poll=setInterval(async()=>{
-  const next=await fetch('/next').then(r=>r.json());
-  if(next?.dismissExport)window.webkit.messageHandlers.buioLayout.postMessage({dismissFixtureExport:true});
-  else if(next){clearInterval(poll);location.assign(next)}
-},250);
+let leaving=false;
+const poll=async()=>{
+  try {
+    const next=await fetch('/next?from='+encodeURIComponent(location.pathname+location.search)).then(r=>r.json());
+    if(next?.dismissExport)window.webkit.messageHandlers.buioLayout.postMessage({dismissFixtureExport:true});
+    else if(next){leaving=true;location.assign(next)}
+  } catch { /* The existing phase deadline still detects transport failures. */ }
+  finally { if(!leaving)setTimeout(poll,250); }
+};
+setTimeout(poll,250);
 </script></body></html>`;
 const server = createServer(async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
@@ -94,12 +101,16 @@ const server = createServer(async (req, res) => {
     res.setHeader('Content-Type', 'text/plain');
     res.setHeader('Content-Disposition', 'attachment; filename="buio-http-export.txt"');
     res.end('BuiO native authenticated export check');
-  } else if (req.url === '/next') {
-    res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(nextPath || null)); nextPath = undefined;
+  } else if (req.url.startsWith('/next?')) {
+    const from = new URL(req.url, 'http://fixture.local').searchParams.get('from');
+    const next = navigation.read(from);
+    if (next) console.log('[native] fixture command ' + JSON.stringify({ from, next }));
+    res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(next));
   } else if (req.method === 'POST' && req.url === '/report') {
     let body = '';
     for await (const chunk of req) { body += chunk; if (body.length > 10000) { res.writeHead(413).end(); return; } }
     received = JSON.parse(body);
+    navigation.acknowledge(received.path);
     res.writeHead(204).end();
   } else {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -137,12 +148,12 @@ try {
           '-resultBundlePath', path.join(output, 'iPad-device-mode.xcresult'), 'CODE_SIGNING_ALLOWED=NO', 'test'], {}, 600000);
         await writeFile(path.join(output, 'iPad-device-mode.log'), log);
       }
-      received = undefined; nextPath = undefined; attachmentCookieReceived = false;
+      received = undefined; navigation.clear(); attachmentCookieReceived = false;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot'], {}, 600000);
       let originalPortrait;
       for (const route of ['/', '/homework', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/pet/teacher', '/game/', '/tower-defense/', '/?return=1', '/export-probe']) {
         console.log(`[native] ${device.name}: ${route}`);
-        if (route !== '/') { received = undefined; nextPath = route; }
+        if (route !== '/') { received = undefined; navigation.issue(reports.at(-1).path, route); }
         // A freshly booted simulator may spend over 45s starting WebKit.
         // Only the first navigation gets a cold-start allowance; orientation
         // and export phases retain their existing 45s readiness deadline.
@@ -157,7 +168,7 @@ try {
           (!['/?return=1', '/export-probe'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) {
           if (route === '/export-probe' && received?.downloads?.length === 2 && received.shareCount === 1 && !dismissedFirstExport) {
-            nextPath = { dismissExport: true }; dismissedFirstExport = true;
+            navigation.issue(route, { dismissExport: true }); dismissedFirstExport = true;
           }
           await new Promise(resolve => setTimeout(resolve, 250));
         }

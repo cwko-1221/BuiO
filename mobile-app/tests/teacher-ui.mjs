@@ -16,7 +16,7 @@ await mkdir(out, { recursive: true });
 const users = [
   { studentid: 'MOBILETEACHER', name: '版面測試老師', role: 'teacher' },
   ...Array.from({ length: 12 }, (_, i) => ({ studentid: 'MOBILE' + String(i).padStart(3, '0'),
-    name: i === 1 ? '版面測試 Basilio Ofelia Eiko Vallez' : '測試學生 ' + (i + 1),
+    name: i === 1 ? '版面測試 Demo Long Student ExampleName' : '測試學生 ' + (i + 1),
     role: 'student', classname: i < 6 ? 'P4' : 'P5', classno: i + 1,
     chinesegroup: 'A組', englishgroup: 'B組', mathgroup: 'A組' }))
 ].map(user => ({ ...user, passwordhash: bcrypt.hashSync('pilot-fixture-only', 4), language: 'zh-HK' }));
@@ -84,7 +84,7 @@ try {
     });
     assert.ok(layout.every(item => item.labelLines === 1 && item.height >= 44 && item.fits), JSON.stringify(layout));
     await fit(); await page.screenshot({ path: path.join(out, 'student-edit-' + screenName + '.png'), fullPage: true });
-    const search = page.locator('.buio-directory-controls input'); await search.fill('Vallez');
+    const search = page.locator('.buio-directory-controls input'); await search.fill('ExampleName');
     assert.equal(await page.locator('.management-student-row:visible').count(), 1);
     await search.fill(''); await page.locator('.buio-directory-controls select').selectOption('P5');
     assert.equal(await page.locator('.management-student-row:visible').count(), 6);
@@ -100,10 +100,10 @@ try {
       assert.equal(route.request().method(), 'GET');
       const name = new URL(route.request().url()).pathname.split('/').pop();
       const data = name === 'meta' ? { success: true, role: 'teacher', canAccess: true, subjects: SUBJECTS, academicYears: ['2025-26'], currentAcademicYear: '2025-26', assignments: [], teacherAssignments: [] } :
-        name === 'class-analysis' ? { success: true, totalMissing: 3, rows: [{ id: 'MOBILE000', name: '版面測試 Abbago Jace Skyler Canon', missingCount: 3,
+        name === 'class-analysis' ? { success: true, totalMissing: 3, rows: [{ id: 'MOBILE000', name: '版面測試 Example Long Student Display Name', missingCount: 3,
           missingRecords: Array.from({ length: 3 }, (_, i) => ({ date: '2026-10-29', subject: 'chinese-a', subjectName: '中文 A 組', homework: i === 0 ? 'CB' : '中文閱讀理解第二十課及詞語練習', madeUp: i === 1 })) }] } :
         name === 'teacher-classes' ? { success: true, totalMissing: 6, assignments: [{ className: 'P4', subject: 'chinese-a', subjectName: '中文 A 組', missingCount: 6,
-          rows: Array.from({ length: 6 }, (_, i) => ({ date: '2026-10-31', studentName: '版面測試 Colman Felim George ' + i, classNo: i + 1, studentId: 'MOBILE' + i,
+          rows: Array.from({ length: 6 }, (_, i) => ({ date: '2026-10-31', studentName: '版面測試 Demo Long Student Name ' + i, classNo: i + 1, studentId: 'MOBILE' + i,
             homework: i === 0 ? 'WB p.14–15' : '中文閱讀理解及詞語練習第二十課 WB p.14–15', homeworkId: 'test' + i, className: 'P4', subject: 'chinese-a', madeUp: i === 1 })) }] } : { success: true, students: [], monitors: [] };
       return route.fulfill({ json: data });
     });
