@@ -50,6 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 class BuiOViewController: CAPBridgeViewController {
     private var keyboardBottom: NSLayoutConstraint?
     private var landscapeModule = false
+    private var portraitModule = false
     private var immersive = false
     private var returnOrientation: UIInterfaceOrientation = .portrait
     private var lastInsets = ""
@@ -129,6 +130,7 @@ class BuiOViewController: CAPBridgeViewController {
         let science = url.path == "/science-lab" || url.path.hasPrefix("/science-lab/")
         let game = ["/pet", "/pet/", "/game", "/game/", "/tower-defense", "/tower-defense/"].contains(url.path)
         let forceLandscape = science || (game && (body["landscape"] as? Bool == true))
+        let forcePortrait = (url.path == "/pet" || url.path.hasPrefix("/pet/")) && (body["portrait"] as? Bool == true)
         immersive = science || (game && (body["immersive"] as? Bool == true))
         setStatusBarVisible(!immersive)
         setStatusBarStyle(body["lightStatus"] as? Bool == true ? .lightContent : .darkContent)
@@ -143,19 +145,21 @@ class BuiOViewController: CAPBridgeViewController {
             webView?.backgroundColor = color
             webView?.scrollView.backgroundColor = color
         }
-        if landscapeModule != forceLandscape {
+        if landscapeModule != forceLandscape || portraitModule != forcePortrait {
             if forceLandscape {
                 returnOrientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
                 if returnOrientation == .unknown { returnOrientation = .portrait }
             }
             landscapeModule = forceLandscape
+            portraitModule = forcePortrait
+            if forcePortrait { returnOrientation = .portrait }
             updateOrientation()
         }
         publishLayout(force: true)
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        landscapeModule ? .landscape : (UIDevice.current.userInterfaceIdiom == .pad ? .all : .allButUpsideDown)
+        portraitModule ? .portrait : (landscapeModule ? .landscape : (UIDevice.current.userInterfaceIdiom == .pad ? .all : .allButUpsideDown))
     }
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
         landscapeModule ? .landscapeRight : returnOrientation

@@ -382,8 +382,11 @@
     const gameCanvas = Boolean(document.querySelector('#rotateNotice, #gameCanvas'));
     const immersive = module === 'science-lab' || gameCanvas || battle || (module === 'pet' && ['park', 'coin-pusher'].includes(petScreen));
     root.setAttribute('data-buio-immersive', String(immersive));
-    const landscape = module === 'pet' || module === 'science-lab' || battle || gameCanvas;
-    const message = { immersive, landscape, background, lightStatus: ['math', 'games', 'game', 'tower-defense', 'science-lab'].includes(module) };
+    const petRoom = module === 'pet' && !document.querySelector('.pet-shell.brawl-open') &&
+      (Boolean(document.querySelector('.teacher-shell')) || ['', 'home', 'decorate'].includes(petScreen));
+    const portrait = petRoom;
+    const landscape = (module === 'pet' && !portrait) || module === 'science-lab' || battle || gameCanvas;
+    const message = { immersive, landscape, portrait, background, lightStatus: ['math', 'games', 'game', 'tower-defense', 'science-lab'].includes(module) };
     const serialized = JSON.stringify(message);
     if (serialized !== lastPresentation) {
       window.webkit?.messageHandlers?.buioLayout?.postMessage(message);

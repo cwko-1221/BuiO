@@ -98,7 +98,8 @@ const server = createServer(async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Set-Cookie', 'buio_fixture=ready; Path=/; HttpOnly; SameSite=Lax');
     let document = html;
-    if (req.url.includes('battle=1')) document = html.replace('<body>', '<body><div class="pet-shell brawl-active"></div>');
+    if (req.url.includes('battle=1')) document = html.replace('<body>', '<body><div class="pet-shell brawl-open brawl-active"></div>');
+    if (req.url.startsWith('/pet/teacher')) document = html.replace('<body>', '<body><div class="teacher-shell"></div>');
     if (req.url.startsWith('/game/') || req.url.startsWith('/tower-defense/')) document = html.replace('<body>', '<body><canvas id="gameCanvas"></canvas>');
     res.end(document);
   }
@@ -130,7 +131,7 @@ try {
       received = undefined; nextPath = undefined; attachmentCookieReceived = false;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot'], {}, 600000);
       let originalPortrait;
-      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/game/', '/tower-defense/', '/?return=1', '/export-probe']) {
+      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/pet/teacher', '/game/', '/tower-defense/', '/?return=1', '/export-probe']) {
         console.log(`[native] ${device.name}: ${route}`);
         if (route !== '/') { received = undefined; nextPath = route; }
         // A freshly booted simulator may spend over 45s starting WebKit.
@@ -139,7 +140,8 @@ try {
         const deadline = Date.now() + (route === '/' ? 120000 : 45000);
         let dismissedFirstExport = false;
         const ready = () => received?.path === route && received.native &&
-          (!(route.startsWith('/pet') || ['/science-lab', '/game/', '/tower-defense/'].includes(route)) || received.width > received.height) &&
+          (!['/pet?battle=1','/science-lab', '/game/', '/tower-defense/'].includes(route) || received.width > received.height) &&
+          (!['/pet','/pet?home=1','/pet/teacher'].includes(route) || received.height > received.width) &&
           (route !== '/export-probe' || (received.downloads?.length === 2 && received.shareCount === 2)) &&
           (!['/?return=1', '/export-probe'].includes(route) || (received.height > received.width) === originalPortrait);
         while (!ready() && Date.now() < deadline) {

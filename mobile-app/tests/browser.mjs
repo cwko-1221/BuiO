@@ -89,7 +89,10 @@ try {
       });
       const originalViewports = new WeakMap();
       await context.exposeBinding('__buioNativePresentation', async ({ page }, message) => {
-        if (message.landscape) {
+        if (message.portrait) {
+          const size = page.viewportSize();
+          if (size.width > size.height) await page.setViewportSize({ width: size.height, height: size.width });
+        } else if (message.landscape) {
           if (!originalViewports.has(page)) originalViewports.set(page, page.viewportSize());
           const size = page.viewportSize();
           if (size.height > size.width) await page.setViewportSize({ width: size.height, height: size.width });
@@ -214,7 +217,7 @@ try {
       await page.goto(backend + '/pet');
       await page.waitForFunction(() => document.body.innerText.includes('寵物'), { timeout: 20000 });
       await page.locator('.pet-nav').waitFor();
-      await page.waitForFunction(() => innerWidth > innerHeight);
+      await page.waitForFunction(() => innerHeight > innerWidth);
       const compactPet = () => {
         const size = page.viewportSize();
         return size.width < 900 || (size.height <= 599 && size.width <= 1100);
@@ -367,6 +370,7 @@ try {
         await page.locator('.pet-nav [data-tab="home"].active').waitFor({ state: 'attached' });
         await page.setViewportSize(roomLandscape);
         await petTab('brawl');
+        await page.waitForFunction(() => innerWidth > innerHeight);
         await page.locator('[data-buio-brawl-menu] .buio-brawl-roster').waitFor();
         await page.locator('[data-brawl="filter"][data-id="all"]').click();
         await page.locator('[data-buio-brawl-menu] .buio-brawl-roster').waitFor();

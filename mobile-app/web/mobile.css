@@ -290,6 +290,36 @@ html[data-buio-module="pet"] .buio-brawl-dialog .brawl-heading :is(h1,p) { font-
   html[data-buio-module="pet"] .buio-brawl-preparation { border-left: 0; padding-left: 0; }
 }
 
+/* Homework data fits the viewport; keep every field and action available
+   by wrapping records instead of retaining desktop minimum widths. */
+@media (max-width: 1100px) {
+  html[data-buio-module="homework"] .shell { grid-template-columns: minmax(0,1fr); padding: 12px; gap: 12px; }
+  html[data-buio-module="homework"] .side { position: static; min-height: 0; padding: 14px; }
+  html[data-buio-module="homework"] .nav { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 4px; margin-top: 12px; }
+  html[data-buio-module="homework"] .nav button { padding: 6px; font-size: clamp(12px,2.8vw,14px); justify-content: center; text-align: center; }
+  html[data-buio-module="homework"] .panel { padding: 12px; }
+  html[data-buio-module="homework"] .panel h2 { font-size: clamp(18px,4vw,24px); }
+  html[data-buio-module="homework"] :is(.filters,.filters.three,.homework-export-settings) { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  html[data-buio-module="homework"] :is(.field,.field input,.field select,.homework-title,.status-table,.missing-record-row,.class-analysis-record-row) { min-width: 0; max-width: 100%; }
+  html[data-buio-module="homework"] :is(.homework-card,.missing-record-list,.class-analysis-record-list,.table-wrap) { overflow-x: visible; }
+  html[data-buio-module="homework"] :is(.missing-record-row,.class-analysis-record-row) {
+    grid-template-columns: minmax(0,.85fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr);
+    gap: 6px; padding: 10px 8px; font-size: clamp(12px,2.8vw,14px); overflow-wrap: anywhere;
+  }
+  html[data-buio-module="homework"] :is(.missing-record-row,.class-analysis-record-row) > * { min-width: 0; overflow-wrap: anywhere; }
+  html[data-buio-module="homework"] :is(.missing-record-status,.caught-up-check) { flex-wrap: wrap; gap: 4px; font-size: 12px; }
+  html[data-buio-module="homework"] .caught-up-check { min-height: 44px; }
+  html[data-buio-module="homework"] :is(.status-table,.analysis-table,.draft-comparison table) { width: 100%; min-width: 0; table-layout: fixed; }
+  html[data-buio-module="homework"] :is(th,td) { padding: 8px 5px; font-size: clamp(12px,2.8vw,14px); overflow-wrap: anywhere; }
+  html[data-buio-module="homework"] .status-options { gap: 4px; }
+  html[data-buio-module="homework"] .status-options label { min-height: 44px; padding: 6px; font-size: 12px; }
+  html[data-buio-module="homework"] :is(.actions,.homework-title) { display: flex; flex-wrap: wrap; gap: 8px; }
+  html[data-buio-module="homework"] .homework-title > * { min-width: 0; max-width: 100%; }
+}
+@media (max-width: 380px) {
+  html[data-buio-module="homework"] :is(.filters,.filters.three,.homework-export-settings) { grid-template-columns: minmax(0,1fr); }
+}
+
 html[data-buio-module="science-lab"] .topbar {
   padding-inline: max(12px, var(--buio-safe-left)) max(12px, var(--buio-safe-right));
 }
