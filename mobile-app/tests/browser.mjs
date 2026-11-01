@@ -90,6 +90,7 @@ try {
       const originalViewports = new WeakMap();
       await context.exposeBinding('__buioNativePresentation', async ({ page }, message) => {
         if (message.portrait) {
+          if (!originalViewports.has(page)) originalViewports.set(page, page.viewportSize());
           const size = page.viewportSize();
           if (size.width > size.height) await page.setViewportSize({ width: size.height, height: size.width });
         } else if (message.landscape) {
@@ -238,6 +239,8 @@ try {
         await page.locator('.pet-nav [data-tab="home"]').click();
       }
       assert.ok(!page.url().endsWith('/'));
+      await page.waitForFunction(() => innerHeight > innerWidth);
+      await page.waitForTimeout(250); // Finish the tab press and rotation transitions before measuring the row.
       const petNavigation = await page.locator('.pet-nav').evaluate(nav => {
         const box = nav.getBoundingClientRect();
         const buttons = [...nav.querySelectorAll(':scope > button')].filter(button => button.getBoundingClientRect().width);

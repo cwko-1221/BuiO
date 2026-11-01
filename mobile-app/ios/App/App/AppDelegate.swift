@@ -146,13 +146,12 @@ class BuiOViewController: CAPBridgeViewController {
             webView?.scrollView.backgroundColor = color
         }
         if landscapeModule != forceLandscape || portraitModule != forcePortrait {
-            if forceLandscape {
+            if !landscapeModule && !portraitModule && (forceLandscape || forcePortrait) {
                 returnOrientation = view.window?.windowScene?.interfaceOrientation ?? .portrait
                 if returnOrientation == .unknown { returnOrientation = .portrait }
             }
             landscapeModule = forceLandscape
             portraitModule = forcePortrait
-            if forcePortrait { returnOrientation = .portrait }
             updateOrientation()
         }
         publishLayout(force: true)
@@ -162,7 +161,7 @@ class BuiOViewController: CAPBridgeViewController {
         portraitModule ? .portrait : (landscapeModule ? .landscape : (UIDevice.current.userInterfaceIdiom == .pad ? .all : .allButUpsideDown))
     }
     override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
-        landscapeModule ? .landscapeRight : returnOrientation
+        portraitModule ? .portrait : (landscapeModule ? .landscapeRight : returnOrientation)
     }
     @available(iOS 26.0, *)
     override var prefersInterfaceOrientationLocked: Bool { landscapeModule && view.bounds.width > view.bounds.height }
@@ -223,7 +222,8 @@ class BuiOViewController: CAPBridgeViewController {
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
                 let previous = UIInterfaceOrientationMask(rawValue: 1 << self.returnOrientation.rawValue)
-                self.view.window?.windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: self.landscapeModule ? .landscape : previous)) { error in
+                let requested: UIInterfaceOrientationMask = self.portraitModule ? .portrait : (self.landscapeModule ? .landscape : previous)
+                self.view.window?.windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: requested)) { error in
                     NSLog("BuiO orientation request: %@", error.localizedDescription)
                 }
             }
