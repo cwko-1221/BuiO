@@ -6,7 +6,7 @@
 
 ## 更新已安裝的 App
 
-用戶 iPhone 於 2026-10-31 已安裝 0.2.0 build 5，當時 Sideloadly 顯示 Done／100%。最新 build 8 已完成原生編譯，正在最後驗證，尚未安裝；包含學生房間／老師版直向與欠交功課適配。通過後提供的檔案為 `releases/buio-pilot-0.2.0-unsigned.ipa`，狀態及雜湊記在 [VALIDATION.md](VALIDATION.md)。其他裝置仍須自行簽署及安裝。
+用戶 iPhone 於 2026-10-31 已安裝 0.2.0 build 5，當時 Sideloadly 顯示 Done／100%。最新 build 10 正在編譯及原生驗證，尚未安裝；包含老師工作台、學生管理、功課紀錄卡、寵物老師版排版，以及既有方向修正。通過後提供的檔案為 `releases/buio-pilot-0.2.0-unsigned.ipa`，狀態及雜湊記在 [VALIDATION.md](VALIDATION.md)。其他裝置仍須自行簽署及安裝。
 
 - 使用本次提供的 `buio-pilot-0.2.0-unsigned.ipa`。它必須先經簽署，不能在 iPhone 的 Files 裡點開便安裝。
 - 沿用上次的 Apple ID 及 Sideloadly Bundle ID 設定，直接覆蓋更新；毋須先刪除現有 App。安全區、轉向及 App 導覽程式已內嵌在新版，單純重新載入舊 App 不會取得這些修正。

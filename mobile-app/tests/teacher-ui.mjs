@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const require = createRequire(path.join(root, 'package.json'));
 const { webkit } = require('playwright');
 const bcrypt = require('bcryptjs');
-const out = path.join(root, 'mobile-app/test-results/teacher-build9');
+const out = path.join(root, 'mobile-app/test-results/teacher-build10');
 await mkdir(out, { recursive: true });
 const users = [
   { studentid: 'MOBILETEACHER', name: '版面測試老師', role: 'teacher' },
@@ -92,8 +92,60 @@ try {
     await fit(); await page.screenshot({ path: path.join(out, 'checklist-' + viewport.width + '.png') });
     await page.evaluate(() => scrollTo(0, 300));
     const sticky = await page.locator('.topbar').boundingBox(); assert.ok(sticky.y >= (viewport.width > 600 ? 24 : 62) - 1);
+    const { SUBJECTS } = require(path.join(root, 'homework-app/lib/domain.js'));
+    await context.route(url => url.origin === backend && url.pathname.startsWith('/api/homework/'), route => {
+      assert.equal(route.request().method(), 'GET');
+      const name = new URL(route.request().url()).pathname.split('/').pop();
+      const data = name === 'meta' ? { success: true, role: 'teacher', canAccess: true, subjects: SUBJECTS, academicYears: ['2025-26'], currentAcademicYear: '2025-26', assignments: [], teacherAssignments: [] } :
+        name === 'teacher-classes' ? { success: true, totalMissing: 6, assignments: [{ className: 'P4', subject: 'chinese-a', subjectName: '中文 A 組', missingCount: 6,
+          rows: Array.from({ length: 6 }, (_, i) => ({ date: '2026-10-31', studentName: '版面測試 Colman Felim George ' + i, classNo: i + 1, studentId: 'MOBILE' + i,
+            homework: '中文閱讀理解及詞語練習第二十課 WB p.14–15', homeworkId: 'test' + i, className: 'P4', subject: 'chinese-a', madeUp: i === 1 })) }] } : { success: true, students: [], monitors: [] };
+      return route.fulfill({ json: data });
+    });
+    await page.goto(backend + '/homework'); await page.locator('.nav [data-view=classes]').click();
+    await page.locator('.teacher-class-made-up').first().waitFor();
+    assert.equal(await page.locator('.teacher-class-made-up').count(), 6);
+    const cards = await page.locator('.missing-record-row:not(.missing-record-heading)').evaluateAll(rows => rows.map(row => {
+      const student = row.children[1].getBoundingClientRect(); const work = row.children[2].getBoundingClientRect(); const date = row.children[0].getBoundingClientRect();
+      return { width: row.clientWidth, scroll: row.scrollWidth, nameWidth: student.width, assignmentWidth: work.width, dateHeight: date.height, font: parseFloat(getComputedStyle(row.children[1]).fontSize) };
+    }));
+    if (viewport.width <= 1100) assert.ok(cards.every(card => card.scroll <= card.width + 1 && card.nameWidth >= 140 && card.assignmentWidth >= card.width - 30 && card.dateHeight < 20 && card.font >= 14), JSON.stringify(cards));
+    await page.locator('.teacher-class-made-up').first().check();
+    assert.equal(await page.locator('.teacher-class-made-up:checked').count(), 2, 'The original draft controls still work without submitting records');
+    await fit(); await page.screenshot({ path: path.join(out, 'homework-' + viewport.width + '.png'), fullPage: true });
+    await context.route(url => url.origin === backend && url.pathname === '/api/pet/teacher/roster', async route => {
+      const response = await route.fetch(); const data = await response.json();
+      data.students = Array.from({ length: 157 }, (_, i) => ({ ...data.students[i % data.students.length], id: 'ROSTER' + i }));
+      data.classes = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6']; await route.fulfill({ json: data });
+    });
+    await page.goto(backend + '/pet'); await page.locator('.teacher-shell').waitFor();
+    assert.deepEqual(await page.locator('.teacher-summary b').allTextContents(), ['157', '6']);
+    const stats = await page.locator('.teacher-summary small').evaluateAll(nodes => nodes.map(node => ({ display: getComputedStyle(node).display, height: node.getBoundingClientRect().height, scroll: node.scrollWidth, width: node.clientWidth })));
+    assert.ok(stats.every(item => item.display !== 'none' && item.height > 10 && item.scroll <= item.width + 1), JSON.stringify(stats));
+    const alignment = await page.locator('.teacher-tool-tabs').evaluate(nav => {
+      const rows = new Map(); for (const button of nav.querySelectorAll('button')) {
+        const box = button.getBoundingClientRect(); const key = Math.round(box.top); const row = rows.get(key) || []; row.push(box); rows.set(key, row);
+      }
+      const center = (nav.getBoundingClientRect().left + nav.getBoundingClientRect().right) / 2;
+      return [...rows.values()].map(boxes => ({ error: Math.abs((Math.min(...boxes.map(box => box.left)) + Math.max(...boxes.map(box => box.right))) / 2 - center), heights: boxes.map(box => box.height) }));
+    });
+    assert.ok(alignment.every(row => row.error < 2 && row.heights.every(height => height >= 44)), JSON.stringify(alignment));
+    assert.equal(await page.locator('.teacher-tool-tabs button').count(), 5);
+    await fit(); await page.screenshot({ path: path.join(out, 'pet-teacher-' + viewport.width + '.png') });
+    const scrolling = await page.locator('.grant-head').evaluate(head => {
+      const before = head.getBoundingClientRect().top;
+      const panel = head.closest('.grant-panel'); const main = head.closest('.teacher-main');
+      const scroller = /auto|scroll/.test(getComputedStyle(panel).overflowY) && panel.scrollHeight > panel.clientHeight + 1 ? panel : main;
+      scroller.scrollTop = 350;
+      return { position: getComputedStyle(head).position, distance: before - head.getBoundingClientRect().top, scroll: scroller.scrollTop,
+        availableScroll: Math.max(panel.scrollHeight - panel.clientHeight, main.scrollHeight - main.clientHeight),
+        ancestors: [panel, main, main.parentElement, document.body, document.documentElement].map(node => ({ name: node.className, height: node.clientHeight, scroll: node.scrollHeight, overflow: getComputedStyle(node).overflowY })) };
+    });
+    assert.equal(scrolling.position, 'static');
+    if (scrolling.availableScroll > 100) assert.ok(scrolling.scroll > 100 && scrolling.distance > 100, JSON.stringify(scrolling));
+    await page.screenshot({ path: path.join(out, 'pet-teacher-scroll-' + viewport.width + '.png') });
     assert.deepEqual(writes, [], 'The layout review must not change school data');
-    reports.push({ viewport, quickTools: 4, hiddenTeacherModules: 7, directory: 'search, class filter, edit disclosure, five fitting fields passed', checklist: 'title clear of sticky header', writes: 0 });
+    reports.push({ viewport, quickTools: 4, hiddenTeacherModules: 7, directory: 'search, class filter, edit disclosure, five fitting fields passed', checklist: 'title clear of sticky header', homework: 'six records and draft checkboxes retained', petTeacher: '157/6 labels, five centered tabs and scrolling title passed', writes: 0 });
     await context.close();
   }
   // The plain website and student App retain their existing module catalog.

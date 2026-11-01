@@ -418,6 +418,89 @@ html[data-buio-module="pet"] .buio-brawl-dialog .brawl-heading :is(h1,p) { font-
   html[data-buio-module="homework"] :is(.filters,.filters.three,.homework-export-settings) { grid-template-columns: minmax(0,1fr); }
 }
 
+/* Missing work is a reading-and-follow-up flow on a phone. A compact card
+   gives the full student name and assignment their own lines; the original
+   checkboxes and Save handlers keep their data attributes and behavior. */
+@media (max-width: 1100px) {
+  html[data-buio-module="homework"] body { background: #f3f6f8; }
+  html[data-buio-module="homework"] .shell { align-content: start; }
+  html[data-buio-module="homework"] .main { gap: 16px; }
+  html[data-buio-module="homework"] .top { flex-direction: row; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+  html[data-buio-module="homework"] .top h1 { font-size: 26px; line-height: 1.3; }
+  html[data-buio-module="homework"] .top p { font-size: 13px; margin-top: 4px; }
+  html[data-buio-module="homework"] .date-chip { font-size: 12px; padding: 6px 10px; border-radius: 8px; min-height: 0; }
+  html[data-buio-module="homework"] .panel { border-radius: 16px; box-shadow: 0 3px 12px #244f540b; background: #fff; }
+  html[data-buio-module="homework"] .panel:has(#teacherClassYear) { padding: 16px; }
+  html[data-buio-module="homework"] .panel:has(#teacherClassYear) .panel-head { margin-bottom: 12px; }
+  html[data-buio-module="homework"] .panel:has(#teacherClassYear) :is(.hint,.assignment) { display: none; }
+  html[data-buio-module="homework"] .filters.teacher-class-filter { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+  html[data-buio-module="homework"] .teacher-class-filter .field { gap: 5px; }
+  html[data-buio-module="homework"] .teacher-class-filter .field label { font-size: 12px; color: #667484; }
+  html[data-buio-module="homework"] .teacher-class-filter select { min-height: 44px; max-width: 180px; border-radius: 10px; }
+  html[data-buio-module="homework"] .teacher-class-total { align-self: center; font-size: 14px; justify-content: flex-end; white-space: nowrap; }
+  html[data-buio-module="homework"] .teacher-classes-panel { padding: 0; border: 0; box-shadow: none; background: transparent; backdrop-filter: none; gap: 16px; }
+  html[data-buio-module="homework"] .teacher-class-card { border-radius: 16px; border-color: #dfe7ec; background: #fff; }
+  html[data-buio-module="homework"] .teacher-class-card-head { flex-direction: row; align-items: center; flex-wrap: wrap; padding: 14px; gap: 10px; background: #edf6f4; }
+  html[data-buio-module="homework"] .teacher-class-card-head > div { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  html[data-buio-module="homework"] .teacher-class-card-head h3 { display: inline; margin: 0; font-size: 16px; }
+  html[data-buio-module="homework"] .teacher-class-card-head > strong { font-size: 12px; }
+  html[data-buio-module="homework"] .class-badge { border-radius: 8px; background: #fff; font-size: 12px; min-height: 26px; }
+  html[data-buio-module="homework"] .missing-record-list { display: grid; padding: 12px; gap: 10px; }
+  html[data-buio-module="homework"] .missing-record-heading { display: none; }
+  html[data-buio-module="homework"] .missing-record-row:not(.missing-record-heading) {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "student status" "homework homework" "date date";
+    align-items: start; min-width: 0; gap: 9px 12px; padding: 14px;
+    border: 1px solid #e1e8ee; border-radius: 12px; font-size: 14px;
+  }
+  html[data-buio-module="homework"] .missing-record-row > span:nth-child(1) { grid-area: date; font-size: 12px; color: #677586; white-space: nowrap; }
+  html[data-buio-module="homework"] .missing-record-row > span:nth-child(2) { grid-area: student; line-height: 1.5; overflow-wrap: break-word; }
+  html[data-buio-module="homework"] .missing-record-row > span:nth-child(2) strong { font-size: 15px; }
+  html[data-buio-module="homework"] .missing-record-row > span:nth-child(2) small { display: block; margin: 3px 0 0; font-size: 12px; }
+  html[data-buio-module="homework"] .missing-record-row > span:nth-child(3) { grid-area: homework; padding: 10px 12px; border-radius: 8px; background: #f5f8fa; color: #354458; line-height: 1.5; }
+  html[data-buio-module="homework"] .missing-record-status { grid-area: status; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  html[data-buio-module="homework"] .status-tag { font-size: 11px; min-height: 0; padding: 4px 9px; }
+  html[data-buio-module="homework"] .caught-up-check { min-height: 44px; padding: 6px 8px; border-radius: 8px; background: #fff8e8; font-size: 12px; white-space: nowrap; }
+  html[data-buio-module="homework"] .caught-up-check input { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; margin: 0; border: 1.5px solid #a9b6bc; border-radius: 5px; background: #fff; display: grid; place-content: center; }
+  html[data-buio-module="homework"] .caught-up-check input:checked { border-color: #087174; background: #087174; }
+  html[data-buio-module="homework"] .caught-up-check input:checked::after { content: '✓'; color: #fff; font-size: 14px; line-height: 1; }
+  html[data-buio-module="homework"] .teacher-class-card-actions { padding: 2px 12px 12px; }
+  html[data-buio-module="homework"] .teacher-class-save { width: 100%; border-radius: 10px; min-height: 44px; font-size: 14px; }
+}
+@media (min-width: 700px) and (max-width: 1100px) {
+  html[data-buio-module="homework"] .missing-record-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* The teacher console keeps only its compact brand and tool navigation above
+   the scroll area. The long title/warning scrolls with the form itself. */
+html[data-buio-module="pet"] .teacher-header { padding-bottom: 10px; gap: 12px; }
+html[data-buio-module="pet"] .teacher-header .brand { flex: 1 1 auto; gap: 9px; padding: 0; }
+html[data-buio-module="pet"] .teacher-header .brand > span:last-child { display: grid; }
+html[data-buio-module="pet"] .teacher-header .brand b { font-size: 15px; }
+html[data-buio-module="pet"] .teacher-header .brand small { font-size: 11px; }
+html[data-buio-module="pet"] .teacher-header .brand-mark { width: 36px; height: 36px; font-size: 20px; border-radius: 12px; box-shadow: none; }
+html[data-buio-module="pet"] .teacher-summary { flex: 0 0 auto; gap: 6px; }
+html[data-buio-module="pet"] .teacher-summary > span { display: grid; grid-template-columns: minmax(0, 1fr); text-align: center; gap: 3px; min-width: 48px; min-height: 48px; padding: 7px; border-radius: 11px; box-shadow: none; background: #f3eee5; }
+html[data-buio-module="pet"] .teacher-summary b { font-size: 18px; line-height: 1.2; }
+html[data-buio-module="pet"] .teacher-summary small { display: block !important; grid-column: 1; font-size: 10px; white-space: nowrap; line-height: 1.3; }
+html[data-buio-module="pet"] .teacher-tool-tabs { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; padding: 10px max(12px,var(--buio-safe-right)) 10px max(12px,var(--buio-safe-left)); }
+html[data-buio-module="pet"] .teacher-tool-tabs button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 12px; font-size: 13px; border-radius: 11px; gap: 5px; text-align: center; }
+html[data-buio-module="pet"] .teacher-shell .grant-head { position: static !important; top: auto; z-index: auto; margin: 0; padding: 0 0 14px; background: transparent; gap: 8px; }
+html[data-buio-module="pet"] .teacher-shell .grant-head .eyebrow { font-size: 10px; letter-spacing: .12em; margin: 0; }
+html[data-buio-module="pet"] .teacher-shell .grant-head h1 { font-size: clamp(22px, 5vw, 28px); line-height: 1.35; }
+html[data-buio-module="pet"] .teacher-shell .grant-head .caution { padding: 12px; margin: 0; border-radius: 12px; font-size: 12px; line-height: 1.6; }
+html[data-buio-module="pet"] .teacher-shell .grant-panel { padding: 18px 16px; }
+@media (max-width: 700px) {
+  html[data-buio-module="pet"] .teacher-tool-tabs button { flex: 0 1 calc((100% - 12px) / 3); padding-inline: 4px; font-size: 12px; }
+  html[data-buio-module="pet"] .teacher-main { padding: 12px; gap: 12px; padding-bottom: calc(12px + var(--buio-safe-bottom)); }
+  html[data-buio-module="pet"] .teacher-shell :is(.grant-panel,.roster-panel) { border-radius: 16px; box-shadow: none; }
+  html[data-buio-module="pet"] .teacher-shell .field > span { font-size: 13px; }
+  html[data-buio-module="pet"] .teacher-shell .field input { min-height: 48px; border-radius: 12px; padding: 10px 12px; font-size: 16px; }
+  html[data-buio-module="pet"] .teacher-shell .amount-help { flex-wrap: wrap; font-size: 11px; gap: 8px; }
+  html[data-buio-module="pet"] .teacher-shell .segmented button { font-size: 13px; min-height: 44px; padding: 6px; }
+  html[data-buio-module="pet"] .teacher-shell .preset-row button { min-height: 44px; font-size: 14px; }
+}
+
 html[data-buio-module="science-lab"] .topbar {
   padding-inline: max(12px, var(--buio-safe-left)) max(12px, var(--buio-safe-right));
 }
