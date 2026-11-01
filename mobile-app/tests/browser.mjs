@@ -12,7 +12,8 @@ const require = createRequire(path.join(root, 'package.json'));
 const { chromium, webkit } = require('playwright');
 const bcrypt = require('bcryptjs');
 const output = path.join(root, 'mobile-app/test-results');
-const deep = process.argv.includes('--deep');
+const inputOnly = process.argv.includes('--input-only');
+const deep = process.argv.includes('--deep') || inputOnly;
 await mkdir(output, { recursive: true });
 const fixture = path.join(output, 'fixture.json');
 const users = [
@@ -148,6 +149,76 @@ try {
         }));
         assert.equal(geometry.app, '0.2.0', `${engine} ${label}: document-start helper`);
         assert.ok(geometry.scrollWidth <= geometry.width + 1, `${engine} ${label}: ${JSON.stringify(geometry)}`);
+      };
+      const exerciseFloatingStick = async (mode, selector) => {
+        const stick = page.locator(selector); const before = await stick.boundingBox();
+        const origin = { x: Math.round(before.x + before.width + 20), y: Math.round(before.y + before.height / 2), id: 31 };
+        assert.ok(await page.evaluate(({ x, y, selector }) => Boolean(document.elementFromPoint(x, y)?.closest(selector)), { ...origin, selector }), `${engine} ${mode}: nearby ground belongs to the extended hit area`);
+        const waitMask = expected => page.waitForFunction(({ mode, expected }) => {
+          const mask = mode === 'park' ? window.__petPark?.scene?.touchMask : window.__petGame?.scene.getScene('Brawl')?.runtime?.state?.actors[0]?.lastMask;
+          return (mask & 31) === expected;
+        }, { mode, expected }, { timeout: 5000 }).catch(async error => {
+          const current = await page.evaluate(({ mode, selector }) => ({ floating: document.querySelector(selector)?.hasAttribute('data-buio-floating-stick'),
+            mask: mode === 'park' ? window.__petPark?.scene?.touchMask : window.__petGame?.scene.getScene('Brawl')?.runtime?.state?.actors[0]?.lastMask,
+            parkOwner: window.__petPark?.joystickPointer }), { mode, selector });
+          throw new Error(`${engine} ${mode}: expected input ${expected}, observed ${JSON.stringify(current)}`, { cause: error });
+        });
+        const assertAnchored = async () => {
+          await stick.waitFor();
+          const box = await stick.boundingBox();
+          assert.ok(Math.abs(box.x + box.width / 2 - origin.x) < 1 && Math.abs(box.y + box.height / 2 - origin.y) < 1,
+            `${engine} ${mode}: joystick anchors at the new touch instead of the old fixed circle`);
+        };
+        if (browserType === chromium) {
+          const session = await context.newCDPSession(page);
+          const touch = (type, touchPoints) => session.send('Input.dispatchTouchEvent', { type, touchPoints });
+          await touch('touchStart', [origin]); await assertAnchored(); await waitMask(0);
+          const moved = { ...origin, x: origin.x + 36, y: origin.y - 30 };
+          await touch('touchMove', [moved]); await waitMask(6);
+          // A second finger touching/releasing the movement area must not
+          // replace the owner or stop the first finger (park's release is shared).
+          const extra = { ...origin, id: 32 };
+          // Chromium accepts changed points for partial starts/ends; an empty
+          // touchEnd releases every remaining pointer.
+          await touch('touchStart', [extra]);
+          await touch('touchEnd', [extra]); await waitMask(6);
+          if (mode === 'battle') {
+            const attack = page.locator('[data-battle-key="16"]'); const box = await attack.boundingBox();
+            const second = { id: 33, x: Math.round(box.x + box.width / 2), y: Math.round(box.y + box.height / 2) };
+            await touch('touchStart', [second]); await waitMask(22);
+            assert.ok(await attack.evaluate(button => button.classList.contains('held')), 'Movement and attack work with two real touch pointers');
+            await touch('touchEnd', [second]); await waitMask(6);
+          }
+          await page.screenshot({ path: path.join(output, `${engine}-${mode}-floating.png`) });
+          await touch('touchEnd', []); await waitMask(0);
+          await touch('touchStart', [origin]); await touch('touchMove', [moved]); await waitMask(6);
+          await touch('touchCancel', []); await waitMask(0);
+          if (mode === 'battle') {
+            await touch('touchStart', [origin]); await touch('touchMove', [moved]); await waitMask(6);
+            await page.keyboard.press('Escape');
+            await page.locator('.brawl-modal').waitFor();
+            assert.equal(await stick.getAttribute('data-buio-floating-stick'), null, 'Pause resets the floating origin even while the movement finger remains down');
+            await touch('touchEnd', []);
+            await page.locator('[data-brawl="continue"]').click(); await waitMask(0);
+          }
+          await session.detach();
+        } else {
+          // WebKit's real mouse pointer exercises hit testing and pointer
+          // capture too; Chromium above additionally verifies multitouch.
+          await page.mouse.move(origin.x, origin.y); await page.mouse.down(); await assertAnchored(); await waitMask(0);
+          await page.mouse.move(origin.x + 36, origin.y - 30); await waitMask(6);
+          await page.screenshot({ path: path.join(output, `${engine}-${mode}-floating.png`) });
+          await page.mouse.up(); await waitMask(0);
+          await stick.evaluate(element => element.addEventListener('gotpointercapture', event => { window.__buioTestPointer = event.pointerId; }, { once: true }));
+          await page.mouse.move(origin.x, origin.y); await page.mouse.down();
+          await page.mouse.move(origin.x + 36, origin.y - 30); await waitMask(6);
+          await stick.evaluate(element => element.releasePointerCapture(window.__buioTestPointer));
+          await page.mouse.move(origin.x + 37, origin.y - 30); await waitMask(0);
+          await page.mouse.up();
+        }
+        assert.equal(await stick.getAttribute('data-buio-floating-stick'), null);
+        const restored = await stick.boundingBox(); assert.ok(Math.abs(restored.x - before.x) < 1 && Math.abs(restored.y - before.y) < 1);
+        console.log(`${engine}: ${mode} floating input, release and capture passed`);
       };
       await page.goto(fallback);
       await page.getByRole('heading', { name: '暫時未能連接平台' }).waitFor();
@@ -324,6 +395,7 @@ try {
         await page.screenshot({ path: path.join(output, `${engine}-pet-shop.png`) });
         await petTab('park'); await page.locator('.park-root').waitFor();
         await page.locator('[data-park-loading]').waitFor({ state: 'hidden', timeout: 45000 });
+        await exerciseFloatingStick('park', '[data-park-stick]');
         // Exercise the real contextual HUD renderer with a deterministic nearby
         // object. This checks placement, not walking or quest completion.
         const { OBJECTS } = await import('../../pet-app/lib/park-world.mjs');
@@ -443,12 +515,18 @@ try {
         const hud = await page.locator('.brawl-hud').boundingBox();
         const safeLeft = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--buio-safe-left')));
         assert.ok(hud && hud.x >= safeLeft, 'Battle health and pause controls avoid the camera housing');
+        await exerciseFloatingStick('battle', '[data-stick]');
         await page.keyboard.press('Escape');
         await page.locator('[data-brawl="lobby"]').click();
         await page.waitForFunction(() => !document.querySelector('.pet-shell.brawl-active'));
         await petTab('home');
         await page.waitForFunction(() => window.__petGame?.scene.isActive('Bedroom'));
         console.log(`${engine}: hatch, collection, shop, practice battle and return passed`);
+        if (inputOnly) {
+          await context.close();
+          report.checks.push({ engine, floatingParkAndBattle: 'passed', multiTouch: engine.startsWith('chromium') ? 'passed' : 'single real pointer checked', cancelAndRelease: 'passed' });
+          continue;
+        }
 
         const { experiments } = await import('../../science-lab-app/public/js/data/experiments.js');
         if (viewport.height > viewport.width) await page.setViewportSize({ width: viewport.height, height: viewport.width });
@@ -572,7 +650,7 @@ try {
       report.checks.push({ engine, login: 'passed', modules: modules.length, permissions: 'role checks passed', fallback: 'passed', reconnectNotice: 'passed' });
     } finally { await Promise.race([browser.close(), new Promise(resolve => setTimeout(resolve, 10000))]); }
   }
-  await writeFile(path.join(output, deep ? 'deep-report.json' : 'browser-report.json'), JSON.stringify(report, null, 2));
+  await writeFile(path.join(output, inputOnly ? 'input-report.json' : deep ? 'deep-report.json' : 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
   process.exitCode = 1;

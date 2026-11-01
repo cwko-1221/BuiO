@@ -60,7 +60,11 @@ const reportLayout=()=>{
     width:innerWidth,height:innerHeight,screenWidth:screen.width,screenHeight:screen.height,
     cssWidth:box.width,cssHeight:box.height,footerBottom:bottom.bottom,scrollWidth:document.documentElement.scrollWidth,
     scale:visualViewport.scale,inputFont:parseFloat(getComputedStyle(document.querySelector('input')).fontSize),
-    meta:document.querySelector('meta[name="viewport"]').content};
+    meta:document.querySelector('meta[name="viewport"]').content,
+    dates:[...document.querySelectorAll('input[type="date"]')].map(input=>{
+      const box=input.getBoundingClientRect(),field=input.closest('.field').getBoundingClientRect();
+      return {value:input.value,width:box.width,left:box.left,right:box.right,fieldLeft:field.left,fieldRight:field.right,font:parseFloat(getComputedStyle(input).fontSize)};
+    })};
   document.querySelector('#result').textContent=report.width+' × '+report.height+' pt\\n100vh: '+report.cssHeight+'\\nApp helper: '+report.version;
   fetch('/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(report)});
 };
@@ -101,6 +105,8 @@ const server = createServer(async (req, res) => {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Set-Cookie', 'buio_fixture=ready; Path=/; HttpOnly; SameSite=Lax');
     let document = html;
+    if (req.url === '/homework') document = html.replace('<pre id="result">',
+      '<style>.filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:grid;min-width:0;gap:6px}.field input{padding:10px 12px;border:1px solid #a8bcb4;border-radius:10px;background:white;color:#203c3b}</style><div class="filters"><div class="field"><label for="classAnalysisFrom">由</label><input lang="zh-HK" id="classAnalysisFrom" type="date" value="2026-09-01"></div><div class="field"><label for="classAnalysisTo">至</label><input lang="zh-HK" id="classAnalysisTo" type="date" value="2026-11-01"></div></div><pre id="result">');
     if (req.url.includes('battle=1')) document = html.replace('<body>', '<body><div class="pet-shell brawl-open brawl-active"></div>');
     if (req.url.startsWith('/pet/teacher')) document = html.replace('<body>', '<body><div class="teacher-shell"></div>');
     if (req.url.startsWith('/game/') || req.url.startsWith('/tower-defense/')) document = html.replace('<body>', '<body><canvas id="gameCanvas"></canvas>');
@@ -134,7 +140,7 @@ try {
       received = undefined; nextPath = undefined; attachmentCookieReceived = false;
       await run('xcrun', ['simctl', 'launch', device.udid, 'com.buiosch.learning.pilot'], {}, 600000);
       let originalPortrait;
-      for (const route of ['/', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/pet/teacher', '/game/', '/tower-defense/', '/?return=1', '/export-probe']) {
+      for (const route of ['/', '/homework', '/science-lab', '/pet', '/pet?battle=1', '/pet?home=1', '/pet/teacher', '/game/', '/tower-defense/', '/?return=1', '/export-probe']) {
         console.log(`[native] ${device.name}: ${route}`);
         if (route !== '/') { received = undefined; nextPath = route; }
         // A freshly booted simulator may spend over 45s starting WebKit.
@@ -184,7 +190,16 @@ try {
         for (const edge of ['top', 'right', 'bottom', 'left']) assert.ok(Math.abs(report.safe[edge] - report.native[edge]) <= 1, `CSS safe area ${edge}`);
         assert.ok(report.scrollWidth <= report.width + 1);
         assert.ok(report.inputFont >= 16);
-        assert.ok(Math.abs(report.statusShield.height - (['/', '/?return=1', '/export-probe'].includes(route) ? report.native.top : 0)) <= 1);
+        assert.ok(Math.abs(report.statusShield.height - (['/', '/homework', '/?return=1', '/export-probe'].includes(route) ? report.native.top : 0)) <= 1);
+        if (route === '/homework') {
+          assert.equal(report.dates.length, 2);
+          assert.deepEqual(report.dates.map(input => input.value), ['2026-09-01', '2026-11-01']);
+          for (const input of report.dates) {
+            assert.ok(input.left >= input.fieldLeft - 1 && input.right <= input.fieldRight + 1, 'Native date input must fit its field');
+            assert.ok(input.font >= 16);
+            if (report.width < 700) assert.ok(input.width >= report.width - 60, 'Phone date text receives a full-width row');
+          }
+        }
         assert.ok(!/maximum-scale|user-scalable/.test(report.meta));
         if (route === '/export-probe') {
           assert.equal(attachmentCookieReceived, true, 'HTTP export must retain the WebView cookie context');

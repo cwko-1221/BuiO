@@ -1,5 +1,5 @@
-// Installed at document start by the native iOS host. This does not modify
-// requests, authentication, gameplay, input timing or authoritative results.
+// Installed at document start by the native iOS host. App layout and joystick
+// hit regions reuse the original controls, requests and authoritative rules.
 (function () {
   'use strict';
   if (window.BuiOMobile) return;
@@ -123,6 +123,7 @@
     }).observe(document.head, { childList: true, subtree: true });
     updatePresentation();
     if (document.documentElement.getAttribute('data-buio-page') === 'hub') setupTeacherHub();
+    if (document.documentElement.getAttribute('data-buio-module') === 'homework') setupHomework();
     if (document.documentElement.getAttribute('data-buio-module') === 'pet') {
       const attach = () => {
         const shell = document.querySelector('.pet-shell');
@@ -130,6 +131,7 @@
           new MutationObserver(updatePresentation).observe(shell, { attributes: true, attributeFilter: ['data-screen', 'class'] });
           setupPetNavigation(shell);
           setupPetBrawl(shell);
+          setupFloatingSticks(shell);
           updatePresentation();
         }
         return Boolean(shell || document.querySelector('.teacher-shell'));
@@ -140,6 +142,134 @@
       }
     }
   };
+  function setupFloatingSticks(shell) {
+    let active;
+    const ignoredPointers = new Set();
+    const reset = (release = false) => {
+      if (!active) return;
+      const { stick, id, transform, transition } = active; active = undefined;
+      for (const [name, saved] of [['transform', transform], ['transition', transition]]) {
+        if (saved.value) stick.style.setProperty(name, saved.value, saved.priority);
+        else stick.style.removeProperty(name);
+      }
+      stick.removeAttribute('data-buio-floating-stick');
+      if (release && stick.hasPointerCapture(id)) stick.releasePointerCapture(id);
+    };
+    // A transparent pseudo-element belongs to the real stick. Therefore the
+    // original controller receives a real, capturable pointer, not a synthetic
+    // event or a second input implementation. Recenter before its handler runs.
+    document.addEventListener('pointerdown', event => {
+      ignoredPointers.delete(event.pointerId);
+      const stick = event.target.closest?.('[data-park-stick],[data-stick]');
+      if (!stick || !shell.contains(stick) || event.button !== 0) return;
+      if (active) {
+        if (active.id !== event.pointerId) { ignoredPointers.add(event.pointerId); event.preventDefault(); event.stopImmediatePropagation(); }
+        return;
+      }
+      const rect = stick.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const saved = name => ({ value: stick.style.getPropertyValue(name), priority: stick.style.getPropertyPriority(name) });
+      active = { stick, id: event.pointerId, transform: saved('transform'), transition: saved('transition') };
+      const base = getComputedStyle(stick).transform;
+      stick.style.setProperty('transition', 'none', 'important');
+      stick.style.setProperty('transform', 'translate(' + (event.clientX - rect.left - rect.width / 2) + 'px,' +
+        (event.clientY - rect.top - rect.height / 2) + 'px)' + (base === 'none' ? '' : ' ' + base), 'important');
+      stick.setAttribute('data-buio-floating-stick', '');
+    }, true);
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+      document.addEventListener(type, event => {
+        if (ignoredPointers.has(event.pointerId)) {
+          // Touch pointers have implicit capture even when their down handler
+          // is suppressed. Ignore both up and the following lost-capture event.
+          if (type === 'lostpointercapture') ignoredPointers.delete(event.pointerId);
+          event.preventDefault(); event.stopImmediatePropagation(); return;
+        }
+        if (active?.id === event.pointerId) reset();
+      }, true);
+    }
+    addEventListener('blur', () => reset(true));
+    addEventListener('resize', () => reset(true));
+    document.addEventListener('visibilitychange', () => { if (document.hidden) reset(true); });
+    new MutationObserver(records => {
+      if (!active) return;
+      if (!active.stick.isConnected || records.some(record => [...record.addedNodes].some(node => node.nodeType === Node.ELEMENT_NODE &&
+          (node.matches('.brawl-modal,.brawl-story-overlay,.park-drawer-backdrop,.park-dialog-backdrop,.park-garden-backdrop,.park-social-backdrop') ||
+           node.querySelector('.brawl-modal,.brawl-story-overlay,.park-drawer-backdrop,.park-dialog-backdrop,.park-garden-backdrop,.park-social-backdrop'))))) reset(true);
+    }).observe(shell, { childList: true, subtree: true });
+  }
+  function setupHomework() {
+    const host = document.getElementById('app'); if (!host) return;
+    let filter = 'all';
+    const setText = (node, value) => { if (node.textContent !== value) node.textContent = value; };
+    const enhance = () => {
+      const english = document.documentElement.lang.startsWith('en');
+      const text = (zh, en) => english ? en : zh;
+      const back = host.querySelector('.shell:not(.student-shell) .side .back');
+      if (back) {
+        if (!back.hasAttribute('aria-label')) back.setAttribute('aria-label', back.textContent);
+        setText(back, text('← 返回首頁', '← Home'));
+      }
+      for (const row of host.querySelectorAll('.missing-record-row:not(.missing-record-heading)')) {
+        if (!row.hasAttribute('data-buio-compact-record')) {
+          row.setAttribute('data-buio-compact-record', '');
+          const number = row.children[1]?.querySelector('small');
+          if (number && row.children[0]) {
+            const separator = document.createElement('span'); separator.textContent = ' · '; separator.setAttribute('aria-hidden', 'true');
+            row.children[0].append(separator, number);
+          }
+          const label = row.querySelector('.caught-up-check');
+          if (label) {
+            for (const node of [...label.childNodes]) if (node.nodeType === Node.TEXT_NODE) node.remove();
+            const caption = document.createElement('span'); caption.setAttribute('data-buio-made-up-caption', ''); label.append(caption);
+          }
+        }
+        const input = row.querySelector('.teacher-class-made-up'); const caption = row.querySelector('[data-buio-made-up-caption]');
+        if (input && caption) setText(caption, input.checked ? text('已補做', 'Made up') : text('待補交', 'Pending'));
+      }
+      const panel = host.querySelector('.teacher-classes-panel');
+      if (panel) {
+        let filters = panel.querySelector('[data-buio-homework-filters]');
+        if (!filters) {
+          filters = document.createElement('div'); filters.setAttribute('data-buio-homework-filters', '');
+          filters.setAttribute('role', 'group'); filters.setAttribute('aria-label', text('篩選補交狀態', 'Filter submission status'));
+          for (const value of ['all', 'pending', 'done']) {
+            const button = document.createElement('button'); button.type = 'button'; button.dataset.buioHomeworkFilter = value;
+            button.addEventListener('click', () => { filter = value; enhance(); }); filters.append(button);
+          }
+          panel.prepend(filters);
+        }
+        const rows = [...panel.querySelectorAll('.missing-record-row:not(.missing-record-heading)')];
+        const done = rows.filter(row => row.querySelector('.teacher-class-made-up')?.checked).length;
+        const counts = { all: rows.length, pending: rows.length - done, done };
+        const labels = { all: text('全部', 'All'), pending: text('待補交', 'Pending'), done: text('已補做', 'Made up') };
+        for (const button of filters.querySelectorAll('button')) {
+          const key = button.dataset.buioHomeworkFilter; setText(button, labels[key] + ' ' + counts[key]);
+          button.setAttribute('aria-pressed', String(key === filter));
+        }
+        for (const row of rows) {
+          const madeUp = Boolean(row.querySelector('.teacher-class-made-up')?.checked);
+          row.hidden = filter === 'pending' ? madeUp : filter === 'done' ? !madeUp : false;
+        }
+        for (const card of panel.querySelectorAll('.teacher-class-card')) {
+          const list = card.querySelector('.missing-record-list'); if (!list) continue;
+          let empty = card.querySelector('[data-buio-homework-empty]');
+          if (!empty) { empty = document.createElement('p'); empty.setAttribute('data-buio-homework-empty', ''); list.after(empty); }
+          setText(empty, text('此分類沒有紀錄', 'No records in this category'));
+          empty.hidden = [...list.querySelectorAll('.missing-record-row:not(.missing-record-heading)')].some(row => !row.hidden);
+        }
+      }
+      const analysis = host.querySelector('.panel:has(#classAnalysisFrom)');
+      const hint = analysis?.querySelector('.panel-head .hint');
+      if (hint && !hint.closest('[data-buio-analysis-note]')) {
+        const note = document.createElement('details'); note.setAttribute('data-buio-analysis-note', '');
+        const summary = document.createElement('summary'); summary.textContent = text('統計說明', 'About these statistics');
+        hint.before(note); note.append(summary, hint);
+      }
+    };
+    host.addEventListener('change', event => { if (event.target.matches('.teacher-class-made-up')) enhance(); });
+    new MutationObserver(enhance).observe(host, { childList: true, subtree: true });
+    enhance();
+  }
   function setupTeacherHub() {
     const root = document.documentElement;
     const excluded = new Set(['buzzer', 'whiteboard', 'science-lab', 'chinese', 'game', 'english', 'phonics']);

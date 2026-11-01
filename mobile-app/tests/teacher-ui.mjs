@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 const require = createRequire(path.join(root, 'package.json'));
 const { webkit } = require('playwright');
 const bcrypt = require('bcryptjs');
-const out = path.join(root, 'mobile-app/test-results/teacher-build10');
+const out = path.join(root, 'mobile-app/test-results/teacher-build12');
 await mkdir(out, { recursive: true });
 const users = [
   { studentid: 'MOBILETEACHER', name: '版面測試老師', role: 'teacher' },
@@ -40,7 +40,9 @@ try {
     await new Promise(resolve => setTimeout(resolve, 250));
   }
   assert.ok(ready, logs.slice(-1500)); browser = await webkit.launch({ headless: true });
-  for (const viewport of [{ width: 375, height: 667 }, { width: 402, height: 874 }, { width: 768, height: 1024 }, { width: 1376, height: 1032 }]) {
+  for (const scenario of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 402, height: 874 }, { width: 600, height: 900 }, { width: 768, height: 1024 }, { width: 1376, height: 1032 }, { width: 402, height: 874, language: 'en-US' }]) {
+    const { language = 'zh-HK', ...viewport } = scenario;
+    const screenName = viewport.width + (language.startsWith('en') ? '-en' : '');
     const context = await browser.newContext({ viewport, hasTouch: true });
     await context.addInitScript({ path: path.join(root, 'mobile-app/www/runtime.js') });
     await context.addInitScript(({ tablet }) => {
@@ -48,6 +50,7 @@ try {
     }, { tablet: viewport.width > 600 });
     const login = await context.request.post(backend + '/api/auth/login', { data: { studentId: 'MOBILETEACHER', password: 'pilot-fixture-only' } });
     assert.equal(login.status(), 200);
+    if (language.startsWith('en')) assert.equal((await context.request.put(backend + '/api/auth/language', { data: { language } })).status(), 200);
     // Every page-level API interaction in this review must be read-only.
     const writes = [];
     context.on('request', request => { if (request.url().includes('/api/') && !['GET', 'HEAD'].includes(request.method())) writes.push(request.method() + ' ' + request.url()); });
@@ -56,7 +59,7 @@ try {
     assert.equal(await page.locator('.buio-quick-tools > .module-card').count(), 4);
     assert.equal(await page.locator('#openBuzzerBtn,#openBoardBtn,#rejoinBoardBtn,#endSessionBtn').count(), 0);
     const fit = async () => assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
-    await fit(); await page.screenshot({ path: path.join(out, 'home-' + viewport.width + '.png'), fullPage: true });
+    await fit(); await page.screenshot({ path: path.join(out, 'home-' + screenName + '.png'), fullPage: true });
     await page.locator('.buio-text-action').click();
     await page.locator('.module-grid.modules-page').waitFor();
     const moduleIds = await page.locator('[data-open-module]').evaluateAll(nodes => nodes.map(node => node.dataset.openModule));
@@ -67,7 +70,7 @@ try {
     await page.locator('[data-buio-students] .management-student-row').first().waitFor();
     assert.equal(await page.locator('.management-student-row').count(), 12);
     assert.equal(await page.locator('#addStudentForm').isVisible(), false);
-    await page.screenshot({ path: path.join(out, 'students-' + viewport.width + '.png'), fullPage: true });
+    await page.screenshot({ path: path.join(out, 'students-' + screenName + '.png'), fullPage: true });
     const first = page.locator('.management-student-row').first(); await first.locator('summary').click();
     assert.equal(await first.locator('.inline-edit:visible').count(), 5);
     const layout = await first.locator('.student-edit-fields').evaluate(fields => {
@@ -80,7 +83,7 @@ try {
       });
     });
     assert.ok(layout.every(item => item.labelLines === 1 && item.height >= 44 && item.fits), JSON.stringify(layout));
-    await fit(); await page.screenshot({ path: path.join(out, 'student-edit-' + viewport.width + '.png'), fullPage: true });
+    await fit(); await page.screenshot({ path: path.join(out, 'student-edit-' + screenName + '.png'), fullPage: true });
     const search = page.locator('.buio-directory-controls input'); await search.fill('Vallez');
     assert.equal(await page.locator('.management-student-row:visible').count(), 1);
     await search.fill(''); await page.locator('.buio-directory-controls select').selectOption('P5');
@@ -89,7 +92,7 @@ try {
     await page.locator('.hero h1').waitFor(); await page.waitForTimeout(300);
     const heading = await page.locator('.hero h1').boundingBox(); const header = await page.locator('.topbar').boundingBox();
     assert.ok(heading.y >= header.y + header.height, JSON.stringify({ heading, header }));
-    await fit(); await page.screenshot({ path: path.join(out, 'checklist-' + viewport.width + '.png') });
+    await fit(); await page.screenshot({ path: path.join(out, 'checklist-' + screenName + '.png') });
     await page.evaluate(() => scrollTo(0, 300));
     const sticky = await page.locator('.topbar').boundingBox(); assert.ok(sticky.y >= (viewport.width > 600 ? 24 : 62) - 1);
     const { SUBJECTS } = require(path.join(root, 'homework-app/lib/domain.js'));
@@ -97,9 +100,11 @@ try {
       assert.equal(route.request().method(), 'GET');
       const name = new URL(route.request().url()).pathname.split('/').pop();
       const data = name === 'meta' ? { success: true, role: 'teacher', canAccess: true, subjects: SUBJECTS, academicYears: ['2025-26'], currentAcademicYear: '2025-26', assignments: [], teacherAssignments: [] } :
+        name === 'class-analysis' ? { success: true, totalMissing: 3, rows: [{ id: 'MOBILE000', name: '版面測試 Abbago Jace Skyler Canon', missingCount: 3,
+          missingRecords: Array.from({ length: 3 }, (_, i) => ({ date: '2026-10-29', subject: 'chinese-a', subjectName: '中文 A 組', homework: i === 0 ? 'CB' : '中文閱讀理解第二十課及詞語練習', madeUp: i === 1 })) }] } :
         name === 'teacher-classes' ? { success: true, totalMissing: 6, assignments: [{ className: 'P4', subject: 'chinese-a', subjectName: '中文 A 組', missingCount: 6,
           rows: Array.from({ length: 6 }, (_, i) => ({ date: '2026-10-31', studentName: '版面測試 Colman Felim George ' + i, classNo: i + 1, studentId: 'MOBILE' + i,
-            homework: '中文閱讀理解及詞語練習第二十課 WB p.14–15', homeworkId: 'test' + i, className: 'P4', subject: 'chinese-a', madeUp: i === 1 })) }] } : { success: true, students: [], monitors: [] };
+            homework: i === 0 ? 'WB p.14–15' : '中文閱讀理解及詞語練習第二十課 WB p.14–15', homeworkId: 'test' + i, className: 'P4', subject: 'chinese-a', madeUp: i === 1 })) }] } : { success: true, students: [], monitors: [] };
       return route.fulfill({ json: data });
     });
     await page.goto(backend + '/homework'); await page.locator('.nav [data-view=classes]').click();
@@ -107,12 +112,42 @@ try {
     assert.equal(await page.locator('.teacher-class-made-up').count(), 6);
     const cards = await page.locator('.missing-record-row:not(.missing-record-heading)').evaluateAll(rows => rows.map(row => {
       const student = row.children[1].getBoundingClientRect(); const work = row.children[2].getBoundingClientRect(); const date = row.children[0].getBoundingClientRect();
-      return { width: row.clientWidth, scroll: row.scrollWidth, nameWidth: student.width, assignmentWidth: work.width, dateHeight: date.height, font: parseFloat(getComputedStyle(row.children[1]).fontSize) };
+      return { height: row.getBoundingClientRect().height, width: row.clientWidth, scroll: row.scrollWidth, nameWidth: student.width, assignmentWidth: work.width, dateHeight: date.height, font: parseFloat(getComputedStyle(row.children[1]).fontSize) };
     }));
-    if (viewport.width <= 1100) assert.ok(cards.every(card => card.scroll <= card.width + 1 && card.nameWidth >= 140 && card.assignmentWidth >= card.width - 30 && card.dateHeight < 20 && card.font >= 14), JSON.stringify(cards));
+    if (viewport.width <= 1100) {
+      assert.ok(cards.every(card => card.scroll <= card.width + 1 && card.nameWidth >= 140 && card.assignmentWidth >= 140 && card.dateHeight < 20 && card.font >= 14), JSON.stringify(cards));
+      assert.ok(cards[0].height <= 120, 'A short assignment with a long student name should fit in a compact row: ' + JSON.stringify(cards[0]));
+    }
+    await page.locator('[data-buio-homework-filter=pending]').click();
+    assert.equal(await page.locator('.missing-record-row:not(.missing-record-heading):visible').count(), 5);
     await page.locator('.teacher-class-made-up').first().check();
     assert.equal(await page.locator('.teacher-class-made-up:checked').count(), 2, 'The original draft controls still work without submitting records');
-    await fit(); await page.screenshot({ path: path.join(out, 'homework-' + viewport.width + '.png'), fullPage: true });
+    assert.equal(await page.locator('.missing-record-row:not(.missing-record-heading):visible').count(), 4, 'The active pending filter follows draft checkbox changes');
+    await page.locator('[data-buio-homework-filter=done]').click();
+    assert.equal(await page.locator('.missing-record-row:not(.missing-record-heading):visible').count(), 2);
+    assert.equal(await page.locator('.missing-record-status > .status-tag:visible').count(), 0, 'One clear state instead of simultaneous missing/made-up badges');
+    await page.locator('[data-buio-homework-filter=all]').click();
+    assert.equal(await page.locator('.teacher-class-made-up').count(), 6, 'Filtering never drops records from the original Save handler');
+    const dateCell = page.locator('.missing-record-row:not(.missing-record-heading)').first().locator(':scope > span').first();
+    assert.ok((await dateCell.innerText()).includes('2026-10-31'));
+    assert.ok((await dateCell.locator('small').innerText()).includes('1'));
+    await fit(); await page.screenshot({ path: path.join(out, 'homework-' + screenName + '.png'), fullPage: true });
+    await page.locator('.nav [data-view="class-analysis"]').click();
+    await page.locator('#classAnalysisClass').selectOption('P4');
+    const dates = await page.locator('input[type="date"]').evaluateAll(inputs => inputs.map(input => {
+      const box = input.getBoundingClientRect(); const field = input.closest('.field').getBoundingClientRect();
+      return { value: input.value, width: box.width, inside: box.left >= field.left - 1 && box.right <= field.right + 1, font: parseFloat(getComputedStyle(input).fontSize) };
+    }));
+    assert.equal(dates.length, 2); assert.ok(dates.every(date => date.inside && date.value && date.font >= 16), JSON.stringify(dates));
+    if (viewport.width < 700) assert.ok(dates.every(date => date.width >= viewport.width - 90), 'Phone dates use full-width rows for localized iOS date text');
+    await page.locator('#runClassAnalysis').click(); await page.locator('.class-analysis-student').first().waitFor();
+    assert.equal(await page.locator('.class-analysis-student-count strong').first().innerText(), '3', 'Made-up history remains in the original statistics');
+    await page.locator('.class-analysis-student > summary').first().click();
+    assert.equal(await page.locator('.class-analysis-record-status .status-tag:visible').count(), 3);
+    assert.equal(await page.locator('.class-analysis-record-status .made-up:visible').count(), 1);
+    const recordOverflow = await page.locator('.class-analysis-record-list,.class-analysis-record-row,.filters').evaluateAll(nodes => nodes.map(node => ({ name: node.className, width: node.clientWidth, scroll: node.scrollWidth })));
+    assert.ok(recordOverflow.every(node => node.scroll <= node.width + 1), JSON.stringify(recordOverflow));
+    await fit(); await page.screenshot({ path: path.join(out, 'class-analysis-' + screenName + '.png'), fullPage: true });
     await context.route(url => url.origin === backend && url.pathname === '/api/pet/teacher/roster', async route => {
       const response = await route.fetch(); const data = await response.json();
       data.students = Array.from({ length: 157 }, (_, i) => ({ ...data.students[i % data.students.length], id: 'ROSTER' + i }));
@@ -131,7 +166,7 @@ try {
     });
     assert.ok(alignment.every(row => row.error < 2 && row.heights.every(height => height >= 44)), JSON.stringify(alignment));
     assert.equal(await page.locator('.teacher-tool-tabs button').count(), 5);
-    await fit(); await page.screenshot({ path: path.join(out, 'pet-teacher-' + viewport.width + '.png') });
+    await fit(); await page.screenshot({ path: path.join(out, 'pet-teacher-' + screenName + '.png') });
     const scrolling = await page.locator('.grant-head').evaluate(head => {
       const before = head.getBoundingClientRect().top;
       const panel = head.closest('.grant-panel'); const main = head.closest('.teacher-main');
@@ -143,9 +178,9 @@ try {
     });
     assert.equal(scrolling.position, 'static');
     if (scrolling.availableScroll > 100) assert.ok(scrolling.scroll > 100 && scrolling.distance > 100, JSON.stringify(scrolling));
-    await page.screenshot({ path: path.join(out, 'pet-teacher-scroll-' + viewport.width + '.png') });
+    await page.screenshot({ path: path.join(out, 'pet-teacher-scroll-' + screenName + '.png') });
     assert.deepEqual(writes, [], 'The layout review must not change school data');
-    reports.push({ viewport, quickTools: 4, hiddenTeacherModules: 7, directory: 'search, class filter, edit disclosure, five fitting fields passed', checklist: 'title clear of sticky header', homework: 'six records and draft checkboxes retained', petTeacher: '157/6 labels, five centered tabs and scrolling title passed', writes: 0 });
+    reports.push({ viewport, language, quickTools: 4, hiddenTeacherModules: 7, directory: 'search, class filter, edit disclosure, five fitting fields passed', checklist: 'title clear of sticky header', homework: 'compact rows, live filters, original draft checkboxes, date bounds and class analysis passed', petTeacher: '157/6 labels, five centered tabs and scrolling title passed', writes: 0 });
     await context.close();
   }
   // The plain website and student App retain their existing module catalog.
