@@ -1,8 +1,18 @@
+# Build 9 驗證進度
+
+老師 App 工作台、七個模組入口篩選（搶答及白板課堂亦移除）、學生名單搜尋／班級篩選／展開編輯，以及乘數表標題安全區已完成。四種 WebKit 尺寸 375×667、402×874、768×1024、1376×1032 全部通過；實際頁面 API 寫入為零，桌面網站及學生 App 清單未受影響。原生建置與覆蓋安裝待完成。
+
+Build 8 原生 iPhone 十個階段通過；iPad 橫向過渡中，CSS footer 比原生視窗遲一個量測而未通過，該候選不作為發行版。Build 9 將持續量測至原生與 CSS 幾何一致，保留所有原有安全區／轉向斷言。
+
+以下為先前紀錄，不能代替 build 9 驗證：
+
 # 杯澳 App 0.2.0 驗證紀錄
 
 日期：2026-11-01（香港時間）。最新來源為 build 8；用戶 iPhone 仍安裝 build 5。依最新要求，房間／老師寵物版面改為直向，戶外／大亂鬥保留橫向；欠交功課按畫面寬度換行收窄。375×667、402×874、768×1024 的真實前端與合成欠交記錄檢查通過，六個補交勾選均保留，沒有記錄列或容器水平溢出。房間／老師版面已確認發出直向要求，待最新原生十階段／每裝置驗證。以下其餘紀錄屬 build 7 基線；build 8 尚未安裝。
 
 ## 本次修訂與瀏覽器驗證
+
+- Build 8：學生寵物房間／房間佈置、老師寵物模組直向；戶外、大亂鬥及其餘學生寵物選單維持橫向，離開強制方向模組恢復進入前方向。欠交功課改為按寬度收窄欄位、字級與間距並換行；375px、402px、768px 的長姓名／長功課記錄與六個補交勾選檢查通過。
 
 - 房間資料、錢包與六個操作按鈕收窄，保留完整名稱與 Stage；橫向手機導覽回到底部。戶外地點互動置於右下六個工具上方，窄直向排成兩列並避開搖桿。
 - 介面文字與圖片停用選字及長按選單；可編輯內容保留正常編輯。WKWebView 另停用連結預覽。瀏覽器檢查確認非編輯區 `user-select: none`，取消 `selectstart`／`contextmenu`；輸入欄保持可編輯。這不等同實體 iOS 長按驗收。
@@ -19,19 +29,21 @@
 
 ## 原生與安裝檔
 
-[Build 7 第一次完整原生流程](https://github.com/cwko-1221/BuiO/actions/runs/41221519552)，來源 `1afedaf9ddc4e205eb70d932b8ae7af64645461a`：模擬器及實體 ARM64 Release 編譯成功。iPhone 九個階段及 Windows 實體畫面邊緣／兩次分享核對通過；iPad 的全螢幕系統模式設定測試成功，但 App 首次啟動 45 秒內未回傳任何頁面資料，截圖為空白，整輪未通過。已增加首次載入等候至 120 秒及完整 App／WebKit 診斷；方向與分享仍維持原有 45 秒與實際資料檢查，正重驗。
+[Build 8 最終原生流程](https://github.com/cwko-1221/BuiO/actions/runs/41297616149)，來源 `a7854df7b087f3a8e775c104e2600c9cb57d6e04`：實體 ARM64 Release 與模擬器編譯通過，目前執行 iPhone／iPad 各十個階段，包括新房間直向、實戰橫向、返回房間直向及老師版直向，尚未列為全部通過。
+
+[Build 7 基線重驗](https://github.com/cwko-1221/BuiO/actions/runs/41223743067)的 18 個階段及 Windows 實體畫面邊緣、兩次分享核對已全部通過。此前首次 iPad 冷啟動 45 秒未載入頁面而失敗；重驗將首次載入等候增至 120 秒，其餘方向與分享保留原有 45 秒與實際資料檢查。這份基線不代替 build 8 的新方向驗證。
 
 原生使用 GitHub macOS runner、Xcode 26 及真正 Simulator WKWebView，只連匿名 loopback fixture，不連正式帳戶。九個階段包括首頁、科學島、寵物入口／房間／實戰、多人闖關、塔防、返回方向及原生匯出，分別在 iPhone／iPad 執行；它驗證原生幾何與接線，不代替真實業務畫面驗收。
 
 iPad 按用戶選擇以全螢幕／自動橫向優先。iPadOS 26 須使用「設定 → 多工處理與手勢 → 全螢幕 App」；`UIRequiresFullScreen` 不能替代此設定。[Apple 文件](https://developer.apple.com/documentation/BundleResources/Information-Property-List/UIRequiresFullScreen)描述了視窗化 App／Stage Manager 相容縮放行為。CI 的獨立 XCUITest 只設定可丟棄模擬器，沒有修改用戶裝置或使用私人轉向 API。
 
-上一輪候選 IPA：`releases/candidates/41221519552/buio-pilot-0.2.0-unsigned.ipa`，493,108 bytes；SHA-256 `f98c4ee77b406df01b4040a48e783d27bf1acd6b4a05a21111be07c7d2fd50f8`。整輪未通過，沒有取代最終試用版檔案。最低部署版本現已校正為 15.4，以符合實際對話框／版面 API，待新建置與驗證更新此證據。
+Build 8 候選 IPA：`releases/candidates/41297616149/buio-pilot-0.2.0-unsigned.ipa`，493,987 bytes；SHA-256 `6a06b3332220c62390912c23a9637d9fb56e41f96e2c2d69cc3ccd09a73cea4b`。待該輪原生檢查完成後才取代最終試用版檔案。
 
-Windows 已核對上一輪 IPA 的 ZIP CRC、ARM64／iPhoneOS、0.2.0／build 7、最低 iOS 15、全螢幕、正式 HTTPS 後端、完整 17 模組清單，以及內嵌 runtime／CSS 與當輪來源完全一致。Release 沒有 loopback、分享計數或測試取消控制介面。
+Windows 已核對 build 8 IPA 的 ZIP CRC、ARM64／iPhoneOS、0.2.0／build 8、最低 iOS 15.4、全螢幕、正式 HTTPS 後端、完整 17 模組清單，以及內嵌 runtime／CSS 與當輪來源完全一致。Release 沒有 loopback、分享計數或測試取消控制介面。
 
 ## 尚待實機驗收
 
-- Build 7 啟動、長按、觸控、軟／硬件鍵盤、背景重連及長時間執行。
+- Build 8 啟動、長按、觸控、軟／硬件鍵盤、背景重連及長時間執行。
 - 正式私人 Excel／PDF、匯入、錄音／錄影、拒絕權限重試、相簿、白板及雙機對戰。
 - 已通關帳戶的故事回顧、已儲存冒險及正式排名邀請結算；本次保留原入口與控制器，未聲稱私人流程全部驗收。
 - Android 專案保留，未完成等價原生方向／安全區輔助，未編譯或安裝 APK。

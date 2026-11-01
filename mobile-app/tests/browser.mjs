@@ -560,7 +560,13 @@ try {
   }
   await writeFile(path.join(output, deep ? 'deep-report.json' : 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
+} catch (error) {
+  process.exitCode = 1;
+  throw error;
 } finally {
+  // WebKit's Windows driver can retain an IPC handle after all checks finish.
+  // Bound teardown without converting a failed assertion into a successful run.
+  setTimeout(() => process.exit(process.exitCode ?? 0), 15000).unref();
   if (staticServer) {
     staticServer.closeAllConnections();
     await new Promise(resolve => staticServer.close(resolve));

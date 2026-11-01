@@ -122,6 +122,7 @@
       }
     }).observe(document.head, { childList: true, subtree: true });
     updatePresentation();
+    if (document.documentElement.getAttribute('data-buio-page') === 'hub') setupTeacherHub();
     if (document.documentElement.getAttribute('data-buio-module') === 'pet') {
       const attach = () => {
         const shell = document.querySelector('.pet-shell');
@@ -139,6 +140,109 @@
       }
     }
   };
+  function setupTeacherHub() {
+    const root = document.documentElement;
+    const excluded = new Set(['buzzer', 'whiteboard', 'science-lab', 'chinese', 'game', 'english', 'phonics']);
+    const enhance = () => {
+      const teacher = Boolean(document.querySelector('.side-nav [data-view="students"]'));
+      root.toggleAttribute('data-buio-teacher', teacher);
+      if (!teacher) return;
+      const english = root.lang.startsWith('en');
+      const text = (zh, en) => english ? en : zh;
+      for (const action of document.querySelectorAll('[data-open-module]')) {
+        if (excluded.has(action.dataset.openModule)) action.closest('.module-card')?.remove();
+      }
+      const hero = document.querySelector('.hero-board.teacher:not([data-buio-workbench])');
+      if (hero) {
+        const count = hero.querySelector('.class-snapshot strong');
+        const snapshot = document.createElement('div'); snapshot.className = 'buio-teacher-stat';
+        if (count) snapshot.append(count);
+        const unit = document.createElement('span'); unit.textContent = text('位學生', 'students'); snapshot.append(unit);
+        const copy = document.createElement('div');
+        const heading = document.createElement('h2'); heading.textContent = text('教學工作台', 'Teaching workspace');
+        const description = document.createElement('p'); description.textContent = text('管理學生，跟進學習進度。', 'Manage students and follow their progress.');
+        copy.append(heading, description); hero.replaceChildren(copy, snapshot); hero.setAttribute('data-buio-workbench', '');
+        const grid = hero.parentElement.querySelector('.module-grid');
+        if (grid) {
+          grid.classList.add('buio-quick-tools');
+          const student = document.createElement('article'); student.className = 'module-card mint buio-student-tool';
+          const icon = document.createElement('div'); icon.className = 'module-icon';
+          const sourceNav = document.querySelector('.side-nav [data-view="students"]');
+          const sourceIcon = sourceNav?.querySelector('svg'); if (sourceIcon) icon.append(sourceIcon.cloneNode(true));
+          const title = document.createElement('h3'); title.textContent = text('學生管理', 'Students');
+          const detail = document.createElement('p'); detail.textContent = text('名單、班級與學習分組', 'Accounts, classes and learning groups');
+          const action = document.createElement('button'); action.type = 'button'; action.className = 'module-action';
+          action.textContent = text('管理學生', 'Manage students'); action.addEventListener('click', () => sourceNav?.click());
+          const content = document.createElement('div'); content.className = 'module-copy'; content.append(title, detail);
+          student.append(icon, content, action);
+          const preferred = ['homework', 'multiplication-checklist', 'pet'].map(id => grid.querySelector('[data-open-module="' + id + '"]')?.closest('.module-card')).filter(Boolean);
+          for (const card of preferred) {
+            const action = card.querySelector('.module-action'); const title = card.querySelector('h3');
+            action?.setAttribute('aria-label', title?.textContent || '');
+            const id = action?.dataset.openModule;
+            if (id === 'multiplication-checklist' && title) title.textContent = text('乘數表', 'Times tables');
+            const description = card.querySelector('.module-copy p');
+            const descriptions = { homework: text('跟進欠交紀錄與補交進度', 'Track missing work and submissions'),
+              'multiplication-checklist': text('抽籤背誦，記錄學習成果', 'Draw students and record progress'), pet: text('管理金幣、獎勵與寵物', 'Manage coins, rewards and pets') };
+            if (description && descriptions[id]) description.textContent = descriptions[id];
+          }
+          grid.replaceChildren(student, ...preferred);
+          const section = grid.previousElementSibling;
+          if (section?.matches('.section-head')) {
+            const label = document.createElement('h2'); label.textContent = text('常用工具', 'Quick access');
+            const all = document.createElement('button'); all.type = 'button'; all.className = 'buio-text-action'; all.textContent = text('全部工具 →', 'All tools →');
+            all.addEventListener('click', () => document.querySelector('.side-nav [data-view="modules"]')?.click());
+            section.replaceChildren(label, all); section.classList.add('buio-tools-heading');
+          }
+        }
+      }
+      const table = document.querySelector('.student-table:has(.management-student-row)');
+      if (table && !table.hasAttribute('data-buio-students')) {
+        table.setAttribute('data-buio-students', '');
+        const rows = [...table.querySelectorAll('.management-student-row')];
+        const controls = document.createElement('div'); controls.className = 'buio-directory-controls';
+        const search = document.createElement('input'); search.type = 'search'; search.placeholder = text('搜尋姓名或學號', 'Search name or student ID'); search.setAttribute('aria-label', search.placeholder);
+        const filter = document.createElement('select'); filter.setAttribute('aria-label', text('篩選班級', 'Filter class'));
+        const classes = [...new Set(rows.map(row => row.querySelector('[data-field="className"]')?.value).filter(Boolean))].sort();
+        for (const value of ['', ...classes]) { const option = document.createElement('option'); option.value = value; option.textContent = value || text('所有班級', 'All classes'); filter.append(option); }
+        const result = document.createElement('span'); result.className = 'buio-directory-count'; result.setAttribute('role', 'status');
+        const applyFilter = () => {
+          let visible = 0; const term = search.value.trim().toLocaleLowerCase();
+          for (const row of rows) {
+            const matches = (!term || row.firstElementChild.textContent.toLocaleLowerCase().includes(term)) && (!filter.value || row.querySelector('[data-field="className"]')?.value === filter.value);
+            row.hidden = !matches; if (matches) visible++;
+          }
+          result.textContent = text(visible + ' 位學生', visible + ' students');
+        };
+        search.addEventListener('input', applyFilter); filter.addEventListener('change', applyFilter); table.addEventListener('change', applyFilter);
+        controls.append(search, filter, result); table.before(controls);
+        for (const row of rows) {
+          const profile = row.firstElementChild; const fields = row.querySelector('.student-edit-fields'); const actions = row.lastElementChild;
+          const badge = document.createElement('span'); badge.className = 'buio-student-class';
+          const updateBadge = () => { badge.textContent = [row.querySelector('[data-field="className"]')?.value, row.querySelector('[data-field="classNo"]')?.value].filter(Boolean).join(' · '); };
+          updateBadge(); row.addEventListener('change', updateBadge); profile.append(badge);
+          const editor = document.createElement('details'); editor.className = 'buio-student-editor';
+          const summary = document.createElement('summary'); summary.textContent = text('編輯資料', 'Edit details');
+          editor.append(summary, fields, actions); row.append(editor);
+        }
+        applyFilter();
+        // Creation and import remain available without pushing the directory
+        // below several screens of seldom-used forms. Keep the real form nodes.
+        for (const form of document.querySelectorAll('#addStudentForm, .batch-import-card')) {
+          const card = form.matches('form') ? form.parentElement : form;
+          if (card.parentElement?.matches('[data-buio-student-task]')) continue;
+          const task = document.createElement('details'); task.setAttribute('data-buio-student-task', '');
+          const summary = document.createElement('summary'); summary.textContent = card.querySelector('h3')?.textContent || text('匯入名單', 'Import students');
+          card.before(task); task.append(summary, card);
+        }
+      }
+    };
+    // The hub replaces #app on navigation and after its directory GET finishes.
+    // Observe structure only; our edits are idempotent and never change data.
+    const host = document.getElementById('app');
+    if (host) new MutationObserver(enhance).observe(host, { childList: true, subtree: true });
+    enhance();
+  }
   function setupPetNavigation(shell) {
     const nav = shell.querySelector('.pet-nav');
     if (!nav || nav.querySelector('[data-buio-more]')) return;

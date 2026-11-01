@@ -50,6 +50,104 @@ html[data-buio-app] :is(dialog, .modal-card, .modal-content) {
 html[data-buio-app][data-buio-layout="document"] :is(.navbar, .topbar) {
   top: var(--buio-safe-top);
 }
+/* This module's header was position:relative: shifting it by the top inset
+   painted it over the title. Sticky positioning retains its space in flow. */
+html[data-buio-module="multiplication-checklist"] .topbar {
+  position: sticky !important;
+  top: var(--buio-safe-top) !important;
+  padding: 12px 16px;
+  min-height: 68px;
+  gap: 12px;
+  background: #fff;
+}
+html[data-buio-module="multiplication-checklist"] .main { width: calc(100% - 32px); padding-top: 22px; }
+html[data-buio-module="multiplication-checklist"] .hero h1 { font-size: clamp(25px, 5vw, 36px); line-height: 1.25; }
+html[data-buio-module="multiplication-checklist"] .brand { min-width: 0; gap: 9px; }
+html[data-buio-module="multiplication-checklist"] .brand strong { font-size: 14px; }
+html[data-buio-module="multiplication-checklist"] .brand span { font-size: 10px; }
+html[data-buio-module="multiplication-checklist"] .brand-mark { width: 36px; height: 42px; flex-shrink: 0; }
+html[data-buio-module="multiplication-checklist"] .back-link { white-space: nowrap; display: inline-flex; align-items: center; padding: 8px 12px; font-size: 13px; }
+
+/* Teacher App: a quiet workbench, with real account and module actions. */
+html[data-buio-teacher] body { background: #f3f6f8; }
+html[data-buio-teacher] .main-panel { gap: 18px; }
+html[data-buio-teacher] [data-buio-workbench] {
+  min-height: 0; padding: 20px !important; border-radius: 18px;
+  display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 16px;
+  color: #fff; background: #126f70; box-shadow: none;
+}
+html[data-buio-teacher] [data-buio-workbench]::before { display: none; }
+html[data-buio-teacher] [data-buio-workbench] h2 { margin: 0; font-size: 21px; line-height: 1.35; }
+html[data-buio-teacher] [data-buio-workbench] p { margin: 6px 0 0; color: #deefec; font-size: 13px; line-height: 1.5; }
+html[data-buio-teacher] .buio-teacher-stat { display: grid; gap: 2px; text-align: right; flex-shrink: 0; }
+html[data-buio-teacher] .buio-teacher-stat strong { font-size: 28px; line-height: 1.15; font-variant-numeric: tabular-nums; }
+html[data-buio-teacher] .buio-teacher-stat span { font-size: 12px; color: #deefec; }
+html[data-buio-teacher] .buio-tools-heading { margin: 4px 0 0 !important; gap: 8px; flex-direction: row; align-items: center; }
+html[data-buio-teacher] .buio-tools-heading h2 { font-size: 18px; margin: 0; }
+html[data-buio-teacher] .buio-text-action { border: 0; padding: 6px 0 6px 12px; color: #087174; background: transparent; font-weight: 700; font-size: 13px; }
+html[data-buio-teacher] .buio-quick-tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+html[data-buio-teacher] .buio-quick-tools .module-card {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start;
+  min-width: 0; min-height: 144px; padding: 16px; gap: 12px;
+  border: 1px solid #e1e8ec; border-radius: 18px; background: #fff; box-shadow: 0 3px 10px #244f5410;
+}
+html[data-buio-teacher] .buio-quick-tools .module-card::before { display: none; }
+html[data-buio-teacher] .buio-quick-tools .module-icon { width: 42px; height: 42px; min-height: 42px; border-radius: 12px; color: #087174; background: #e7f3f1; display: grid; place-items: center; }
+html[data-buio-teacher] .buio-quick-tools .module-icon svg { width: 23px; height: 23px; }
+html[data-buio-teacher] .buio-quick-tools .module-copy { min-width: 0; }
+html[data-buio-teacher] .buio-quick-tools h3 { font-size: 17px; line-height: 1.4; margin: 0; }
+html[data-buio-teacher] .buio-quick-tools p { margin: 5px 0 0; font-size: 12px; color: #667484; line-height: 1.55; }
+html[data-buio-teacher] .buio-quick-tools :is(.module-kicker, .module-meta) { display: none; }
+html[data-buio-teacher] .buio-quick-tools .module-action {
+  position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 18px;
+  background: transparent; color: transparent; font-size: 0; margin: 0; box-shadow: none;
+}
+html[data-buio-teacher] .buio-quick-tools .module-action:focus-visible { outline: 3px solid #087174; outline-offset: 3px; }
+html[data-buio-teacher] .buio-quick-tools .module-card:active { background: #eef7f5; }
+
+html[data-buio-teacher] [data-buio-student-task] { border: 1px solid #dfe6eb; border-radius: 14px; background: #fff; min-width: 0; }
+html[data-buio-teacher] [data-buio-student-task] > summary { min-height: 48px; padding: 13px 16px; cursor: pointer; font-weight: 700; font-size: 14px; color: #087174; }
+html[data-buio-teacher] [data-buio-student-task] > .glass-card { border: 0; margin: 0 !important; padding: 16px !important; box-shadow: none; }
+html[data-buio-teacher] [data-buio-student-task] h3 { display: none; }
+html[data-buio-teacher] .buio-directory-controls { display: grid; grid-template-columns: minmax(0, 1fr) 112px; gap: 10px; margin: 16px 0 8px; }
+html[data-buio-teacher] .buio-directory-controls :is(input, select) { width: 100%; min-width: 0; min-height: 44px; padding: 10px; background: #f7f9fb; border: 1px solid #dce4eb; border-radius: 10px; font: inherit; font-size: 16px; }
+html[data-buio-teacher] .buio-directory-count { grid-column: 1 / -1; color: #677586; font-size: 12px; }
+html[data-buio-teacher] [data-buio-students] { gap: 10px; margin-top: 8px; }
+html[data-buio-teacher] .management-student-row { display: block; padding: 14px; border: 1px solid #e0e7ed; border-radius: 14px; background: #fff; }
+html[data-buio-teacher] .management-student-row[hidden] { display: none; }
+html[data-buio-teacher] .management-student-row > div:first-child { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; }
+html[data-buio-teacher] .management-student-row > div:first-child > div:first-child { display: flex !important; flex-direction: column; gap: 3px !important; align-items: flex-start !important; min-width: 0; }
+html[data-buio-teacher] .management-student-row > div:first-child strong { font-size: 15px !important; line-height: 1.45; overflow-wrap: anywhere; }
+html[data-buio-teacher] .management-student-row > div:first-child > div:nth-child(2) { display: none; }
+html[data-buio-teacher] .buio-student-class { align-self: start; padding: 4px 8px; border-radius: 7px; color: #126f70; background: #eaf4f2; font-weight: 700; font-size: 12px; white-space: nowrap; }
+html[data-buio-teacher] .buio-student-editor > summary { min-height: 44px; padding: 13px 0 0; color: #087174; font-size: 13px; cursor: pointer; }
+html[data-buio-teacher] .student-edit-fields { display: grid !important; grid-template-columns: repeat(6, minmax(0, 1fr)) !important; gap: 12px 10px; margin: 12px 0; }
+html[data-buio-teacher] .student-edit-fields label { display: grid !important; grid-column: span 2; gap: 6px !important; min-width: 0; font-size: 12px; white-space: nowrap; }
+html[data-buio-teacher] .student-edit-fields label:nth-child(-n+2) { grid-column: span 3; }
+html[data-buio-teacher] .student-edit-fields :is(input,select) { min-width: 0 !important; width: 100% !important; max-width: 100%; min-height: 44px; padding: 8px !important; border-radius: 9px !important; }
+html[data-buio-teacher] .buio-student-editor > div:last-child { display: flex; justify-content: flex-end; border-top: 1px solid #edf0f3; padding-top: 10px; }
+html[data-buio-teacher] .delete-student-btn { font-size: 13px; padding: 8px 12px; box-shadow: none; }
+@media (max-width: 899px) {
+  html[data-buio-teacher] .app-shell { align-content: start; }
+  html[data-buio-teacher] .topbar { flex-direction: row; flex-wrap: nowrap; align-items: flex-start; gap: 8px; }
+  html[data-buio-teacher] .topbar h1 { font-size: 23px !important; line-height: 1.35; }
+  html[data-buio-teacher] .topbar p { font-size: 13px; margin-top: 5px; }
+  html[data-buio-teacher] .profile-chip { font-size: 11px; border: 0; padding: 5px; background: transparent; max-width: 32%; overflow-wrap: anywhere; }
+  html[data-buio-teacher] .profile-chip svg { display: none; }
+  html[data-buio-teacher] .main-panel:has(#studentAcademicYear) > .topbar { display: none; }
+  html[data-buio-teacher] .main-panel > .section-head:has(#studentAcademicYear) { margin-top: 0 !important; align-items: flex-start !important; flex-wrap: wrap; gap: 12px; }
+  html[data-buio-teacher] .section-head:has(#studentAcademicYear) h2 { font-size: 23px; margin: 0; }
+  html[data-buio-teacher] .section-head:has(#studentAcademicYear) p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; }
+  html[data-buio-teacher] .section-head:has(#studentAcademicYear) > label { display: flex !important; align-items: center; font-size: 13px; }
+  html[data-buio-teacher] .work-panel:has([data-buio-students]) { padding: 16px !important; border-radius: 18px; }
+  html[data-buio-teacher] .work-panel:has([data-buio-students]) > h2 { font-size: 19px; margin: 0; }
+  html[data-buio-teacher] .module-grid.modules-page { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  html[data-buio-teacher] .module-grid.modules-page .module-card { min-height: 0; padding: 16px; border-radius: 16px; }
+}
+@media (min-width: 700px) {
+  html[data-buio-teacher] .buio-quick-tools { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  html[data-buio-teacher] [data-buio-students] { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
 
 /* Pet backgrounds reach the glass edges. Its header and bottom navigation,
    rather than the entire canvas, carry the system-safe padding. */

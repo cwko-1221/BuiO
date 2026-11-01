@@ -73,6 +73,9 @@ addEventListener('load',()=>{
     setTimeout(()=>{const link=document.createElement('a');link.href='/attachment';link.click()},1000);
   },500);
 });addEventListener('resize',schedule);addEventListener('buio:native-layout',schedule);
+// UIKit and WebKit finish rotation on different frames. Keep measuring the
+// actual CSS layout until it agrees with the native scene, then assert it.
+setInterval(reportLayout,500);
 const poll=setInterval(async()=>{
   const next=await fetch('/next').then(r=>r.json());
   if(next?.dismissExport)window.webkit.messageHandlers.buioLayout.postMessage({dismissFixtureExport:true});
@@ -140,6 +143,8 @@ try {
         const deadline = Date.now() + (route === '/' ? 120000 : 45000);
         let dismissedFirstExport = false;
         const ready = () => received?.path === route && received.native &&
+          Math.abs(received.footerBottom - (received.height - received.safe.bottom)) <= 1 &&
+          Math.abs(received.cssWidth - received.width) <= 1 && Math.abs(received.cssHeight - received.height) <= 1 &&
           (!['/pet?battle=1','/science-lab', '/game/', '/tower-defense/'].includes(route) || received.width > received.height) &&
           (!['/pet','/pet?home=1','/pet/teacher'].includes(route) || received.height > received.width) &&
           (route !== '/export-probe' || (received.downloads?.length === 2 && received.shareCount === 2)) &&
