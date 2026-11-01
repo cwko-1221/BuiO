@@ -295,6 +295,14 @@ try {
           });
           await page.screenshot({ path: path.join(output, `${engine}-pet-room-stage-${size.width}.png`) });
           assert.ok(statusFits, `${engine}: pet name and full Stage text stay inside the status pill`);
+          if (size.width < size.height && size.width <= 700) {
+            const name = await page.locator('#petStatus > b').evaluate(element => {
+              const range = document.createRange(); range.selectNodeContents(element);
+              return { lines: range.getClientRects().length, width: element.getBoundingClientRect().width };
+            });
+            assert.equal(name.lines, 1, `${engine}: the starter name reads horizontally`);
+            assert.ok(name.width >= size.width - 64, 'Identity has a full-width row instead of leftover width beside the wallet');
+          }
           if (size.width > size.height) {
             const room = await page.evaluate(() => ({
               top: document.querySelector('.pet-topbar').getBoundingClientRect().height + document.querySelector('.room-bar').getBoundingClientRect().height,
@@ -415,6 +423,12 @@ try {
           await page.locator(`.buio-brawl-toolbar [data-brawl="mode"].selected[data-id="${mode}"]`).waitFor();
           await page.locator('[data-buio-brawl-menu]').waitFor();
           await assertFits('brawl ' + mode);
+          const preparation = await page.locator('.buio-brawl-preparation').evaluate(element => {
+            element.scrollLeft = 1000;
+            return { width: element.clientWidth, scroll: element.scrollWidth, offset: element.scrollLeft };
+          });
+          assert.ok(preparation.scroll <= preparation.width + 1 && preparation.offset === 0,
+            `${engine} ${mode}: battle preparation cannot scroll sideways: ${JSON.stringify(preparation)}`);
           if (mode === 'pvp') await page.locator('.buio-brawl-preparation .pvp-panel').waitFor();
         }
         await page.locator('.buio-brawl-stage-info').click();

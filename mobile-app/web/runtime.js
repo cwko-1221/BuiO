@@ -416,6 +416,35 @@
             select.addEventListener('change', () => [...acts.querySelectorAll('button')].find(act => act.dataset.id === select.value)?.click());
             label.append(select); stageHead.append(label); metadata.append(acts);
           }
+          // Keep the controller's selects as the source of truth, but present
+          // game choices with full option names in a touch-friendly panel.
+          for (const select of stageHead.querySelectorAll('select')) {
+            const label = select.closest('label'); if (!label) continue;
+            const caption = [...label.childNodes].filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent.trim()).join(' ') || select.getAttribute('aria-label') || '';
+            select.hidden = true;
+            const choice = button('', 'buio-game-choice');
+            const title = document.createElement('span'); title.className = 'buio-choice-caption'; title.textContent = caption;
+            const value = document.createElement('strong');
+            choice.append(title, value); choice.setAttribute('aria-haspopup', 'dialog');
+            const updateChoice = () => {
+              const selected = select.selectedOptions[0];
+              value.textContent = select.closest('.buio-brawl-act-select') ? (english ? 'Act ' + (select.selectedIndex + 1) : (selected?.textContent || '').replace(/^\s*\d+\s*/, '').split(/[·：:]/)[0].trim()) : selected?.textContent || '';
+              choice.setAttribute('aria-label', caption + '：' + (selected?.textContent || ''));
+            };
+            select.addEventListener('change', updateChoice); updateChoice();
+            choice.addEventListener('click', () => {
+              openDialog(caption, []);
+              const choices = document.createElement('div'); choices.className = 'buio-game-choices';
+              for (const option of select.options) {
+                const pick = button(option.textContent, 'buio-game-option'); pick.disabled = option.disabled;
+                pick.setAttribute('aria-pressed', String(option.selected));
+                pick.addEventListener('click', () => { closeDialog(); select.value = option.value; select.dispatchEvent(new Event('change', { bubbles: true })); });
+                choices.append(pick);
+              }
+              dialog.append(choices);
+            });
+            label.append(choice); label.classList.add('buio-game-choice-label');
+          }
           const footer = document.createElement('footer'); footer.className = 'buio-brawl-launch';
           const detail = button(text('詳情', 'Details'), 'buio-brawl-stage-info');
           let selectedCard;
