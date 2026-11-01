@@ -8,6 +8,7 @@ import { once } from 'node:events';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { FixtureNavigation } from './fixture-navigation.mjs';
+import { readFixtureReport } from './fixture-report.mjs';
 
 if (process.platform !== 'darwin') throw Error('Native viewport checks require Xcode/macOS.');
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -107,11 +108,13 @@ const server = createServer(async (req, res) => {
     if (next) console.log('[native] fixture command ' + JSON.stringify({ from, next }));
     res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(next));
   } else if (req.method === 'POST' && req.url === '/report') {
-    let body = '';
-    for await (const chunk of req) { body += chunk; if (body.length > 10000) { res.writeHead(413).end(); return; } }
-    received = JSON.parse(body);
-    navigation.acknowledge(received.path);
-    res.writeHead(204).end();
+    const result = await readFixtureReport(req);
+    if (!result.status) return;
+    if (result.report) {
+      received = result.report;
+      navigation.acknowledge(received.path);
+    }
+    res.writeHead(result.status).end();
   } else {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('Set-Cookie', 'buio_fixture=ready; Path=/; HttpOnly; SameSite=Lax');

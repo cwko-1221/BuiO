@@ -1,6 +1,6 @@
 # 杯澳 App 0.2.0 build 12 驗證紀錄
 
-本輪日期：2026-11-02（香港時間）。編譯來源 `6c5f0a0bf6635b5772694580649d9a7c1efccc49`；[iOS 建置與原生驗證](https://github.com/cwko-1221/BuiO/actions/runs/41323185220)。實機 ARM64 IPA 已編譯及核對；首輪 iPhone 11 階段及 iPad 首 3 階段通過；iPad 後續 fixture 導航停在上一頁，該輪未通過全部原生驗證。已修正測試指令的來源頁面綁定與目標回報確認，待重跑。本輪沒有操作用戶的安裝工具。
+本輪日期：2026-11-02（香港時間）。編譯來源 `88eda645fa04a7af734f3723fe0d849375a80b26`；[iOS 建置與原生驗證](https://github.com/cwko-1221/BuiO/actions/runs/41325255230)。實機 ARM64 IPA 已編譯及核對；首輪 iPhone 11 階段及 iPad 首 3 階段通過；iPad 後續 fixture 導航停在上一頁，該輪未通過全部原生驗證。第二輪 iPhone 的 10 個版面／轉向階段通過，匯出時因測試伺服器未處理 HTTP ECONNRESET 而中止。已加來源頁面綁定、目標回報確認及取消回報處理，保留原檢查標準，待第三輪重跑。本輪沒有操作用戶的安裝工具。
 
 ## 本輪修訂
 
@@ -14,7 +14,7 @@
 
 ## 已完成檢查
 
-- `npm test`：七項通過，包括 HTTPS／危險網址、17 模組 inventory、SceneDelegate／storyboard 接線、權限及備援，以及 fixture 過期頁面／導航確認。
+- `npm test`：九項通過，包括 HTTPS／危險網址、17 模組 inventory、SceneDelegate／storyboard 接線、權限及備援，以及 fixture 過期頁面／導航確認、中斷 HTTP 回報、格式／大小限制及非預期錯誤。
 - `node tests/teacher-ui.mjs`：七組 WebKit 尺寸／語言通過：320×568、375×667、402×874、600×900、768×1024、1376×1032，以及 402×874 英文。檢查緊湊列、完整姓名、六筆原資料、狀態即時篩選及原有勾選、歷史次數、日期內外寬度、班級分析、老師首頁／名單／乘數表及寵物統計。使用獨立 JSON 帳戶與合成紀錄，頁面 API 寫入為零。
 - `npm run test:app-ui`：Chromium iPhone、WebKit iPhone、WebKit iPad 三組完整流程通過。涵蓋孵化、房間、圖鑑、商店、戶外、七個大亂鬥模式、練習實戰及返回、科學島流程。
 - Chromium 使用真正的觸控指標檢查附近起點、方向、第二指按下／放開、移動加攻擊、正常放手、取消及按住移動時暫停後重設。WebKit 使用真正滑鼠指標驗證附近命中、拖曳、放手及 capture 遺失；它不代替實體 iOS 多指觸控驗收。
@@ -23,9 +23,9 @@
 
 ## 安裝檔
 
-候選：`releases/candidates/41323185220/buio-pilot-0.2.0-unsigned.ipa`。
+候選：`releases/candidates/41325255230/buio-pilot-0.2.0-unsigned.ipa`。
 
-505,105 bytes；SHA-256 `c4f7c8149188401deceee6baa6e87db1506e8e3166c785b993e670086a45b6e6`。ZIP CRC、ARM64／iPhoneOS、build 12、最低 iOS 15.4、全螢幕、HTTPS 後端、完整 17 模組 inventory、內嵌 runtime／CSS 與來源一致均已核對。Release 不含原生測試診斷、loopback、分享計數或測試取消介面。IPA 尚未簽署，個人安裝須經 Sideloadly 簽署；不能把工具上次留下的 Done 當作本次安裝證明。
+505,105 bytes；SHA-256 `cbf11cfd7e04d41fcaffb89e28b7517aaa6d9da7eab690c970264c92d6b5f3d8`。ZIP CRC、ARM64／iPhoneOS、build 12、最低 iOS 15.4、全螢幕、HTTPS 後端、完整 17 模組 inventory、內嵌 runtime／CSS 與來源一致均已核對。Release 不含原生測試診斷、loopback、分享計數或測試取消介面。IPA 尚未簽署，個人安裝須經 Sideloadly 簽署；不能把工具上次留下的 Done 當作本次安裝證明。
 
 ## 原生與既有基線
 
