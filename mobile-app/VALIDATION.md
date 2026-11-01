@@ -1,6 +1,6 @@
 # 杯澳 App 0.2.0 build 12 驗證紀錄
 
-本輪日期：2026-11-02（香港時間）。編譯來源 `88eda645fa04a7af734f3723fe0d849375a80b26`；[iOS 建置與原生驗證](https://github.com/cwko-1221/BuiO/actions/runs/41325255230)。實機 ARM64 IPA 已編譯及核對；首輪 iPhone 11 階段及 iPad 首 3 階段通過；iPad 後續 fixture 導航停在上一頁，該輪未通過全部原生驗證。第二輪 iPhone 的 10 個版面／轉向階段通過，匯出時因測試伺服器未處理 HTTP ECONNRESET 而中止。已加來源頁面綁定、目標回報確認及取消回報處理，保留原檢查標準，待第三輪重跑。本輪沒有操作用戶的安裝工具。
+本輪日期：2026-11-02（香港時間）。編譯來源 `8265e407bf2d87fe2e38264abf8b863032f4fb1e`；[iOS 建置與原生驗證](https://github.com/cwko-1221/BuiO/actions/runs/41326115635)全部通過。實機 ARM64 IPA 已核對；iPhone／iPad 共 22 原生階段、截圖畫面比例／四邊及連續分享均通過。本輪沒有操作用戶的安裝工具。
 
 ## 本輪修訂
 
@@ -20,16 +20,19 @@
 - Chromium 使用真正的觸控指標檢查附近起點、方向、第二指按下／放開、移動加攻擊、正常放手、取消及按住移動時暫停後重設。WebKit 使用真正滑鼠指標驗證附近命中、拖曳、放手及 capture 遺失；它不代替實體 iOS 多指觸控驗收。
 - 四組額外 WebKit 選單檢查通過：667×375、956×440、1376×1032、874×402 英文。同屏可見 8／18／29／10 隻角色，最後一頁可達；模式按鈕及詳情文字、陰影餘量、選項面板、第二篇章、原有擁有／解鎖限制均通過，右側不能水平捲動。
 - 精確紀錄：`test-results/teacher-build12-verified.log`、`deep-build12-verified.log`、`brawl-build12-verified.log`。
+- 原生證據：`test-results/native-020-build12-passed/`。Windows 核對 22 階段的截圖比例、畫面四邊及連續分享均通過；另已目視核對 iPhone 與 iPad 的原生日期欄。
 
 ## 安裝檔
 
-候選：`releases/candidates/41325255230/buio-pilot-0.2.0-unsigned.ipa`。
+交付：`releases/buio-pilot-0.2.0-unsigned.ipa`。本輪候選備份：`releases/candidates/41326115635/buio-pilot-0.2.0-unsigned.ipa`。
 
-505,105 bytes；SHA-256 `cbf11cfd7e04d41fcaffb89e28b7517aaa6d9da7eab690c970264c92d6b5f3d8`。ZIP CRC、ARM64／iPhoneOS、build 12、最低 iOS 15.4、全螢幕、HTTPS 後端、完整 17 模組 inventory、內嵌 runtime／CSS 與來源一致均已核對。Release 不含原生測試診斷、loopback、分享計數或測試取消介面。IPA 尚未簽署，個人安裝須經 Sideloadly 簽署；不能把工具上次留下的 Done 當作本次安裝證明。
+505,105 bytes；SHA-256 `71a7f626085ebac082088962f428f6ad637960fb552c3996900cf94a7044c5e7`。ZIP CRC、ARM64／iPhoneOS、build 12、最低 iOS 15.4、全螢幕、HTTPS 後端、完整 17 模組 inventory、內嵌 runtime／CSS 與來源一致均已核對。Release 不含原生測試診斷、loopback、分享計數或測試取消介面。IPA 尚未簽署，個人安裝須經 Sideloadly 簽署；不能把工具上次留下的 Done 當作本次安裝證明。
 
 ## 原生與既有基線
 
-本輪原生新增 `/homework` 日期欄位階段，檢查兩個真正的 iOS date inputs 是否在欄位內、手機是否完整一列、日期值與字級是否保留。加上原有方向、安全區、全螢幕及連續匯出，iPhone／iPad 各 11 階段，共 22 階段待完成。使用匿名 loopback fixture，不連正式帳戶，也不代替全部真實業務畫面。
+本輪原生新增 `/homework` 日期欄位階段，檢查兩個真正的 iOS date inputs 是否在欄位內、手機是否完整一列、日期值與字級是否保留。加上原有方向、安全區、全螢幕及連續匯出，iPhone／iPad 各 11 階段，共 22 階段全部通過。使用匿名 loopback fixture，不連正式帳戶，也不代替全部真實業務畫面。
+
+此前兩輪未列作完整驗收：第一輪 iPad 導航停在上一頁且截圖沒有正常內容；第二輪在 iPhone 匯出時因測試伺服器未處理 HTTP ECONNRESET 而中止。測試已加入來源頁面綁定、目標回報確認及取消回報處理，保留原檢查標準；本次成功輪的全部截圖亦通過畫面範圍核對。這些修正只涉及測試程式，沒有改動 App 的遊戲或原生控制器。
 
 [Build 11](https://github.com/cwko-1221/BuiO/actions/runs/41301122940)的 20 原生階段、Windows 實體畫面比例／四邊及連續分享核對已通過；本輪沿用其原生控制器。老師入口篩選、工作台、學生管理、寵物方向及大亂鬥遊戲選項面板均保留。
 
