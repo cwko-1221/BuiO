@@ -811,8 +811,8 @@ input {
 /* Bottom Overworld Strip: Followers Parade Bar & Interact Prompt */
 .hud-bottom-left {
   position: absolute;
-  left: max(24px, env(safe-area-inset-left));
-  bottom: calc(max(24px, env(safe-area-inset-bottom)) + 124px);
+  left: 16px;
+  bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -962,37 +962,15 @@ input {
   z-index: 28;
 }
 
-.touch-mount .interactive,
-.touch-mount [data-joystick-zone],
-.touch-mount [data-park-stick],
-.touch-mount .touch-controls,
-.touch-mount .quick-action-btn {
-  pointer-events: auto;
-}
-
 /* =========================================================
-   PET-PARK STYLE VIRTUAL JOYSTICK & TOUCH ACTION BUTTON
+   PET-PARK STYLE VIRTUAL JOYSTICK (bottom-right, fixed)
    ========================================================= */
-.joystick-touch-zone {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: min(380px, 50vw);
-  height: min(380px, 52vh);
-  z-index: 28;
-  touch-action: none;
-  pointer-events: auto;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
 .park-joystick {
   position: absolute;
-  left: max(24px, env(safe-area-inset-left));
-  bottom: max(24px, env(safe-area-inset-bottom));
+  right: max(28px, env(safe-area-inset-right));
+  bottom: max(28px, env(safe-area-inset-bottom));
   width: 102px;
   height: 102px;
-  z-index: 30;
   border: 2px solid rgba(255, 249, 231, 0.68);
   border-radius: 50%;
   background: rgba(255, 250, 232, 0.24);
@@ -1003,13 +981,17 @@ input {
   user-select: none;
   -webkit-user-select: none;
   pointer-events: auto;
-  transition: border-color 0.15s, background-color 0.15s;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
 }
 
 .park-joystick.active {
   border-color: rgba(254, 240, 138, 0.95);
   background: rgba(254, 240, 138, 0.32);
-  box-shadow: inset 0 2px 12px rgba(234, 179, 8, 0.35), 0 0 16px rgba(253, 224, 71, 0.45);
+}
+
+.park-joystick.sprint {
+  border-color: #fb923c;
+  box-shadow: inset 0 2px 12px rgba(234, 88, 12, 0.35), 0 0 18px rgba(251, 146, 60, 0.6);
 }
 
 .park-stick-arrows {
@@ -1032,71 +1014,11 @@ input {
   border: 2px solid #fff5dc;
   border-radius: 50%;
   background: rgba(248, 241, 217, 0.88);
-  left: 26px;
-  top: 26px;
+  left: 26.5px;
+  top: 26.5px;
   box-shadow: 0 3px 10px rgba(70, 99, 71, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.8);
   pointer-events: none;
-  transform: translate(0px, 0px);
   will-change: transform;
-}
-
-/* Quick Action / Interact Button (Bottom-Right) */
-.touch-controls {
-  position: absolute;
-  right: max(24px, env(safe-area-inset-right));
-  bottom: max(24px, env(safe-area-inset-bottom));
-  z-index: 28;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.quick-action-btn {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 2px solid rgba(214, 183, 118, 0.75);
-  background: linear-gradient(135deg, rgba(26, 48, 62, 0.94), rgba(14, 28, 38, 0.96));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #fff9e6;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.25);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  cursor: pointer;
-  touch-action: manipulation;
-  user-select: none;
-  transition: transform 0.1s, border-color 0.15s, background 0.15s, box-shadow 0.15s;
-}
-
-.quick-action-btn:active {
-  transform: scale(0.92);
-  border-color: #fde047;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.65), rgba(20, 83, 45, 0.85));
-}
-
-.quick-action-btn.has-target {
-  border-color: #fde047;
-  box-shadow: 0 0 16px rgba(253, 224, 71, 0.55), 0 6px 20px rgba(0, 0, 0, 0.42);
-}
-
-.quick-action-btn .action-icon {
-  font-size: 22px;
-  line-height: 1;
-}
-
-.quick-action-btn .action-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: #fdf4d8;
-  max-width: 60px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* =========================================================

@@ -115,15 +115,11 @@ export class GameController {
   resetJoystick() {
     this._joystickActivePointerId = null;
     this.joystickVector = null;
-    if (!this.touchMount) return;
-    const stick = this.touchMount.querySelector('[data-park-stick]');
+    const stick = this.touchMount?.querySelector('[data-park-stick]');
     if (!stick) return;
-    stick.classList.remove('active');
+    stick.classList.remove('active', 'sprint');
     const thumb = stick.querySelector('i');
     if (thumb) thumb.style.transform = '';
-    stick.style.left = '';
-    stick.style.top = '';
-    stick.style.bottom = '';
   }
 
   bindJoystick() {
@@ -132,117 +128,64 @@ export class GameController {
     const thumb = stick?.querySelector('i');
     if (!stick || !thumb) return;
 
+    // Fixed bottom-right joystick (Pet Park style). Only touches on / right
+    // around the ring start a drag; the rest of the screen is untouched.
+    const maxRadius = 40;      // thumb travel in px
+    const deadzone = 6;        // ignore tiny wobble
+    const sprintAt = 32;       // push near the rim = run (same as Shift)
+    const hitRadius = 70;      // generous but compact touch target
     let anchorX = 0;
     let anchorY = 0;
-    const maxRadius = 36;
-    const deadzone = 6;
 
-    const getRestingCenter = () => {
-      const prevLeft = stick.style.left;
-      const prevTop = stick.style.top;
-      const prevBottom = stick.style.bottom;
-      stick.style.left = '';
-      stick.style.top = '';
-      stick.style.bottom = '';
-      const rect = stick.getBoundingClientRect();
-      if (prevLeft) stick.style.left = prevLeft;
-      if (prevTop) stick.style.top = prevTop;
-      if (prevBottom) stick.style.bottom = prevBottom;
-      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-    };
-
-    const updateThumbAndVector = (clientX, clientY) => {
+    const update = (clientX, clientY) => {
       const dx = clientX - anchorX;
       const dy = clientY - anchorY;
       const dist = Math.hypot(dx, dy);
-
-      if (dist < 0.001) {
-        thumb.style.transform = 'translate(0px, 0px)';
+      if (dist <= deadzone) {
+        thumb.style.transform = `translate(${Math.round(dx)}px, ${Math.round(dy)}px)`;
+        stick.classList.remove('sprint');
         this.joystickVector = null;
         return;
       }
-
-      const clampedDist = Math.min(dist, maxRadius);
       const nx = dx / dist;
       const ny = dy / dist;
-      thumb.style.transform = `translate(${Math.round(nx * clampedDist)}px, ${Math.round(ny * clampedDist)}px)`;
-
-      if (dist <= deadzone) {
-        this.joystickVector = null;
-      } else {
-        const mag = Math.min(1.0, Math.max(0.25, (dist - deadzone) / (maxRadius - deadzone)));
-        this.joystickVector = {
-          x: nx,
-          z: ny,
-          magnitude: mag,
-        };
-      }
+      const travel = Math.min(dist, maxRadius);
+      thumb.style.transform = `translate(${Math.round(nx * travel)}px, ${Math.round(ny * travel)}px)`;
+      const sprint = dist >= sprintAt;
+      stick.classList.toggle('sprint', sprint);
+      this.joystickVector = {
+        x: nx,
+        z: ny,
+        magnitude: sprint ? 1 : Math.max(0.45, Math.min(1, (dist - deadzone) / (sprintAt - deadzone))),
+        sprint,
+      };
     };
 
     const onPointerDown = (e) => {
       if (this.screen !== 'world' || this.dialogue || this.modal || !this.save) return;
       if (this._joystickActivePointerId !== null) return;
-
-      const target = e.target;
-      if (
-        target?.closest?.('button') ||
-        target?.closest?.('.hud-card') ||
-        target?.closest?.('.followers-strip-card') ||
-        target?.closest?.('.rpg-modal') ||
-        target?.closest?.('.dialogue-box')
-      ) {
-        return;
-      }
-
-      const isDirectZone = Boolean(target?.closest?.('[data-joystick-zone]'));
-      const isLeftTouchArea = e.clientX < window.innerWidth * 0.52 && e.clientY > 140;
-      if (!isDirectZone && !isLeftTouchArea) return;
-
-      const resting = getRestingCenter();
-      const distToResting = Math.hypot(e.clientX - resting.x, e.clientY - resting.y);
-
-      // If tapped within 55px of resting stick, stay anchored at corner.
-      // If tapped elsewhere in movement zone, dynamically float stick centered at finger.
-      if (distToResting <= 55) {
-        anchorX = resting.x;
-        anchorY = resting.y;
-        stick.style.left = '';
-        stick.style.top = '';
-        stick.style.bottom = '';
-      } else {
-        anchorX = e.clientX;
-        anchorY = e.clientY;
-        stick.style.left = `${Math.round(anchorX - 51)}px`;
-        stick.style.top = `${Math.round(anchorY - 51)}px`;
-        stick.style.bottom = 'auto';
-      }
-
+      const rect = stick.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      if (Math.hypot(e.clientX - cx, e.clientY - cy) > hitRadius) return;
+      anchorX = cx;
+      anchorY = cy;
       this._joystickActivePointerId = e.pointerId;
       this.clickTarget = null;
       stick.classList.add('active');
-
-      try {
-        if (typeof stick.setPointerCapture === 'function') {
-          stick.setPointerCapture(e.pointerId);
-        }
-      } catch (_) {}
-
-      updateThumbAndVector(e.clientX, e.clientY);
+      try { stick.setPointerCapture?.(e.pointerId); } catch (_) {}
+      update(e.clientX, e.clientY);
     };
 
     const onPointerMove = (e) => {
       if (this._joystickActivePointerId !== e.pointerId) return;
-      updateThumbAndVector(e.clientX, e.clientY);
+      update(e.clientX, e.clientY);
     };
 
     const onPointerUp = (e) => {
-      if (this._joystickActivePointerId !== null && e.pointerId !== this._joystickActivePointerId) return;
+      if (this._joystickActivePointerId === null || e.pointerId !== this._joystickActivePointerId) return;
       this.resetJoystick();
-      try {
-        if (stick.hasPointerCapture && stick.hasPointerCapture(e.pointerId)) {
-          stick.releasePointerCapture(e.pointerId);
-        }
-      } catch (_) {}
+      try { if (stick.hasPointerCapture?.(e.pointerId)) stick.releasePointerCapture(e.pointerId); } catch (_) {}
     };
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true });
@@ -251,29 +194,12 @@ export class GameController {
     window.addEventListener('pointercancel', onPointerUp, { passive: true });
   }
 
-  syncTouchControls(nearbyPrompt = null, inTallGrass = false) {
+  syncTouchControls() {
     if (!this.touchMount) return;
     const isWorld = this.screen === 'world' && !this.dialogue && !this.modal && Boolean(this.save);
-    this.touchMount.style.display = isWorld ? 'block' : 'none';
-    if (!isWorld) {
-      if (this.joystickVector) {
-        this.resetJoystick();
-      }
-      return;
-    }
-
-    const quickBtn = this.touchMount.querySelector('.quick-action-btn');
-    if (quickBtn) {
-      const hasTarget = Boolean(nearbyPrompt);
-      quickBtn.classList.toggle('has-target', hasTarget);
-      quickBtn.dataset.action = nearbyPrompt ? 'interact-nearby' : (inTallGrass ? 'search-wild-now' : 'interact-nearby');
-      quickBtn.setAttribute('aria-label', nearbyPrompt ? nearbyPrompt.label : (inTallGrass ? '搜尋野生寶可夢' : '調查互動'));
-      quickBtn.setAttribute('title', nearbyPrompt ? nearbyPrompt.label : (inTallGrass ? '搜尋野生寶可夢' : '互動 (空白鍵)'));
-      const iconEl = quickBtn.querySelector('.action-icon');
-      const labelEl = quickBtn.querySelector('.action-label');
-      if (iconEl) iconEl.textContent = nearbyPrompt ? '💬' : (inTallGrass ? '🌿' : '●');
-      if (labelEl) labelEl.textContent = nearbyPrompt ? nearbyPrompt.label : (inTallGrass ? '搜尋' : '互動');
-    }
+    const display = isWorld ? 'block' : 'none';
+    if (this.touchMount.style.display !== display) this.touchMount.style.display = display;
+    if (!isWorld && this._joystickActivePointerId !== null) this.resetJoystick();
   }
 
   async init() {
@@ -303,23 +229,9 @@ export class GameController {
       <div class="viewport-canvas" id="rpg-canvas-mount"></div>
       <div id="rpg-hud-mount"></div>
       <div id="rpg-touch-mount" class="touch-mount" style="display:none;">
-        <div class="joystick-touch-zone interactive" data-joystick-zone aria-label="移動搖桿控制區域"></div>
         <div class="park-joystick" data-park-stick role="group" aria-label="拖曳控制方向">
           <span class="park-stick-arrows">＋</span>
           <i></i>
-        </div>
-        <div class="touch-controls interactive">
-          <button
-            type="button"
-            class="quick-action-btn"
-            data-action="interact-nearby"
-            aria-label="調查互動"
-            title="互動 (空白鍵)"
-            data-testid="quick-interact-btn"
-          >
-            <span class="action-icon">●</span>
-            <span class="action-label">互動</span>
-          </button>
         </div>
       </div>
       <div id="rpg-dialogue-mount"></div>
@@ -567,26 +479,6 @@ export class GameController {
     };
     window.addEventListener('pointerup', clearDpad);
     window.addEventListener('pointercancel', clearDpad);
-
-    // Click-to-Walk on 2.5D Canvas when in overworld
-    this.canvasMount.addEventListener('pointerdown', (e) => {
-      if (this.screen !== 'world' || this.dialogue || this.modal || !this.save) return;
-      // Ignore taps in the joystick movement zone
-      if (e.clientX < window.innerWidth * 0.52 && e.clientY > 140) return;
-      const rect = this.canvasMount.getBoundingClientRect();
-      const lx = e.clientX - rect.left;
-      const ly = e.clientY - rect.top;
-      if (this.renderer && typeof this.renderer.screenToWorld === 'function') {
-        this.clickTarget = this.renderer.screenToWorld(lx, ly);
-      } else {
-        const nx = (lx / Math.max(1, rect.width) - 0.5) * 2;
-        const ny = (ly / Math.max(1, rect.height) - 0.5) * 2;
-        this.clickTarget = {
-          x: this.save.position.x + nx * 9.5,
-          z: this.save.position.z + ny * 9.0,
-        };
-      }
-    });
 
     // Keyboard controls
     window.addEventListener('keydown', (e) => {
@@ -2394,7 +2286,7 @@ export class GameController {
         : null;
       const nearbyPrompt = this.getNearbyInteraction();
       const inTallGrass = Boolean(getTallGrassAt(this.save.position.x, this.save.position.z, zoneId));
-      this.syncTouchControls(nearbyPrompt, inTallGrass);
+      this.syncTouchControls();
 
       const sig = [
         'world',
@@ -2473,9 +2365,9 @@ export class GameController {
     vx /= len;
     vz /= len;
 
-    const sprinting = this.keys.has('shift');
-    // Scaled speed supporting analog joystick tilt and shift sprint
-    const speed = (sprinting ? 3.6 : 1.8) * Math.max(0.35, mag);
+    // Shift or pushing the joystick to its rim both run.
+    const sprinting = this.keys.has('shift') || Boolean(this.joystickVector?.sprint);
+    const speed = sprinting ? 3.6 : 1.8 * Math.max(0.45, mag);
     const stepX = vx * speed * dt;
     const stepZ = vz * speed * dt;
 

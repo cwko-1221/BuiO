@@ -408,7 +408,7 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline: 3px solid #d
   }
   .hud-bottom-left {
     left: max(16px, env(safe-area-inset-left));
-    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 116px);
+    bottom: max(14px, env(safe-area-inset-bottom));
   }
   .touch-controls {
     right: max(16px, env(safe-area-inset-right));
