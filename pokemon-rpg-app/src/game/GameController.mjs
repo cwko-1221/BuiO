@@ -133,7 +133,7 @@ export class GameController {
     const maxRadius = 40;      // thumb travel in px
     const deadzone = 6;        // ignore tiny wobble
     const sprintAt = 32;       // push near the rim = run (same as Shift)
-    const hitRadius = 70;      // generous but compact touch target
+    const hitRadius = 105;     // comfortable touch pickup area around the 102px joystick ring
     let anchorX = 0;
     let anchorY = 0;
 
@@ -164,6 +164,7 @@ export class GameController {
     const onPointerDown = (e) => {
       if (this.screen !== 'world' || this.dialogue || this.modal || !this.save) return;
       if (this._joystickActivePointerId !== null) return;
+      if (e.target?.closest?.('button, a, input, [data-action]')) return;
       const rect = stick.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
