@@ -413,21 +413,7 @@ export function renderOverworldHud({
         ` : ''}
       </div>
 
-      <!-- Bottom-Right: Touch / Mouse D-Pad -->
-      <div class="touch-controls interactive">
-        <div class="dpad-grid">
-          <span></span>
-          <button type="button" class="dpad-btn" data-dpad="up" aria-label="Move Up">▲</button>
-          <span></span>
-          <button type="button" class="dpad-btn" data-dpad="left" aria-label="Move Left">◀</button>
-          <button type="button" class="dpad-btn" data-action="interact-nearby" aria-label="Interact">●</button>
-          <button type="button" class="dpad-btn" data-dpad="right" aria-label="Move Right">▶</button>
-          <span></span>
-          <button type="button" class="dpad-btn" data-dpad="down" aria-label="Move Down">▼</button>
-          <span></span>
-        </div>
-      </div>
-    </div>
+          </div>
   `;
 }
 

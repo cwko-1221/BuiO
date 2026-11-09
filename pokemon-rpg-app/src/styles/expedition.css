@@ -49,7 +49,7 @@ kbd { font: 10px Georgia, serif; border: 1px solid #a9946455; padding: 2px 4px; 
 .minimap-caption { display: flex; justify-content: center; align-items: center; gap: 5px; left: 12px; right: 12px; bottom: 9px; padding: 5px 2px; background: #102a34d9; border-radius: 10px; font-size: 9px; color: #f3dfb5; }
 .minimap-caption .game-icon { width: 13px; height: 13px; }
 .minimap-caption kbd { border: none; padding: 0; font-size: 9px; }
-.hud-bottom-left { left: max(24px,env(safe-area-inset-left)); bottom: max(24px,env(safe-area-inset-bottom)); }
+.hud-bottom-left { left: max(24px,env(safe-area-inset-left)); bottom: calc(max(24px,env(safe-area-inset-bottom)) + 124px); }
 .followers-strip-card { border-radius: 8px; border-color: #d6b77666; padding: 7px 10px; background: #102a34e8; gap: 13px; }
 .followers-label strong { color: #f3dfb5; font-size: 11px; letter-spacing: .06em; }
 .followers-label span { font-size: 9px; color: #b6c7bf; }
@@ -214,13 +214,12 @@ kbd { font: 10px Georgia, serif; border: 1px solid #a9946455; padding: 2px 4px; 
   .hud-btn { width: 32px; height: 36px; padding: 6px; }
   .hud-btn .game-icon { width: 18px; height: 18px; }
   .hud-btn kbd { display: none; }
-  .hud-bottom-left { left: 12px; bottom: max(15px,env(safe-area-inset-bottom)); }
+  .hud-bottom-left { left: 12px; bottom: calc(max(15px,env(safe-area-inset-bottom)) + 112px); }
   .followers-strip-card { padding: 5px 8px; gap: 7px; }
   .followers-label { display: none; }
   .follower-slot { width: 36px; height: 36px; }
   .touch-controls { right: 12px; bottom: max(15px,env(safe-area-inset-bottom)); }
-  .dpad-grid { grid-template-columns: repeat(3,36px); grid-template-rows: repeat(3,36px); gap: 3px; }
-  .dpad-btn { width: 36px; height: 36px; }
+  .quick-action-btn { width: 62px; height: 62px; }
   .interact-prompt-wrap { bottom: 145px; max-width: 80vw; }
   .interact-prompt-btn { padding: 8px 10px; font-size: 11px; }
   .toast-stack { bottom: 205px; }
@@ -260,11 +259,10 @@ kbd { font: 10px Georgia, serif; border: 1px solid #a9946455; padding: 2px 4px; 
   .hud-menu-bar { display: grid; grid-template-columns: repeat(2,44px); gap: 5px; }
   .hud-btn { width: 44px; height: 44px; }
   .hud-btn > span,.hud-btn kbd { display: none; }
-  .dpad-grid { grid-template-columns: repeat(3,44px); grid-template-rows: repeat(3,44px); gap: 4px; }
-  .dpad-btn { width: 44px; height: 44px; }
+  .quick-action-btn { width: 56px; height: 56px; }
   .follower-slot { width: 44px; height: 44px; }
   .touch-controls { bottom: 12px; right: 14px; }
-  .hud-bottom-left { bottom: 12px; left: 14px; }
+  .hud-bottom-left { bottom: 106px; left: 14px; }
   .interact-prompt-wrap { bottom: 18px; max-width: 40vw; }
   .toast-stack { top: 120px; bottom: auto; max-width: 38vw; }
   .expedition-menu .modal-header { padding: 14px 20px; }
