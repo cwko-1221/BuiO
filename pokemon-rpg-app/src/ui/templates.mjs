@@ -1056,7 +1056,7 @@ export function renderModal({ modal, save, battle, lastLightCampRestAt = 0 }) {
     const selIsFollowing = selFollowIdx !== -1;
     const selInParty = selectedMon ? save.party.some((m) => m.uid === selectedMon.uid) : false;
     const selPartyIdx = selectedMon ? save.party.findIndex((m) => m.uid === selectedMon.uid) : -1;
-    const selEvoTarget = selSp?.evolvesTo ? POKEMON_SPECIES[selSp.evolvesTo.targetId] : null;
+    const selEvoTarget = selSp?.evolvesTo ? POKEMON_SPECIES[selSp.evolvesTo.speciesId || selSp.evolvesTo.targetId] : null;
 
     const renderMonCard = (mon, idx, location) => {
       const sp = POKEMON_SPECIES[mon.speciesId];
@@ -1324,7 +1324,7 @@ export function renderModal({ modal, save, battle, lastLightCampRestAt = 0 }) {
     const featuredSp = POKEMON_SPECIES[selectedDexId] || POKEMON_LIST[0];
     const isFeaturedCaught = caughtSet.has(featuredSp.id);
     const isFeaturedSeen = seenSet.has(featuredSp.id);
-    const featuredEvo = featuredSp.evolvesTo ? POKEMON_SPECIES[featuredSp.evolvesTo.targetId] : null;
+    const featuredEvo = featuredSp.evolvesTo ? POKEMON_SPECIES[featuredSp.evolvesTo.speciesId || featuredSp.evolvesTo.targetId] : null;
 
     return `
       <div class="modal-backdrop" data-testid="pokedex-modal">

@@ -796,7 +796,7 @@
           </div>
         </div>
       </div>
-    `}if(e.type===`team`){let n=e.tab||`party`,r=[...t.party,...t.box],i=e.selectedUid||t.party[0]?.uid||t.box[0]?.uid,a=r.find(e=>e.uid===i)||t.party[0],o=a?V[a.speciesId]:null,s=a?Zt(a.speciesId,a.level):[],c=a?Yt(a.level):100,l=a?t.followers.indexOf(a.uid):-1,u=l!==-1,d=a?t.party.some(e=>e.uid===a.uid):!1,f=a?t.party.findIndex(e=>e.uid===a.uid):-1,p=o?.evolvesTo?V[o.evolvesTo.targetId]:null,m=(e,n,r)=>{let i=V[e.speciesId],o=t.followers.indexOf(e.uid),s=o!==-1,c=Zt(e.speciesId,e.level),l=e.uid===a?.uid;return`
+    `}if(e.type===`team`){let n=e.tab||`party`,r=[...t.party,...t.box],i=e.selectedUid||t.party[0]?.uid||t.box[0]?.uid,a=r.find(e=>e.uid===i)||t.party[0],o=a?V[a.speciesId]:null,s=a?Zt(a.speciesId,a.level):[],c=a?Yt(a.level):100,l=a?t.followers.indexOf(a.uid):-1,u=l!==-1,d=a?t.party.some(e=>e.uid===a.uid):!1,f=a?t.party.findIndex(e=>e.uid===a.uid):-1,p=o?.evolvesTo?V[o.evolvesTo.speciesId||o.evolvesTo.targetId]:null,m=(e,n,r)=>{let i=V[e.speciesId],o=t.followers.indexOf(e.uid),s=o!==-1,c=Zt(e.speciesId,e.level),l=e.uid===a?.uid;return`
         <div
           class="mon-manage-card ${l?`selected`:``}"
           style="align-items:flex-start;cursor:pointer"
@@ -1042,7 +1042,7 @@
           </div>
         </div>
       </div>
-    `}if(e.type===`pokedex`){let n=new Set(t.pokedex.caught),r=new Set([...t.pokedex.seen,...t.pokedex.caught]),i=V[e.selectedDexId||t.pokedex.caught[0]||qt[0].id]||qt[0],a=n.has(i.id),o=r.has(i.id),s=i.evolvesTo?V[i.evolvesTo.targetId]:null;return`
+    `}if(e.type===`pokedex`){let n=new Set(t.pokedex.caught),r=new Set([...t.pokedex.seen,...t.pokedex.caught]),i=V[e.selectedDexId||t.pokedex.caught[0]||qt[0].id]||qt[0],a=n.has(i.id),o=r.has(i.id),s=i.evolvesTo?V[i.evolvesTo.speciesId||i.evolvesTo.targetId]:null;return`
       <div class="modal-backdrop" data-testid="pokedex-modal">
         <div class="modal-window wide" style="max-width:1120px">
           <div class="modal-header">
