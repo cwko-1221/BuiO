@@ -369,10 +369,19 @@ export class World25DRenderer {
 
     this._preloadCoreArt();
 
-    this._onResize = () => this.resize();
+    this._onResize = () => {
+      this.resize();
+      setTimeout(() => this.resize(), 60);
+      setTimeout(() => this.resize(), 220);
+    };
     window.addEventListener('resize', this._onResize);
     window.addEventListener('orientationchange', this._onResize);
+    window.addEventListener('load', this._onResize);
     window.visualViewport?.addEventListener('resize', this._onResize);
+    if (typeof ResizeObserver !== 'undefined') {
+      this._resizeObserver = new ResizeObserver(() => this.resize());
+      this._resizeObserver.observe(this.container);
+    }
     this.resize();
 
     this.triggerZoneBanner('dawnleaf');
@@ -513,18 +522,53 @@ export class World25DRenderer {
     };
   }
 
+  _measureViewport() {
+    const vv = window.visualViewport;
+    const rect = this.container?.getBoundingClientRect?.();
+    const winW = vv?.width || window.innerWidth || 1280;
+    const winH = vv?.height || window.innerHeight || 720;
+    const cw = rect?.width || this.container?.clientWidth || 0;
+    const ch = rect?.height || this.container?.clientHeight || 0;
+    // Guard against unstyled container before CSS loads (where canvas intrinsic height is 150px)
+    const rawW = cw >= 200 ? cw : winW;
+    const rawH = ch >= 220 && ch >= winH * 0.5 ? ch : winH;
+    return {
+      w: Math.max(320, Math.round(rawW)),
+      h: Math.max(240, Math.round(rawH)),
+      dpr: Math.min(window.devicePixelRatio || 1, 2),
+    };
+  }
+
+  _syncCanvasMetrics() {
+    if (this.disposed) return false;
+    const { w, h, dpr } = this._measureViewport();
+    const targetW = Math.round(w * dpr);
+    const targetH = Math.round(h * dpr);
+    if (
+      this.viewW !== w ||
+      this.viewH !== h ||
+      this.dpr !== dpr ||
+      this.canvas.width !== targetW ||
+      this.canvas.height !== targetH
+    ) {
+      this.resize();
+      return true;
+    }
+    return false;
+  }
+
   resize() {
     if (this.disposed) return;
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const vv = window.visualViewport;
-    this.viewW = Math.max(320, Math.round(this.container.clientWidth || vv?.width || window.innerWidth));
-    this.viewH = Math.max(240, Math.round(this.container.clientHeight || vv?.height || window.innerHeight));
+    const { w, h, dpr } = this._measureViewport();
+    this.dpr = dpr;
+    this.viewW = w;
+    this.viewH = h;
     this.canvas.width = Math.round(this.viewW * this.dpr);
     this.canvas.height = Math.round(this.viewH * this.dpr);
-    const zoomByW = this.viewW / 1360;
-    const zoomByH = this.viewH / 780;
-    const minZoom = this.worldArtTrial?.id === 'premium-crossing-v1' ? .92 : .72;
-    this.zoom = clamp(Math.min(zoomByW, zoomByH), minZoom, 1.08);
+    this.canvas.style.width = `${this.viewW}px`;
+    this.canvas.style.height = `${this.viewH}px`;
+    const minZoom = this.worldArtTrial?.id === 'premium-crossing-v1' ? .95 : .78;
+    this.zoom = clamp(Math.max(this.viewW, this.viewH) / 1360, minZoom, 1.08);
   }
 
   screenToWorld(localX, localY) {
@@ -1198,6 +1242,7 @@ export class World25DRenderer {
 
   updateWorld({ playerPos, isMoving, facing = 'down', questTarget, defeatedNpcs = [] }) {
     if (this.disposed || this.mode !== 'world') return;
+    this._syncCanvasMetrics();
 
     const now = performance.now();
     const dt = Math.min(0.05, Math.max(0.001, (now - this.lastTime) / 1000));
@@ -1830,7 +1875,7 @@ export class World25DRenderer {
 
   _getBattleLayout() {
     const w = this.viewW, h = this.viewH;
-    const portrait = w <= 720 && h > 500;
+    const portrait = (w <= 720 || h > w * 1.05) && h > 500;
     const stage = this.battleViewport || { left: 12, top: 100, right: w-12, bottom: h*.65 };
     const room = Math.max(60, stage.bottom-stage.top);
     const playerScale = clamp(POKEMON_SPECIES[this.battleState.playerMon?.speciesId]?.heightScale || 1, .86, 1.36);
@@ -1849,6 +1894,7 @@ export class World25DRenderer {
 
   updateBattle() {
     if (this.disposed || this.mode !== 'battle') return;
+    this._syncCanvasMetrics();
 
     const now = performance.now();
     const dt = Math.min(0.05, Math.max(0.001, (now - this.lastTime) / 1000));
@@ -1887,7 +1933,8 @@ export class World25DRenderer {
     if (bgEntry && bgEntry.ready) {
       const imgW = bgEntry.img.naturalWidth;
       const imgH = bgEntry.img.naturalHeight;
-      const cropY = w <= 720 && h > 500 ? imgH*.44 : h <= 500 && w <= 1000 ? imgH*.2 : 0;
+      const isPortrait = (w <= 720 || h > w * 1.05) && h > 500;
+      const cropY = isPortrait ? imgH*.38 : h <= 500 && w <= 1000 ? imgH*.2 : 0;
       const sourceH = imgH-cropY;
       const scale = Math.max(w / imgW, h / sourceH) * 1.03;
       const drawW = imgW * scale;
@@ -2591,7 +2638,9 @@ export class World25DRenderer {
     this.disposed = true;
     window.removeEventListener('resize', this._onResize);
     window.removeEventListener('orientationchange', this._onResize);
+    window.removeEventListener('load', this._onResize);
     window.visualViewport?.removeEventListener('resize', this._onResize);
+    this._resizeObserver?.disconnect();
     this.terrainChunks.clear();
     this.terrainChunkBytes = 0;
   }

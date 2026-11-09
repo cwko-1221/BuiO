@@ -7,8 +7,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>星輝寶可夢物語 | BuiO 2.5D 開放世界育成對戰 RPG</title>
   <link rel="icon" type="image/webp" href="/pokemon-rpg/assets/items/pokeball.webp" />
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; height: 100dvh; overflow: hidden; background: #0b1120; }
+    .rpg-root { position: fixed; inset: 0; width: 100%; height: 100%; height: 100dvh; overflow: hidden; }
+    .viewport-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; }
+    .viewport-canvas canvas { display: block; }
+  </style>
 </head>
 <body>
+  <div id="game-container" hidden></div>
   <div id="rpg-app" class="rpg-root">
     <div class="boot-loader">
       <img src="/pokemon-rpg/assets/items/pokeball.webp" alt="Loading" class="boot-ball-spin" />
