@@ -27,7 +27,7 @@ export const BATTLE_SPRITE_GEOMETRY={
     "right": 0.9609375,
     "top": 0.255859375,
     "bottom": 0.9609375,
-    "sha256": "ede298375f58f95c1d82c70068ce6027b8610969034cce5a60131456c01757c3"
+    "sha256": "75578bf906e7521233bd36246eac32f5554b59adabfcf0d6f1fab6419055eb18"
   },
   "squirtle": {
     "left": 0.05078125,
@@ -62,7 +62,7 @@ export const BATTLE_SPRITE_GEOMETRY={
     "right": 0.8203125,
     "top": 0.048828125,
     "bottom": 0.94921875,
-    "sha256": "0b13a3724839cee4377f811ca0c98f219a129d11837e5f2dca8e104cea882c95"
+    "sha256": "fbf887a3bfab7ff12736c4f8148831943b5c4b4ec9645122eaee8129a08f1908"
   },
   "jigglypuff": {
     "left": 0.060546875,
@@ -76,7 +76,7 @@ export const BATTLE_SPRITE_GEOMETRY={
     "right": 0.8671875,
     "top": 0.048828125,
     "bottom": 0.94921875,
-    "sha256": "99f58eb2595091c28157064bc5d78c1143d8f2873b71215647f06701ff9e0ed5"
+    "sha256": "85768dae070e2c433d4591607a1dd9df5f3ac9aca15618cc41148d50150b2fb2"
   },
   "magikarp": {
     "left": 0.1171875,
@@ -125,7 +125,7 @@ export const BATTLE_SPRITE_GEOMETRY={
     "right": 0.79296875,
     "top": 0.041015625,
     "bottom": 0.9609375,
-    "sha256": "a5f8bf4a0bdfe3bfb56733ba86b0194ed75d004f29948b8203c3cef2a57eea21"
+    "sha256": "042c1ce1ad40f7e2d7b08978d3f8b3c1fc83410c85aba59efff1e526a1a75192"
   },
   "haunter": {
     "left": 0.126953125,
