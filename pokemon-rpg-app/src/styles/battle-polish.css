@@ -1,0 +1,17 @@
+/* Readable command cards across desktop, portrait and low landscape screens. */
+.battle-action-state{display:flex;align-items:center;gap:7px;min-height:22px;margin-bottom:8px;padding:0 1px;color:#c4d3d8;font-size:11px;line-height:1.6}
+.battle-action-dot{width:5px;height:5px;flex-shrink:0;background:#a5c9bd;border-radius:50%}.battle-action-state.is-busy{color:#f0d29a}.is-busy .battle-action-dot{background:#edc177}
+.combatant-plate.is-acting{box-shadow:inset 0 0 0 2px #d5ae5c,0 5px 18px #142b3540}
+.skill-drawer-hint{font-size:11px;font-weight:500;color:#b9cbd2;margin-left:6px;white-space:nowrap}
+.battle-command-panel .skill-choice-btn{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:8px;min-width:0;min-height:82px;padding:12px;border-radius:5px;border-color:#bda57566;background:linear-gradient(140deg,#3b5361,#263e4d);box-shadow:inset 0 1px #eee1bd15}
+.skill-choice-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;min-width:0}
+.skill-choice-name{font-size:14px;line-height:1.5;color:#f5eddc;overflow-wrap:anywhere}
+.skill-choice-cost{flex-shrink:0;white-space:nowrap;font-size:12px;line-height:1.5;color:#a8dde1;font-variant-numeric:tabular-nums}
+.skill-choice-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px;color:#c5d1d4;font-size:11px;line-height:1.5}
+.skill-choice-meta .type-badge{font-size:10px;padding:2px 8px;white-space:nowrap}
+.skill-choice-feedback{font-size:11px;line-height:1.4}.skill-choice-feedback.super{color:#badfb2}.skill-choice-feedback.weak{color:#e1b3ae}.skill-choice-feedback.insufficient,.skill-choice-cost.insufficient{color:#efb0a0}
+.battle-command-panel .skill-choice-btn:hover:not(:disabled){border-color:#e6ca88;background:linear-gradient(140deg,#476472,#2d4a59);transform:none}
+.battle-command-panel button:focus-visible{outline:2px solid #f6dda0;outline-offset:2px}
+@media(max-width:600px){.battle-command-panel .skill-choice-btn{padding:10px 9px;min-height:91px;gap:7px}.skill-choice-name{font-size:13px}.skill-choice-cost{font-size:11px}.skill-drawer-hint{display:block;margin-left:0;margin-top:2px}.skill-choice-meta{gap:5px}.skill-choice-meta .type-badge{font-size:9px;padding:2px 6px}}
+@media(max-height:500px) and (min-width:601px){.battle-command-panel .skill-choice-btn{min-height:70px;padding:9px;gap:4px}.skill-choice-name{font-size:12px}.skill-choice-feedback,.skill-choice-meta,.skill-choice-cost{font-size:10px}}
+@media(max-height:500px) and (min-width:601px){.battle-action-state{min-height:16px;margin-bottom:5px;font-size:10px}}

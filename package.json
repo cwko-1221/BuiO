@@ -75,7 +75,7 @@
     "check:tower-defense-live": "node scripts/test-tower-defense-live.mjs",
     "check:game-hub-live": "node scripts/test-game-hub-live.mjs",
     "build:game-assets": "node scripts/generate-reference-extensions.mjs && node scripts/generate-fixed-bricks.mjs && node scripts/build-game-assets.mjs && node scripts/analyze-game-geometry.mjs && node scripts/pack-game-atlases.mjs",
-    "postinstall": "npm --prefix whiteboard-app/client ci --include=dev --no-audit --no-fund && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app ci --include=dev --no-audit --no-fund && npm --prefix science-lab-app run build && npm --prefix pet-app ci --include=dev --no-audit --no-fund && npm --prefix pet-app run build && node scripts/precompress-assets.mjs",
+    "postinstall": "npm --prefix whiteboard-app/client ci --include=dev --no-audit --no-fund && npm --prefix whiteboard-app/client run build && npm --prefix science-lab-app ci --include=dev --no-audit --no-fund && npm --prefix science-lab-app run build && npm --prefix pet-app ci --include=dev --no-audit --no-fund && npm --prefix pet-app run build && npm --prefix pokemon-rpg-app ci --include=dev --no-audit --no-fund && npm --prefix pokemon-rpg-app run build && node scripts/precompress-assets.mjs",
     "import:art": "node scripts/import-art.mjs",
     "build:art-prompts": "node scripts/build-art-prompts.mjs",
     "build:room-shape": "node scripts/room-shape.mjs",
@@ -97,7 +97,12 @@
     "check:pet-latency-live": "node scripts/test-pet-latency-live.cjs",
     "check:whiteboard": "node --test whiteboard-app/server/socket.test.js whiteboard-app/server/checkpoints.test.js whiteboard-app/server/recovery.test.js whiteboard-app/client/src/utils/boardSnapshots.test.mjs whiteboard-app/client/src/utils/boardDelta.test.mjs whiteboard-app/client/src/utils/paintBoard.test.mjs whiteboard-app/client/src/utils/boardTimeline.test.mjs tests/report-work.test.cjs",
     "check:whiteboard-live": "node scripts/test-whiteboard-classroom-live.mjs && node scripts/test-whiteboard-views-live.mjs && node scripts/test-whiteboard-restart-live.mjs && node scripts/test-whiteboard-fast-sync-live.mjs",
-    "check:classroom-mixed-load": "node scripts/test-classroom-mixed-load.mjs"
+    "check:classroom-mixed-load": "node scripts/test-classroom-mixed-load.mjs",
+    "build:pokemon-rpg": "npm --prefix pokemon-rpg-app run build",
+    "build:pokemon-rpg-assets": "node scripts/build-pokemon-rpg-assets.mjs",
+    "check:pokemon-rpg": "node --test pokemon-rpg-app/tests/pokemon-rpg.test.mjs pokemon-rpg-app/tests/world-art.test.mjs",
+    "check:pokemon-rpg-live": "node scripts/test-pokemon-rpg-live.mjs",
+    "audit:pokemon-rpg-art": "node scripts/audit-pokemon-art-overhaul.mjs"
   },
   "dependencies": {
     "@ffprobe-installer/ffprobe": "^2.1.2",

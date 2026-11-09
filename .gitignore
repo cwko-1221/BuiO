@@ -45,3 +45,5 @@ art-inbox/
 # Generated art work: 4096px redraws and the layers lifted out of them. The sources are the
 # artist's, the outputs are reproducible from them with scripts/bake-wearable.mjs.
 pet-app/art-source/imagegen/
+pokemon-rpg-app/art-sources/
+art-sources/

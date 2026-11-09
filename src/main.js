@@ -287,6 +287,9 @@ async function openModule(moduleId, mode) {
   } else if (moduleId === 'pet') {
     window.location.href = '/pet';
 
+  } else if (moduleId === 'pokemon-rpg') {
+    window.location.href = '/pokemon-rpg';
+
   } else if (moduleId === 'buzzer') {
     window.location.href = '/buzzer';
 

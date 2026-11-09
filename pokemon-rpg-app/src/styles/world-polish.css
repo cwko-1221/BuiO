@@ -1,0 +1,80 @@
+/* Keep the current objective visible; longer story instructions are on demand. */
+.quest-hud-toggle{width:100%;min-height:40px;padding:0;display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left;color:inherit;font:inherit;background:none;border:0;cursor:pointer}
+.quest-hud-toggle .quest-hud-title{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin:0;font-size:12px;line-height:1.45}
+.quest-toggle-mark{font-size:18px;color:#e3c88e;line-height:1;flex-shrink:0}
+.quest-hud-toggle:focus-visible{outline:2px solid #ead29a;outline-offset:4px;border-radius:2px}
+.quest-hud-desc[hidden]{display:none}
+.quest-hud-toggle[aria-expanded=true]+.quest-hud-desc{margin-top:8px;padding-top:8px;border-top:1px solid #d6c18c40}
+@media(max-width:600px){.quest-hud-toggle .quest-hud-title{font-size:11px}.quest-hud-toggle{min-height:44px;gap:8px}.quest-hud-desc{font-size:11px;line-height:1.65}}
+
+/* ImageGen brass compass frames the live, north-up regional illustration. */
+.minimap-box{padding:0;border:0;outline:0;background:transparent;box-shadow:none;overflow:visible;isolation:isolate}
+.minimap-box::after{display:none}
+.minimap-box canvas{position:absolute;inset:12%;width:76%;height:76%;border-radius:50%;background:#365d56}
+.minimap-bezel{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 4px 6px #102c3766)}
+.minimap-box .minimap-caption{left:4%;right:4%;bottom:-9px;z-index:1;border:1px solid #c2a36399;border-radius:3px;background:#193c45f5;padding:4px 3px;font-size:9px;box-shadow:0 3px 6px #102c3740}
+.minimap-box:focus-visible{outline:2px solid #ffe4a8;outline-offset:5px;border-radius:50%}
+.atlas-window{max-width:1240px}
+.atlas-body{grid-template-columns:164px minmax(0,1fr);gap:22px}
+.atlas-heading h2{color:#304e52}
+.atlas-view-switch{display:flex;border:1px solid #ad925d;border-radius:4px;padding:3px;gap:3px;flex-shrink:0}
+.atlas-view-switch button{border:0;background:transparent;color:#5c685d;padding:9px 12px;min-height:36px;font:inherit;font-size:11px;cursor:pointer;border-radius:2px}
+.atlas-view-switch button[aria-pressed=true]{background:#315760;color:#f8e8c6;box-shadow:0 2px 5px #153c3b25}
+.atlas-illustration{position:relative;width:100%;aspect-ratio:3/2;border:1px solid #af955d;box-shadow:0 6px 22px #6c573b33;overflow:hidden;border-radius:3px;background:#e3d4ac}
+.atlas-illustration>img{display:block;width:100%;height:100%;object-fit:fill}
+.atlas-pin{position:absolute;display:flex;flex-direction:column;align-items:center;gap:2px;transform:translate(-50%,-50%);border:0;color:#2b4549;background:transparent;cursor:pointer;min-height:44px;min-width:44px;padding:0;filter:drop-shadow(0 2px 2px #392d2744)}
+.atlas-pin-gem{display:grid;place-items:center;width:22px;height:22px;background:#315f64ed;border:1px solid #f0d594;border-radius:50%;color:#ffdf85;font-size:13px}
+.atlas-pin strong{font:600 11px "Microsoft JhengHei",sans-serif;background:#fff2d7ed;border:1px solid #a28b55;padding:4px 7px;border-radius:3px;white-space:nowrap}
+.atlas-pin small{font-size:8px;line-height:1.4;background:#245e63;color:#fff0ca;padding:1px 6px;border-radius:2px}
+.atlas-pin.is-current .atlas-pin-gem{box-shadow:0 0 0 4px #fff0bb88}
+.atlas-pin:hover strong,.atlas-pin:focus-visible strong{background:#284f58;color:#ffedc7}
+.atlas-pin:focus-visible{outline:2px solid #ffe3a0;outline-offset:4px}
+.atlas-route-card{display:flex;justify-content:space-between;gap:14px;margin-top:14px;padding:13px 0;border-top:1px solid #ad925d55;color:#354e50}
+.atlas-route-card>div:first-child{display:flex;flex-direction:column;gap:5px;min-width:0}
+.atlas-route-card strong{font-size:12px}
+.atlas-route-card span{font-size:10px;color:#687465;line-height:1.7}
+.atlas-connections{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;align-items:start}
+.atlas-connections button{min-height:34px;border:1px solid #a28b5577;background:#eee1bc88;color:#365b5d;font:inherit;font-size:10px;padding:5px 8px;border-radius:3px;cursor:pointer}
+.atlas-quest-note{font-size:11px;line-height:1.8;color:#775b2e;background:#d6be7930;border-left:2px solid #ae8b48;padding:8px 11px;margin:0}
+.atlas-survey-tools{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0 0 8px;font-size:10px;color:#64715f}
+.atlas-survey-tools>div{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.atlas-survey-tools button{border:1px solid #ad925d88;background:#f7ebcc;color:#365a5d;min-width:36px;min-height:34px;border-radius:3px;font:inherit;font-size:17px;cursor:pointer}
+.atlas-survey-tools button:disabled{opacity:.4;cursor:default}
+.atlas-sheet{overflow:auto;max-width:100%;max-height:55dvh;scrollbar-width:thin;scrollbar-color:#ad976c transparent;background:#e9dcba;border:1px solid #b49a66;box-shadow:0 6px 22px #6c573b25;touch-action:pan-x pan-y}
+#rpg-fullmap-canvas{width:calc(100% * var(--map-zoom));max-width:none;margin:0 auto;border:0;border-radius:0;box-shadow:none}
+@media(min-width:721px){.atlas-sheet{width:min(100%,calc((100dvh - 395px)*var(--survey-ratio)));margin:0 auto;max-height:calc(100dvh - 395px)}}
+@media(max-width:720px){.atlas-body{grid-template-columns:1fr;gap:10px}.atlas-view-switch button{padding:7px 9px;font-size:10px}.atlas-heading{gap:8px}.atlas-pin strong{font-size:9px;padding:3px 5px}.atlas-pin-gem{width:17px;height:17px;font-size:11px}.atlas-route-card{flex-direction:column;gap:8px}.atlas-connections{justify-content:flex-start}.atlas-legend{font-size:9px}.minimap-box .minimap-caption{font-size:7px;padding:3px 0;bottom:-6px}.atlas-heading h2{font-size:19px}}
+@media(prefers-reduced-motion:reduce){.atlas-pin{transition:none}}
+
+.journey-hud-link{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;background:none;border:0;border-top:1px solid #d5bc8033;margin-top:7px;padding:6px 0 0;color:#f1d99b;font:inherit;font-size:10px;cursor:pointer;min-height:28px;text-align:left}
+.journey-hud-link kbd{font-size:9px;border:1px solid #d5bc8055;border-radius:2px;padding:1px 4px}
+.quest-journal-window{max-width:1080px}
+.journey-summary{display:flex;gap:15px;flex-wrap:wrap;padding:10px 24px;color:#5b6b5e;font-size:11px;border-bottom:1px solid #b49b6355}
+.journey-summary strong{color:#315b60}
+.journey-tabs{display:flex;overflow-x:auto;flex-shrink:0}
+.journey-tabs .tab-btn{white-space:nowrap;display:flex;align-items:center;gap:7px;min-height:44px;font-size:12px}
+.journey-tabs small{font-size:10px;opacity:.7}
+.journey-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 24px;color:#718071;font-size:10px}
+.journey-filter button{font:inherit;font-size:11px;background:#eee1bd;border:1px solid #b49b6377;color:#31575a;border-radius:3px;min-height:34px;padding:6px 10px;cursor:pointer}
+.journey-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+.journey-card{padding:17px;border:1px solid #b49b6366;background:#fff6df66;border-radius:4px;color:#314c4b;min-width:0}
+.journey-card.is-done{background:#e6e3c455}
+.journey-card-heading{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#72816d}
+.journey-status{border:1px solid #a28d5d55;padding:2px 6px;border-radius:2px;white-space:nowrap}
+.journey-status.is-ready{background:#32635a;color:#fff0c4}
+.journey-card h3{font:600 17px Georgia,"Microsoft JhengHei",serif;color:#315255;line-height:1.5;margin:10px 0}
+.journey-story{font-size:12px;line-height:1.9;color:#60705e;margin:0 0 12px}
+.journey-objectives{list-style:none;margin:0;padding:10px 0;border-top:1px solid #b49b6333;border-bottom:1px solid #b49b6333;display:flex;flex-direction:column;gap:8px;font-size:12px}
+.journey-objectives li{display:flex;justify-content:space-between;gap:10px;line-height:1.6}
+.journey-objectives li strong{font-size:11px;white-space:nowrap;color:#85703f}
+.journey-objectives .is-complete{color:#4a7c60}
+.journey-rewards{font-size:11px;line-height:1.8;color:#8c6b33;padding-top:10px}
+.journey-actions{display:flex;gap:7px;flex-wrap:wrap;padding-top:12px}
+.journey-actions button{font-size:11px;padding:8px 12px;min-height:36px}
+.journey-empty{grid-column:1/-1;text-align:center;padding:30px;font-size:13px;color:#687764}
+.field-camp-body{display:flex;flex-direction:column;gap:13px;text-align:center;color:#425e54;align-items:stretch}
+.field-camp-body>img{height:150px;max-width:90%;object-fit:contain;align-self:center}
+.field-camp-body p{margin:0;font-size:13px;line-height:1.8}
+.field-camp-body small{font-size:11px;line-height:1.6;color:#75846b}
+.field-camp-body button{font-size:12px;min-height:44px}
+@media(max-width:720px){.journey-body{grid-template-columns:1fr;gap:10px}.journey-summary{padding:9px 14px;font-size:10px;gap:7px 12px}.journey-filter{padding:8px 14px}.journey-tabs .tab-btn{font-size:11px;padding:10px 12px}.journey-card{padding:14px}.journey-card h3{font-size:16px}.journey-hud-link{font-size:9px}}

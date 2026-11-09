@@ -165,6 +165,7 @@ app.use('/api/tower-defense', require('./tower-defense-app/routes/questions'));
 app.use('/api/pet', require('./pet-app/routes/pet'));
 app.use('/api/buzzer', require('./buzzer-app/routes'));
 app.use('/api/science-inquiry', require('./science-inquiry-app/routes'));
+app.use('/api/pokemon-rpg', require('./pokemon-rpg-app/routes/rpg'));
 
 // Whiteboard — HTTP + Socket.io. Build httpServer/io now so the whiteboard
 // module can register its /api/whiteboard/* routes BEFORE the catch-all
@@ -527,6 +528,39 @@ app.get(['/pet', '/pet/'], requireSession, (req, res) => {
   setPetHeaders(res, { document: true, microphone: req.session.role === 'teacher' });
   res.set('Cache-Control', 'no-store');
   res.sendFile('index.html', { root: petDist });
+});
+
+// Starlight Pokémon Chronicles 2.5D Open-World RPG
+const pokemonRpgDist = path.join(__dirname, 'pokemon-rpg-app', 'dist');
+const setPokemonRpgHeaders = (res, { document = false } = {}) => {
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.set('Referrer-Policy', 'same-origin');
+  res.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (document) {
+    res.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; media-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+  }
+};
+app.use('/pokemon-rpg/assets', assetStatic(path.join(pokemonRpgDist, 'assets'), {
+  maxAge: config.isProd ? '1y' : 0,
+  immutable: config.isProd,
+  setHeaders: (res) => setPokemonRpgHeaders(res),
+}));
+app.get('/pokemon-rpg/preview', (req, res, next) => {
+  if (config.isProd) return next();
+  if (!req.session?.studentId) {
+    req.session.studentId = 'S001';
+    req.session.studentName = '王小明';
+    req.session.role = 'student';
+  }
+  setPokemonRpgHeaders(res, { document: true });
+  res.set('Cache-Control', 'no-store');
+  res.sendFile('index.html', { root: pokemonRpgDist });
+});
+app.get(['/pokemon-rpg', '/pokemon-rpg/'], requireSession, (req, res) => {
+  if (req.session.role !== 'teacher') return res.redirect('/');
+  setPokemonRpgHeaders(res, { document: true });
+  res.set('Cache-Control', 'no-store');
+  res.sendFile('index.html', { root: pokemonRpgDist });
 });
 
 // Wonder Lab: only versioned build assets are public. The HTML entry remains

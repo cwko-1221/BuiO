@@ -89,6 +89,18 @@ export const MODULES = [
     roleAccess: ['student', 'teacher']
   },
   {
+    id: 'pokemon-rpg',
+    name: 'module_pokerpg_name',
+    shortName: 'Pokémon 2.5D RPG',
+    description: 'module_pokerpg_desc',
+    accent: 'violet',
+    icon: 'pokeball',
+    url: '/pokemon-rpg',
+    metric: 'module_pokerpg_metric',
+    status: 'module_pokerpg_status',
+    roleAccess: ['teacher']
+  },
+  {
     id: 'whiteboard',
     name: 'module_wb_name',
     shortName: 'Board',
@@ -164,6 +176,7 @@ export const MODULES = [
 // =============================================
 export const iconSvg = {
   paw: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 12.5c-2.7 1.5-4.2 3.7-3.5 5.8.8 2.3 3.6 2.5 7 1.1 3.4 1.4 6.2 1.2 7-1.1.7-2.1-.8-4.3-3.5-5.8-2.1-1.2-4.9-1.2-7 0Z"/><ellipse cx="6.5" cy="8" rx="2" ry="2.8"/><ellipse cx="11" cy="5.5" rx="2" ry="2.8"/><ellipse cx="17.5" cy="8" rx="2" ry="2.8"/></svg>`,
+  pokeball: `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h6.2M14.8 12H21"/><circle cx="12" cy="12" r="2.8"/></svg>`,
   flask: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v5l-6 10a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3L14 8V3"/><path d="M7 16h10M9 13h6"/></svg>`,
   math: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10M7 12h10M7 17h6"/><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/></svg>`,
   board: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H4z"/><path d="M8 21h8M12 16v5"/><path d="m8 12 3-3 2 2 3-4"/></svg>`,

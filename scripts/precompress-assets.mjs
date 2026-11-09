@@ -7,7 +7,7 @@ const folders = ['src', 'shared/i18n', 'report-app/js', 'report-app/css', 'buzze
   'chinese-app/public/js', 'chinese-app/public/css', 'english-app/public/js', 'english-app/public/css',
   'phonics-app/public/js', 'phonics-app/public/css', 'homework-app/public/js', 'homework-app/public/css',
   'game-app/public/js', 'game-app/public/css', 'tower-defense-app/public/js', 'tower-defense-app/public/css',
-  'whiteboard-app/client/dist/assets', 'science-lab-app/dist/assets', 'pet-app/dist/assets'];
+  'whiteboard-app/client/dist/assets', 'science-lab-app/dist/assets', 'pet-app/dist/assets', 'pokemon-rpg-app/dist/assets'];
 let files = 0, before = 0, after = 0;
 async function writeChanged(file, bytes) {
   const existing = await fs.readFile(file).catch(error => { if (error.code === 'ENOENT') return null; throw error; });
