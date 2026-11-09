@@ -1568,6 +1568,9 @@ export class GameController {
       enemyMon,
     });
     this.renderUI(true);
+    requestAnimationFrame(() => {
+      if (this.screen === 'battle') this.syncBattleViewport();
+    });
   }
 
   playCombatSfx(actionResult) {
@@ -2377,7 +2380,6 @@ export class GameController {
       });
       this.renderUI(false);
     } else if (this.screen === 'battle' && this.battle) {
-      this.syncBattleViewport();
       this.renderer.updateBattle();
     } else if (this.renderer && this.screen !== 'battle') {
       // Render serene background town panorama behind title/creation if visible

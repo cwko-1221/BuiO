@@ -309,10 +309,14 @@ export class World25DRenderer {
     container.innerHTML = '';
     container.appendChild(this.canvas);
 
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const isTouch = typeof navigator !== 'undefined' && (navigator.maxTouchPoints > 0 || 'ontouchstart' in window);
+    this.dpr = Math.min(window.devicePixelRatio || 1, isTouch ? 1.35 : 1.5);
     this.viewW = 1280;
     this.viewH = 720;
     this.zoom = 1;
+    this._dirtyMetrics = true;
+    this._cachedVig = null;
+    this._vigKey = null;
 
     this.images = new Map();
     this.terrainPatternTiles = new Map();
@@ -370,16 +374,20 @@ export class World25DRenderer {
     this._preloadCoreArt();
 
     this._onResize = () => {
+      this._dirtyMetrics = true;
       this.resize();
-      setTimeout(() => this.resize(), 60);
-      setTimeout(() => this.resize(), 220);
+      setTimeout(() => { this._dirtyMetrics = true; this.resize(); }, 60);
+      setTimeout(() => { this._dirtyMetrics = true; this.resize(); }, 220);
     };
     window.addEventListener('resize', this._onResize);
     window.addEventListener('orientationchange', this._onResize);
     window.addEventListener('load', this._onResize);
     window.visualViewport?.addEventListener('resize', this._onResize);
     if (typeof ResizeObserver !== 'undefined') {
-      this._resizeObserver = new ResizeObserver(() => this.resize());
+      this._resizeObserver = new ResizeObserver(() => {
+        this._dirtyMetrics = true;
+        this.resize();
+      });
       this._resizeObserver.observe(this.container);
     }
     this.resize();
@@ -524,23 +532,31 @@ export class World25DRenderer {
 
   _measureViewport() {
     const vv = window.visualViewport;
-    const rect = this.container?.getBoundingClientRect?.();
+    const cw = this.container?.clientWidth || 0;
+    const ch = this.container?.clientHeight || 0;
     const winW = vv?.width || window.innerWidth || 1280;
     const winH = vv?.height || window.innerHeight || 720;
-    const cw = rect?.width || this.container?.clientWidth || 0;
-    const ch = rect?.height || this.container?.clientHeight || 0;
     // Guard against unstyled container before CSS loads (where canvas intrinsic height is 150px)
     const rawW = cw >= 200 ? cw : winW;
     const rawH = ch >= 220 && ch >= winH * 0.5 ? ch : winH;
+    const isTouch = typeof navigator !== 'undefined' && (navigator.maxTouchPoints > 0 || 'ontouchstart' in window);
+    const maxDpr = isTouch ? 1.35 : 1.5;
     return {
       w: Math.max(320, Math.round(rawW)),
       h: Math.max(240, Math.round(rawH)),
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: Math.min(window.devicePixelRatio || 1, maxDpr),
     };
   }
 
   _syncCanvasMetrics() {
     if (this.disposed) return false;
+    // High-performance fast path: skip measuring when geometry is unchanged
+    const cw = this.container?.clientWidth;
+    const ch = this.container?.clientHeight;
+    if (!this._dirtyMetrics && cw === this.viewW && ch === this.viewH) {
+      return false;
+    }
+    this._dirtyMetrics = false;
     const { w, h, dpr } = this._measureViewport();
     const targetW = Math.round(w * dpr);
     const targetH = Math.round(h * dpr);
@@ -559,6 +575,7 @@ export class World25DRenderer {
 
   resize() {
     if (this.disposed) return;
+    this._dirtyMetrics = false;
     const { w, h, dpr } = this._measureViewport();
     this.dpr = dpr;
     this.viewW = w;
@@ -569,6 +586,8 @@ export class World25DRenderer {
     this.canvas.style.height = `${this.viewH}px`;
     const minZoom = this.worldArtTrial?.id === 'premium-crossing-v1' ? .95 : .78;
     this.zoom = clamp(Math.max(this.viewW, this.viewH) / 1360, minZoom, 1.08);
+    this._cachedVig = null;
+    this._vigKey = null;
   }
 
   screenToWorld(localX, localY) {
@@ -1595,26 +1614,31 @@ export class World25DRenderer {
 
     ctx.restore(); // camera transform
 
-    // Ambient biome lighting vignette
-    const vig = ctx.createRadialGradient(
-      this.viewW * 0.5,
-      this.viewH * 0.48,
-      this.viewW * 0.32,
-      this.viewW * 0.5,
-      this.viewH * 0.5,
-      this.viewW * 0.78
-    );
-    if (this.activeZoneId === 'twilight') {
-      vig.addColorStop(0, 'rgba(76, 29, 149, 0)');
-      vig.addColorStop(1, 'rgba(30, 11, 64, 0.34)');
-    } else if (this.activeZoneId === 'canyon') {
-      vig.addColorStop(0, 'rgba(251, 146, 60, 0)');
-      vig.addColorStop(1, 'rgba(124, 45, 18, 0.24)');
-    } else {
-      vig.addColorStop(0, 'rgba(255, 251, 235, 0.03)');
-      vig.addColorStop(1, 'rgba(15, 23, 42, 0.16)');
+    // Ambient biome lighting vignette (cached to avoid recreating gradient object every frame)
+    const vigKey = `${this.viewW}_${this.viewH}_${this.activeZoneId}`;
+    if (this._vigKey !== vigKey || !this._cachedVig) {
+      this._vigKey = vigKey;
+      const vig = ctx.createRadialGradient(
+        this.viewW * 0.5,
+        this.viewH * 0.48,
+        this.viewW * 0.32,
+        this.viewW * 0.5,
+        this.viewH * 0.5,
+        this.viewW * 0.78
+      );
+      if (this.activeZoneId === 'twilight') {
+        vig.addColorStop(0, 'rgba(76, 29, 149, 0)');
+        vig.addColorStop(1, 'rgba(30, 11, 64, 0.34)');
+      } else if (this.activeZoneId === 'canyon') {
+        vig.addColorStop(0, 'rgba(251, 146, 60, 0)');
+        vig.addColorStop(1, 'rgba(124, 45, 18, 0.24)');
+      } else {
+        vig.addColorStop(0, 'rgba(255, 251, 235, 0.03)');
+        vig.addColorStop(1, 'rgba(15, 23, 42, 0.16)');
+      }
+      this._cachedVig = vig;
     }
-    ctx.fillStyle = vig;
+    ctx.fillStyle = this._cachedVig;
     ctx.fillRect(0, 0, this.viewW, this.viewH);
 
     // Cross Gate Grand Zone Announcement Banner
