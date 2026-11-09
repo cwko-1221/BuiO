@@ -338,6 +338,15 @@ export class GameController {
     window.addEventListener('pointerdown', unlockOnce, { passive: true });
     window.addEventListener('keydown', unlockOnce, { passive: true });
 
+    this._onViewportResize = () => {
+      if (this.screen === 'battle' && this.battle) {
+        this.syncBattleViewport();
+      }
+    };
+    window.addEventListener('resize', this._onViewportResize, { passive: true });
+    window.addEventListener('orientationchange', this._onViewportResize, { passive: true });
+    window.visualViewport?.addEventListener('resize', this._onViewportResize, { passive: true });
+
     // Delegated UI button clicks
     this.rootEl.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-action]');

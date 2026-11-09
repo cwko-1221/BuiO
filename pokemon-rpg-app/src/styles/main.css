@@ -34,6 +34,7 @@ body {
   padding: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   overflow: hidden;
   background: var(--bg-deep);
   color: var(--text-main);
@@ -48,9 +49,11 @@ input {
 }
 
 .rpg-root {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
   overflow: hidden;
   background: radial-gradient(circle at 50% 30%, #1e293b 0%, #090e1a 100%);
 }
@@ -143,12 +146,15 @@ input {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .title-screen {
   min-height: 100%;
   justify-content: space-between;
-  padding: 28px 36px 48px;
+  padding: max(24px, env(safe-area-inset-top)) max(28px, env(safe-area-inset-right)) max(36px, env(safe-area-inset-bottom)) max(28px, env(safe-area-inset-left));
   background-color: #0b132b;
   background-size: cover;
   background-position: center;
@@ -1263,7 +1269,7 @@ input {
   align-items: stretch;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 720px) {
   .battle-deck {
     grid-template-columns: 1fr;
   }

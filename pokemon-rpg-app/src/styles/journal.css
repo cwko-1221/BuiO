@@ -164,7 +164,7 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline: 3px solid #d
 .avatar-option-card,.starter-card { background:linear-gradient(150deg,#36546766,#1c344966);border-color:#c1a66a66;border-radius:4px 12px 4px 12px; }
 .avatar-option-card.selected,.starter-card.selected { border-color:#efce8b;background:#d8b8741f;box-shadow:inset 0 0 0 2px #d8b87422,0 5px 15px #10273944; }
 .rpg-input { border-radius:4px;background:#142c3f;border-color:#b79e68; }
-@media (max-width:900px) {
+@media (max-width:720px) {
  .team-showcase-split-layout,.pokedex-split-layout { grid-template-columns:1fr;gap:16px; }
  .pokedex-showcase-pane { order:0; }
  .pokedex-showcase-pane .stage-portrait-frame { height:185px; }
@@ -294,3 +294,348 @@ button:focus-visible,a:focus-visible,input:focus-visible { outline: 3px solid #d
  .celebration-box .cta-primary { min-height:40px;padding:9px 15px;font-size:12px; }
 }
 @media (prefers-reduced-motion:reduce) { button { transition:none; } }
+
+/* =========================================================
+   iPad & Tablet Adaptive Viewport Tuning (Portrait & Landscape)
+   Covers iPad Mini / Air / Pro (768x1024, 820x1180, 1024x768, 1180x820)
+   and iPad Safari with address/tab bar visible (height 640px-840px)
+   ========================================================= */
+.battle-hud {
+  padding: max(14px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+}
+.dialogue-overlay {
+  padding: 20px max(20px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+.expedition-footer {
+  padding-bottom: max(14px, env(safe-area-inset-bottom));
+}
+
+/* Tablet / iPad Landscape & Portrait Height-Constrained Viewports */
+@media (max-height: 850px) and (min-width: 601px) {
+  .title-screen {
+    padding: max(18px, env(safe-area-inset-top)) max(26px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(26px, env(safe-area-inset-left));
+  }
+  .title-hero-center {
+    gap: 10px;
+  }
+  .title-logo-main {
+    font-size: clamp(28px, 3.8vw, 52px);
+  }
+  .save-summary-card {
+    padding: 10px 14px;
+  }
+
+  /* Compact Creation Screen so CTA button is never chopped on iPad Landscape */
+  .creation-screen {
+    padding: max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  }
+  .creation-container {
+    gap: 12px 18px;
+  }
+  .creation-header {
+    margin-bottom: 0;
+    padding-bottom: 8px;
+  }
+  .creation-header h1 {
+    font-size: clamp(18px, 2vw, 24px);
+    margin: 4px 0;
+  }
+  .creation-intro {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+  .creation-cast-stage {
+    padding: 2px 4px 12px;
+  }
+  .cast-stage-art {
+    height: clamp(165px, 24dvh, 220px);
+    margin: 8px 0;
+  }
+  .cast-stage-caption h2 {
+    font-size: 21px;
+    margin: 4px 0;
+  }
+  .creation-panel {
+    gap: 10px;
+    padding-bottom: 6px;
+  }
+  .panel-step-title {
+    font-size: 16px;
+    padding-bottom: 8px;
+  }
+  .rpg-input {
+    min-height: 38px;
+    padding: 7px 11px;
+    font-size: 14px;
+  }
+  .avatar-option-card {
+    padding: 7px 4px;
+  }
+  .avatar-option-card img {
+    width: 48px;
+    height: 56px;
+  }
+  .selected-desc-box {
+    padding: 8px 0;
+    font-size: 10.5px;
+    line-height: 1.55;
+  }
+  .starter-card {
+    padding: 7px 4px;
+    gap: 4px;
+  }
+  .starter-card img {
+    width: 48px;
+    height: 48px;
+  }
+  .starter-detail-box {
+    padding: 9px 11px;
+    gap: 7px;
+  }
+  .starter-detail-box > div {
+    font-size: 10.5px !important;
+    line-height: 1.4 !important;
+  }
+  .creation-footer .cta-primary {
+    min-height: 42px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  /* Compact Overworld HUD for iPad Landscape / Safari Tab Bar */
+  .hud-top-row {
+    padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  }
+  .hud-bottom-left {
+    left: max(16px, env(safe-area-inset-left));
+    bottom: max(14px, env(safe-area-inset-bottom));
+  }
+  .touch-controls {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(14px, env(safe-area-inset-bottom));
+  }
+  .interact-prompt-wrap {
+    bottom: max(16px, env(safe-area-inset-bottom));
+    max-width: calc(100vw - 440px);
+  }
+
+  /* Compact Battle HUD for iPad so 2.5D Arena is never squished or chopped */
+  .battle-hud {
+    padding: max(10px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  }
+  .combatant-plate {
+    width: 320px;
+    padding: 7px 11px;
+    gap: 9px;
+  }
+  .plate-mon-portrait-wrap {
+    width: 48px;
+    height: 48px;
+  }
+  .plate-mon-portrait {
+    width: 42px;
+    height: 42px;
+  }
+  .plate-name {
+    font-size: 0.94rem;
+  }
+  .plate-lv {
+    font-size: 0.85rem;
+  }
+  .bar-track {
+    height: 8px;
+  }
+  .bar-track.thin {
+    height: 5px;
+  }
+  .battle-bottom-area {
+    gap: 6px;
+  }
+  .battle-deck {
+    grid-template-columns: 0.92fr 1.38fr;
+    gap: 10px;
+  }
+  .battle-log-panel {
+    min-height: 92px;
+    max-height: 122px;
+    padding: 9px 12px;
+  }
+  .battle-log-line {
+    font-size: 0.84rem;
+    line-height: 1.38;
+  }
+  .battle-log-line:last-child {
+    font-size: 0.9rem;
+  }
+  .battle-command-panel {
+    padding: 9px 10px;
+  }
+  .cmd-grid-6 {
+    gap: 6px;
+  }
+  .cmd-btn {
+    padding: 7px 9px;
+  }
+  .cmd-btn strong {
+    font-size: 0.88rem;
+  }
+  .cmd-btn span {
+    font-size: 0.68rem;
+  }
+  .subdrawer-grid {
+    max-height: 118px;
+    gap: 6px;
+  }
+  .battle-command-panel .skill-choice-btn {
+    min-height: 64px;
+    padding: 8px 10px;
+    gap: 4px;
+  }
+
+  /* Modals & Journal Windows on iPad */
+  .modal-backdrop {
+    padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+  }
+  .modal-window {
+    border-width: 22px;
+    border-image-width: 22px;
+    max-height: calc(100dvh - max(24px, env(safe-area-inset-top) + env(safe-area-inset-bottom) + 16px));
+  }
+  .modal-header {
+    padding: 6px 6px 11px;
+  }
+  .modal-tabs {
+    padding: 9px 6px;
+  }
+  .modal-body {
+    padding: 12px 6px 6px;
+  }
+  .card-grid-1,
+  .pokedex-scroll-pane {
+    max-height: calc(100dvh - 220px);
+  }
+  .team-artwork-stage,
+  .pokedex-showcase-pane {
+    padding: 12px;
+    gap: 8px;
+  }
+  .stage-portrait-frame {
+    height: clamp(130px, 19dvh, 165px);
+  }
+  .stage-portrait-img {
+    width: clamp(118px, 17dvh, 148px);
+    height: clamp(118px, 17dvh, 148px);
+  }
+  .stage-friendship-row {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  .stage-stats-block,
+  .stage-skills-box,
+  .dex-meta-box {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+  .stat-badge,
+  .stage-skill-pill {
+    padding: 4px 6px;
+  }
+  .stage-evo-note {
+    padding: 6px 10px;
+    line-height: 1.5;
+  }
+}
+
+/* iPad Portrait & Compact Tablet Widths (721px - 1024px) */
+@media (min-width: 721px) and (max-width: 1024px) {
+  .creation-screen {
+    padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  }
+  .creation-container {
+    grid-template-columns: 0.72fr 1.65fr;
+    gap: 14px 16px;
+  }
+  .creation-grid {
+    grid-template-columns: 1fr 1.08fr;
+    gap: 14px;
+  }
+  .creation-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .avatar-select-grid,
+  .starter-select-grid {
+    gap: 6px;
+  }
+  .interact-prompt-wrap {
+    bottom: max(18px, env(safe-area-inset-bottom));
+    max-width: calc(100vw - 410px);
+  }
+  .interact-prompt-btn {
+    padding: 9px 14px;
+    font-size: 12px;
+  }
+  .battle-deck {
+    grid-template-columns: 0.88fr 1.42fr;
+    gap: 10px;
+  }
+  .team-showcase-split-layout {
+    grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.15fr);
+    gap: 16px;
+  }
+  .pokedex-split-layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(255px, 0.85fr);
+    gap: 16px;
+  }
+}
+
+/* iPad Portrait Specifically (width <= 900px and height >= 851px) */
+@media (min-width: 601px) and (max-width: 900px) and (min-height: 851px) {
+  .creation-container {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .creation-header {
+    grid-column: 1;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+  }
+  .creation-cast-stage {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    align-items: center;
+    padding: 0;
+    gap: 16px;
+  }
+  .cast-stage-art {
+    height: 185px;
+    margin: 0;
+  }
+  .creation-grid {
+    grid-template-columns: 1fr 1.08fr;
+    gap: 16px;
+  }
+  .creation-panel {
+    gap: 11px;
+    padding-bottom: 4px;
+  }
+  .avatar-option-card {
+    padding: 8px 4px;
+  }
+  .avatar-option-card img {
+    width: 54px;
+    height: 64px;
+  }
+  .starter-card {
+    padding: 8px 4px;
+  }
+  .starter-card img {
+    width: 52px;
+    height: 52px;
+  }
+  .starter-detail-box {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+}

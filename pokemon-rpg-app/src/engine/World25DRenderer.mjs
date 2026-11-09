@@ -371,6 +371,8 @@ export class World25DRenderer {
 
     this._onResize = () => this.resize();
     window.addEventListener('resize', this._onResize);
+    window.addEventListener('orientationchange', this._onResize);
+    window.visualViewport?.addEventListener('resize', this._onResize);
     this.resize();
 
     this.triggerZoneBanner('dawnleaf');
@@ -514,11 +516,15 @@ export class World25DRenderer {
   resize() {
     if (this.disposed) return;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.viewW = Math.max(320, this.container.clientWidth || window.innerWidth);
-    this.viewH = Math.max(240, this.container.clientHeight || window.innerHeight);
+    const vv = window.visualViewport;
+    this.viewW = Math.max(320, Math.round(this.container.clientWidth || vv?.width || window.innerWidth));
+    this.viewH = Math.max(240, Math.round(this.container.clientHeight || vv?.height || window.innerHeight));
     this.canvas.width = Math.round(this.viewW * this.dpr);
     this.canvas.height = Math.round(this.viewH * this.dpr);
-    this.zoom = clamp(this.viewW / 1360, this.worldArtTrial?.id==='premium-crossing-v1' ? .95 : .78, 1.08);
+    const zoomByW = this.viewW / 1360;
+    const zoomByH = this.viewH / 780;
+    const minZoom = this.worldArtTrial?.id === 'premium-crossing-v1' ? .92 : .72;
+    this.zoom = clamp(Math.min(zoomByW, zoomByH), minZoom, 1.08);
   }
 
   screenToWorld(localX, localY) {
@@ -2584,6 +2590,8 @@ export class World25DRenderer {
   dispose() {
     this.disposed = true;
     window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('orientationchange', this._onResize);
+    window.visualViewport?.removeEventListener('resize', this._onResize);
     this.terrainChunks.clear();
     this.terrainChunkBytes = 0;
   }

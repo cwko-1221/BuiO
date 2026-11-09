@@ -119,8 +119,8 @@ kbd { font: 10px Georgia, serif; border: 1px solid #a9946455; padding: 2px 4px; 
 .menu-arrow { margin-left: auto; color: #ccb582; font-size: 24px; }
 .expedition-footer { display: flex; justify-content: space-between; gap: 10px; padding: 22px; margin-top: auto; }
 @keyframes journalEnter { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-.creation-screen { background: radial-gradient(ellipse at 16% 45%,#345b5f 0%,#18343e 32%,#0c222d 76%); padding: 32px; }
-.creation-container { max-width: 1380px; display: grid; grid-template-columns: .85fr 1.8fr; gap: 30px; min-height: calc(100vh - 64px); }
+.creation-screen { background: radial-gradient(ellipse at 16% 45%,#345b5f 0%,#18343e 32%,#0c222d 76%); padding: max(22px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(28px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); }
+.creation-container { max-width: 1380px; display: grid; grid-template-columns: .85fr 1.8fr; gap: 26px; min-height: auto; margin: auto; }
 .creation-header { grid-column: 1 / -1; margin-bottom: 6px; padding-bottom: 18px; align-self: start; }
 .creation-header h1 { font-family: Georgia,"Microsoft JhengHei",serif; font-weight: 500; letter-spacing: .08em; font-size: clamp(20px,2.4vw,32px); margin: 10px 0; }
 .creation-intro { color: #a8c1b9; font-size: 12px; line-height: 1.8; }
