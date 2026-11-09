@@ -128,14 +128,16 @@ export class GameController {
     const thumb = stick?.querySelector('i');
     if (!stick || !thumb) return;
 
-    // Fixed bottom-right joystick (Pet Park style). Only touches on / right
-    // around the ring start a drag; the rest of the screen is untouched.
+    // Fixed bottom-right joystick (Pet Park style).
+    // Touch detection range is proportional to the viewport/container:
+    // - Portrait (直向): bottom 1/2 height, right 1/2 width
+    // - Landscape (橫向): bottom 1/2 height, right 1/3 width
     const maxRadius = 40;      // thumb travel in px
     const deadzone = 6;        // ignore tiny wobble
     const sprintAt = 32;       // push near the rim = run (same as Shift)
-    const hitRadius = 105;     // comfortable touch pickup area around the 102px joystick ring
     let anchorX = 0;
     let anchorY = 0;
+    let isFloatingAnchor = false;
 
     const update = (clientX, clientY) => {
       const dx = clientX - anchorX;
@@ -159,18 +161,58 @@ export class GameController {
         magnitude: sprint ? 1 : Math.max(0.45, Math.min(1, (dist - deadzone) / (sprintAt - deadzone))),
         sprint,
       };
+
+      // When dragging in the proportional zone outside the stick, smoothly float the anchor
+      // so reversing or changing directions is immediate without needing to backtrack long distances.
+      if (isFloatingAnchor && dist > 55) {
+        anchorX = clientX - nx * 55;
+        anchorY = clientY - ny * 55;
+      }
     };
 
     const onPointerDown = (e) => {
       if (this.screen !== 'world' || this.dialogue || this.modal || !this.save) return;
       if (this._joystickActivePointerId !== null) return;
       if (e.target?.closest?.('button, a, input, [data-action]')) return;
-      const rect = stick.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      if (Math.hypot(e.clientX - cx, e.clientY - cy) > hitRadius) return;
-      anchorX = cx;
-      anchorY = cy;
+
+      const container = this.rootEl?.getBoundingClientRect?.() || {
+        left: 0,
+        top: 0,
+        width: window.innerWidth,
+        height: window.innerHeight,
+      };
+      const relX = e.clientX - container.left;
+      const relY = e.clientY - container.top;
+      const isPortrait = container.height >= container.width;
+
+      // Proportional detection range:
+      // Portrait: bottom 1/2 of height, right 1/2 of width
+      // Landscape: bottom 1/2 of height, right 1/3 of width
+      const minRelY = container.height * 0.5;
+      const minRelX = isPortrait ? container.width * 0.5 : container.width * (2 / 3);
+
+      const inProportionalZone =
+        relY >= minRelY && relY <= container.height &&
+        relX >= minRelX && relX <= container.width;
+
+      const stickRect = stick.getBoundingClientRect();
+      const cx = stickRect.left + stickRect.width / 2;
+      const cy = stickRect.top + stickRect.height / 2;
+      const distToStick = Math.hypot(e.clientX - cx, e.clientY - cy);
+      const onStick = stick.contains(e.target) || distToStick <= stickRect.width / 2;
+
+      if (!inProportionalZone && !onStick) return;
+
+      if (onStick) {
+        anchorX = cx;
+        anchorY = cy;
+        isFloatingAnchor = false;
+      } else {
+        anchorX = e.clientX;
+        anchorY = e.clientY;
+        isFloatingAnchor = true;
+      }
+
       this._joystickActivePointerId = e.pointerId;
       this.clickTarget = null;
       stick.classList.add('active');
