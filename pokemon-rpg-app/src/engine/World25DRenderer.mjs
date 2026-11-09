@@ -624,6 +624,9 @@ export class World25DRenderer {
       if (mon?.speciesId) {
         if(this.artPokemonTrial?.speciesId===mon.speciesId) {this.getImg(this.artPokemonTrial.src);continue;}
         this.getImg(`/pokemon-rpg/assets/pokemon/${mon.speciesId}.webp`);
+        if (WALK_ATLASES.pokemon[mon.speciesId]) {
+          this.getImg(WALK_ATLASES.pokemon[mon.speciesId].src);
+        }
         if (AI_WALK_ATLAS_POKEMON.has(mon.speciesId)) {
           this.getImg(`/pokemon-rpg/assets/sprites/pokemon/${mon.speciesId}_walk.webp`);
         }
