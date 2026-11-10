@@ -964,12 +964,11 @@ input {
 }
 
 /* =========================================================
-   PET-PARK STYLE VIRTUAL JOYSTICK (bottom-right, fixed)
+   DYNAMIC FLOATING VIRTUAL JOYSTICK
+   Hidden by default; appears at touch location in hit zone
    ========================================================= */
 .park-joystick {
   position: absolute;
-  right: max(28px, env(safe-area-inset-right));
-  bottom: max(28px, env(safe-area-inset-bottom));
   width: 102px;
   height: 102px;
   border: 2px solid rgba(255, 249, 231, 0.68);
@@ -981,7 +980,10 @@ input {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  pointer-events: auto;
+  pointer-events: none;
+  display: none;
+  transform: translate(-50%, -50%);
+  z-index: 50;
   transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
 }
 
@@ -1010,13 +1012,15 @@ input {
 
 .park-joystick i {
   position: absolute;
-  width: 45px;
-  height: 45px;
+  width: 44px;
+  height: 44px;
   border: 2px solid #fff5dc;
   border-radius: 50%;
   background: rgba(248, 241, 217, 0.88);
-  left: 26.5px;
-  top: 26.5px;
+  left: 50%;
+  top: 50%;
+  margin-left: -22px;
+  margin-top: -22px;
   box-shadow: 0 3px 10px rgba(70, 99, 71, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.8);
   pointer-events: none;
   will-change: transform;

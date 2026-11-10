@@ -118,6 +118,7 @@ export class GameController {
     const stick = this.touchMount?.querySelector('[data-park-stick]');
     if (!stick) return;
     stick.classList.remove('active', 'sprint');
+    stick.style.display = 'none';
     const thumb = stick.querySelector('i');
     if (thumb) thumb.style.transform = '';
   }
@@ -128,23 +129,23 @@ export class GameController {
     const thumb = stick?.querySelector('i');
     if (!stick || !thumb) return;
 
-    // Fixed bottom-right joystick (Pet Park style).
-    // Touch detection range is proportional to the viewport/container:
-    // - Portrait (直向): bottom 1/2 height, right 1/2 width
-    // - Landscape (橫向): bottom 1/2 height, right 1/3 width
+    // Dynamic floating virtual joystick:
+    // - Idle: hidden (display: none)
+    // - Touch in proportional zone: spawns centered at touch position (anchorX, anchorY)
+    // - Dragging: steers movement; dragging > 55px smoothly moves the anchor
+    // - Release: immediately hides
     const maxRadius = 40;      // thumb travel in px
     const deadzone = 6;        // ignore tiny wobble
     const sprintAt = 32;       // push near the rim = run (same as Shift)
     let anchorX = 0;
     let anchorY = 0;
-    let isFloatingAnchor = false;
 
     const update = (clientX, clientY) => {
       const dx = clientX - anchorX;
       const dy = clientY - anchorY;
       const dist = Math.hypot(dx, dy);
       if (dist <= deadzone) {
-        thumb.style.transform = `translate(${Math.round(dx)}px, ${Math.round(dy)}px)`;
+        thumb.style.transform = '';
         stick.classList.remove('sprint');
         this.joystickVector = null;
         return;
@@ -162,11 +163,12 @@ export class GameController {
         sprint,
       };
 
-      // When dragging in the proportional zone outside the stick, smoothly float the anchor
-      // so reversing or changing directions is immediate without needing to backtrack long distances.
-      if (isFloatingAnchor && dist > 55) {
+      // Smoothly slide the anchor if dragging far so reversing direction is instant
+      if (dist > 55) {
         anchorX = clientX - nx * 55;
         anchorY = clientY - ny * 55;
+        stick.style.left = `${anchorX}px`;
+        stick.style.top = `${anchorY}px`;
       }
     };
 
@@ -186,8 +188,8 @@ export class GameController {
       const isPortrait = container.height >= container.width;
 
       // Proportional detection range:
-      // Portrait: bottom 1/2 of height, right 1/2 of width
-      // Landscape: bottom 1/2 of height, right 1/3 of width
+      // Portrait (直向): bottom 1/2 of height, right 1/2 of width
+      // Landscape (橫向): bottom 1/2 of height, right 1/3 of width
       const minRelY = container.height * 0.5;
       const minRelX = isPortrait ? container.width * 0.5 : container.width * (2 / 3);
 
@@ -195,28 +197,19 @@ export class GameController {
         relY >= minRelY && relY <= container.height &&
         relX >= minRelX && relX <= container.width;
 
-      const stickRect = stick.getBoundingClientRect();
-      const cx = stickRect.left + stickRect.width / 2;
-      const cy = stickRect.top + stickRect.height / 2;
-      const distToStick = Math.hypot(e.clientX - cx, e.clientY - cy);
-      const onStick = stick.contains(e.target) || distToStick <= stickRect.width / 2;
+      if (!inProportionalZone) return;
 
-      if (!inProportionalZone && !onStick) return;
-
-      if (onStick) {
-        anchorX = cx;
-        anchorY = cy;
-        isFloatingAnchor = false;
-      } else {
-        anchorX = e.clientX;
-        anchorY = e.clientY;
-        isFloatingAnchor = true;
-      }
-
+      anchorX = e.clientX;
+      anchorY = e.clientY;
       this._joystickActivePointerId = e.pointerId;
       this.clickTarget = null;
+
+      // Position floating joystick centered at touch point and show it
+      stick.style.left = `${anchorX}px`;
+      stick.style.top = `${anchorY}px`;
+      stick.style.display = 'block';
       stick.classList.add('active');
-      try { stick.setPointerCapture?.(e.pointerId); } catch (_) {}
+
       update(e.clientX, e.clientY);
     };
 
@@ -228,7 +221,6 @@ export class GameController {
     const onPointerUp = (e) => {
       if (this._joystickActivePointerId === null || e.pointerId !== this._joystickActivePointerId) return;
       this.resetJoystick();
-      try { if (stick.hasPointerCapture?.(e.pointerId)) stick.releasePointerCapture(e.pointerId); } catch (_) {}
     };
 
     window.addEventListener('pointerdown', onPointerDown, { passive: true });
@@ -272,7 +264,7 @@ export class GameController {
       <div class="viewport-canvas" id="rpg-canvas-mount"></div>
       <div id="rpg-hud-mount"></div>
       <div id="rpg-touch-mount" class="touch-mount" style="display:none;">
-        <div class="park-joystick" data-park-stick role="group" aria-label="拖曳控制方向">
+        <div class="park-joystick" data-park-stick role="group" aria-label="拖曳控制方向" style="display:none;">
           <span class="park-stick-arrows">＋</span>
           <i></i>
         </div>

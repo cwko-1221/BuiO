@@ -219,8 +219,7 @@ kbd { font: 10px Georgia, serif; border: 1px solid #a9946455; padding: 2px 4px; 
   .followers-label { display: none; }
   .follower-slot { width: 36px; height: 36px; }
   .touch-controls { right: 12px; bottom: max(15px,env(safe-area-inset-bottom)); }
-  .park-joystick { right: 14px; bottom: max(15px,env(safe-area-inset-bottom)); width: 92px; height: 92px; }
-  .park-joystick i { left: 21.5px; top: 21.5px; }
+  .park-joystick { width: 92px; height: 92px; }
   .interact-prompt-wrap { bottom: 145px; max-width: 80vw; }
   .interact-prompt-btn { padding: 8px 10px; font-size: 11px; }
   .toast-stack { bottom: 205px; }
@@ -260,8 +259,7 @@ kbd { font: 10px Georgia, serif; border: 1px solid #a9946455; padding: 2px 4px; 
   .hud-menu-bar { display: grid; grid-template-columns: repeat(2,44px); gap: 5px; }
   .hud-btn { width: 44px; height: 44px; }
   .hud-btn > span,.hud-btn kbd { display: none; }
-  .park-joystick { right: 14px; bottom: 12px; width: 92px; height: 92px; }
-  .park-joystick i { left: 21.5px; top: 21.5px; }
+  .park-joystick { width: 92px; height: 92px; }
   .follower-slot { width: 44px; height: 44px; }
   .touch-controls { bottom: 12px; right: 14px; }
   .hud-bottom-left { bottom: 12px; left: 14px; }
