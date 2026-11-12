@@ -12,7 +12,7 @@
 
 ## 連線及黑屏恢復
 
-- 準備用的 HTTP session 請求在 3 秒內沒有完成，改走已連線的 Socket.IO 通道。兩者使用相同 startRequestId，伺服器共用同一個同步建立函式，晚到的 HTTP 不會另開一局。
+- 正常準備直接使用已連線的 Socket.IO 通道，沿用 Don't Look Down 的連線方式，不發出額外 HTTP session 請求。即時通道不可用時才使用有 3 秒期限的 HTTP 後備；兩者使用相同 startRequestId，伺服器共用同一個同步建立函式，晚到的回覆不會另開一局。
 - Socket 從簽署登入 session 取得帳戶，不能相信用戶端傳來的 studentId；同時檢查 socket 所加入房間、帳戶成員資格及房間階段。正式環境不能使用開發預覽豁免。
 - 第一幀有 30 秒整體期限，涵蓋 XHR 下載後的解碼和 renderer 初始化。逾時後保留答題 session 及模擬狀態，以可重試的局部畫面恢復；重新建立場景時釋放舊 game 和未完成的 blob 圖片。
 - WebGL context loss 立即暫停模擬並取消準備狀態；若 5 秒內未恢復，提供有界的自動重試，以 Canvas 重建畫面。繪圖恢復不會重新開始答題 session。

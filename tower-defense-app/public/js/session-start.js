@@ -53,7 +53,17 @@ export function socketRequest(socket, event, body, signal, timeoutMs = 5000) {
   });
 }
 
-export async function startQuestionSession(api, body, signal, { fallback, diagnostic = () => {} } = {}) {
+export async function startQuestionSession(api, body, signal, { fallback, diagnostic = () => {}, preferSocket = false } = {}) {
+  // Classroom control already uses this connection, as does Don't Look Down.
+  // Avoid opening a separate HTTP request on the normal preparation path.
+  if (preferSocket && fallback) {
+    diagnostic('socket-start');
+    try { const data = await fallback(body, signal); diagnostic('socket-ok'); return data; }
+    catch (error) {
+      diagnostic('socket-failed', { status: error.status || 0 });
+      if (signal.aborted || (error.status && !error.retryable)) throw error;
+    }
+  }
   for (let attempt = 0; attempt < 2; attempt++) {
     const started = performance.now();
     diagnostic('http-start');

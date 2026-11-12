@@ -255,7 +255,7 @@ async function startCampaign(){
   $('deploymentStatus').textContent='';
   try{
     unlockAudio();
-    const response=await startQuestionSession(api,{roomCode:classroom?.code||undefined,startRequestId:sessionStartKey},controller.signal,{diagnostic,fallback:socket?(body,signal)=>socketRequest(socket,'question:session',body,signal):undefined});
+    const response=await startQuestionSession(api,{roomCode:classroom?.code||undefined,startRequestId:sessionStartKey},controller.signal,{diagnostic,preferSocket:true,fallback:socket?(body,signal)=>socketRequest(socket,'question:session',body,signal):undefined});
     if(controller.signal.aborted)return;
     questionSessionId=response.sessionId;
     sessionStartKey=null;

@@ -144,6 +144,11 @@ try {
   let permanentCalls=0,fallbackCalls=0;
   await assert.rejects(startQuestionSession(async()=>{permanentCalls++;throw Object.assign(new Error('Forbidden'),{status:403});},{},new AbortController().signal,{fallback:()=>{fallbackCalls++;}}));
   assert.equal(permanentCalls,1);assert.equal(fallbackCalls,0);
+  let httpCalls=0;
+  const socketFirst=await startQuestionSession(()=>{httpCalls++;throw Error('HTTP must not run');},{},new AbortController().signal,{preferSocket:true,fallback:async()=>({success:true,sessionId:'socket-first'})});
+  assert.equal(socketFirst.sessionId,'socket-first');assert.equal(httpCalls,0);
+  const httpFallback=await startQuestionSession(async()=>({success:true,sessionId:'http-fallback'}),{},new AbortController().signal,{preferSocket:true,fallback:async()=>{throw Object.assign(new Error('Socket unavailable'),{retryable:true});}});
+  assert.equal(httpFallback.sessionId,'http-fallback');
   const load=await classroom();
   const students=await Promise.all(Array.from({length:25},async(_,i)=>{
     const owner=`prepared-${i}`,player=await socket(owner);
@@ -162,7 +167,7 @@ try {
   assert.equal((await emit(load.teacher,'host:start')).ok,false,'teacher must wait for the other eight iPads');
   const {socketRequest}=await import('../tower-defense-app/public/js/session-start.js');
   await Promise.all(students.slice(17).map(async s=>{
-    const result=await startQuestionSession((path,opt)=>requestJson(`${base}/api/tower-defense${path}`,{method:opt.method,headers:{'content-type':'application/json','x-qa-student':s.owner},body:JSON.stringify(opt.body),signal:opt.signal},{timeoutMs:80}),s.body,new AbortController().signal,{fallback:(body,signal)=>socketRequest(s.player,'question:session',body,signal)});
+    const result=await startQuestionSession((path,opt)=>requestJson(`${base}/api/tower-defense${path}`,{method:opt.method,headers:{'content-type':'application/json','x-qa-student':s.owner},body:JSON.stringify(opt.body),signal:opt.signal},{timeoutMs:80}),s.body,new AbortController().signal,{preferSocket:true,fallback:(body,signal)=>socketRequest(s.player,'question:session',body,signal)});
     s.sessionId=result.sessionId;
     assert.equal((await emit(s.player,'player:prepared',{ready:true,mapId:'starport',sessionId:s.sessionId})).ok,true);
   }));
