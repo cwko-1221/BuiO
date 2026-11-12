@@ -47,11 +47,11 @@ async function createClassroom(){
 $('createClassroomBtn').addEventListener('click',createClassroom);
 
 function renderLobbyRoster(){
-  const connected=latestRoster.filter(player=>player.connected),ready=connected.filter(player=>player.mapId);
-  $('readyCount').textContent=t('td.readyCount',{ready:ready.length,total:connected.length});
-  $('startClassroomBtn').disabled=!connected.length||ready.length!==connected.length;
-  $('startClassroomBtn').querySelector('small').textContent=!connected.length?t('td.startHintWaiting'):ready.length===connected.length?t('td.startHintAllReady'):t('td.startHintPending',{count:connected.length-ready.length});
-  $('teacherRoster').innerHTML=connected.length?connected.map(player=>playerCard(player,false)).join(''):`<div class="room-empty"><i></i>${escapeHtml(t('td.waitingStudents'))}</div>`;
+  const connected=latestRoster.filter(player=>player.connected),ready=connected.filter(player=>player.mapId&&player.prepared);
+  $('readyCount').textContent=t('td.readyCount',{ready:ready.length,total:latestRoster.length});
+  $('startClassroomBtn').disabled=!connected.length||ready.length!==latestRoster.length;
+  $('startClassroomBtn').querySelector('small').textContent=!latestRoster.length?t('td.startHintWaiting'):ready.length===latestRoster.length?t('td.startHintAllReady'):t('td.startHintPending',{count:latestRoster.length-ready.length});
+  $('teacherRoster').innerHTML=latestRoster.length?latestRoster.map(player=>playerCard(player,false)).join(''):`<div class="room-empty"><i></i>${escapeHtml(t('td.waitingStudents'))}</div>`;
 }
 
 function playerCard(player,live){

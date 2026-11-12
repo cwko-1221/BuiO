@@ -25,6 +25,7 @@ export class BattleScene extends Phaser.Scene {
   preload() {
     this.assetsReady=false;
     window.BuiLoading?.watchScene(this,{recoverOnError:false});
+    this.load.on('progress', progress => this.hooks.onProgress?.(progress, this.load));
     const mapKey=`td-map-${this.sim.map.id}`;
     if(!this.textures.exists(mapKey))this.load.image(mapKey,MAP_ART[this.sim.map.id]);
     for(const art of [TOWER_ART,ENEMY_ART,BOSS_ART]){

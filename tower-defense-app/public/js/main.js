@@ -13,9 +13,10 @@ document.addEventListener('touchmove', event => {
 
 import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, WORLD, towerStats } from './content.js?v=20260809-path-grid-1';
 import { TowerDefenseSimulation } from './simulation.js?v=20260809-path-grid-1';
-import { BattleScene } from './BattleScene.js?v=20260809-path-grid-1';
+import { BattleScene } from './BattleScene.js?v=20261113-recovery-1';
 import { CrystalAudio } from './audio.js?v=20261013-start-recovery-1';
-import { requestJson, startQuestionSession } from './session-start.js?v=20261013-start-recovery-1';
+import { requestJson, startQuestionSession, socketRequest } from './session-start.js?v=20261113-recovery-1';
+import { mountBattle } from './battle-runtime.js?v=20261113-recovery-1';
 import { MAP_ART, MAP_THUMB, TOWER_ART, atlasPosition } from './assets.js?v=20260817-thumbs';
 
 const $=id=>document.getElementById(id);
@@ -24,7 +25,7 @@ const launchParams=new URLSearchParams(location.search);
 const classroomPreview=previewRoute&&launchParams.has('classroom');
 const autoJoinRoom=launchParams.get('autojoin')==='1'?launchParams.get('room'):null;
 const preview=previewRoute&&!classroomPreview;
-const socket=preview?null:io('/tower-defense');
+const socket=preview?null:io('/tower-defense',{auth:{preview:classroomPreview},tryAllTransports:true});
 const audio=new CrystalAudio();
 const towerOrder=['bolt','cannon','frost','storm','prism','beacon'];
 const mapOrder=['starport','moonwood','embercore'];
@@ -40,8 +41,48 @@ let simulation=null,scene=null,phaserGame=null,questionSessionId=null;
 let selectedTowerId=null,panelSignature='',questionTimer=null,questionDeadline=0,activeQuestion=null,answering=false;
 let lastHudSignature='',lastSoundAt=new Map(),modalWasPaused=false;
 let deploymentAbort=null,sessionStartKey=null,audioFailureReported=false;
-let assetRetry=null,assetRecovery=null;
+let battleRuntime=null,startTimer=null,serverOffset=0,battleStarted=false,networkWasPaused=null;
 let lastSelectedMap=null,mapSelectionRequest=0;
+const traceId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(16)),v=>v.toString(16).padStart(2,'0')).join('');
+const diagnosticStarted=performance.now(),diagnostics=[];
+let pendingDiagnostics=[];
+function diagnostic(stage,detail={}){
+  const item={traceId,stage,elapsedMs:Math.round(performance.now()-diagnosticStarted),...detail};
+  diagnostics.push(item);if(diagnostics.length>64)diagnostics.shift();
+  pendingDiagnostics.push(item);if(pendingDiagnostics.length>64)pendingDiagnostics.shift();
+  try{sessionStorage.setItem('buio-tower-diagnostics',JSON.stringify(diagnostics));}catch{}
+  flushDiagnostics();
+}
+function flushDiagnostics(){
+  if(!socket?.connected)return;
+  for(const item of pendingDiagnostics.splice(0))socket.emit('client:diagnostic',item);
+}
+function showBattleGate(message){$('battleGate').hidden=false;$('battleGateMessage').textContent=message;}
+function hideBattleGate(){$('battleGate').hidden=true;}
+function sendPrepared(ready){
+  if(!socket?.connected||!classroom)return;
+  socket.timeout(5000).emit('player:prepared',{ready,mapId:selectedMap,sessionId:questionSessionId},(error,response)=>{
+    if(error){if(ready&&scene) setTimeout(()=>sendPrepared(true),1500);return;}
+    if(!response?.ok)return;
+    if(response.phase==='playing'){
+      classroomStarted=true;classroom.phase='playing';classroom.startedAt=response.startedAt;
+      scheduleBattleStart();
+    }
+  });
+}
+function scheduleBattleStart(){
+  clearTimeout(startTimer);
+  if(!scene||!classroomStarted||!simulation)return;
+  if(battleStarted){hideBattleGate();return;}
+  const current=simulation;
+  showBattleGate(t('td.startingTogether'));
+  startTimer=setTimeout(()=>{
+    if(simulation!==current||!scene||!classroomStarted)return;
+    battleStarted=true;current.togglePause(false);hideBattleGate();audio.startMusic(MAPS[selectedMap].weather);
+    diagnostic('battle-start',{durationMs:Math.max(0,Date.now()+serverOffset-(classroom?.startedAt||Date.now()))});
+    emitClassroomState('playing',true);
+  },Math.max(0,(classroom?.startedAt||0)-Date.now()-serverOffset));
+}
 
 function unlockAudio(){
   // Safari can leave resume() pending until the student's next tap. Sound must
@@ -61,8 +102,8 @@ function saveProfile(){localStorage.setItem(profileKey,JSON.stringify(profile));
 function showScreen(id){document.querySelectorAll('.screen').forEach(screen=>screen.classList.toggle('active',screen.id===id));}
 function requestHeaders(){return previewRoute?{'x-buio-preview':'1'}:{};}
 
-async function api(path,{method='GET',body,signal}={}){
-  try{return await requestJson(`/api/tower-defense${path}`,{method,signal,credentials:'include',headers:{...requestHeaders(),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});}
+async function api(path,{method='GET',body,signal,timeoutMs}={}){
+  try{return await requestJson(`/api/tower-defense${path}`,{method,signal,credentials:'include',headers:{...requestHeaders(),...(path==='/session'?{'X-BuiO-Trace':traceId}:{}),...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined},{timeoutMs});}
   catch(error){
     if(error.code==='REQUEST_TIMEOUT')error.message=t('td.syncTimeout');
     else if(error.code==='BAD_RESPONSE')error.message=t('td.badResponse');
@@ -114,19 +155,25 @@ async function loadRooms(){
 async function joinRoom(code){
   if(joining||!socket)return;joining=true;$('joinError').textContent='';await loadIdentity();
   const previousMap=classroom?.code===code?(selectedMap||lastSelectedMap):null;
+  const joinSentAt=Date.now();
   socket.timeout(10000).emit('player:join',{code,name:me.name,studentId:me.studentId},(error,response)=>{
     joining=false;
     if(error||!response?.ok){$('joinError').textContent=serverText(response?.message)||t('td.joinFailed');loadRooms();return;}
     clearInterval(roomsTimer);
     if(classroom?.code!==response.code){cancelDeployment();lastSelectedMap=null;}
     mapSelectionRequest++;
-    classroom={code:response.code,hostName:response.hostName,setTitle:response.setTitle,phase:response.phase};
+    classroom={code:response.code,hostName:response.hostName,setTitle:response.setTitle,phase:response.phase,startedAt:response.startedAt};
+    if(response.serverNow)serverOffset=response.serverNow-(joinSentAt+Date.now())/2;
     classroomStarted=response.phase==='playing';selectedMap=response.mapId||null;
     $('classroomHost').textContent=teacherLabel(response.hostName);$('classroomSet').textContent=response.setTitle;
-    if(simulation){emitClassroomState(simulation.state.phase==='won'?'won':simulation.state.phase==='lost'?'lost':'playing',true);return;}
+    if(simulation){
+      if(scene&&battleStarted&&networkWasPaused!==null){simulation.togglePause(networkWasPaused);networkWasPaused=null;}
+      if(scene&&!classroomStarted)showBattleGate(t('td.battleReady'));
+      sendPrepared(!!scene);scheduleBattleStart();return;
+    }
     $('deploymentStatus').textContent=t(classroomStarted?'td.pickThenDeploy':'td.pickFirst');
     showScreen('menuScreen');renderMenu();
-    if(classroomStarted&&selectedMap)startCampaign();
+    if(selectedMap)startCampaign();
     else if(previousMap&&!selectedMap)selectBattlefield(previousMap);
   });
 }
@@ -145,7 +192,7 @@ function selectBattlefield(mapId){
     if(request!==mapSelectionRequest)return;
     if(error||!response?.ok){selectedMap=null;renderMenu();$('deploymentStatus').textContent=serverText(response?.message)||t('td.mapPickFailed');return;}
     $('deploymentStatus').textContent=t(response.shouldStart?'td.deploying':'td.readyWaiting');
-    if(response.shouldStart)startCampaign();
+    startCampaign();
   });
 }
 
@@ -200,58 +247,51 @@ function bindTowerCard(button){
 }
 
 async function startCampaign(){
-  if(!selectedMap||deploymentAbort||(!preview&&!classroomStarted))return;
+  if(!selectedMap||deploymentAbort)return;
   const controller=deploymentAbort=new AbortController();
   sessionStartKey ||= crypto.randomUUID?.() || Array.from(crypto.getRandomValues(new Uint8Array(16)),value=>value.toString(16).padStart(2,'0')).join('');
   const mapId=selectedMap;
-  const button=$('startCampaignBtn');button.disabled=true;button.querySelector('span').textContent=t('td.syncingBank');
+  const button=$('startCampaignBtn');button.disabled=true;button.querySelector('span').textContent=t('td.preparingBattle');
+  $('deploymentStatus').textContent='';
   try{
     unlockAudio();
-    const response=await startQuestionSession(api,{roomCode:classroom?.code||undefined,startRequestId:sessionStartKey},controller.signal);
-    if(controller.signal.aborted||(!preview&&!classroomStarted))return;
+    const response=await startQuestionSession(api,{roomCode:classroom?.code||undefined,startRequestId:sessionStartKey},controller.signal,{diagnostic,fallback:socket?(body,signal)=>socketRequest(socket,'question:session',body,signal):undefined});
+    if(controller.signal.aborted)return;
     questionSessionId=response.sessionId;
     sessionStartKey=null;
     teardownGame();
     simulation=new TowerDefenseSimulation({mapId,seed:Date.now()});
+    if(!preview)simulation.togglePause(true);
+    showBattleGate(t('td.preparingBattle'));
+    deploymentStatus.textContent='';
     showScreen('gameScreen');
     $('mapChapter').textContent=t('td.chapterTier',{chapter:MAPS[selectedMap].chapter,tier:DIFFICULTIES.guardian.name});
     $('mapName').textContent=MAPS[selectedMap].name;
-    const battleScene=new BattleScene(simulation,{
-      onReady:readyScene=>{
-        scene=readyScene;audio.startMusic(MAPS[mapId].weather);
-        assetRetry?.resolve();assetRetry=null;
-        assetRecovery?.();assetRecovery=null;
-      },
-      onLoadFailed:error=>{
-        scene=null;audio.stopMusic();
-        if(assetRetry){assetRetry.reject(error);assetRetry=null;return;}
-        assetRecovery=window.BuiLoading?.recover(error,()=>new Promise((resolve,reject)=>{
-          assetRetry={resolve,reject};battleScene.scene.restart();
-        }),undefined,{automatic:true});
-      },
+    battleRuntime=mountBattle(simulation, lifecycle=>new BattleScene(simulation,{
+      ...lifecycle,
       onState:updateHud,
       onEvent:handleGameEvent,
       onTowerSelected:tower=>{selectedTowerId=tower?.id||null;document.querySelectorAll('[data-tower]').forEach(button=>button.classList.remove('selected'));renderTowerPanel(tower,true);},
       onActionResult:handleActionResult,
+    }),{
+      diagnostic,
+      onUnavailable:()=>{scene=null;audio.stopMusic();showBattleGate(t('td.preparingBattle'));sendPrepared(false);},
+      onReady:readyScene=>{
+        scene=readyScene;phaserGame=readyScene.game;
+        if(preview||battleStarted){hideBattleGate();audio.startMusic(MAPS[mapId].weather);if(!preview)sendPrepared(true);}
+        else {showBattleGate(t('td.battleReady'));sendPrepared(true);scheduleBattleStart();}
+      },
     });
-    phaserGame=new Phaser.Game({
-      type:Phaser.AUTO,parent:'gameCanvas',width:1280,height:720,transparent:true,
-      // CrystalAudio owns all sound. Phaser must not create a second context.
-      audio:{noAudio:true},
-      scale:{mode:Phaser.Scale.FIT,autoCenter:Phaser.Scale.CENTER_BOTH,width:1280,height:720},
-      render:{antialias:true,roundPixels:false,pixelArt:false},scene:[battleScene],fps:{target:60,min:30},
-      loader:{maxParallelDownloads:4,timeout:20000,maxRetries:1},
-    });
-    emitClassroomState('playing',true);
     updateHud(simulation.state,true);showBanner(t('td.mapBanner',{map:MAPS[selectedMap].name,lanes:MAPS[selectedMap].paths.length}));showToast(t('td.bankToast',{title:response.set.title}),'success');
   }catch(error){
     if(controller.signal.aborted)return;
     console.error('[tower-defense] unable to start campaign',error);window.__towerDefense.lastError=error.message;
+    diagnostic('start-failed',{status:error.status||0});hideBattleGate();
     showToast(error.message,'error');$('deploymentStatus').textContent=t('td.retryDeployHint');showScreen('menuScreen');
   }finally{
     if(deploymentAbort===controller){
       deploymentAbort=null;
-      button.disabled=!preview&&(!classroomStarted||!selectedMap);
+      button.disabled=!selectedMap;
       button.classList.toggle('classroom-wait',button.disabled);
       button.querySelector('span').textContent=t(preview?'td.previewThisMap':'td.retryDeploy');
     }
@@ -259,11 +299,12 @@ async function startCampaign(){
 }
 
 function teardownGame(){
-  assetRecovery?.();assetRecovery=null;
-  assetRetry?.reject(new DOMException('Game closed','AbortError'));assetRetry=null;
+  battleStarted=false;
+  networkWasPaused=null;
+  clearTimeout(startTimer);battleRuntime?.close();battleRuntime=null;hideBattleGate();
   clearInterval(questionTimer);questionTimer=null;activeQuestion=null;answering=false;
   $('questionPanel').classList.remove('open');$('endModal').classList.remove('open');$('towerPanel').classList.remove('open');
-  if(phaserGame){phaserGame.destroy(true);phaserGame=null;}scene=null;simulation=null;selectedTowerId=null;panelSignature='';lastHudSignature='';
+  phaserGame=null;scene=null;simulation=null;selectedTowerId=null;panelSignature='';lastHudSignature='';
   audio.stopMusic();
 }
 
@@ -275,7 +316,7 @@ function selectBuildTower(id){
 }
 
 function emitClassroomState(status='playing',force=false){
-  if(!socket||!simulation)return;
+  if(!socket||!simulation||!classroomStarted||!scene||Date.now()+serverOffset<(classroom?.startedAt||0))return;
   const now=performance.now();if(!force&&now-lastClassroomStateAt<750)return;lastClassroomStateAt=now;
   const state=simulation.state;
   socket.emit('player:state',{status,wave:state.wave,score:state.score,quizCorrect:state.stats.quizCorrect,quizAnswered:state.stats.quizAnswered});
@@ -423,7 +464,7 @@ function bindUi(){
   const toggleAudio=()=>{unlockAudio();const muted=audio.toggle();$('audioBtn').textContent=$('menuAudioBtn').textContent=muted?'×':'♪';};$('audioBtn').addEventListener('click',toggleAudio);$('menuAudioBtn').addEventListener('click',toggleAudio);
   for(const type of ['click','touchend','keydown'])document.addEventListener(type,()=>{if(audio.context?.state!=='running')unlockAudio();},{capture:true,passive:true});
   document.addEventListener('keydown',event=>{
-    if(!$('gameScreen').classList.contains('active'))return;
+    if(!$('gameScreen').classList.contains('active')||(!preview&&!battleStarted))return;
     if($('questionPanel').classList.contains('open')){const index=['a','b','c','d'].indexOf(event.key.toLowerCase());if(index>=0)answerQuestion(index);return;}
     if(event.key>='1'&&event.key<='6')selectBuildTower(towerOrder[Number(event.key)-1]);
     else if(event.code==='Space'){event.preventDefault();beginWave();}
@@ -439,12 +480,19 @@ function bindUi(){
 }
 
 if(socket){
-  socket.on('connect',()=>{if(classroom?.code)joinRoom(classroom.code);});
+  socket.on('connect',()=>{flushDiagnostics();if(classroom?.code)joinRoom(classroom.code);});
+  socket.on('disconnect',()=>{
+    if(!simulation)return;
+    networkWasPaused=simulation.state.paused;
+    clearTimeout(startTimer);simulation.togglePause(true);showBattleGate(t('td.preparingBattle'));
+  });
   socket.on('classroom:start',payload=>{
-    classroomStarted=true;if(classroom)classroom.phase='playing';
-    if(selectedMap){if(!simulation)startCampaign();}else $('deploymentStatus').textContent=t('td.startedPickNow');
+    classroomStarted=true;if(classroom){classroom.phase='playing';classroom.startedAt=payload.startedAt;}
+    if(selectedMap){if(!simulation)startCampaign();else scheduleBattleStart();}else $('deploymentStatus').textContent=t('td.startedPickNow');
   });
   socket.on('classroom:ended',()=>{
+    clearTimeout(startTimer);hideBattleGate();
+    battleRuntime?.close();battleRuntime=null;scene=null;
     classroomStarted=false;if(classroom)classroom.phase='ended';cancelDeployment();
     if(!simulation){location.href='/';return;}
     simulation.togglePause(true);emitClassroomState(simulation.state.phase==='won'?'won':'playing',true);
@@ -469,4 +517,5 @@ window.__towerDefense={
   get scene(){return scene;},
   get audioState(){return {contextState:audio.context?.state||'unavailable',muted:audio.muted,musicActive:!!audio.musicTimer};},
   startCampaign,openQuestion,profile,preview,classroomPreview,get classroom(){return classroom;},selectBattlefield,
+  get diagnostics(){return diagnostics;},get runtime(){return battleRuntime;},
 };

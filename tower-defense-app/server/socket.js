@@ -3,6 +3,8 @@
 const setsRepo = require('../../game-app/repositories/questionSets.repo');
 const demoSet = require('../../game-app/lib/demoSet');
 const defaultSet = require('../lib/defaultQuestions');
+const config = require('../../config');
+const { startSession, sessions: questionSessions } = require('../lib/questionSessions');
 const {
   MAP_IDS,
   rooms,
@@ -52,6 +54,41 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
   });
 
   nsp.on('connection', socket => {
+    let startSecond = 0, startCount = 0, diagnosticMinute = 0, diagnosticCount = 0;
+    socket.on('question:session', (body, ack) => {
+      if (typeof ack !== 'function') return;
+      const owner = socket.request.session?.studentId;
+      const preview = !config.isProd && socket.handshake.auth?.preview === true;
+      if (!owner && !preview) return ack({ success: false, status: 401, message: '請先登入平台。' });
+      const second = Math.floor(Date.now() / 1000);
+      if (second !== startSecond) { startSecond = second; startCount = 0; }
+      if (++startCount > 4) return ack({ success: false, status: 429, message: '請稍後再試。' });
+      if (!body || typeof body !== 'object' || body.roomCode !== socket.data.code || socket.data.role !== 'player') {
+        return ack({ success: false, status: 403, message: '你尚未加入這個塔防房間。' });
+      }
+      try {
+        const result = startSession(owner || 'preview-player', body, { preview, prepare: true });
+        console.log('[tower-start]', JSON.stringify({ stage: 'socket-session', attemptId: body.startRequestId, success: true }));
+        ack(result);
+      } catch (error) {
+        ack({ success: false, status: error.status || 500, message: error.status ? error.message : '暫時未能建立答題連線。' });
+      }
+    });
+    socket.on('client:diagnostic', data => {
+      if (!socket.request.session?.studentId || !data || typeof data !== 'object') return;
+      const minute = Math.floor(Date.now() / 60000);
+      if (minute !== diagnosticMinute) { diagnosticMinute = minute; diagnosticCount = 0; }
+      if (++diagnosticCount > 100) return;
+      if (typeof data.traceId !== 'string' || !/^[\w-]{16,80}$/.test(data.traceId)) return;
+      const stages = ['http-start', 'http-ok', 'http-failed', 'socket-start', 'socket-ok', 'socket-failed', 'assets-start', 'assets-progress', 'first-frame', 'battle-start', 'render-timeout', 'context-lost', 'context-restored', 'retry-scene', 'start-failed'];
+      if (!stages.includes(data.stage)) return;
+      const safe = { build: '20261113-recovery-1', traceId: data.traceId, stage: data.stage,
+        elapsedMs: Math.min(3600000, Math.max(0, Number(data.elapsedMs) || 0)), transport: socket.conn.transport.name };
+      for (const key of ['durationMs', 'status', 'progress', 'inflight', 'processing']) {
+        if (Number.isFinite(data[key])) safe[key] = Math.max(0, Math.min(3600000, data[key]));
+      }
+      console.log('[tower-start]', JSON.stringify(safe));
+    });
     socket.on('host:create', async ({ setId, hostName }, ack) => {
       try {
         const set = await loadQuestionSet(String(setId || defaultSet.id));
@@ -91,13 +128,13 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
       }
       const players = connectedPlayers(room);
       if (!players.length) return ack?.({ ok: false, message: '未有學生加入。' });
-      const unready = players.filter(player => !player.mapId);
+      const unready = [...room.players.values()].filter(player => !player.connected || !player.mapId || !player.prepared);
       if (unready.length) {
-        return ack?.({ ok: false, message: `仍有 ${unready.length} 位學生未選擇戰場。` });
+        return ack?.({ ok: false, message: `仍有 ${unready.length} 位學生未完成戰場準備。` });
       }
       room.phase = 'playing';
-      room.startedAt = Date.now();
-      for (const player of players) player.status = 'deploying';
+      room.startedAt = Date.now() + 1500;
+      for (const player of players) player.status = 'ready';
       nsp.to(room.code).emit('classroom:start', {
         startedAt: room.startedAt,
         difficulty: 'guardian',
@@ -123,6 +160,8 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
     });
 
     socket.on('player:join', ({ code, name, studentId }, ack) => {
+      // An authenticated socket can join only as its signed-in account.
+      studentId = socket.request.session?.studentId || studentId;
       const room = rooms.get(String(code || '').trim());
       if (!room) return ack?.({ ok: false, message: '找不到這個房間，請重新選擇。' });
       if (room.phase === 'ended') return ack?.({ ok: false, message: '這個課堂已經結束。' });
@@ -137,6 +176,7 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
           connected: true,
           joinedAt: Date.now(),
           mapId: null,
+          prepared: false,
           status: 'choosing',
           wave: 0,
           score: 0,
@@ -145,6 +185,7 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
         };
         room.players.set(key, player);
       } else {
+        if (player.socketId !== socket.id) player.prepared = false;
         player.socketId = socket.id;
         player.connected = true;
         player.name = String(name || player.name).trim().slice(0, 30) || player.name;
@@ -163,6 +204,8 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
         phase: room.phase,
         mapId: player.mapId,
         difficulty: 'guardian',
+        startedAt: room.startedAt,
+        serverNow: Date.now(),
       });
     });
 
@@ -176,9 +219,22 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
         return ack?.({ ok: false, message: '戰役已經開始，不能更換戰場。' });
       }
       player.mapId = mapId;
-      player.status = room.phase === 'playing' ? 'deploying' : 'ready';
+      player.prepared = false;
+      player.status = 'deploying';
       emitRoster(room);
       ack?.({ ok: true, mapId, shouldStart: room.phase === 'playing' });
+    });
+
+    socket.on('player:prepared', ({ ready, mapId, sessionId } = {}, ack) => {
+      const room = rooms.get(socket.data.code), player = room?.players.get(socket.data.playerKey);
+      if (!room || !player || player.socketId !== socket.id || player.mapId !== mapId) return ack?.({ ok: false });
+      const questionSession = questionSessions.get(sessionId);
+      const owner = socket.request.session?.studentId;
+      const preview = !config.isProd && socket.handshake.auth?.preview === true;
+      if (ready && (!questionSession || questionSession.roomCode !== room.code || (!preview && questionSession.owner !== owner))) return ack?.({ ok: false });
+      player.prepared = ready === true;
+      player.status = player.prepared ? 'ready' : 'deploying';
+      emitRoster(room); ack?.({ ok: true, phase: room.phase, startedAt: room.startedAt, serverNow: Date.now() });
     });
 
     socket.on('player:state', raw => {
@@ -201,8 +257,11 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
       }
       const player = room.players.get(socket.data.playerKey);
       if (!player) return;
+      if (player.socketId !== socket.id) return;
       player.connected = false;
-      if (room.phase === 'lobby') room.players.delete(player.key);
+      player.prepared = false;
+      // Keep a disconnected pupil visible. Starting must not silently exclude
+      // the iPad that is struggling to prepare; reconnect restores its seat.
       emitRoster(room);
     });
   });

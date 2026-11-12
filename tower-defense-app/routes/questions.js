@@ -5,13 +5,14 @@ const express = require('express');
 const config = require('../../config');
 const setsRepo = require('../../game-app/repositories/questionSets.repo');
 const defaultSet = require('../lib/defaultQuestions');
-const { findPlayerForOwner, rooms } = require('../lib/classrooms');
+const { rooms } = require('../lib/classrooms');
+const { sessions, publicSet, startSession } = require('../lib/questionSessions');
 
 const router = express.Router();
-const sessions = new Map();
-const starts = new Map();
+
+
 const QUESTION_TTL_MS = 20_000;
-const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
+
 
 function isPreview(req) {
   return !config.isProd && req.get('x-buio-preview') === '1';
@@ -26,9 +27,6 @@ function ownerOf(req) {
   return req.session?.studentId || 'preview-player';
 }
 
-function publicSet(set) {
-  return { id: set.id, title: set.title, questionCount: set.questions.length, builtin: set.id === defaultSet.id };
-}
 
 function shuffledQuestion(question) {
   const entries = question.choices.map((choice, index) => ({ choice, correct: index === question.correctIndex }));
@@ -73,56 +71,16 @@ router.get('/sets', async (req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.post('/session', async (req, res, next) => {
+router.post('/session', (req, res, next) => {
   try {
-    const roomCode = String(req.body?.roomCode || '').trim();
-    let set = defaultSet;
-    if (roomCode) {
-      const room = rooms.get(roomCode);
-      if (!room || room.phase !== 'playing') {
-        return res.status(409).json({ success: false, message: '老師尚未開始，或課堂已經結束。' });
-      }
-      const player = findPlayerForOwner(room, ownerOf(req));
-      if (!player && !isPreview(req)) {
-        return res.status(403).json({ success: false, message: '你尚未加入這個塔防房間。' });
-      }
-      set = room.set;
-    } else if (!isPreview(req)) {
-      return res.status(400).json({ success: false, message: '請先加入老師建立的塔防房間。' });
-    }
-    const requestId = req.body?.startRequestId;
-    if (requestId !== undefined && (typeof requestId !== 'string' || !/^[A-Za-z0-9_-]{16,80}$/.test(requestId))) {
-      return res.status(400).json({ success: false, message: '開始請求識別碼不正確。' });
-    }
-    const startKey = requestId ? JSON.stringify([ownerOf(req), roomCode, requestId]) : null;
-    const existing = startKey && sessions.get(starts.get(startKey));
-    if (existing) {
-      existing.touchedAt = Date.now();
-      return res.status(201).json({ success: true, sessionId: existing.id, set: publicSet(existing.set) });
-    }
-    const id = crypto.randomUUID();
-    const order = set.questions.map((_, index) => index);
-    for (let index = order.length - 1; index > 0; index--) {
-      const swap = crypto.randomInt(index + 1);
-      [order[index], order[swap]] = [order[swap], order[index]];
-    }
-    sessions.set(id, {
-      id,
-      owner: ownerOf(req),
-      roomCode: roomCode || null,
-      startKey,
-      set,
-      order,
-      cursor: 0,
-      streak: 0,
-      correct: 0,
-      answered: 0,
-      active: null,
-      touchedAt: Date.now(),
-    });
-    if (startKey) starts.set(startKey, id);
-    res.status(201).json({ success: true, sessionId: id, set: publicSet(set) });
-  } catch (error) { next(error); }
+    const result = startSession(ownerOf(req), req.body, { preview: isPreview(req), prepare: true });
+    const traceId = req.get('X-BuiO-Trace');
+    if (typeof traceId === 'string' && /^[\w-]{16,80}$/.test(traceId)) console.log('[tower-start]', JSON.stringify({ stage: 'http-session', traceId, requestId: req.requestId, success: true }));
+    res.status(201).json(result);
+  } catch (error) {
+    if (error.status) return res.status(error.status).json({ success: false, message: error.message });
+    next(error);
+  }
 });
 
 router.post('/question', (req, res) => {
@@ -180,12 +138,6 @@ router.post('/answer', (req, res) => {
   });
 });
 
-setInterval(() => {
-  const cutoff = Date.now() - SESSION_TTL_MS;
-  for (const [id, session] of sessions) if (session.touchedAt < cutoff) {
-    sessions.delete(id);
-    if (session.startKey) starts.delete(session.startKey);
-  }
-}, 10 * 60 * 1000).unref();
+
 
 module.exports = router;

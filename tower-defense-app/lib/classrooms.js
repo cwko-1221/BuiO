@@ -28,6 +28,7 @@ function roster(room) {
       studentId: player.studentId,
       connected: player.connected,
       mapId: player.mapId,
+      prepared: player.prepared === true,
       status: player.status,
       wave: player.wave,
       score: player.score,

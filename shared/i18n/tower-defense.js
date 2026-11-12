@@ -1,6 +1,9 @@
 // Crystal Bastion: student battlefield, teacher console, and all of the game
 // content — maps, towers, enemies and abilities — that the player reads on screen.
 BuiI18n.register({
+  'td.preparingBattle': { 'zh-HK': '正在準備你的戰場…', 'en-US': 'Preparing your battlefield…' },
+  'td.battleReady': { 'zh-HK': '戰場已準備好，等待老師與全班一起開始', 'en-US': 'Battlefield ready. Waiting to start with your class.' },
+  'td.startingTogether': { 'zh-HK': '全班準備完成，即將一起開始', 'en-US': 'Everyone is ready. Starting together shortly.' },
   // --- shell ------------------------------------------------------------
   'td.pageTitle':      { 'zh-HK': 'BuiO 晶核守衛戰', 'en-US': 'BuiO Crystal Bastion' },
   'td.teacherPageTitle': { 'zh-HK': '晶核守衛戰 · 老師控制台 | BuiO', 'en-US': 'Crystal Bastion · Teacher Console | BuiO' },
@@ -58,7 +61,7 @@ BuiI18n.register({
   'td.syncingBank':    { 'zh-HK': '正在同步題庫…', 'en-US': 'Syncing the question bank…' },
   'td.syncTimeout':    { 'zh-HK': '同步等候逾時，請再試一次。', 'en-US': 'Syncing took too long. Please try again.' },
   'td.retryDeploy':    { 'zh-HK': '重新部署', 'en-US': 'Retry deployment' },
-  'td.retryDeployHint': { 'zh-HK': '未能完成同步，請按重新部署再試一次。', 'en-US': 'Syncing did not finish. Tap Retry deployment to try again.' },
+  'td.retryDeployHint': { 'zh-HK': '戰場準備未完成，請按重新部署再試一次。', 'en-US': 'Battlefield preparation did not finish. Tap Retry deployment to try again.' },
   'td.entrances':      { 'zh-HK': '{count} 個入口', 'en-US': '{count} entrances' },
   'td.campaignRecord': { 'zh-HK': '戰役進度 <b>{done}/3</b> · 最高分 <b>{best}</b> · 累積答對 <b>{correct}</b>', 'en-US': 'Campaign <b>{done}/3</b> · Best score <b>{best}</b> · Correct answers <b>{correct}</b>' },
 
@@ -231,8 +234,8 @@ BuiI18n.register({
   'td.closeRoom':      { 'zh-HK': '關閉房間', 'en-US': 'Close the room' },
   'td.startClass':     { 'zh-HK': '開始全班戰役', 'en-US': 'Start the class campaign' },
   'td.startHintWaiting': { 'zh-HK': '等待學生加入', 'en-US': 'Waiting for students' },
-  'td.startHintAllReady': { 'zh-HK': '全員已選擇戰場', 'en-US': 'Everyone has a battlefield' },
-  'td.startHintPending': { 'zh-HK': '尚有 {count} 人未選戰場', 'en-US': '{count} still choosing' },
+  'td.startHintAllReady': { 'zh-HK': '全員戰場及題庫已準備完成', 'en-US': 'Everyone’s battlefield and questions are ready' },
+  'td.startHintPending': { 'zh-HK': '尚有 {count} 部裝置未完成戰場準備', 'en-US': '{count} devices still preparing their battlefield' },
   'td.startFailed':    { 'zh-HK': '無法開始。', 'en-US': 'Could not start.' },
   'td.roomSummary':    { 'zh-HK': '題庫：{title} · {count} 題 · 固定守衛級', 'en-US': 'Bank: {title} · {count} questions · Guardian tier' },
   'td.liveTitle':      { 'zh-HK': '全班晶核戰況', 'en-US': 'Class battle status' },
