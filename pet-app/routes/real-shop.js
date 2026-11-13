@@ -23,6 +23,7 @@ router.put('/teacher/products/:id', requireTeacher, route(async (req, res) => {
   const teacher = await users.findByIdSummary(req.session.studentId);
   ok(res, { product: await shop.saveProduct(req.session.studentId, req.params.id, req.body, teacher?.name || req.session.studentId) });
 }));
+router.delete('/teacher/products/:id', requireTeacher, route(async (req, res) => ok(res, await shop.deleteProduct(req.params.id, req.body?.revision))));
 router.post('/teacher/images', requireTeacher, (req, res, next) => upload(req, res, error => {
   if (error) return next(Object.assign(new Error(error.code === 'LIMIT_FILE_SIZE' ? '圖片不能超過 8 MB。' : '請上傳一張商品圖片。'), { status: 400 }));
   next();
@@ -37,6 +38,7 @@ router.post('/teacher/images', requireTeacher, (req, res, next) => upload(req, r
   } catch { throw Object.assign(new Error('圖片無法讀取，請使用 JPG、PNG 或 WebP 圖片（最多 2500 萬像素）。'), { status: 400 }); }
   ok(res, await shop.saveImage(req.session.studentId, content));
 }));
-router.get('/teacher/vouchers', requireTeacher, route(async (req, res) => ok(res, await shop.vouchers({ code: req.query.code, before: req.query.before }))));
+router.get('/teacher/vouchers', requireTeacher, route(async (req, res) => ok(res, await shop.vouchers({ code: req.query.code, before: req.query.before, search: req.query.search }))));
+router.post('/teacher/vouchers/:id/redeem', requireTeacher, route(async (req, res) => ok(res, await shop.redeemVoucher(req.session.studentId, req.params.id))));
 router.post('/teacher/redeem', requireTeacher, route(async (req, res) => ok(res, await shop.redeem(req.session.studentId, req.body?.code))));
 module.exports = router;

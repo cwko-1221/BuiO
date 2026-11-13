@@ -12,7 +12,7 @@ export class RealShop {
   private vouchers: RealVoucher[] = [];
   private nextCursor: string | null = null;
   private section = 'products';
-  private code = '';
+  private search = '';
   private busy = false;
   private generation = 0;
   private pending: Pending | null = null;
@@ -35,7 +35,7 @@ export class RealShop {
     try {
       if (this.section === 'products') this.products = (await api.realProducts(this.teacher)).products;
       else {
-        const page = await api.realVouchers(this.teacher, this.code, append ? this.nextCursor || '' : '');
+        const page = await api.realVouchers(this.teacher, this.search, append ? this.nextCursor || '' : '');
         if (generation !== this.generation || !this.root.isConnected) return;
         this.vouchers = append ? [...this.vouchers, ...page.vouchers] : page.vouchers; this.nextCursor = page.nextCursor;
       }
@@ -59,12 +59,15 @@ export class RealShop {
       banner.querySelector<HTMLButtonElement>('[data-recover]')!.onclick = () => this.confirmPurchase(this.pending!);
     }
     if (this.section === 'products') {
-      content.innerHTML = `${this.teacher ? `<button type="button" class="primary" data-new>${this.t('＋ 新增商品', '+ Add product')}</button><div class="real-editor"></div>` : ''}<div class="real-product-grid">${this.products.map(product => `<article class="real-product-card">${this.image(product.imageUrl, product.name)}<div class="real-card-body"><span class="real-state">${product.active ? this.t('上架中', 'Available') : this.t('已下架', 'Unlisted')}</span><h2>${esc(product.name)}</h2><p class="real-description">${esc(product.description)}</p><p class="real-teacher">${this.t("領取老師", "Collect from")}: <b>${esc(product.listedByName || product.listedBy)}</b></p><p>${product.stock === null ? this.t('不限量', 'Unlimited stock') : `${this.t('剩餘', 'Remaining')}: ${product.stock}`}</p><strong>🪙 ${product.price.toLocaleString()}</strong><button type="button" data-product="${product.id}" ${!this.teacher && (product.stock === 0 || this.balance < product.price || this.pending) ? 'disabled' : ''}>${this.teacher ? this.t('編輯商品', 'Edit product') : product.stock === 0 ? this.t('已售罄', 'Sold out') : this.balance < product.price ? this.t('金幣不足', 'Not enough coins') : this.t('購買', 'Buy')}</button></div></article>`).join('') || `<p class="empty-state">${this.t('暫時沒有上架商品。', 'No rewards are listed yet.')}</p>`}</div>`;
+      content.innerHTML = `${this.teacher ? `<button type="button" class="primary" data-new>${this.t('＋ 新增商品', '+ Add product')}</button><div class="real-editor"></div>` : ''}<div class="real-product-grid">${this.products.map(product => `<article class="real-product-card">${this.image(product.imageUrl, product.name)}<div class="real-card-body"><span class="real-state">${product.active ? this.t('上架中', 'Available') : this.t('已下架', 'Unlisted')}</span><h2>${esc(product.name)}</h2><p class="real-description">${esc(product.description)}</p><p class="real-teacher">${this.t("領取老師", "Collect from")}: <b>${esc(product.listedByName || product.listedBy)}</b></p><p>${product.stock === null ? this.t('不限量', 'Unlimited stock') : `${this.t('剩餘', 'Remaining')}: ${product.stock}`}</p><strong>🪙 ${product.price.toLocaleString()}</strong><button type="button" data-product="${product.id}" ${!this.teacher && (product.stock === 0 || this.balance < product.price || this.pending) ? 'disabled' : ''}>${this.teacher ? this.t('編輯商品', 'Edit product') : product.stock === 0 ? this.t('已售罄', 'Sold out') : this.balance < product.price ? this.t('金幣不足', 'Not enough coins') : this.t('購買', 'Buy')}</button>${this.teacher ? `<button type="button" class="real-delete" data-delete-product="${product.id}">${this.t('刪除商品', 'Delete product')}</button>` : ''}</div></article>`).join('') || `<p class="empty-state">${this.t('暫時沒有上架商品。', 'No rewards are listed yet.')}</p>`}</div>`;
       content.querySelector<HTMLButtonElement>('[data-new]')?.addEventListener('click', () => this.editProduct());
       content.querySelectorAll<HTMLButtonElement>('[data-product]').forEach(button => button.onclick = () => {
         const product = this.products.find(p => p.id === button.dataset.product)!;
         if (this.teacher) this.editProduct(product);
         else this.confirmPurchase({ productId: product.id, name: product.name, price: product.price, key: idempotencyKey() });
+      });
+      content.querySelectorAll<HTMLButtonElement>('[data-delete-product]').forEach(button => button.onclick = () => {
+        if (!this.busy) this.confirmDelete(this.products.find(product => product.id === button.dataset.deleteProduct)!);
       });
     } else this.renderVouchers(content);
   }
@@ -102,25 +105,39 @@ export class RealShop {
   }
   private clearPending() { this.pending = null; try { sessionStorage.removeItem(this.pendingKey); } catch { /* unavailable storage */ } }
 
+  private confirmDelete(product: RealProduct) {
+    const dialog = this.showDialog(`<h2>${this.t('確認刪除商品', 'Delete this product?')}</h2><h3>${esc(product.name)}</h3><p>${this.t('刪除後，學生不能再購買這件商品。已購買的換領券會保留，仍可領取及核銷。', 'Students will no longer be able to buy this product. Existing vouchers remain valid for collection and redemption.')}</p><p role="status"></p><div class="real-actions"><button type="button" data-cancel>${this.t('取消', 'Cancel')}</button><button type="button" class="real-delete" data-confirm>${this.t('刪除商品', 'Delete product')}</button></div>`);
+    dialog.querySelector<HTMLButtonElement>('[data-confirm]')!.onclick = async () => {
+      if (this.busy) return;
+      this.busy = true; dialog.querySelectorAll<HTMLButtonElement>('button').forEach(button => button.disabled = true);
+      try {
+        await api.deleteRealProduct(product.id, product.revision);
+        dialog.close(); this.busy = false; await this.load();
+        this.message(this.t('商品已刪除，已購換領券仍然有效。', 'Product deleted. Existing vouchers remain valid.'));
+      } catch (error) { dialog.querySelector<HTMLElement>('[role="status"]')!.textContent = (error as Error).message; }
+      finally { this.busy = false; dialog.querySelectorAll<HTMLButtonElement>('button').forEach(button => button.disabled = false); }
+    };
+  }
+
   private studentLabel(voucher: RealVoucher) {
     const student = this.roster.find(row => row.studentId === voucher.studentId);
     return student ? `${student.name} · ${student.className || ''} ${student.classNo || ''} · ${student.studentId}` : voucher.studentId;
   }
   private voucherCard(voucher: RealVoucher) {
-    return `<article class="real-voucher ${voucher.redeemedAt ? 'redeemed' : ''}">${this.image(voucher.imageUrl, voucher.name)}<div><span class="real-state">${voucher.redeemedAt ? this.t('已核銷・請勿重複派發', 'Redeemed · do not issue again') : this.t('待領取', 'Ready to collect')}</span><h2>${esc(voucher.name)}</h2><p class="real-teacher">${this.t("領取老師", "Collect from")}: <b>${esc(voucher.listedByName || voucher.listedBy)}</b></p><p>${esc(this.teacher ? this.studentLabel(voucher) : this.studentId)}</p><code>${esc(voucher.code)}</code><p>🪙 ${voucher.price.toLocaleString()} · ${esc(this.date(voucher.purchasedAt))}</p>${voucher.redeemedAt ? `<p>${this.t('核銷時間', 'Redeemed')}: ${esc(this.date(voucher.redeemedAt))}<br>${this.t('核銷老師', 'Teacher')}: ${esc(voucher.redeemedBy)}</p>` : `<p>${this.t('請在派發實物時由老師核銷一次。', 'A teacher redeems this voucher once when handing over the item.')}</p>${this.teacher ? `<button type="button" class="primary" data-redeem="${esc(voucher.code)}">${this.t('核對並核銷', 'Review and redeem')}</button>` : ''}`}</div></article>`;
+    return `<article class="real-voucher ${voucher.redeemedAt ? 'redeemed' : ''}">${this.image(voucher.imageUrl, voucher.name)}<div><span class="real-state">${voucher.redeemedAt ? this.t('已核銷・請勿重複派發', 'Redeemed · do not issue again') : this.t('待領取', 'Ready to collect')}</span><h2>${esc(voucher.name)}</h2><p class="real-teacher">${this.t("領取老師", "Collect from")}: <b>${esc(voucher.listedByName || voucher.listedBy)}</b></p><p>${esc(this.teacher ? this.studentLabel(voucher) : this.studentId)}</p><p>🪙 ${voucher.price.toLocaleString()} · ${esc(this.date(voucher.purchasedAt))}</p>${voucher.redeemedAt ? `<p>${this.t('核銷時間', 'Redeemed')}: ${esc(this.date(voucher.redeemedAt))}<br>${this.t('核銷老師', 'Teacher')}: ${esc(voucher.redeemedBy)}</p>` : `<p>${this.t('請在派發實物時由老師核銷一次。', 'A teacher redeems this voucher once when handing over the item.')}</p>${this.teacher ? `<button type="button" class="primary" data-redeem="${voucher.id}">${this.t('核對並核銷', 'Review and redeem')}</button>` : ''}`}</div></article>`;
   }
   private renderVouchers(content: HTMLElement) {
-    content.innerHTML = `${this.teacher ? `<form class="real-lookup"><label class="field"><span>${this.t('輸入學生的換領碼', 'Enter the student’s voucher code')}</span><input name="code" placeholder="RW-XXXX-XXXX-XXXX-XXXX" value="${esc(this.code)}" maxlength="40"></label><button class="primary">${this.t('查找換領券', 'Find voucher')}</button><button type="button" data-all>${this.t('全部紀錄', 'All records')}</button></form>` : ''}<div class="real-vouchers">${this.vouchers.map(v => this.voucherCard(v)).join('') || `<p class="empty-state">${this.t(this.code ? '找不到這張換領券。' : '暫時沒有換領券。', this.code ? 'No matching voucher.' : 'No vouchers yet.')}</p>`}</div>${this.nextCursor ? `<button type="button" data-more>${this.t('載入更多', 'Load more')}</button>` : ''}`;
-    content.querySelector('form')?.addEventListener('submit', event => { event.preventDefault(); this.code = new FormData(event.currentTarget as HTMLFormElement).get('code')!.toString().trim(); void this.load(); });
-    content.querySelector<HTMLButtonElement>('[data-all]')?.addEventListener('click', () => { this.code = ''; void this.load(); });
+    content.innerHTML = `${this.teacher ? `<form class="real-lookup"><label class="field"><span>${this.t('搜尋學生或商品', 'Search student or reward')}</span><input name="search" placeholder="${this.t('學生姓名、學號或商品名稱', 'Student name, ID or reward')}" value="${esc(this.search)}" maxlength="100"></label><button class="primary">${this.t('搜尋換領紀錄', 'Search vouchers')}</button><button type="button" data-all>${this.t('全部紀錄', 'All records')}</button></form>` : ''}<div class="real-vouchers">${this.vouchers.map(v => this.voucherCard(v)).join('') || `<p class="empty-state">${this.t(this.search ? '找不到符合的換領紀錄。' : '暫時沒有換領券。', this.search ? 'No matching voucher.' : 'No vouchers yet.')}</p>`}</div>${this.nextCursor ? `<button type="button" data-more>${this.t('載入更多', 'Load more')}</button>` : ''}`;
+    content.querySelector('form')?.addEventListener('submit', event => { event.preventDefault(); this.search = new FormData(event.currentTarget as HTMLFormElement).get('search')!.toString().trim(); void this.load(); });
+    content.querySelector<HTMLButtonElement>('[data-all]')?.addEventListener('click', () => { this.search = ''; void this.load(); });
     content.querySelector<HTMLButtonElement>('[data-more]')?.addEventListener('click', event => { (event.currentTarget as HTMLButtonElement).disabled = true; void this.load(true); });
     content.querySelectorAll<HTMLButtonElement>('[data-redeem]').forEach(button => button.onclick = () => {
-      const voucher = this.vouchers.find(v => v.code === button.dataset.redeem)!;
-      const dialog = this.showDialog(`<h2>${this.t('確認派發實物及核銷', 'Confirm handover and redemption')}</h2><p>${esc(this.studentLabel(voucher))}</p><h3>${esc(voucher.name)}</h3><code>${esc(voucher.code)}</code><p>${this.t('請核對學生身分，並在派發這件物品時確認。每張券只可領取一次。', 'Check the student’s identity and confirm while handing over this item. Each voucher can only be redeemed once.')}</p><p role="status"></p><div class="real-actions"><button type="button" data-cancel>${this.t('取消', 'Cancel')}</button><button type="button" class="primary" data-confirm>${this.t('已派發，確認核銷', 'Handed over · redeem')}</button></div>`);
+      const voucher = this.vouchers.find(v => v.id === button.dataset.redeem)!;
+      const dialog = this.showDialog(`<h2>${this.t('確認派發實物及核銷', 'Confirm handover and redemption')}</h2><p>${esc(this.studentLabel(voucher))}</p><h3>${esc(voucher.name)}</h3><p>${this.t('請核對學生身分，並在派發這件物品時確認。每張券只可領取一次。', 'Check the student’s identity and confirm while handing over this item. Each voucher can only be redeemed once.')}</p><p role="status"></p><div class="real-actions"><button type="button" data-cancel>${this.t('取消', 'Cancel')}</button><button type="button" class="primary" data-confirm>${this.t('已派發，確認核銷', 'Handed over · redeem')}</button></div>`);
       dialog.querySelector<HTMLButtonElement>('[data-confirm]')!.onclick = async () => {
         if (this.busy) return; this.busy = true; dialog.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = true);
         try {
-          const result = await api.redeemRealVoucher(voucher.code); dialog.close(); this.busy = false; await this.load();
+          const result = await api.redeemRealVoucher(voucher.id); dialog.close(); this.busy = false; await this.load();
           this.message(result.alreadyRedeemed ? this.t('這張券已經核銷，請勿再次派發。', 'Already redeemed. Do not hand over another item.') : this.t('核銷成功，已記錄領取時間。', 'Redeemed. Collection time recorded.'), result.alreadyRedeemed);
         } catch (error) { dialog.querySelector<HTMLElement>('[role="status"]')!.textContent = (error as Error).message; }
         finally { this.busy = false; dialog.querySelectorAll<HTMLButtonElement>('button').forEach(b => b.disabled = false); }

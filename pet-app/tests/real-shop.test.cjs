@@ -64,3 +64,28 @@ test('rejects price changes, insufficient coins and invalid fields without spend
   await assert.rejects(repo.redeem('T001', 'RW-0000-0000-0000-0000'), /找不到/);
   pets.purgeJsonStudent('S001'); assert.equal((await repo.vouchers({ studentId: 'S001' })).vouchers.length, 0);
 });
+
+test('teacher deletion preserves purchased vouchers, search and direct redemption, with stale edits and save failure protected', async () => {
+  await pets.grantUnlimitedMoney('S002', 500);
+  store.load().users.find(user => user.studentid === 'S002').name = '李月兒';
+  const id = randomUUID();
+  await repo.saveProduct('T001', id, { ...fields, stock: 2 }, '黃老師');
+  const purchase = await repo.purchase('S002', id, 120, 'before-delete');
+  const product = (await repo.listProducts(true)).find(row => row.id === id);
+  await assert.rejects(repo.deleteProduct(id, product.revision - 1), /已更新/);
+  const save = store.save;
+  store.save = () => { throw new Error('disk interrupted'); };
+  try { await assert.rejects(repo.deleteProduct(id, product.revision), /disk interrupted/); }
+  finally { store.save = save; }
+  assert.ok((await repo.listProducts()).some(row => row.id === id));
+  await repo.deleteProduct(id, product.revision); await repo.deleteProduct(id, product.revision);
+  assert.equal((await repo.listProducts(true)).some(row => row.id === id), false);
+  assert.equal((await repo.purchase('S002', id, 120, 'before-delete')).voucher.id, purchase.voucher.id);
+  await assert.rejects(repo.purchase('S002', id, 120, 'after-delete'), /下架/);
+  for (const search of ['李月兒', 's002', '彩色鉛筆']) assert.ok((await repo.vouchers({ search })).vouchers.some(row => row.id === purchase.voucher.id));
+  assert.equal((await repo.vouchers({ search: '不存在的學生' })).vouchers.length, 0);
+  const count = store.load().petCurrencyLedger.length;
+  assert.equal((await repo.redeemVoucher('T001', purchase.voucher.id)).alreadyRedeemed, false);
+  assert.equal((await repo.redeemVoucher('T002', purchase.voucher.id)).alreadyRedeemed, true);
+  assert.equal(store.load().petCurrencyLedger.length, count);
+});

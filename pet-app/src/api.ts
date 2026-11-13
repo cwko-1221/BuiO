@@ -52,10 +52,11 @@ async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<
 export const api = {
   realProducts: (teacher = false) => request<{ products: RealProduct[] }>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}products`),
   saveRealProduct: (product: Partial<RealProduct> & { id: string }) => request<{ product: RealProduct }>(`/api/pet/real-shop/teacher/products/${encodeURIComponent(product.id)}`, { method: 'PUT', body: JSON.stringify(product) }),
+  deleteRealProduct: (id: string, revision: number) => request<{ deleted: boolean }>(`/api/pet/real-shop/teacher/products/${encodeURIComponent(id)}`, { method: 'DELETE', body: JSON.stringify({ revision }) }),
   uploadRealImage: (file: File) => { const body = new FormData(); body.append('image', file); return request<{ imageId: string; imageUrl: string }>('/api/pet/real-shop/teacher/images', { method: 'POST', body }); },
   buyRealProduct: (productId: string, expectedPrice: number, key: string) => request<{ voucher: RealVoucher; balance: number }>('/api/pet/real-shop/purchase', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ productId, expectedPrice }) }),
-  realVouchers: (teacher = false, code = '', before = '') => { const params = new URLSearchParams(); if (code) params.set('code', code); if (before) params.set('before', before); return request<VoucherPage>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}vouchers?${params}`); },
-  redeemRealVoucher: (code: string) => request<{ voucher: RealVoucher; alreadyRedeemed: boolean }>('/api/pet/real-shop/teacher/redeem', { method: 'POST', body: JSON.stringify({ code }) }),
+  realVouchers: (teacher = false, search = '', before = '') => { const params = new URLSearchParams(); if (search) params.set('search', search); if (before) params.set('before', before); return request<VoucherPage>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}vouchers?${params}`); },
+  redeemRealVoucher: (id: string) => request<{ voucher: RealVoucher; alreadyRedeemed: boolean }>(`/api/pet/real-shop/teacher/vouchers/${encodeURIComponent(id)}/redeem`, { method: 'POST', body: '{}' }),
   parkSettings: () => request<{ dailyCap: number }>('/api/pet/teacher/park/settings'),
   saveParkSettings: (dailyCap: number) => request<{ dailyCap: number }>('/api/pet/teacher/park/settings', { method: 'PUT', body: JSON.stringify({ dailyCap }) }),
   brawlRanking: () => request<import('./brawl/ranking-types').RankedOverview>('/api/pet/brawl/ranking'),

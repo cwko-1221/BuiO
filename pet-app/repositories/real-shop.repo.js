@@ -113,6 +113,26 @@ async function saveProduct(actorId, id, body, actorName = actorId) {
   });
 }
 
+async function deleteProduct(id, revision) {
+  if (!uuid(id) || !Number.isSafeInteger(revision) || revision < 1) fail('商品識別資料無效，請重新載入。');
+  await ensure();
+  const check = product => {
+    if (product && product.revision !== revision) fail('商品或庫存已更新，請重新載入後再刪除。', 409);
+  };
+  if (config.db.mode === 'postgres') return withTransaction(async client => {
+    await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`real-product:${id}`]);
+    const product = (await client.query('SELECT Data AS data FROM PetRealProducts WHERE ProductID=$1 FOR UPDATE', [id])).rows[0]?.data;
+    check(product);
+    await client.query('DELETE FROM PetRealProducts WHERE ProductID=$1', [id]);
+    return { deleted: true };
+  });
+  return jsonTransaction(data => {
+    check(data.petRealProducts.find(row => row.id === id));
+    data.petRealProducts = data.petRealProducts.filter(row => row.id !== id);
+    return { deleted: true };
+  });
+}
+
 async function purchase(studentId, productId, expectedPrice, key) {
   if (!uuid(productId)) fail('商品編號無效。');
   if (typeof key !== 'string' || !key.trim() || key.length > 120) fail('缺少有效的防重複提交識別碼。');
@@ -161,42 +181,54 @@ function normalizeCode(code) {
   return 'RW-' + value.slice(2).match(/.{4}/g).join('-');
 }
 
-async function vouchers({ studentId, code, before } = {}) {
+async function vouchers({ studentId, code, before, search = '' } = {}) {
   await ensure();
   if (code !== undefined) code = normalizeCode(code);
   if (before !== undefined && (typeof before !== 'string' || !uuid(before))) fail('分頁識別碼無效。');
+  if (typeof search !== 'string' || search.length > 100) fail('搜尋文字最多 100 個字。');
+  search = search.trim().toLowerCase();
   let rows;
   if (config.db.mode === 'postgres') {
     const params = [], clauses = [], add = (sql, value) => { params.push(value); clauses.push(sql.replace('?', `$${params.length}`)); };
-    if (studentId) add('StudentID=?', studentId);
-    if (code) add('Code=?', code);
-    if (before) add('(CreatedAt,VoucherID) < (SELECT CreatedAt,VoucherID FROM PetRealVouchers WHERE VoucherID=?::uuid)', before);
-    rows = (await getPool().query(`SELECT Data AS data FROM PetRealVouchers ${clauses.length ? 'WHERE ' + clauses.join(' AND ') : ''} ORDER BY CreatedAt DESC,VoucherID DESC LIMIT 201`, params)).rows.map(row => row.data);
+    if (studentId) add('v.StudentID=?', studentId);
+    if (code) add('v.Code=?', code);
+    if (before) add('(v.CreatedAt,v.VoucherID) < (SELECT CreatedAt,VoucherID FROM PetRealVouchers WHERE VoucherID=?::uuid)', before);
+    if (search) add("strpos(lower(concat_ws(' ',u.Name,v.StudentID,v.Data->>'name')),?)>0", search);
+    rows = (await getPool().query(`SELECT v.Data AS data FROM PetRealVouchers v ${search ? 'LEFT JOIN Users u ON u.StudentID=v.StudentID' : ''} ${clauses.length ? 'WHERE ' + clauses.join(' AND ') : ''} ORDER BY v.CreatedAt DESC,v.VoucherID DESC LIMIT 201`, params)).rows.map(row => row.data);
   } else {
     rows = store.load().petRealVouchers.filter(row => (!studentId || row.studentId === studentId) && (!code || row.code === code)).slice().sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt) || b.id.localeCompare(a.id));
+    if (search) { const names = new Map(store.load().users.map(user => [user.studentid, user.name || ''])); rows = rows.filter(row => `${names.get(row.studentId) || ''} ${row.studentId} ${row.name}`.toLowerCase().includes(search)); }
     if (before) { const index = rows.findIndex(row => row.id === before); rows = index < 0 ? [] : rows.slice(index + 1); }
   }
   return { vouchers: rows.slice(0, 200).map(voucherView), nextCursor: rows.length > 200 ? rows[199].id : null };
 }
 
 async function redeem(actorId, code) {
-  code = normalizeCode(code); await ensure();
+  return redeemRecord(actorId, { code: normalizeCode(code) });
+}
+async function redeemVoucher(actorId, id) {
+  if (!uuid(id)) fail('換領券識別資料無效。');
+  return redeemRecord(actorId, { id });
+}
+async function redeemRecord(actorId, selector) {
+  await ensure();
   const apply = voucher => {
     if (!voucher) fail('找不到這張換領券。', 404);
     if (voucher.redeemedAt) return { voucher: voucherView(voucher), alreadyRedeemed: true };
     return { voucher: voucherView({ ...voucher, redeemedAt: new Date().toISOString(), redeemedBy: actorId }), alreadyRedeemed: false };
   };
   if (config.db.mode === 'postgres') return withTransaction(async client => {
-    const previous = (await client.query('SELECT Data AS data FROM PetRealVouchers WHERE Code=$1 FOR UPDATE', [code])).rows[0]?.data;
+    const field = selector.id ? 'VoucherID' : 'Code', value = selector.id || selector.code;
+    const previous = (await client.query(`SELECT Data AS data FROM PetRealVouchers WHERE ${field}=$1 FOR UPDATE`, [value])).rows[0]?.data;
     const result = apply(previous);
-    if (!result.alreadyRedeemed) { const { imageUrl: unused, ...data } = result.voucher; await client.query('UPDATE PetRealVouchers SET Data=$2::jsonb WHERE Code=$1', [code, JSON.stringify(data)]); }
+    if (!result.alreadyRedeemed) { const { imageUrl: unused, ...data } = result.voucher; await client.query(`UPDATE PetRealVouchers SET Data=$2::jsonb WHERE ${field}=$1`, [value, JSON.stringify(data)]); }
     return result;
   });
   return jsonTransaction(data => {
-    const index = data.petRealVouchers.findIndex(row => row.code === code), result = apply(data.petRealVouchers[index]);
+    const index = data.petRealVouchers.findIndex(row => selector.id ? row.id === selector.id : row.code === selector.code), result = apply(data.petRealVouchers[index]);
     if (!result.alreadyRedeemed) { const { imageUrl: unused, ...voucher } = result.voucher; data.petRealVouchers[index] = voucher; }
     return result;
   });
 }
 
-module.exports = { ensure, saveImage, readImage, listProducts, saveProduct, purchase, vouchers, redeem };
+module.exports = { ensure, saveImage, readImage, listProducts, saveProduct, deleteProduct, purchase, vouchers, redeem, redeemVoucher };
