@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import './styles/main.css';
 import './styles/access.css';
 import { api } from './api';
+import { RealShop } from './real-shop';
 import { CoinPusherSettlementRetries, coinPusherPayoutEventId, rejectCoinPusherPayout, settledCoinPusherRemaining, type SettlementError } from './game/CoinPusherSettlement';
 import { lockCoinPusherBrowserInteractions } from './game/CoinPusherBrowserInteractions';
 import { CoinPusherTeacherSettings } from './teacher/CoinPusherSettings';
@@ -75,7 +76,7 @@ if (localStorage.getItem('pet-reduced-motion') === '1') document.documentElement
 
 const UI = {
   'zh-HK': {
-    title:'寵物樂園', home:'我的房間', park:'戶外樂園', collection:'寵物圖鑑', shop:'魔法商店', coinPusher:'推銀仔', brawl:'大亂鬥', visit:'同班參觀', settings:'設定',
+    title:'寵物樂園', home:'我的房間', park:'戶外樂園', collection:'寵物圖鑑', shop:'魔法商店', realShop:'實體商店', coinPusher:'推銀仔', brawl:'大亂鬥', visit:'同班參觀', settings:'設定',
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
     hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
@@ -83,7 +84,7 @@ const UI = {
     empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 12 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
-    title:'Pet Paradise', home:'My Room', park:'Pet Town', collection:'Pet Collection', shop:'Magic Shop', coinPusher:'Coin Pusher', brawl:'Pet Brawl', visit:'Class Visits', settings:'Settings',
+    title:'Pet Paradise', home:'My Room', park:'Pet Town', collection:'Pet Collection', shop:'Magic Shop', realShop:'Reward Shop', coinPusher:'Coin Pusher', brawl:'Pet Brawl', visit:'Class Visits', settings:'Settings',
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
     hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
@@ -291,7 +292,7 @@ class StudentApp {
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
-        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
+        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['realShop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
       </nav>
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
@@ -542,7 +543,8 @@ class StudentApp {
     if(tab!=='brawl'){this.brawlGeneration++;this.brawlController?.destroy();this.brawlController=undefined;}
     if(tab!=='coinPusher')this.cancelCoinPusherPreload();
     this.tab=tab;document.querySelectorAll('[data-tab]').forEach((item)=>{const on=(item as HTMLElement).dataset.tab===tab;item.classList.toggle('active',on);item.setAttribute('aria-current',on?'page':'false');});
-    if(tab==='park')void this.openPark();else if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
+    if(tab==='realShop'){this.setLayout('full');const panel=document.querySelector('#sidePanel')!;panel.innerHTML='<div class="panel-scroll" id="studentRealShop"></div>';void new RealShop(panel.querySelector<HTMLElement>('#studentRealShop')!,this.locale,false,this.identity.id,this.state.wallet.balance,balance=>{this.state.wallet.balance=balance;this.updateWallet();}).init();}
+    else if(tab==='park')void this.openPark();else if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
   }
   private destroyPark(clearRestore = true) {
     this.parkGeneration++; this.parkController?.destroy(); this.parkController = undefined;
@@ -2251,6 +2253,7 @@ class StudentApp {
 type RosterFilterField = 'className' | 'chineseGroup' | 'englishGroup' | 'mathGroup';
 
 class TeacherApp {
+  private realShop?: RealShop;
   private parkSettings?: ParkTeacherSettings;
   quietRoom?:QuietRoom;
   private coinPusherSettings?:CoinPusherTeacherSettings;
@@ -2278,6 +2281,7 @@ class TeacherApp {
     this.coinPusherSettings=undefined;
     this.accessSettings?.dispose();this.accessSettings=undefined;
     this.parkSettings=undefined;
+    this.realShop=undefined;
     const zh=this.zh();
     app.innerHTML=`<div class="teacher-shell">
       <header class="teacher-header">
@@ -2328,21 +2332,25 @@ class TeacherApp {
       <main id="teacherArcadeMain" class="teacher-arcade-main" hidden></main>
       <main id="teacherAccessMain" class="teacher-access-main" hidden></main>
       <main id="teacherParkMain" class="teacher-arcade-main" hidden></main>
+      <main id="teacherRealShopMain" class="teacher-real-shop-main" hidden></main>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
     app.querySelector('.teacher-tool-tabs')!.insertAdjacentHTML('beforeend', `<button type="button" data-teacher-tool="park" aria-pressed="false">${zh?'戶外樂園設定':'Outdoor park settings'}</button>`);
+    app.querySelector('.teacher-tool-tabs')!.insertAdjacentHTML('beforeend', `<button type="button" data-teacher-tool="realShop" aria-pressed="false">🎁 ${zh?'實體商店':'Reward Shop'}</button>`);
     this.bind();this.updateSummary();
     document.querySelectorAll<HTMLButtonElement>('[data-teacher-tool]').forEach(button=>button.addEventListener('click',()=>{
       const quiet=button.dataset.teacherTool==='quiet';
       const arcade=button.dataset.teacherTool==='arcade';
       const access=button.dataset.teacherTool==='access';
       const park=button.dataset.teacherTool==='park';
+      const realShop=button.dataset.teacherTool==='realShop';
       document.querySelectorAll<HTMLElement>('[data-teacher-tool]').forEach(item=>{item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));});
-      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade||access||park;
+      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade||access||park||realShop;
       document.querySelector<HTMLElement>('#teacherQuietMain')!.hidden=!quiet;
       document.querySelector<HTMLElement>('#teacherArcadeMain')!.hidden=!arcade;
       document.querySelector<HTMLElement>('#teacherAccessMain')!.hidden=!access;
       document.querySelector<HTMLElement>('#teacherParkMain')!.hidden=!park;
+      document.querySelector<HTMLElement>('#teacherRealShopMain')!.hidden=!realShop;
       if(!quiet)this.quietRoom?.hide();
       if(quiet&&!this.quietRoom){
         this.quietRoom=new QuietRoom(document.querySelector<HTMLElement>('#teacherQuietMain')!,this.roster,this.locale,async()=>{
@@ -2356,6 +2364,7 @@ class TeacherApp {
       }
       if(access&&!this.accessSettings){this.accessSettings=new PetAccessTeacherSettings(document.querySelector<HTMLElement>('#teacherAccessMain')!,this.locale);void this.accessSettings.init();}
       if(park&&!this.parkSettings){this.parkSettings=new ParkTeacherSettings(document.querySelector<HTMLElement>('#teacherParkMain')!,this.locale);void this.parkSettings.init();}
+      if(realShop&&!this.realShop){this.realShop=new RealShop(document.querySelector<HTMLElement>('#teacherRealShopMain')!,this.locale,true,'',0,undefined,this.roster.students,this.identity.name);void this.realShop.init();}
     }));
   }
   studentRows(){return this.filteredStudents().map((student:any)=>{

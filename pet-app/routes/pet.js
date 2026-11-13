@@ -56,6 +56,7 @@ router.use(async (req, res, next) => {
   }
 });
 router.use('/brawl', require('./brawl'));
+router.use('/real-shop', require('./real-shop'));
 
 router.get('/bootstrap', requireStudent, asyncRoute(async (req, res) => {
   sendResult(res, await repo.getBootstrap(req.session.studentId));

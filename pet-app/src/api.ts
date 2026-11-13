@@ -5,6 +5,7 @@ import type { ArcadePrize, ArcadePrizeKind } from './game/ArcadePrizes';
 import type { QuietSession, QuietSettings } from './quiet-room-types';
 import type { PetAccessStatus, PetAccessSettings, PetAccessUpdate } from './access-types';
 import { retrySettlement } from '../lib/brawl/settlement-retry.mjs';
+import type { RealProduct, RealVoucher, VoucherPage } from './real-shop-types';
 
 // The shared runtime is loaded blocking in <head>, before this bundle runs.
 const t = (key: string) => (window as any).BuiI18n.t(key) as string;
@@ -20,7 +21,7 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     credentials: 'include',
     ...options,
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: { ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }), ...(options.headers || {}) },
   });
   const data = await response.json().catch(() => ({ success: false, message: t('pet.badResponse') }));
   if (!response.ok || data.success === false) {
@@ -49,6 +50,12 @@ async function quietRequest<T>(url: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  realProducts: (teacher = false) => request<{ products: RealProduct[] }>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}products`),
+  saveRealProduct: (product: Partial<RealProduct> & { id: string }) => request<{ product: RealProduct }>(`/api/pet/real-shop/teacher/products/${encodeURIComponent(product.id)}`, { method: 'PUT', body: JSON.stringify(product) }),
+  uploadRealImage: (file: File) => { const body = new FormData(); body.append('image', file); return request<{ imageId: string; imageUrl: string }>('/api/pet/real-shop/teacher/images', { method: 'POST', body }); },
+  buyRealProduct: (productId: string, expectedPrice: number, key: string) => request<{ voucher: RealVoucher; balance: number }>('/api/pet/real-shop/purchase', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ productId, expectedPrice }) }),
+  realVouchers: (teacher = false, code = '', before = '') => { const params = new URLSearchParams(); if (code) params.set('code', code); if (before) params.set('before', before); return request<VoucherPage>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}vouchers?${params}`); },
+  redeemRealVoucher: (code: string) => request<{ voucher: RealVoucher; alreadyRedeemed: boolean }>('/api/pet/real-shop/teacher/redeem', { method: 'POST', body: JSON.stringify({ code }) }),
   parkSettings: () => request<{ dailyCap: number }>('/api/pet/teacher/park/settings'),
   saveParkSettings: (dailyCap: number) => request<{ dailyCap: number }>('/api/pet/teacher/park/settings', { method: 'PUT', body: JSON.stringify({ dailyCap }) }),
   brawlRanking: () => request<import('./brawl/ranking-types').RankedOverview>('/api/pet/brawl/ranking'),

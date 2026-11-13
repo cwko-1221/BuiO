@@ -42,6 +42,8 @@
     "build:pet-redrawn-queue": "node scripts/build-redrawn-wearable-queue.mjs",
     "build:pet-redrawn-queue:all": "node scripts/build-redrawn-wearable-queue.mjs --all-stages",
     "check:pet": "node scripts/test-pet-module.mjs",
+    "check:pet-real-shop": "node --test pet-app/tests/real-shop.test.cjs pet-app/tests/real-shop-postgres.test.cjs",
+    "check:pet-real-shop-live": "node scripts/test-pet-real-shop-live.mjs",
     "check:pet-park": "node --test pet-app/tests/park.test.cjs pet-app/tests/park-postgres.test.cjs pet-app/tests/park-activities.test.cjs",
     "check:pet-park-live": "node scripts/test-pet-park-adventure-live.mjs",
     "check:pet-park-sync": "node scripts/test-pet-park-live.mjs --smoke",
