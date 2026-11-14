@@ -4,7 +4,8 @@
 
 ## 學生體驗
 
-- 5 個多步驟探究，涵蓋生命與健康、物質、環境、能量及力與運動。
+- 8 個多步驟探究，涵蓋生命與健康、物質、環境、能量及力與運動。
+- 所有實驗的器材名稱改用清晰的 HTML 文字，桌面 16px、手機 14px，跟隨器材及視角、避開控制介面，並保留原有 3D 拖拉操作；呼吸系統的六張器官字卡同樣使用清晰文字。
 - 每個探究包括預測、安全提示、器材操作、逐步觀察、科學解釋、模型限制和 PDF 內容代碼。
 - 支援拖動、連接、倒入、攪拌、敲擊、點按及連續數值調校；Rapier 剛體碰撞、浮力、摩擦、彈簧張力與電磁力會直接影響結果，所有步驟亦有鍵盤／按鈕等效操作。
 - 3D 卡通器材由本地 Blender 資產包與程序幾何組成，動畫與 WebAudio 音效亦隨模組提供，不依賴外部圖片、字型或聲音服務。
@@ -18,6 +19,7 @@ npm run build:science-lab
 npm run check:science-lab
 npm run check:science-lab-live
 npm run check:science-lab-physics
+node scripts/test-science-labels-live.mjs
 ```
 
 正式 HTML 由平台登入保護；只有帶雜湊名稱的建立資源可由 `/science-lab/assets` 讀取。`/science-lab/preview` 只在開發環境啟用。

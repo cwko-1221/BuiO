@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "htmlSha256": "bcf890b4c21431a593033170e57a07af24f3eae0e5dcfc790566c645998c5279",
+  "checks": [
+    "Desktop: opaque sandbox, denied storage, offline, WebGL, real balloon/bottle drags, six steps, two records, reflection, conclusion",
+    "Mobile: 390×900, sandbox, no horizontal overflow, alternate controls complete the inquiry",
+    "Air Lab: independent branding, 16px/14px DOM apparatus labels, camera tracking, live model readings, phone task/readout/control separation",
+    "Chinese/English: desktop and phone, translated apparatus/instructions/data, round-trip language changes preserve progress, prediction, readings and action history",
+    "Local file: opens directly without a server or separate asset files",
+    "Language settings are accessible on the introductory slides, so visitors can start in English"
+  ],
+  "googleSitesPasteVerified": false,
+  "note": "Actual Google Sites editor requires Google sign-in; sandbox tests do not establish editor paste/publish compatibility."
+}

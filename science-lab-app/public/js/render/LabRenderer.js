@@ -4,7 +4,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import {
   palette, mat, roundedBox, cylinder, sphere, torus, makeBench, makeBeaker,
   makeBottle, makeTargetRing, makeWire, replaceWireGeometry, disposeObject, worldPosition,
-  makeLabelPlane, setLabelAnisotropy,
+  setLabelAnisotropy,
 } from './SceneKit.js';
 import { buildExperimentScene } from './ExperimentScenes.js';
 
@@ -13,6 +13,7 @@ import { buildExperimentScene } from './ExperimentScenes.js';
 const sceneLabel = (text) => window.BuiI18n?.sceneLabel?.(text) ?? text;
 import { PhysicsWorld } from '../physics/PhysicsWorld.js';
 import { loadScienceLabKit, loadRespiratoryModel, getAssetLibraryStats } from './AssetLibrary.js';
+import { ScreenLabels } from './ScreenLabels.js';
 
 const DEFAULT_CAMERA = new THREE.Vector3(0, 7.6, 11.2);
 const DEFAULT_TARGET = new THREE.Vector3(0, .9, 0);
@@ -332,7 +333,7 @@ export class LabRenderer {
     this.entities.set(id, entity);
     // Connection ports are named by the step instruction and sit too close
     // together to plate; parts that are not pickable are scenery.
-    if (label && options.namePlate !== false && !options.connectable && options.pickable !== false) this.namePlateQueue.push(entity);
+    if (label && (options.namePlate !== false || options.screenLabel) && !options.connectable && options.pickable !== false) this.namePlateQueue.push(entity);
     this.physics?.registerEntity(id, object, options);
     object.traverse((child) => {
       if (!child.isMesh) return;
@@ -341,88 +342,26 @@ export class LabRenderer {
     });
   }
 
-  /**
-   * Build one plate per named piece of apparatus and stand them along the front
-   * of the bench. Plates are laid out together rather than one at a time so
-   * neighbouring apparatus cannot end up with overlapping names.
-   */
+  /** Project readable HTML names beside apparatus in every experiment. */
   #layOutNamePlates() {
-    // Plate the nearest apparatus first. The bench is seen at an angle, so two
-    // plates a short distance apart in depth still read as one stacked blur;
-    // a crowded plate therefore steps backwards, which keeps the plates in the
-    // same front-to-back order as the apparatus they name.
-    const queued = this.namePlateQueue
-      .map((entity) => ({ entity, bounds: new THREE.Box3().setFromObject(entity.object) }))
-      .filter(({ bounds }) => !bounds.isEmpty() && Number.isFinite(bounds.min.x))
-      .sort((a, b) => b.bounds.max.z - a.bounds.max.z);
-    const placed = [];
-    for (const { entity, bounds } of queued) {
+    const entries = this.namePlateQueue.flatMap(entity => {
+      const bounds = new THREE.Box3().setFromObject(entity.object);
+      if (bounds.isEmpty() || !Number.isFinite(bounds.min.x)) return [];
       const centre = bounds.getCenter(new THREE.Vector3());
-      const plate = this.#makeNamePlate(entity.label);
+      const overlay = entity.options.screenLabelMode === 'overlay';
       const paired = entity.options.namePlateMode === 'paired-fixed';
-      const local = paired
-        ? this.experimentRoot.worldToLocal(centre.clone())
-        : this.experimentRoot.worldToLocal(new THREE.Vector3(centre.x, 0, bounds.max.z + .34));
-      local.y = .02;
-      if (paired) local.z += entity.options.namePlateFrontOffset ?? .68;
-      local.x = THREE.MathUtils.clamp(local.x, -5, 5);
-      local.z = THREE.MathUtils.clamp(local.z, -2.5, 2.62);
-      if (!paired) {
-        for (let guard = 0; guard < 10; guard += 1) {
-          const clash = placed.find((other) => Math.abs(other.x - local.x) < 1.56 && Math.abs(other.z - local.z) < .88);
-          if (!clash) break;
-          local.z = clash.z - .92;
-          if (local.z < -2.5) {
-            // No room behind: stand it beside the plate that is already there.
-            local.z = clash.z;
-            local.x += local.x < 0 ? -1.6 : 1.6;
-            local.x = THREE.MathUtils.clamp(local.x, -5, 5);
-          }
-        }
-      }
-      placed.push({ x: local.x, z: local.z });
-      plate.position.copy(local);
-      this.experimentRoot.add(plate);
-      this.namePlates.set(entity.id, plate);
-    }
+      const point = overlay ? centre : new THREE.Vector3(centre.x, bounds.min.y + .04, bounds.max.z + .22);
+      if (paired) point.z += entity.options.namePlateFrontOffset ?? .68;
+      return [{ entity, point, fixed: paired, overlay }];
+    });
+    this.screenLabels ||= new ScreenLabels(this);
+    this.screenLabels.setEntries(entries);
     this.namePlateQueue = [];
-    this.#highlightNamePlates();
-  }
-
-  #makeNamePlate(text) {
-    const plate = new THREE.Group();
-    const base = roundedBox(1.5, .06, .36, 0xf3efe2, .026, 2, { roughness: .78 });
-    base.position.y = .03;
-    const face = new THREE.Group();
-    const easel = roundedBox(1.4, .5, .05, 0xfffdf7, .06, 3, { roughness: .7 });
-    easel.position.set(0, .29, 0);
-    easel.renderOrder = 5;
-    const caption = makeLabelPlane(text, { scale: .48 });
-    caption.position.set(0, .29, .04);
-    caption.renderOrder = 6;
-    face.add(easel, caption);
-    plate.add(base, face);
-    plate.userData.face = face;
-    plate.userData.caption = caption;
-    plate.userData.easel = easel;
-    plate.userData.authoredScale = caption.scale.clone();
-    return plate;
   }
 
   /** The apparatus this step needs reads larger than the rest of the bench. */
   #highlightNamePlates() {
-    const action = this.currentStep?.action;
-    const active = new Set([action?.subject, action?.target].filter(Boolean));
-    for (const [id, plate] of this.namePlates) {
-      const on = active.has(id);
-      const authored = plate.userData.authoredScale;
-      plate.userData.caption.scale.set(
-        authored.x * (on ? 1.24 : 1),
-        authored.y * (on ? 1.24 : 1),
-        1,
-      );
-      plate.userData.easel.material.color.set(on ? 0xfff3cd : 0xfffdf7);
-    }
+    this.screenLabels?.update();
   }
 
   #registerTarget(id, label, object, options) {
@@ -1523,6 +1462,7 @@ export class LabRenderer {
       background: `#${this.scene.background.getHexString()}`,
       physics: this.physics?.getStats?.() || null,
       assets: getAssetLibraryStats(),
+      labels: this.screenLabels?.getStats() || null,
       science: this.sceneController?.getState?.() || null,
       lastInteraction: this.lastInteraction || null,
     };
@@ -1632,6 +1572,7 @@ export class LabRenderer {
     if (!this.settings.reduceMotion) this.environment.children.forEach((child) => { if (child.userData.floatOffset != null) child.position.y += Math.sin(this.elapsed*.55+child.userData.floatOffset)*.0008; });
     this.sceneController?.update?.(this.elapsed, dt);
     this.renderer.render(this.scene, this.camera);
+    this.screenLabels?.update();
   }
 
   #updateAnimations(dt) {
@@ -1666,6 +1607,7 @@ export class LabRenderer {
   }
 
   #clearWorld() {
+    this.screenLabels?.clear();
     this.customAction = null;
     this.customPreview = null;
     this.sceneController = null;
@@ -1690,6 +1632,7 @@ export class LabRenderer {
 
   dispose() {
     this.destroyed = true;
+    this.screenLabels?.dispose();
     window.removeEventListener('resize', this.resizeHandler);
     document.removeEventListener('visibilitychange', this.visibilityHandler);
     this.renderer?.setAnimationLoop(null);

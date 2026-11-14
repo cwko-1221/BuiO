@@ -1,3 +1,19 @@
+.science-apparatus-label-layer { position: fixed; inset: 0; z-index: 18; overflow: hidden; pointer-events: none; user-select: none; }
+.science-apparatus-label-layer > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.science-apparatus-label-layer path { fill: none; stroke: rgba(18,59,69,.5); stroke-width: 1; }
+.science-apparatus-label { position: absolute; left: 0; top: 0; padding: 7px 11px; min-height: 34px; border: 1px solid #bfd2d2; border-radius: 7px; color: #123b45; background: #fffef9; box-shadow: 0 3px 12px rgba(8,47,61,.1); white-space: nowrap; font: 700 16px/1.2 'Microsoft JhengHei','PingFang TC',system-ui,sans-serif; }
+.science-apparatus-label.is-active { border-color: #178d79; background: #effcf5; box-shadow: 0 0 0 2px rgba(23,141,121,.15); }
+.science-apparatus-label--card { min-height: 0; padding: 2px 4px; border-color: transparent; background: rgba(255,255,255,.94); box-shadow: none; }
+.high-contrast .science-apparatus-label { border-width: 2px; border-color: #123b45; color: #082f3d; background: #fff; }
+@media (max-width: 620px) {
+  .science-apparatus-label { min-height: 30px; padding: 6px 8px; font-size: 14px; }
+  .science-apparatus-label--card { min-height: 0; padding: 2px 3px; }
+  .lab-screen:not(.mission-open) .variable-control,
+  .lab-screen:not(.mission-open) .record-panel,
+  .lab-screen:not(.mission-open) .observation-strip { bottom: 88px; }
+  .lab-screen .variable-control { max-width: calc(100vw - 28px); grid-template-columns: auto minmax(80px,1fr) auto; }
+}
+
 :root {
   --ink: #102e38;
   --ink-soft: #4d6870;

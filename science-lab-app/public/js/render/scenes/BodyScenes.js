@@ -488,12 +488,14 @@ export function buildRespiratory(api) {
     const chip = new THREE.Group();
     const cardBody = roundedBox(1, .42, .08, 0xffffff, .08, 3, { roughness: .5, castShadow: false });
     const face = makeTextPlane(ORGAN_TEXT[organ], { width: 1, height: .42, background: '#ffffff', border: '#2f9c86', radius: .08 });
+    // Keep the original physical card; its caption is sharp screen-space text.
+    face.visible = false;
     face.position.z = .045;
     chip.add(cardBody, face);
     labelChips.set(organ, chip);
     chip.position.set(-2.68 + index * 1.07, 0, .08);
     rack.add(chip);
-    api.entity(`chip-${organ}`, ORGAN_TEXT[organ], chip, { draggable: true, namePlate: false, physics: false });
+    api.entity(`chip-${organ}`, ORGAN_TEXT[organ], chip, { draggable: true, namePlate: false, screenLabel: true, screenLabelMode: 'overlay', physics: false });
   });
 
   // A one-row rack and wide instruction card get clipped in a portrait tablet

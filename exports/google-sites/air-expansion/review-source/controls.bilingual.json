@@ -1,0 +1,714 @@
+{
+  "sl.pageTitle": {
+    "zh-HK": "空氣的脹與縮｜空氣研究所",
+    "en-US": "Air Expansion & Contraction | Air Lab"
+  },
+  "sl.pageDesc": {
+    "zh-HK": "空氣研究所：以氣球、熱水與冰水，探索空氣受熱膨脹、遇冷收縮。",
+    "en-US": "Explore how air expands and contracts using a balloon and hot and cold water."
+  },
+  "sl.brand": {
+    "zh-HK": "空氣研究所",
+    "en-US": "Air Lab"
+  },
+  "sl.skipLink": {
+    "zh-HK": "跳到主要內容",
+    "en-US": "Skip to the main content"
+  },
+  "sl.canvasAria": {
+    "zh-HK": "互動式 3D 科學實驗場景",
+    "en-US": "Interactive 3D science laboratory"
+  },
+  "sl.booting": {
+    "zh-HK": "正在打開空氣研究所…",
+    "en-US": "Opening Air Lab…"
+  },
+  "sl.homeAria": {
+    "zh-HK": "返回實驗目錄",
+    "en-US": "Back to the experiment list"
+  },
+  "sl.progressAria": {
+    "zh-HK": "完成進度",
+    "en-US": "Progress"
+  },
+  "sl.completed": {
+    "zh-HK": "已完成",
+    "en-US": "completed"
+  },
+  "sl.notebookAria": {
+    "zh-HK": "打開科學筆記",
+    "en-US": "Open the science notebook"
+  },
+  "sl.notebook": {
+    "zh-HK": "科學筆記",
+    "en-US": "Science notebook"
+  },
+  "sl.soundOff": {
+    "zh-HK": "關閉聲音",
+    "en-US": "Mute"
+  },
+  "sl.soundOn": {
+    "zh-HK": "開啟聲音",
+    "en-US": "Unmute"
+  },
+  "sl.sound": {
+    "zh-HK": "聲音",
+    "en-US": "Sound"
+  },
+  "sl.settings": {
+    "zh-HK": "設定",
+    "en-US": "Settings"
+  },
+  "sl.leaveAria": {
+    "zh-HK": "返回學習平台",
+    "en-US": "Back to the learning platform"
+  },
+  "sl.leave": {
+    "zh-HK": "離開實驗室",
+    "en-US": "Leave the lab"
+  },
+  "sl.catalogTitle": {
+    "zh-HK": "空氣的脹與縮",
+    "en-US": "Get hands on,<br /><em>and let discovery happen.</em>"
+  },
+  "sl.catalogLead": {
+    "zh-HK": "空氣受熱和遇冷時，體積會有甚麼變化？ 透過氣球、熱水和冰水，親手觀察空氣體積的變化。",
+    "en-US": "Step into safe simulated experiments: drag, connect, pour, stir and adjust the apparatus yourself, and find the science behind what you see."
+  },
+  "sl.startFirst": {
+    "zh-HK": "開始實驗",
+    "en-US": "Start the first experiment"
+  },
+  "sl.continueMine": {
+    "zh-HK": "繼續我的探究",
+    "en-US": "Continue my inquiry"
+  },
+  "sl.tour": {
+    "zh-HK": "30 秒使用導覽",
+    "en-US": "30-second tour"
+  },
+  "sl.proofAria": {
+    "zh-HK": "模組特色",
+    "en-US": "What is inside"
+  },
+  "sl.proofInquiries": {
+    "zh-HK": "個完整探究",
+    "en-US": "full inquiries"
+  },
+  "sl.proofFields": {
+    "zh-HK": "大科學範疇",
+    "en-US": "science topics"
+  },
+  "sl.proofSafe": {
+    "zh-HK": "安全模擬",
+    "en-US": "safe simulation"
+  },
+  "sl.chooseStation": {
+    "zh-HK": "空氣的脹與縮",
+    "en-US": "Choose an inquiry station"
+  },
+  "sl.filterAria": {
+    "zh-HK": "篩選實驗",
+    "en-US": "Filter the experiments"
+  },
+  "sl.filterAll": {
+    "zh-HK": "全部",
+    "en-US": "All"
+  },
+  "sl.topicMatter": {
+    "zh-HK": "物質",
+    "en-US": "Matter"
+  },
+  "sl.topicEnvironment": {
+    "zh-HK": "環境",
+    "en-US": "Environment"
+  },
+  "sl.topicEnergy": {
+    "zh-HK": "能量",
+    "en-US": "Energy"
+  },
+  "sl.topicForces": {
+    "zh-HK": "力與運動",
+    "en-US": "Forces & Motion"
+  },
+  "sl.topicBody": {
+    "zh-HK": "人體",
+    "en-US": "Human Body"
+  },
+  "sl.mapBack": {
+    "zh-HK": "實驗地圖",
+    "en-US": "Experiment map"
+  },
+  "sl.expandMission": {
+    "zh-HK": "展開任務卡",
+    "en-US": "Open the task card"
+  },
+  "sl.collapseMission": {
+    "zh-HK": "收起任務卡",
+    "en-US": "Close the task card"
+  },
+  "sl.peekTitle": {
+    "zh-HK": "查看今步任務",
+    "en-US": "See this step"
+  },
+  "sl.stepOf": {
+    "zh-HK": "步驟 {n} / {total}",
+    "en-US": "Step {n} of {total}"
+  },
+  "sl.cueDrag": {
+    "zh-HK": "拖動有光圈的器材",
+    "en-US": "Drag the apparatus that is glowing"
+  },
+  "sl.hintButton": {
+    "zh-HK": "提示",
+    "en-US": "Hint"
+  },
+  "sl.accessible": {
+    "zh-HK": "按鈕操作",
+    "en-US": "Do it with a button"
+  },
+  "sl.accessibleAdjust": {
+    "zh-HK": "套用建議數值",
+    "en-US": "Apply the suggested value"
+  },
+  "sl.accessibleRecord": {
+    "zh-HK": "填入儀器讀數",
+    "en-US": "Fill in the meter reading"
+  },
+  "sl.accessibleAria": {
+    "zh-HK": "以按鈕完成：{instruction}",
+    "en-US": "Do this with a button: {instruction}"
+  },
+  "sl.restart": {
+    "zh-HK": "重新開始",
+    "en-US": "Start over"
+  },
+  "sl.variableLabel": {
+    "zh-HK": "調校數值",
+    "en-US": "Adjust the value"
+  },
+  "sl.recordKicker": {
+    "zh-HK": "記錄數據 · RECORD",
+    "en-US": "RECORD YOUR DATA"
+  },
+  "sl.reading": {
+    "zh-HK": "讀數",
+    "en-US": "Reading"
+  },
+  "sl.readingWithUnit": {
+    "zh-HK": "{label}（{unit}）",
+    "en-US": "{label} ({unit})"
+  },
+  "sl.recordAria": {
+    "zh-HK": "選擇讀數",
+    "en-US": "Choose a reading"
+  },
+  "sl.observePrompt": {
+    "zh-HK": "觀察到甚麼？",
+    "en-US": "What did you see?"
+  },
+  "sl.viewAria": {
+    "zh-HK": "3D 視角控制",
+    "en-US": "3D view controls"
+  },
+  "sl.viewLeft": {
+    "zh-HK": "視角向左轉",
+    "en-US": "Turn the view left"
+  },
+  "sl.viewReset": {
+    "zh-HK": "重設視角",
+    "en-US": "Reset the view"
+  },
+  "sl.viewRight": {
+    "zh-HK": "視角向右轉",
+    "en-US": "Turn the view right"
+  },
+  "sl.observeKicker": {
+    "zh-HK": "先看現象 · OBSERVE",
+    "en-US": "OBSERVE FIRST"
+  },
+  "sl.watchResult": {
+    "zh-HK": "留心觀看實驗結果",
+    "en-US": "Watch what happens"
+  },
+  "sl.watchFinal": {
+    "zh-HK": "留心觀看最後的實驗現象",
+    "en-US": "Watch the final result closely"
+  },
+  "sl.explainIn": {
+    "zh-HK": "{seconds} 秒後顯示解釋",
+    "en-US": "Explanation in {seconds}s"
+  },
+  "sl.explainNow": {
+    "zh-HK": "立即看解釋",
+    "en-US": "Explain it now"
+  },
+  "sl.continue": {
+    "zh-HK": "繼續",
+    "en-US": "Continue"
+  },
+  "sl.explainKicker": {
+    "zh-HK": "第五步 · 科學解釋 EXPLAIN",
+    "en-US": "STEP FIVE · EXPLAIN"
+  },
+  "sl.resultTitle": {
+    "zh-HK": "發現密度的秘密！",
+    "en-US": "You uncovered it!"
+  },
+  "sl.resultScoreDefault": {
+    "zh-HK": "獨立完成",
+    "en-US": "Finished independently"
+  },
+  "sl.labelHypothesis": {
+    "zh-HK": "你的假說",
+    "en-US": "Your hypothesis"
+  },
+  "sl.labelObservation": {
+    "zh-HK": "實驗觀察",
+    "en-US": "What you observed"
+  },
+  "sl.labelComparison": {
+    "zh-HK": "對照比較",
+    "en-US": "Side by side"
+  },
+  "sl.labelExplanation": {
+    "zh-HK": "科學解釋",
+    "en-US": "The science"
+  },
+  "sl.curriculumNote": {
+    "zh-HK": "本模組原創實驗，參考建議教具表的相關編碼；並非完整課程或評核清單。",
+    "en-US": "These inquiries are original to this module and cite the suggested apparatus codes. They are not a full syllabus or assessment list."
+  },
+  "sl.replay": {
+    "zh-HK": "再做一次",
+    "en-US": "Do it again"
+  },
+  "sl.nextStation": {
+    "zh-HK": "前往下一站",
+    "en-US": "Next station"
+  },
+  "sl.notebookTitle": {
+    "zh-HK": "我的科學筆記",
+    "en-US": "My science notebook"
+  },
+  "sl.close": {
+    "zh-HK": "關閉",
+    "en-US": "Close"
+  },
+  "sl.settingsTitle": {
+    "zh-HK": "實驗室設定",
+    "en-US": "Lab settings"
+  },
+  "sl.soundLabel": {
+    "zh-HK": "音效",
+    "en-US": "Sound effects"
+  },
+  "sl.soundHint": {
+    "zh-HK": "操作、成功和環境聲音",
+    "en-US": "Action, success and ambient sounds"
+  },
+  "sl.motionLabel": {
+    "zh-HK": "減少動態",
+    "en-US": "Reduce motion"
+  },
+  "sl.motionHint": {
+    "zh-HK": "減少非必要鏡頭和粒子動畫",
+    "en-US": "Fewer camera moves and particle effects"
+  },
+  "sl.contrastLabel": {
+    "zh-HK": "高對比提示",
+    "en-US": "High-contrast cues"
+  },
+  "sl.contrastHint": {
+    "zh-HK": "加強可操作器材的輪廓",
+    "en-US": "Stronger outlines on apparatus you can use"
+  },
+  "sl.qualityLabel": {
+    "zh-HK": "3D 畫質",
+    "en-US": "3D quality"
+  },
+  "sl.qualityHint": {
+    "zh-HK": "低階平板建議選「流暢」",
+    "en-US": "On an older tablet, choose Smooth"
+  },
+  "sl.qualityAuto": {
+    "zh-HK": "自動",
+    "en-US": "Automatic"
+  },
+  "sl.qualityHigh": {
+    "zh-HK": "精緻",
+    "en-US": "Detailed"
+  },
+  "sl.qualityLow": {
+    "zh-HK": "流暢",
+    "en-US": "Smooth"
+  },
+  "sl.tourTitle": {
+    "zh-HK": "像真的實驗一樣操作",
+    "en-US": "Work as you would in a real lab"
+  },
+  "sl.tour1Title": {
+    "zh-HK": "看清任務",
+    "en-US": "Read the task"
+  },
+  "sl.tour1Body": {
+    "zh-HK": "每次只需要完成一個動作。",
+    "en-US": "There is only ever one action to do."
+  },
+  "sl.tour2Title": {
+    "zh-HK": "直接動手",
+    "en-US": "Use your hands"
+  },
+  "sl.tour2Body": {
+    "zh-HK": "拖動、連接、轉動或點按發光器材。",
+    "en-US": "Drag, connect, turn or tap whatever is glowing."
+  },
+  "sl.tour3Title": {
+    "zh-HK": "留心觀察",
+    "en-US": "Watch closely"
+  },
+  "sl.tour3Body": {
+    "zh-HK": "現象會在 3D 場景中即時出現。",
+    "en-US": "What happens appears straight away in the 3D scene."
+  },
+  "sl.keyboardNote": {
+    "zh-HK": "鍵盤：Tab 選取器材，Enter 操作；左右方向鍵可調節。",
+    "en-US": "Keyboard: Tab to select apparatus, Enter to use it, and the arrow keys to adjust."
+  },
+  "sl.ready": {
+    "zh-HK": "我準備好了",
+    "en-US": "I’m ready"
+  },
+  "sl.bootContent": {
+    "zh-HK": "正在整理實驗步驟…",
+    "en-US": "Loading the experiments…"
+  },
+  "sl.bootExpired": {
+    "zh-HK": "登入資料已失效，正在返回平台…",
+    "en-US": "Your session has expired — returning to the platform…"
+  },
+  "sl.bootApparatus": {
+    "zh-HK": "正在準備氣球與水浴…",
+    "en-US": "Preparing the balloon and water baths…"
+  },
+  "sl.bootNotebook": {
+    "zh-HK": "正在準備觀測介面…",
+    "en-US": "Preparing the observation panel…"
+  },
+  "sl.bootReady": {
+    "zh-HK": "實驗準備好了",
+    "en-US": "The lab is ready!"
+  },
+  "sl.fallbackNotice": {
+    "zh-HK": "裝置未能啟動 3D，已切換至可完整操作的簡化場景。",
+    "en-US": "This device could not start 3D, so the simplified scene is running instead — everything still works."
+  },
+  "sl.resumed": {
+    "zh-HK": "已回復到步驟 {n}，可以繼續探究。",
+    "en-US": "Picked up again at step {n}."
+  },
+  "sl.tryWrongObject": {
+    "zh-HK": "這件器材也很有趣，但今步要使用發光提示的器材。",
+    "en-US": "Interesting piece — but this step needs the one that is glowing."
+  },
+  "sl.tryWrongTarget": {
+    "zh-HK": "位置未對準。留意目標位置的光圈，再放近一點。",
+    "en-US": "Not quite in place. Look for the glowing spot and bring it closer."
+  },
+  "sl.tryWrongVerb": {
+    "zh-HK": "試試依照任務提示，用另一種操作方法。",
+    "en-US": "Try the action the task card suggests instead."
+  },
+  "sl.tryAdjustMore": {
+    "zh-HK": "方向正確！再調校一點，留意數值變化。",
+    "en-US": "Right direction! Adjust a little further and watch the number."
+  },
+  "sl.tryRecordMismatch": {
+    "zh-HK": "再看清楚儀器上的讀數，然後選一次。",
+    "en-US": "Look at the meter again, then choose once more."
+  },
+  "sl.tryRecordMissing": {
+    "zh-HK": "請在數據面板選一個讀數。",
+    "en-US": "Choose a reading in the data panel."
+  },
+  "sl.tryDefault": {
+    "zh-HK": "再觀察一下器材和目標位置。",
+    "en-US": "Take another look at the apparatus and the target spot."
+  },
+  "sl.observeDone": {
+    "zh-HK": "觀察完成，證據已記入科學筆記。",
+    "en-US": "Observation done — the evidence is in your notebook."
+  },
+  "sl.starsLabel": {
+    "zh-HK": "{count} 星",
+    "en-US": "{count} stars"
+  },
+  "sl.notCompleted": {
+    "zh-HK": "未完成",
+    "en-US": "Not finished"
+  },
+  "sl.cardMeta": {
+    "zh-HK": "{minutes} 分鐘 · {grades}",
+    "en-US": "{minutes} min · {grades}"
+  },
+  "sl.labMeta": {
+    "zh-HK": "{topic} · {grades} · 約 {minutes} 分鐘",
+    "en-US": "{topic} · {grades} · about {minutes} min"
+  },
+  "sl.stepOneKicker": {
+    "zh-HK": "第一步 · 觀察 OBSERVE",
+    "en-US": "STEP ONE · OBSERVE"
+  },
+  "sl.myQuestion": {
+    "zh-HK": "我的疑問是⋯⋯",
+    "en-US": "What I am wondering is…"
+  },
+  "sl.toHypothesis": {
+    "zh-HK": "我要提出假說",
+    "en-US": "Make my hypothesis"
+  },
+  "sl.stepTwoKicker": {
+    "zh-HK": "第二步 · 假說 HYPOTHESIS",
+    "en-US": "STEP TWO · HYPOTHESIS"
+  },
+  "sl.testIt": {
+    "zh-HK": "用實驗驗證",
+    "en-US": "Test it by experiment"
+  },
+  "sl.chooseHypothesis": {
+    "zh-HK": "選擇你的假說",
+    "en-US": "Choose your hypothesis"
+  },
+  "sl.safetyLead": {
+    "zh-HK": "安全提示：",
+    "en-US": "Safety: "
+  },
+  "sl.stepFourKicker": {
+    "zh-HK": "第四步 · 分析與反思 ANALYSE",
+    "en-US": "STEP FOUR · ANALYSE & REFLECT"
+  },
+  "sl.seeExplanation": {
+    "zh-HK": "看科學解釋",
+    "en-US": "See the explanation"
+  },
+  "sl.doesItHold": {
+    "zh-HK": "你的假說站得住嗎？",
+    "en-US": "Does your hypothesis hold up?"
+  },
+  "sl.yourHypothesis": {
+    "zh-HK": "你的假說",
+    "en-US": "Your hypothesis"
+  },
+  "sl.noHypothesis": {
+    "zh-HK": "未有假說紀錄",
+    "en-US": "No hypothesis recorded"
+  },
+  "sl.supported": {
+    "zh-HK": "（證據支持）",
+    "en-US": " (the evidence supports it)"
+  },
+  "sl.notSupported": {
+    "zh-HK": "（證據不支持，要修正）",
+    "en-US": " (the evidence does not support it — worth revising)"
+  },
+  "sl.evidenceLabel": {
+    "zh-HK": "實驗證據",
+    "en-US": "Evidence"
+  },
+  "sl.yourData": {
+    "zh-HK": "你記錄的數據",
+    "en-US": "The data you recorded"
+  },
+  "sl.thinkFurther": {
+    "zh-HK": "再想一步",
+    "en-US": "One step further"
+  },
+  "sl.chooseThought": {
+    "zh-HK": "選擇你的想法",
+    "en-US": "Choose what you think"
+  },
+  "sl.rightBecause": {
+    "zh-HK": "答對了。{because}",
+    "en-US": "That’s right. {because}"
+  },
+  "sl.wrongBecause": {
+    "zh-HK": "再想想。{because}",
+    "en-US": "Think again. {because}"
+  },
+  "sl.chapterOne": {
+    "zh-HK": "第一步",
+    "en-US": "Step one"
+  },
+  "sl.chapterObserve": {
+    "zh-HK": "觀察",
+    "en-US": "Observe"
+  },
+  "sl.chapterObserveLead": {
+    "zh-HK": "先看清楚發生了甚麼",
+    "en-US": "First, look closely at what happens"
+  },
+  "sl.chapterTwo": {
+    "zh-HK": "第二步",
+    "en-US": "Step two"
+  },
+  "sl.chapterHypothesis": {
+    "zh-HK": "假說",
+    "en-US": "Hypothesis"
+  },
+  "sl.chapterHypothesisLead": {
+    "zh-HK": "你認為答案是甚麼？",
+    "en-US": "What do you think the answer is?"
+  },
+  "sl.chapterFour": {
+    "zh-HK": "第四步",
+    "en-US": "Step four"
+  },
+  "sl.chapterAnalyse": {
+    "zh-HK": "分析與反思",
+    "en-US": "Analyse & reflect"
+  },
+  "sl.chapterAnalyseLead": {
+    "zh-HK": "證據怎樣說？",
+    "en-US": "What does the evidence say?"
+  },
+  "sl.hypothesisSaved": {
+    "zh-HK": "假說已記下。現在用實驗證據驗證它！",
+    "en-US": "Hypothesis saved. Now test it with evidence!"
+  },
+  "sl.comparisonLine": {
+    "zh-HK": "{leftLabel}：{leftValue}　↔　{rightLabel}：{rightValue}",
+    "en-US": "{leftLabel}: {leftValue}  ↔  {rightLabel}: {rightValue}"
+  },
+  "sl.scoreNone": {
+    "zh-HK": "完成操作，但未有假說紀錄",
+    "en-US": "Finished the work, but no hypothesis was recorded"
+  },
+  "sl.scoreThree": {
+    "zh-HK": "獨立而細心地完成",
+    "en-US": "Finished independently and carefully"
+  },
+  "sl.scoreTwo": {
+    "zh-HK": "善用提示完成探究",
+    "en-US": "Finished, making good use of the hints"
+  },
+  "sl.scoreOne": {
+    "zh-HK": "堅持重試完成探究",
+    "en-US": "Finished by sticking with it"
+  },
+  "sl.noPrediction": {
+    "zh-HK": "未提出假說",
+    "en-US": "No hypothesis made"
+  },
+  "sl.predictionMatched": {
+    "zh-HK": "（與觀察結果一致）",
+    "en-US": " (matches what you saw)"
+  },
+  "sl.predictionRevised": {
+    "zh-HK": "（實驗證據令我修正了想法）",
+    "en-US": " (the evidence changed my mind)"
+  },
+  "sl.modelLimit": {
+    "zh-HK": "{explanation} 模型限制：{note}",
+    "en-US": "{explanation} What this model leaves out: {note}"
+  },
+  "sl.curriculumLine": {
+    "zh-HK": "教具 {items} · {codes}",
+    "en-US": "Apparatus {items} · {codes}"
+  },
+  "sl.summaryDone": {
+    "zh-HK": "完成探究",
+    "en-US": "Inquiries done"
+  },
+  "sl.summaryStars": {
+    "zh-HK": "能力星章",
+    "en-US": "Skill stars"
+  },
+  "sl.summaryTopics": {
+    "zh-HK": "探索範疇",
+    "en-US": "Topics explored"
+  },
+  "sl.confirmRestart": {
+    "zh-HK": "重新開始這個實驗？已完成的整體紀錄會保留。",
+    "en-US": "Start this experiment again? Your overall record is kept."
+  },
+  "sl.restarted": {
+    "zh-HK": "本次實驗已回到第一步。",
+    "en-US": "Back to step one."
+  },
+  "air.language": {
+    "zh-HK": "語言／Language",
+    "en-US": "Language / 語言"
+  },
+  "air.languageHint": {
+    "zh-HK": "介面和實驗內容語言",
+    "en-US": "Interface and experiment language"
+  },
+  "air.live": {
+    "zh-HK": "即時觀測",
+    "en-US": "LIVE OBSERVATIONS"
+  },
+  "air.room": {
+    "zh-HK": "室溫",
+    "en-US": "Room temp."
+  },
+  "air.water": {
+    "zh-HK": "水溫",
+    "en-US": "Water temp."
+  },
+  "air.volume": {
+    "zh-HK": "空氣體積變化",
+    "en-US": "Air volume change"
+  },
+  "air.reference": {
+    "zh-HK": "基準：22 °C · 500 mL 空氣",
+    "en-US": "Reference: 22 °C · 500 mL of air"
+  },
+  "air.attach": {
+    "zh-HK": "先把氣球套上樽口",
+    "en-US": "Fit the balloon over the bottle neck"
+  },
+  "air.expands": {
+    "zh-HK": "受熱膨脹 · 留意氣球的變化",
+    "en-US": "Heating: watch the balloon expand"
+  },
+  "air.contracts": {
+    "zh-HK": "遇冷收縮 · 與熱水結果比較",
+    "en-US": "Cooling: compare with the hot-water result"
+  },
+  "air.attached": {
+    "zh-HK": "氣球已套好 · 把膠樽放進水盆",
+    "en-US": "Balloon fitted: place the bottle in a bath"
+  },
+  "air.label.balloon": {
+    "zh-HK": "氣球",
+    "en-US": "Balloon"
+  },
+  "air.label.bottle": {
+    "zh-HK": "硬身膠樽",
+    "en-US": "Rigid bottle"
+  },
+  "air.label.hot-bath-bowl": {
+    "zh-HK": "熱水盆",
+    "en-US": "Hot-water bath"
+  },
+  "air.label.ice-bath-bowl": {
+    "zh-HK": "冰水盆",
+    "en-US": "Ice-water bath"
+  },
+  "air.label.water-temperature": {
+    "zh-HK": "熱水溫度掣",
+    "en-US": "Hot-water dial"
+  },
+  "air.target.bottle-mouth": {
+    "zh-HK": "樽口",
+    "en-US": "Bottle neck"
+  },
+  "air.target.hot-bath": {
+    "zh-HK": "熱水盆中",
+    "en-US": "In the hot-water bath"
+  },
+  "air.target.ice-bath": {
+    "zh-HK": "冰水盆中",
+    "en-US": "In the ice-water bath"
+  }
+}
