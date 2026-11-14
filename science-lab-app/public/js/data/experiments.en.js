@@ -272,9 +272,9 @@ export const experiments = [
     id: 'air-expansion', number: 7, topic: 'Matter', grades: 'P3–P5', minutes: 11,
     title: 'Warm Air, Cold Air', englishTitle: 'Warm Air, Cold Air', color: '#5ec8b0', icon: 'balloon',
     observe: {
-      title: 'One balloon, two basins',
-      notice: ['What does the balloon do in the hot water?', 'And in the iced water?', 'Does the bottle itself change shape?'],
-      wonder: 'The balloon seals the neck — so how can it swell up and shrink again?',
+      title: 'A party balloon in an air-conditioned room',
+      notice: ['After a birthday party, Ming takes a tied balloon from a warm living room into an air-conditioned room.', 'A little later, the balloon looks less full. Its knot has stayed tied, and nobody has added or let out any air.', 'Back in the warmer living room, the same balloon gradually looks fuller again.'],
+      wonder: 'No air has been added or let out. Why does the same balloon look more or less full in warmer and colder places?',
     },
     question: 'What happens to the volume of air when it is warmed and when it is cooled?',
     objective: 'Use a balloon as an indicator to watch sealed air expand when warmed and contract when cooled.',
@@ -283,8 +283,8 @@ export const experiments = [
     safety: 'Hot water scalds, so a teacher must handle it in a real experiment. Too big a jump between hot and iced water can distort or crack the bottle, so do not use water that is too hot.',
     modelNote: 'The balloon is drawn larger than life so the change is easy to see. The millilitres on the display are the real change worked out from the gas laws. This model assumes the bottle is perfectly sealed and does not change shape.',
     prediction: {
-      prompt: 'With the balloon over the neck, the bottle goes into hot water. What does the air inside do to the balloon?',
-      options: ['Swells it up', 'Shrinks it', 'Leaves it unchanged'],
+      prompt: 'What could explain this everyday observation? Choose a testable hypothesis before moving on to the experiment.',
+      options: ['The same amount of air takes up more space when warmer and less space when colder.', 'The same amount of air takes up less space when warmer and more space when colder.', 'The balloon is slowly leaking as time passes; its size changes are unrelated to temperature.'],
       answer: 0,
     },
     steps: [

@@ -1,8 +1,8 @@
 {
   "experiment": "air-expansion",
-  "characters": 6558443,
-  "utf8Bytes": 6565727,
-  "sha256": "bcf890b4c21431a593033170e57a07af24f3eae0e5dcfc790566c645998c5279",
+  "characters": 6559048,
+  "utf8Bytes": 6566598,
+  "sha256": "9196088e721e81402314f39d94cd8865ee09898f1fa89bebc2bb66f6210dbfcb",
   "externalRuntimeFiles": 0,
   "minified": false,
   "googleSitesPasteVerified": false

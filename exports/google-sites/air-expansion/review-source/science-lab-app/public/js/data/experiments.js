@@ -12,13 +12,13 @@ const editions = {
     "color": "#5ec8b0",
     "icon": "balloon",
     "observe": {
-      "title": "一個氣球，兩盆水",
+      "title": "生日氣球的小變化",
       "notice": [
-        "膠樽放進熱水後，氣球有甚麼變化？",
-        "換成冰水之後又怎樣？",
-        "膠樽本身的形狀有沒有改變？"
+        "生日會後，小明把一個綁緊的氣球，從溫暖的客廳帶進冷氣房。",
+        "過了一會兒，氣球看起來沒有剛才那麼飽滿；結口一直沒有打開，也沒有再充氣。",
+        "把同一個氣球帶回較暖的客廳後，它又慢慢變得較飽滿。"
       ],
-      "wonder": "樽口被氣球封住了，為甚麼氣球還會脹大又縮小？"
+      "wonder": "沒有放氣，也沒有再充氣，為甚麼同一個氣球在不同冷暖環境下，飽滿程度會改變？"
     },
     "question": "空氣受熱和遇冷時，體積會有甚麼變化？",
     "objective": "以氣球作指示，觀察密封空氣受熱膨脹、遇冷收縮。",
@@ -39,11 +39,11 @@ const editions = {
     "safety": "熱水會燙傷，真實實驗必須由老師處理；熱水和冰水的溫差太大可能令膠樽變形或破裂，不要用太熱的水。",
     "modelNote": "氣球的大小為方便觀察而放大了；顯示屏上的毫升數才是按空氣定律算出的實際變化。本模型假設膠樽完全密封而且不會變形。",
     "prediction": {
-      "prompt": "氣球套住樽口後把膠樽放進熱水，樽內的空氣會使氣球怎樣？",
+      "prompt": "你認為甚麼原因能解釋這個生活現象？先選一個可檢驗的假說，再進入實驗。",
       "options": [
-        "脹大",
-        "縮小",
-        "沒有變化"
+        "同一份空氣在較暖時佔較多空間，較冷時佔較少空間。",
+        "同一份空氣在較暖時佔較少空間，較冷時佔較多空間。",
+        "氣球只是隨時間慢慢漏氣，大小變化與冷熱無關。"
       ],
       "answer": 0
     },
@@ -178,13 +178,13 @@ const editions = {
     "color": "#5ec8b0",
     "icon": "balloon",
     "observe": {
-      "title": "One balloon, two basins",
+      "title": "A party balloon in an air-conditioned room",
       "notice": [
-        "What does the balloon do in the hot water?",
-        "And in the iced water?",
-        "Does the bottle itself change shape?"
+        "After a birthday party, Ming takes a tied balloon from a warm living room into an air-conditioned room.",
+        "A little later, the balloon looks less full. Its knot has stayed tied, and nobody has added or let out any air.",
+        "Back in the warmer living room, the same balloon gradually looks fuller again."
       ],
-      "wonder": "The balloon seals the neck — so how can it swell up and shrink again?"
+      "wonder": "No air has been added or let out. Why does the same balloon look more or less full in warmer and colder places?"
     },
     "question": "What happens to the volume of air when it is warmed and when it is cooled?",
     "objective": "Use a balloon as an indicator to watch sealed air expand when warmed and contract when cooled.",
@@ -205,11 +205,11 @@ const editions = {
     "safety": "Hot water scalds, so a teacher must handle it in a real experiment. Too big a jump between hot and iced water can distort or crack the bottle, so do not use water that is too hot.",
     "modelNote": "The balloon is drawn larger than life so the change is easy to see. The millilitres on the display are the real change worked out from the gas laws. This model assumes the bottle is perfectly sealed and does not change shape.",
     "prediction": {
-      "prompt": "With the balloon over the neck, the bottle goes into hot water. What does the air inside do to the balloon?",
+      "prompt": "What could explain this everyday observation? Choose a testable hypothesis before moving on to the experiment.",
       "options": [
-        "Swells it up",
-        "Shrinks it",
-        "Leaves it unchanged"
+        "The same amount of air takes up more space when warmer and less space when colder.",
+        "The same amount of air takes up less space when warmer and more space when colder.",
+        "The balloon is slowly leaking as time passes; its size changes are unrelated to temperature."
       ],
       "answer": 0
     },

@@ -76,11 +76,11 @@ async function open(context, url, sandbox, initialLanguage = 'zh-HK') {
   if (initialLanguage === 'en-US') {
     await language(frame, 'en-US');
     await advanceTo(frame, 'observe-notice');
-    assert.match(await frame.locator('#stageBody').innerText(), /One balloon, two basins/);
+    assert.ok((await frame.locator('#stageBody').innerText()).includes(englishDefinition.observe.title));
     await frame.waitForFunction(() => Number(getComputedStyle(document.querySelector('#stageBody')).opacity) >= .99);
     await page.screenshot({ path: path.join(evidence, '09-english-introduction.png') });
   }
-  if (sandbox && page.viewportSize().width > 1000) {
+  if (initialLanguage === 'zh-HK' && sandbox && page.viewportSize().width > 1000) {
     await advanceTo(frame, 'observe-notice');
     await frame.waitForFunction(() => Number(getComputedStyle(document.querySelector('#stageBody')).opacity) >= .99);
     await page.screenshot({ path: path.join(evidence, '00-introduction.png') });
