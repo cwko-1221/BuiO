@@ -14,6 +14,21 @@
   .lab-screen .variable-control { max-width: calc(100vw - 28px); grid-template-columns: auto minmax(80px,1fr) auto; }
 }
 
+.stage-notice.has-observation-image { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; align-items: center; }
+.stage-notice.has-observation-image > .stage-heading { grid-column: 1 / -1; }
+.observation-figure { margin: 0; overflow: hidden; border: 1px solid rgba(36,51,69,.12); border-radius: 12px; background: #f6f3ec; }
+.observation-figure img { display: block; width: 100%; height: auto; }
+.observation-image-captions { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 12px 10px; color: #34495f; font: 700 14px/1.4 'Microsoft JhengHei','PingFang TC',system-ui,sans-serif; text-align: center; }
+.stage-notice.has-observation-image .stage-list { margin: 0; gap: 12px; }
+.stage-notice.has-observation-image .stage-list li { padding: 15px 15px 15px 48px; font-size: clamp(16px,1.6vw,21px); }
+.stage-notice.has-observation-image .stage-list li::before { left: 12px; width: 26px; height: 26px; font-size: 14px; }
+@media (max-width: 700px) {
+  .stage-notice.has-observation-image { grid-template-columns: 1fr; gap: 14px; }
+  .observation-image-captions { padding: 9px 6px; gap: 5px; font-size: 12px; }
+  .stage-notice.has-observation-image .stage-list li { padding: 12px 12px 12px 43px; font-size: 16px; }
+  .stage-notice.has-observation-image .stage-list li::before { left: 10px; width: 24px; height: 24px; font-size: 13px; }
+}
+
 :root {
   --ink: #102e38;
   --ink-soft: #4d6870;

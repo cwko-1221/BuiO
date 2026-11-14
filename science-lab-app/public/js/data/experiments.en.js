@@ -272,9 +272,10 @@ export const experiments = [
     id: 'air-expansion', number: 7, topic: 'Matter', grades: 'P3–P5', minutes: 11,
     title: 'Warm Air, Cold Air', englishTitle: 'Warm Air, Cold Air', color: '#5ec8b0', icon: 'balloon',
     observe: {
-      title: 'A party balloon in an air-conditioned room',
-      notice: ['After a birthday party, Ming takes a tied balloon from a warm living room into an air-conditioned room.', 'A little later, the balloon looks less full. Its knot has stayed tied, and nobody has added or let out any air.', 'Back in the warmer living room, the same balloon gradually looks fuller again.'],
-      wonder: 'No air has been added or let out. Why does the same balloon look more or less full in warmer and colder places?',
+      title: 'A dented table tennis ball becomes round again',
+      notice: ['While playing table tennis, Ming accidentally dents a ball. It has no crack or hole.', 'A teacher places the ball in hot water. After a while, the dent gradually pushes out.', 'No one adds more air to the ball, yet it returns to its original shape.'],
+      wonder: 'Why can the dented ball return to its original shape when heated, without anyone adding more air?',
+      image: { key: 'ping-pong-recovery', alt: 'Illustration: an unbroken, dented table tennis ball is placed in hot water and becomes round again.', captions: ['Dented ball', 'Placed in hot water', 'Round again'] },
     },
     question: 'What happens to the volume of air when it is warmed and when it is cooled?',
     objective: 'Use a balloon as an indicator to watch sealed air expand when warmed and contract when cooled.',
@@ -283,8 +284,8 @@ export const experiments = [
     safety: 'Hot water scalds, so a teacher must handle it in a real experiment. Too big a jump between hot and iced water can distort or crack the bottle, so do not use water that is too hot.',
     modelNote: 'The balloon is drawn larger than life so the change is easy to see. The millilitres on the display are the real change worked out from the gas laws. This model assumes the bottle is perfectly sealed and does not change shape.',
     prediction: {
-      prompt: 'What could explain this everyday observation? Choose a testable hypothesis before moving on to the experiment.',
-      options: ['The same amount of air takes up more space when warmer and less space when colder.', 'The same amount of air takes up less space when warmer and more space when colder.', 'The balloon is slowly leaking as time passes; its size changes are unrelated to temperature.'],
+      prompt: 'Based on this observation, what do you think happens to air when it is heated?',
+      options: ['It expands', 'It contracts', 'No change'],
       answer: 0,
     },
     steps: [

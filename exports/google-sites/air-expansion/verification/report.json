@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "htmlSha256": "9196088e721e81402314f39d94cd8865ee09898f1fa89bebc2bb66f6210dbfcb",
+  "htmlSha256": "e19b9207205a4e27c36e55a034de636746bc94ad916fc0c8fe62ac570142d17e",
   "checks": [
     "Desktop: opaque sandbox, denied storage, offline, WebGL, real balloon/bottle drags, six steps, two records, reflection, conclusion",
     "Mobile: 390×900, sandbox, no horizontal overflow, alternate controls complete the inquiry",

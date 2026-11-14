@@ -77,15 +77,19 @@ async function open(context, url, sandbox, initialLanguage = 'zh-HK') {
     await language(frame, 'en-US');
     await advanceTo(frame, 'observe-notice');
     assert.ok((await frame.locator('#stageBody').innerText()).includes(englishDefinition.observe.title));
+    await frame.waitForFunction(() => { const img = document.querySelector('.observation-figure img'); return img?.complete && img.naturalWidth > 0; });
+    assert.match(await frame.locator('.observation-figure img').getAttribute('src'), /^data:image\/webp;base64,/);
     await frame.waitForFunction(() => Number(getComputedStyle(document.querySelector('#stageBody')).opacity) >= .99);
     await page.screenshot({ path: path.join(evidence, '09-english-introduction.png') });
   }
   if (initialLanguage === 'zh-HK' && sandbox && page.viewportSize().width > 1000) {
     await advanceTo(frame, 'observe-notice');
+    await frame.waitForFunction(() => { const img = document.querySelector('.observation-figure img'); return img?.complete && img.naturalWidth > 0; });
     await frame.waitForFunction(() => Number(getComputedStyle(document.querySelector('#stageBody')).opacity) >= .99);
     await page.screenshot({ path: path.join(evidence, '00-introduction.png') });
   }
   await advanceTo(frame, 'hypothesis');
+  assert.deepEqual(await frame.locator('#predictionOptions .stage-option > span').allTextContents(), initialLanguage === 'en-US' ? ['It expands', 'It contracts', 'No change'] : ['膨脹', '收縮', '沒有變化']);
   await click(frame.locator('[data-prediction="0"]'));
   await click(frame.locator('#stageNext'));
   await frame.locator('#stageScreen').waitFor({ state: 'hidden' });

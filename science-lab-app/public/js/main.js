@@ -8,6 +8,7 @@ import { ProgressStore } from './persistence/ProgressStore.js';
 import { AudioEngine } from './audio/AudioEngine.js';
 import { FallbackRenderer } from './render/FallbackRenderer.js';
 import { illustrationSvg } from './ui/illustrations.js';
+const observationImages = { 'ping-pong-recovery': new URL('../images/ping-pong-recovery.webp', import.meta.url).href };
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
@@ -435,6 +436,19 @@ function noticeSlide(definition) {
     render() {
       const wrap = element('div', 'stage-notice');
       wrap.append(element('h2', 'stage-heading', definition.observe.title));
+      const image = definition.observe.image;
+      if (image && observationImages[image.key]) {
+        wrap.classList.add('has-observation-image');
+        const figure = element('figure', 'observation-figure');
+        const illustration = document.createElement('img');
+        illustration.src = observationImages[image.key];
+        illustration.alt = image.alt;
+        illustration.decoding = 'async';
+        const caption = element('figcaption', 'observation-image-captions');
+        for (const text of image.captions) caption.append(element('span', '', text));
+        figure.append(illustration, caption);
+        wrap.append(figure);
+      }
       const list = element('ul', 'stage-list');
       list.id = 'observeNotice';
       for (const item of definition.observe.notice) list.append(element('li', null, item));

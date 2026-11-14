@@ -34,6 +34,8 @@ const replaceSection = (source, startText, endText, replacement = '') => {
 
 const kit = await readFile(path.join(publicRoot, 'models/science-lab-kit.glb'));
 const kitUrl = `data:model/gltf-binary;base64,${kit.toString('base64')}`;
+const observationImage = await readFile(path.join(publicRoot, 'images/ping-pong-recovery.webp'));
+const observationImageUrl = `data:image/webp;base64,${observationImage.toString('base64')}`;
 const plugin = {
   name: 'buio-google-sites-standalone',
   enforce: 'pre',
@@ -47,6 +49,7 @@ const plugin = {
     } else if (file.endsWith('/render/ExperimentScenes.js')) {
       source = `// Keep the original 3D air-expansion scene, without other stations.\nimport { buildAirExpansion } from './scenes/MatterForceScenes.js';\nexport function buildExperimentScene(definition, api) {\n  if (definition.id !== 'air-expansion') throw new Error('Unknown standalone inquiry');\n  return buildAirExpansion(api);\n}\n`;
     } else if (file.endsWith('/main.js')) {
+      source = replaceOnce(source, "new URL('../images/ping-pong-recovery.webp', import.meta.url).href", JSON.stringify(observationImageUrl));
       const start = source.indexOf('async function resolveStudentId()');
       const end = source.indexOf('\nfunction setBoot(', start);
       assert.ok(start >= 0 && end > start);
@@ -246,6 +249,8 @@ await writeFile(path.join(outputRoot, 'air-expansion.html'), html);
 await writeFile(path.join(outputRoot, 'air-expansion-embed.txt'), html);
 await writeFile(path.join(outputRoot, 'THIRD-PARTY-NOTICES.txt'), notices);
 await writeFile(path.join(outputRoot, 'review-source/runtime.js'), runtime);
+await mkdir(path.join(outputRoot, 'review-source/science-lab-app/public/images'), { recursive: true });
+await writeFile(path.join(outputRoot, 'review-source/science-lab-app/public/images/ping-pong-recovery.webp'), observationImage);
 await mkdir(path.join(outputRoot, 'review-source/science-lab-app/standalone'), { recursive: true });
 await writeFile(path.join(outputRoot, 'review-source/science-lab-app/standalone/presentation.js'), await read('science-lab-app/standalone/presentation.js'));
 await writeFile(path.join(outputRoot, 'review-source/science-lab-app/standalone/theme.css'), theme);
