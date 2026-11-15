@@ -1,5 +1,5 @@
 import { QuizAudio } from './QuizAudio.js?v=20261028-1';
-import { QuizPresentation } from './QuizPresentation.js?v=20261029-showtime-1';
+import { QuizPresentation } from './QuizPresentation.js?v=20261115-intro-1';
 
 const { t } = window.BuiI18n;
 const $ = id => document.getElementById(id);
@@ -124,6 +124,12 @@ function updateClock() {
   const preparing = state.phase === 'question' && now < state.opensAt;
   const remaining = Math.max(0, Math.ceil((state.closesAt - now) / 1000));
   const clock = $('questionClock');
+  presentation.questionIntro({
+    key: preparing ? `${state.code}:${state.roundId}` : null,
+    label: t('qm.question', { n: state.questionIndex + 1, total: state.questionCount }),
+    remainingMs: preparing ? state.opensAt - now : 0,
+    onReady: updateClock,
+  });
   if (state.phase === 'question') {
     $('main').dataset.preparing = String(preparing);
     $('main').dataset.urgent = String(!preparing && remaining > 0 && remaining <= 5);
@@ -132,7 +138,7 @@ function updateClock() {
     if (countdown !== lastCountdown) {
       if (preparing || (remaining > 0 && remaining <= 5)) {
         if (host) audio.play('countdown');
-        presentation.tick(clock, { preparing });
+        presentation.tick(preparing ? $('introCountdown') : clock, { preparing });
       }
       if (!preparing && lastCountdown?.includes(':prepare:') && remaining > 0 && host) audio.play('go');
       lastCountdown = countdown;

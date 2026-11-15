@@ -42,6 +42,7 @@ BuiI18n.register({
   'qm.question': { 'zh-HK': '第 {n} / {total} 題', 'en-US': 'Question {n} / {total}' },
   'qm.answered': { 'zh-HK': '{n} / {total} 已作答', 'en-US': '{n} / {total} answered' },
   'qm.prepare': { 'zh-HK': '準備 {n}', 'en-US': 'Ready in {n}' },
+  'qm.getReady': { 'zh-HK': '準備作答', 'en-US': 'Get ready' },
   'qm.submitWait': { 'zh-HK': '已提交 {letter}', 'en-US': '{letter} submitted' },
   'qm.submitting': { 'zh-HK': '提交中…', 'en-US': 'Submitting…' },
   'qm.answerNow': { 'zh-HK': '請作答', 'en-US': 'Choose your answer' },

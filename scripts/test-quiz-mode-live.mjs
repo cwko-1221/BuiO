@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'development';
 const require = createRequire(import.meta.url);
 const express = require('express');
 const { Server } = require('socket.io');
-const root = resolve('.'), output = resolve('artifacts/quiz-mode-20261029');
+const root = resolve('.'), output = resolve('artifacts/quiz-mode-20261115');
 mkdirSync(output, { recursive: true });
 const image = `data:image/webp;base64,${readFileSync(resolve('game-app/public/images/game/sky-panorama.webp')).toString('base64')}`;
 const set = { id: 'quiz-fixture', title: '問答課堂測試', createdBy: 'teacher', questions: [
@@ -135,6 +135,33 @@ try {
   await teacher.locator('#audioSettings summary').click();
   assert.equal(await students[0].locator('#musicToggle').isChecked(), false, 'students do not play competing music by default');
   await teacher.locator('#nextBtn').click();
+  await teacher.waitForSelector('#questionIntro:not([hidden])');
+  for (const page of [teacher, ...students]) {
+    await page.waitForSelector('#questionIntro:not([hidden])');
+    const cover = await page.locator('#questionIntro').evaluate(intro => {
+      const bounds = intro.getBoundingClientRect();
+      return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height,
+        viewportWidth: innerWidth, viewportHeight: innerHeight, inert: document.getElementById('main').inert };
+    });
+    assert.deepEqual([cover.x, cover.y, cover.width, cover.height], [0, 0, cover.viewportWidth, cover.viewportHeight], 'the pre-question transition covers the whole viewport');
+    assert.equal(cover.inert, true, 'content behind the countdown cannot be focused or pressed');
+  }
+  assert.equal(await teacher.locator('#questionText').isVisible(), false, 'question text is hidden until the countdown finishes');
+  for (const student of students) assert.equal(await student.locator('[data-answer]:enabled').count(), 0, 'answers stay locked during the transition');
+  await students[2].emulateMedia({ reducedMotion: 'reduce' });
+  assert.equal(await students[2].locator('#questionIntro').isVisible(), true, 'reduced motion keeps the preparation countdown');
+  await students[2].waitForFunction(() => document.getAnimations().every(animation => animation.playState !== 'running'));
+  assert.equal(await students[2].evaluate(() => document.getAnimations().filter(a => a.playState === 'running').length), 0, 'reduced motion disables the curtain animation');
+  await teacher.waitForTimeout(450);
+  await teacher.screenshot({ path: resolve(output, 'host-question-intro.png') });
+  await students[1].screenshot({ path: resolve(output, 'phone-question-intro.png') });
+  await students[2].screenshot({ path: resolve(output, 'ipad-question-intro-reduced.png') });
+  await teacher.waitForSelector('#questionIntro', { state: 'hidden' });
+  assert.equal(await teacher.locator('#main').evaluate(main => main.inert), false);
+  assert.equal(await teacher.locator('#questionText').isVisible(), true);
+  await students[2].emulateMedia({ reducedMotion: 'no-preference' });
+  const firstRound = studentPackets.find(packet => packet.phase === 'question');
+  assert.equal(firstRound.closesAt - firstRound.opensAt, 5000, 'the transition does not consume any answer time');
   await teacher.waitForFunction(() => document.getElementById('questionImage')?.naturalWidth > 100);
   await teacher.waitForTimeout(500);
   await teacher.screenshot({ path: resolve(output, 'host-question-image.png') });
@@ -157,6 +184,7 @@ try {
   await teacher.waitForFunction(() => document.getElementById('answerCount')?.textContent.includes('1 / 3'));
   await students[0].reload();
   await students[0].waitForSelector('[data-answer="1"][aria-pressed="true"]:disabled');
+  assert.equal(await students[0].locator('#questionIntro').isVisible(), false, 'reconnecting during answers does not replay the intro');
   assert.equal(numberIn(await students[0].locator('.personal-score').textContent()), 0, 'live scores do not disclose correctness');
   await students[1].locator('[data-answer="1"]').tap();
   await teacher.waitForFunction(() => document.getElementById('answerCount')?.textContent.includes('2 / 3'));
@@ -204,6 +232,8 @@ try {
   assert.equal(numberIn(firstScores[2]), 0);
   await teacher.screenshot({ path: resolve(output, 'host-all-scores.png') });
   await teacher.locator('#nextBtn').click();
+  await teacher.waitForSelector('#questionIntro:not([hidden])');
+  assert.match(await teacher.locator('#introQuestion').textContent(), /2 \/ 2/);
   for (const student of students) await student.waitForSelector('[data-answer="2"]:enabled');
   await students[0].locator('[data-answer="2"]').tap();
   await students[1].locator('[data-answer="0"]').tap();
@@ -259,12 +289,28 @@ try {
   assert.match(anonymousDenied, /登入/);
   assert.deepEqual(errors, []);
   await teacher.locator('#closeBtn').click();
+  await teacher.waitForFunction(() => document.getElementById('roomPin').hidden);
+  const cancelledIntro = await teacher.evaluate(async () => {
+    const { QuizPresentation } = await import('/quiz-mode/js/QuizPresentation.js?v=20261115-intro-1');
+    const visual = new QuizPresentation(document.getElementById('main'));
+    let fired = false;
+    visual.questionIntro({ key: 'cancelled-round', label: 'Next question', remainingMs: 50, onReady: () => { fired = true; } });
+    const covered = !document.getElementById('questionIntro').hidden && document.getElementById('main').inert;
+    visual.present({ code: 'cancelled', phase: 'lobby', roundId: null }, { host: true });
+    await new Promise(resolve => setTimeout(resolve, 100));
+    const restored = document.getElementById('questionIntro').hidden && !document.body.classList.contains('question-intro-active')
+      && [...document.querySelectorAll('.topbar, #main, #controls')].every(node => !node.inert);
+    visual.destroy();
+    return { covered, restored, fired };
+  });
+  assert.deepEqual(cancelledIntro, { covered: true, restored: true, fired: false }, 'leaving the question cancels the cover and pending timer');
   console.log(JSON.stringify({ code, checks: ['hub integration', 'projected image and choices', 'three student screens', 'touch answers',
     'real-time counts', 'teacher and student reconnects', 'all-answered reveal', 'bar voter details', 'speed points', 'timeout and non-answers',
     'all-player scoreboards', 'final rankings', 'CSV export', 'student/anonymous authorization',
     'real audio output', 'volume and music controls', 'audio preference persistence', 'question/image review',
     'preserved voter selection', 'bar and podium transitions', 'animated scores', 'reduced motion',
-    'custom trophy assets', 'responsive answer targets', 'lobby artwork', 'bounded spark effects'], audio: music, firstScores, output }, null, 2));
+    'custom trophy assets', 'responsive answer targets', 'lobby artwork', 'bounded spark effects',
+    'fullscreen pre-question countdown', 'preserved answer duration', 'intro reconnect handling', 'intro cancellation'], audio: music, firstScores, output }, null, 2));
 } catch (failure) {
   console.error(JSON.stringify({ errors, teacher: await teacher.locator('body').innerText(),
     students: await Promise.all(students.map(page => page.locator('body').innerText())) }, null, 2));

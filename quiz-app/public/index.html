@@ -6,9 +6,9 @@
   <meta name="theme-color" content="#152b28">
   <title data-i18n="qm.title">問答模式 | BuiO</title>
   <script src="/shared/i18n.js?v=20260910-1"></script>
-  <script src="/shared/i18n/quiz-mode.js?v=20261029-showtime-1"></script>
+  <script src="/shared/i18n/quiz-mode.js?v=20261115-intro-1"></script>
   <link rel="stylesheet" href="/quiz-mode/css/quiz.css?v=20261028-1">
-  <link rel="stylesheet" href="/quiz-mode/css/showtime.css?v=20261029-2">
+  <link rel="stylesheet" href="/quiz-mode/css/showtime.css?v=20261115-intro-1">
 </head>
 <body>
   <header class="topbar">
@@ -20,7 +20,20 @@
   <main id="main" class="main"><div class="waiting-state" data-i18n="qm.loading">正在連接課堂…</div></main>
   <footer id="controls" class="controls" hidden></footer>
   <div id="error" class="error" role="alert" hidden></div>
+  <section id="questionIntro" class="question-intro" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <div class="intro-panels" aria-hidden="true">
+      <div class="intro-panel intro-panel-a"><span class="intro-symbol symbol-a"></span></div>
+      <div class="intro-panel intro-panel-b"><span class="intro-symbol symbol-b"></span></div>
+      <div class="intro-panel intro-panel-c"><span class="intro-symbol symbol-c"></span></div>
+      <div class="intro-panel intro-panel-d"><span class="intro-symbol symbol-d"></span></div>
+    </div>
+    <div class="intro-content">
+      <p id="introQuestion" class="intro-question"></p>
+      <strong id="introCountdown" class="intro-countdown"></strong>
+      <p class="intro-ready" data-i18n="qm.getReady">準備作答</p>
+    </div>
+  </section>
   <script src="/socket.io/socket.io.js"></script>
-  <script type="module" src="/quiz-mode/js/main.js?v=20261029-showtime-1"></script>
+  <script type="module" src="/quiz-mode/js/main.js?v=20261115-intro-1"></script>
 </body>
 </html>

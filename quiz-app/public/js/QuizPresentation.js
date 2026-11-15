@@ -10,6 +10,11 @@ export class QuizPresentation {
     this.seenPlayers = new Set();
     this.effects = new Set();
     this.confettiTimer = null;
+    this.intro = document.getElementById('questionIntro');
+    this.introKey = null;
+    this.introTimer = null;
+    this.introExitTimer = null;
+    this.introInert = [];
     this.motion = matchMedia('(prefers-reduced-motion: reduce)');
     this.onMotionChange = () => { if (this.motion.matches) this.clear(); };
     this.motion.addEventListener('change', this.onMotionChange);
@@ -30,6 +35,41 @@ export class QuizPresentation {
     if (node?.animate && !this.motion.matches) this.animations.push(node.animate(frames, { duration: 360, easing: 'cubic-bezier(.2,.7,.2,1)', ...options }));
   }
 
+  questionIntro({ key, label, remainingMs, onReady }) {
+    if (!this.intro) return;
+    if (!key || remainingMs <= 0) { this.hideQuestionIntro(); return; }
+    if (this.introKey !== key) {
+      this.hideQuestionIntro();
+      this.introKey = key;
+      document.getElementById('introQuestion').textContent = label;
+      this.introInert = [...document.querySelectorAll('.topbar, #main, #controls')]
+        .map(node => ({ node, inert: node.inert }));
+      for (const { node } of this.introInert) node.inert = true;
+      document.body.classList.add('question-intro-active');
+      this.intro.hidden = false;
+      window.scrollTo(0, 0);
+      this.introExitTimer = setTimeout(() => { this.intro.dataset.leaving = 'true'; }, Math.max(0, remainingMs - 350));
+    }
+    // Recheck the authoritative clock at opensAt, including after reconnects.
+    clearTimeout(this.introTimer);
+    this.introTimer = setTimeout(onReady, Math.max(1, remainingMs));
+    const countdown = String(Math.ceil(remainingMs / 1000));
+    const number = document.getElementById('introCountdown');
+    if (number.textContent !== countdown) number.textContent = countdown;
+    this.intro.dataset.leaving = String(remainingMs <= 350);
+  }
+
+  hideQuestionIntro() {
+    if (!this.introKey) return;
+    clearTimeout(this.introTimer); clearTimeout(this.introExitTimer);
+    this.introTimer = null; this.introExitTimer = null;
+    this.introKey = null;
+    if (this.intro) { this.intro.hidden = true; delete this.intro.dataset.leaving; }
+    document.body.classList.remove('question-intro-active');
+    for (const { node, inert } of this.introInert) node.inert = inert;
+    this.introInert = [];
+  }
+
   capturePositions() {
     const rows = [...this.main.querySelectorAll('tbody tr[data-player-key]')];
     if (rows.length) this.rowPositions = new Map(rows.map(row => [row.dataset.playerKey, row.getBoundingClientRect().top]));
@@ -44,18 +84,14 @@ export class QuizPresentation {
   }
 
   present(state, { host }) {
+    if (state.phase !== 'question') this.hideQuestionIntro();
     const key = `${state.code}:${state.phase}:${state.roundId}`;
     if (key === this.key) return;
     this.key = key; this.clear();
     this.main.dataset.phase = state.phase;
-    this.animate(this.main.firstElementChild, [{ opacity: .35, transform: 'translateY(18px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 380 });
+    if (state.phase !== 'question') this.animate(this.main.firstElementChild, [{ opacity: .35, transform: 'translateY(18px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 380 });
     if (state.phase === 'lobby') this.animate(this.main.querySelector('.trophy-art'),
       [{ opacity: 0, transform: 'translateY(20px) rotate(-6deg) scale(.85)' }, { opacity: 1, transform: 'translateY(0) rotate(0) scale(1)' }], { duration: 700 });
-    if (state.phase === 'question') {
-      this.main.querySelectorAll('.choice').forEach((node, index) => this.animate(node,
-        [{ opacity: 0, transform: 'translateY(22px) scale(.97)' }, { opacity: 1, transform: 'translateY(0) scale(1)' }], { delay: index * 65, duration: 380 }));
-      this.animate(this.main.querySelector('.time-track'), [{ transform: 'scaleX(.4)', opacity: .3 }, { transform: 'scaleX(1)', opacity: 1 }], { duration: 500 });
-    }
     if (state.phase === 'results' && host) {
       this.main.querySelectorAll('.bar-fill').forEach((node, index) => this.animate(node,
         [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1.04)', offset: .8 }, { transform: 'scaleY(1)' }], { delay: index * 85, duration: 650 }));
@@ -144,8 +180,8 @@ export class QuizPresentation {
 
   tick(clock, { preparing = false } = {}) {
     this.animate(clock, [{ transform: 'scale(1.16) rotate(-2deg)' }, { transform: 'scale(1) rotate(0)' }], { duration: 250 });
-    if (preparing) this.particles(clock, 6, ['#f0c442', '#2563c4', '#d44360']);
+    if (preparing && !this.introKey) this.particles(clock, 6, ['#f0c442', '#2563c4', '#d44360']);
   }
 
-  destroy() { this.clear(); this.motion.removeEventListener('change', this.onMotionChange); }
+  destroy() { this.hideQuestionIntro(); this.clear(); this.motion.removeEventListener('change', this.onMotionChange); }
 }
