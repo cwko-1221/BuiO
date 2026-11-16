@@ -6,6 +6,7 @@ const setsRepo = require('../../game-app/repositories/questionSets.repo');
 const demoSet = require('../../game-app/lib/demoSet');
 const towerSet = require('../../tower-defense-app/lib/defaultQuestions');
 const { QuizRoom } = require('../lib/QuizRoom');
+const petRepo = require('../../pet-app/repositories/pet.repo');
 
 module.exports = function registerQuiz(io, app) {
   const nsp = io.of('/quiz');
@@ -46,9 +47,44 @@ module.exports = function registerQuiz(io, app) {
     nsp.in(room.code).socketsLeave(room.code);
   }
 
-  function endQuestion(room) {
+  function endQuestion(room, broadcastResult = true) {
     clearTimeout(room.questionTimer);
-    if (room.endQuestion()) broadcast(room);
+    if (!room.endQuestion()) return;
+    if (room.coinRewards.enabled) {
+      const winners = [...room.participants].filter(key => room.answers.get(key)?.correct)
+        .map(key => room.players.get(key)).filter(player => room.rewardPreview || player.studentId);
+      const job = { roundId: room.roundId, questionNumber: room.index + 1, amount: room.coinRewards.perCorrect,
+        playerKeys: winners.map(player => player.key), studentIds: winners.map(player => player.studentId).filter(Boolean),
+        status: room.rewardPreview ? 'preview' : winners.length ? 'pending' : 'paid', promise: null };
+      room.rewardJobs.set(room.roundId, job);
+      if (job.status === 'pending') void payRewards(room, job);
+    }
+    if (broadcastResult) broadcast(room);
+  }
+
+  function payRewards(room, job) {
+    if (job.promise || job.status === 'paid' || job.status === 'preview') return job.promise;
+    job.status = 'pending';
+    job.promise = (async () => {
+      try {
+        await petRepo.grantCoins(room.owner, job.studentIds, job.amount, {
+          idempotencyKey: `quiz:${job.roundId}`,
+          note: `問答獎勵：${room.setTitle} · 第 ${job.questionNumber} 題`,
+        });
+        job.status = 'paid';
+      } catch (error) {
+        job.status = 'failed';
+        console.warn('[quiz] coin delivery failed', { code: error.code || 'DELIVERY_FAILED' });
+      } finally {
+        job.promise = null;
+        if (rooms.get(room.code) === room) broadcast(room);
+      }
+    })();
+    return job.promise;
+  }
+
+  function unsettledRewards(room) {
+    return [...room.rewardJobs.values()].some(job => job.status === 'pending' || job.status === 'failed');
   }
 
   function expire(room) {
@@ -73,7 +109,7 @@ module.exports = function registerQuiz(io, app) {
       });
     }
 
-    handle('host:create', async ({ setId = 'demo', hostName, seconds, limit }) => {
+    handle('host:create', async ({ setId = 'demo', hostName, seconds, limit, coinRewardEnabled, coinsPerCorrect }) => {
       if (!teacher(socket)) throw new Error('只有老師可以建立課堂。');
       if (socket.data.creating) throw new Error('正在建立課堂，請稍候。');
       if (socket.data.code && rooms.has(socket.data.code)) throw new Error('請先關閉目前的房間。');
@@ -89,9 +125,11 @@ module.exports = function registerQuiz(io, app) {
         let code;
         do { code = String(100000 + Math.floor(Math.random() * 900000)); } while (rooms.has(code));
         const questionLimit = Math.min(200, Math.max(0, Math.round(Number(limit) || 0)));
-        const room = new QuizRoom({ code, set, hostName: String(hostName || '老師').trim().slice(0, 30), seconds, limit: questionLimit });
+        const room = new QuizRoom({ code, set, hostName: String(hostName || '老師').trim().slice(0, 30), seconds, limit: questionLimit,
+          coinRewardEnabled, coinsPerCorrect });
         room.hostToken = randomBytes(24).toString('hex');
         room.owner = session(socket)?.studentId || null;
+        room.rewardPreview = isPreview(socket);
         room.hostSocket = socket.id;
         rooms.set(code, room);
         socket.data = { role: 'host', code };
@@ -114,12 +152,14 @@ module.exports = function registerQuiz(io, app) {
       room.hostSocket = socket.id; room.hostConnected = true;
       socket.data = { role: 'host', code: room.code }; socket.join(room.code);
       if (room.phase === 'question' && Date.now() >= room.closesAt) endQuestion(room);
+      for (const job of room.rewardJobs.values()) if (job.status === 'failed') void payRewards(room, job);
       broadcast(room);
       return { code: room.code, state: room.hostView() };
     });
 
     handle('host:next', () => {
       const room = owned(socket);
+      if (unsettledRewards(room)) throw new Error('金幣尚未派發完成，請稍候或重試派發。');
       room.startQuestion();
       expire(room);
       room.questionTimer = setTimeout(() => endQuestion(room), room.closesAt - Date.now());
@@ -129,9 +169,18 @@ module.exports = function registerQuiz(io, app) {
     handle('host:reveal', () => { const room = owned(socket); endQuestion(room); return {}; });
     handle('host:leaderboard', () => { const room = owned(socket); room.showLeaderboard(); broadcast(room); return {}; });
     handle('host:end', () => {
-      const room = owned(socket); clearTimeout(room.questionTimer); room.finish(); broadcast(room); return {};
+      const room = owned(socket); endQuestion(room, false); room.finish(); broadcast(room); return {};
     });
-    handle('host:close', () => { close(owned(socket)); return {}; });
+    handle('host:retryRewards', () => {
+      const room = owned(socket);
+      for (const job of room.rewardJobs.values()) if (job.status === 'failed') void payRewards(room, job);
+      broadcast(room); return {};
+    });
+    handle('host:close', () => {
+      const room = owned(socket);
+      if (unsettledRewards(room)) throw new Error('金幣尚未派發完成，請稍候或重試派發。');
+      close(room); return {};
+    });
 
     handle('player:join', ({ code, name, playerToken }) => {
       if (socket.data.role === 'host') throw new Error('老師不能使用同一連線作答。');
@@ -147,6 +196,7 @@ module.exports = function registerQuiz(io, app) {
       }
       const existing = room.players.get(key);
       const player = room.join(key, String(name || studentId || '學生').trim().slice(0, 30) || '學生');
+      player.studentId = session(socket)?.role === 'student' && !isPreview(socket) ? studentId : null;
       if (existing?.socketId && existing.socketId !== socket.id) {
         const previous = nsp.sockets.get(existing.socketId);
         previous?.leave(room.code); previous?.emit('quiz:replaced');

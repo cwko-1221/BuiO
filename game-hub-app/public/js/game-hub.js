@@ -276,6 +276,9 @@ document.querySelectorAll('[data-game]').forEach(button=>button.addEventListener
 $('infiniteEnergyToggle').addEventListener('change',()=>{
   $('energyPerCorrectInput').disabled=$('infiniteEnergyToggle').checked;
 });
+$('quizCoinRewardToggle').addEventListener('change',()=>{
+  $('quizCoinsPerCorrectInput').disabled=!$('quizCoinRewardToggle').checked;
+});
 
 $('createGameBtn').addEventListener('click',()=>{
   $('teacherHubError').textContent='';if(!selectedSet||!selectedGame)return;
@@ -288,7 +291,10 @@ $('createGameBtn').addEventListener('click',()=>{
     params.set('durationSec',$('durationSelect').value);params.set('maxEnergy',String(maxEnergy));params.set('energyPerCorrect',String(energyPerCorrect));params.set('infiniteEnergy',$('infiniteEnergyToggle').checked?'1':'0');
     location.href=preview?`/game/host/preview?${params}`:`/game/host?${params}`;
   }else if(selectedGame==='quiz'){
+    const reward=$('quizCoinRewardToggle').checked,amount=Number($('quizCoinsPerCorrectInput').value);
+    if(reward&&(!Number.isInteger(amount)||amount<1||amount>1000)){$('teacherHubError').textContent=t('gh.quizCoinRange');return;}
     params.set('seconds',$('quizSecondsInput').value);params.set('limit',$('quizLimitInput').value);
+    params.set('coinReward',reward?'1':'0');if(reward)params.set('coinsPerCorrect',String(amount));
     location.href=preview?`/quiz-mode/host/preview?${params}`:`/quiz-mode/host?${params}`;
   }else location.href=preview?`/tower-defense/teacher/preview?${params}`:`/tower-defense/teacher?${params}`;
 });

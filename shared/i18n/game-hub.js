@@ -1,5 +1,9 @@
 // Quiz-game lobby: teacher bank builder, game picker, student room list.
 BuiI18n.register({
+  'gh.quizCoinReward': { 'zh-HK': '金幣獎勵', 'en-US': 'Coin rewards' },
+  'gh.quizCoinRule': { 'zh-HK': '答對可獲得寵物樂園金幣', 'en-US': 'Correct answers earn Pet Paradise coins' },
+  'gh.quizCoinsPerCorrect': { 'zh-HK': '每題答對金幣', 'en-US': 'Coins per correct answer' },
+  'gh.quizCoinRange': { 'zh-HK': '每題金幣必須是 1 至 1000 的整數。', 'en-US': 'Coins per answer must be a whole number from 1 to 1000.' },
   'gh.pageTitle':      { 'zh-HK': '遊戲問答 | BuiO', 'en-US': 'Quiz Games | BuiO' },
   'gh.brand':          { 'zh-HK': '遊戲問答', 'en-US': 'Quiz Games' },
   'gh.loading':        { 'zh-HK': '載入中', 'en-US': 'Loading' },

@@ -10,6 +10,12 @@ assert.equal(pointsForAnswer(true, 100, 20000), 1000);
 assert.equal(pointsForAnswer(true, 10000, 20000), 750);
 assert.equal(pointsForAnswer(true, 20000, 20000), 500);
 assert.equal(pointsForAnswer(false, 100, 20000), 0);
+for (const coinsPerCorrect of [0, -1, 1.5, 1001, Infinity, '10']) {
+  assert.throws(() => new QuizRoom({ code: 'bad', set, coinRewardEnabled: true, coinsPerCorrect }), /1 至 1000/);
+}
+assert.throws(() => new QuizRoom({ code: 'bad', set, coinRewardEnabled: 'true' }), /設定無效/);
+const rewarded = new QuizRoom({ code: 'coins', set, coinRewardEnabled: true, coinsPerCorrect: 25 });
+assert.deepEqual(rewarded.coinRewards, { enabled: true, perCorrect: 25 });
 const room = new QuizRoom({ code: '123456', set, hostName: 'Teacher', seconds: 20, now: 0 });
 assert.throws(() => room.startQuestion(0), /未有學生/);
 room.join('fast', 'Fast', 0); room.join('slow', 'Slow', 1); room.join('wrong', 'Wrong', 2); room.join('absent', 'Absent', 3);

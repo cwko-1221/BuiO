@@ -11,7 +11,9 @@ function pointsForAnswer(correct, elapsedMs, durationMs) {
 function fail(message) { throw new Error(message); }
 
 class QuizRoom {
-  constructor({ code, set, hostName, seconds = 20, limit = 0, now = Date.now() }) {
+  constructor({ code, set, hostName, seconds = 20, limit = 0, coinRewardEnabled = false, coinsPerCorrect = 10, now = Date.now() }) {
+    if (typeof coinRewardEnabled !== 'boolean') fail('金幣獎勵設定無效。');
+    if (coinRewardEnabled && (!Number.isInteger(coinsPerCorrect) || coinsPerCorrect < 1 || coinsPerCorrect > 1000)) fail('每題金幣必須是 1 至 1000 的整數。');
     this.code = code;
     this.hostName = hostName;
     this.setTitle = set.title;
@@ -25,6 +27,9 @@ class QuizRoom {
     this.participants = new Set();
     this.hostConnected = true;
     this.createdAt = now;
+    this.coinRewards = { enabled: coinRewardEnabled, perCorrect: coinRewardEnabled ? coinsPerCorrect : 0 };
+    this.rewardJobs = new Map();
+    this.rewardPreview = false;
   }
 
   join(key, name, now = Date.now()) {
@@ -97,11 +102,14 @@ class QuizRoom {
     return { code: this.code, hostName: this.hostName, setTitle: this.setTitle, phase: this.phase,
       questionIndex: this.index, questionCount: this.questions.length, roundId: this.roundId,
       opensAt: this.opensAt || null, closesAt: this.closesAt || null, serverNow: now,
-      answered: this.answers.size, total: this.participants.size, hostConnected: this.hostConnected };
+      answered: this.answers.size, total: this.participants.size, hostConnected: this.hostConnected,
+      coinRewards: { ...this.coinRewards, preview: this.rewardPreview } };
   }
 
   hostView(now = Date.now()) {
     const state = this.common(now);
+    const jobs = [...this.rewardJobs.values()];
+    state.coinDelivery = { pending: jobs.filter(job => job.status === 'pending').length, failed: jobs.filter(job => job.status === 'failed').length };
     state.roster = [...this.players.values()].map(p => ({ key: p.key, name: p.name, connected: p.connected }));
     if (this.index >= 0) {
       const question = this.questions[this.index];
@@ -124,6 +132,8 @@ class QuizRoom {
     state.me = { key, name: player.name, score: player.score, choice: this.answers.get(key)?.choice ?? null };
     if (['results', 'leaderboard', 'ended'].includes(this.phase)) {
       state.me.result = this.participants.has(key) ? player.last : null;
+      const reward = this.rewardJobs.get(this.roundId);
+      if (reward?.playerKeys.includes(key)) state.me.coinReward = { amount: reward.amount, status: reward.status };
       state.me.rank = this.leaderboard().find(p => p.key === key)?.rank;
       state.correctIndex = this.index >= 0 ? this.questions[this.index].correctIndex : null;
       state.leaderboard = this.leaderboard();

@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'development';
 const require = createRequire(import.meta.url);
 const express = require('express');
 const { Server } = require('socket.io');
-const root = resolve('.'), output = resolve('artifacts/quiz-mode-20261115');
+const root = resolve('.'), output = resolve('artifacts/quiz-mode-20261116');
 mkdirSync(output, { recursive: true });
 const image = `data:image/webp;base64,${readFileSync(resolve('game-app/public/images/game/sky-panorama.webp')).toString('base64')}`;
 const set = { id: 'quiz-fixture', title: '問答課堂測試', createdBy: 'teacher', questions: [
@@ -44,9 +44,16 @@ app.use('/quiz-mode/css', express.static(resolve('quiz-app/public/css')));
 app.use('/quiz-mode/js', express.static(resolve('quiz-app/public/js')));
 app.use('/quiz-mode/assets', express.static(resolve('quiz-app/public/assets')));
 app.use('/game/js', express.static(resolve('game-app/public/js')));
-app.get(['/quiz-mode/host/preview', '/quiz-mode/preview'], (_req, res) => res.sendFile(resolve('quiz-app/public/index.html')));
+app.get(['/quiz-mode/host/preview', '/quiz-mode/preview', '/quiz-mode/host', '/quiz-mode'], (_req, res) => res.sendFile(resolve('quiz-app/public/index.html')));
 app.get('/fixture', (_req, res) => res.send('<script src="/socket.io/socket.io.js"></script>'));
 const http = createServer(app), io = new Server(http, { maxHttpBufferSize: 10 * 1024 * 1024 });
+const petPath = require.resolve('../pet-app/repositories/pet.repo');
+const originalPet = require.cache[petPath];
+let payments = 0, allowPayments = false, failPayments = true;
+require.cache[petPath] = { id: petPath, filename: petPath, loaded: true, exports: { grantCoins: async () => {
+  payments++; if (!allowPayments || failPayments) throw Object.assign(new Error('Fixture payment interrupted'), { code: 'TEST_DELIVERY_FAILED' });
+  return { count: 1, amount: 8 };
+} } };
 io.engine.use(fixtureSession);
 require('../quiz-app/server/socket')(io, app);
 await new Promise(resolve => http.listen(0, '127.0.0.1', resolve));
@@ -104,6 +111,9 @@ try {
   await teacher.locator('[data-select-set="quiz-fixture"]').click();
   await teacher.locator('[data-game="quiz"]').click();
   await teacher.locator('#quizSecondsInput').selectOption('5');
+  assert.equal(await teacher.locator('#quizCoinsPerCorrectInput').isDisabled(), true);
+  await teacher.locator('#quizCoinRewardToggle').check();
+  await teacher.locator('#quizCoinsPerCorrectInput').fill('17');
   await teacher.screenshot({ path: resolve(output, 'hub-third-mode.png'), fullPage: true });
   await teacher.locator('#createGameBtn').click();
   await teacher.waitForURL(/\/quiz-mode\/host\/preview/);
@@ -117,6 +127,7 @@ try {
     await student.waitForSelector('.waiting-state h1');
   }
   await teacher.waitForFunction(() => document.querySelectorAll('#roster li').length === 3);
+  assert.match(await teacher.locator('.lobby-facts').textContent(), /17/);
   await teacher.waitForFunction(() => document.querySelector('.lobby-trophy')?.naturalWidth > 100);
   await teacher.waitForTimeout(750);
   await teacher.screenshot({path:resolve(output,'host-lobby-polished.png')});
@@ -194,6 +205,14 @@ try {
   assert.match(await teacher.locator('#answerCount').textContent(), /2 \/ 3/);
   await students[2].locator('[data-answer="0"]').tap();
   await teacher.waitForSelector('#distributionChart');
+  await students[0].waitForSelector('.coin-feedback');
+  assert.match(await students[0].locator('.coin-feedback').textContent(), /17.*預覽/);
+  assert.equal(await students[2].locator('.coin-feedback').count(), 0, 'wrong answers do not earn coin rewards');
+  for (const student of students.slice(0, 2)) {
+    await student.waitForSelector('.coin-feedback');
+    assert.ok(await student.locator('#answerPad').evaluate(pad => pad.getBoundingClientRect().bottom <= innerHeight), 'reward feedback keeps all student answer buttons in view');
+  }
+  assert.equal(payments, 0, 'preview rooms never write real wallets');
   assert.deepEqual(await teacher.locator('.bar-count').allTextContents(), ['1', '2', '0', '0']);
   await teacher.locator('[data-bar="1"]').click();
   assert.match(await teacher.locator('#voterDetails').textContent(), /心怡/);
@@ -269,6 +288,7 @@ try {
     if (packet.phase === 'question') {
       assert.equal(packet.correctIndex, undefined);
       assert.equal(packet.me.result, undefined);
+      assert.equal(packet.me.coinReward, undefined);
       assert.equal(packet.leaderboard, undefined);
     }
   }
@@ -304,13 +324,74 @@ try {
     return { covered, restored, fired };
   });
   assert.deepEqual(cancelledIntro, { covered: true, restored: true, fired: false }, 'leaving the question cancels the cover and pending timer');
+  await teacher.goto(`${base}/quiz-mode/host/preview`);
+  await teacher.waitForSelector('#coinRewardToggle');
+  assert.equal(await teacher.locator('#coinsPerCorrectInput').isDisabled(), true);
+  await teacher.locator('#coinRewardToggle').check();
+  assert.equal(await teacher.locator('#coinsPerCorrectInput').isEnabled(), true);
+  await teacher.screenshot({ path: resolve(output, 'host-coin-settings.png') });
+  set.questions[0].question = '圖 A、B、C 的四條邊各自等長。哪些圖形是菱形？ Each of shapes A, B and C has four equal sides. Which shapes are rhombuses?';
+  set.questions[0].choices = ['只有圖 A Shape A only', '只有圖 B Shape B only', '只有圖 A 和圖 C Shapes A and C only', '圖 A、B 和 C Shapes A, B and C'];
+  await teacher.goto(`${base}/quiz-mode/host/preview?autocreate=1&setId=quiz-fixture&seconds=120&limit=1`);
+  await teacher.waitForSelector('#nextBtn');
+  const layoutCode = (await teacher.locator('#pinValue').textContent()).trim();
+  await students[0].goto(`${base}/quiz-mode/preview?room=${layoutCode}&autojoin=1&name=Layout`);
+  await teacher.locator('#nextBtn:enabled').click();
+  await teacher.waitForSelector('#questionIntro', { state: 'hidden' });
+  await teacher.waitForSelector('#questionImage');
+  for (const viewport of [{ width: 1920, height: 940 }, { width: 1440, height: 900 }, { width: 1180, height: 820 }, { width: 1024, height: 768 }, { width: 820, height: 1180 }]) {
+    await teacher.setViewportSize(viewport);
+    const layout = await teacher.evaluate(() => {
+      const bounds = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height, bottom: r.bottom, right: r.right }; };
+      return { title: bounds('#questionText'), image: bounds('#questionImage'), choices: bounds('.host-choices'), footer: bounds('#controls'),
+        fit: getComputedStyle(document.getElementById('questionImage')).objectFit, width: innerWidth, height: innerHeight };
+    });
+    assert.ok(layout.title.bottom <= layout.image.y + 1 && layout.image.bottom <= layout.choices.y + 1, `question, image and answers never overlap at ${viewport.width}px`);
+    assert.ok(layout.choices.bottom <= layout.footer.y + 1 && layout.footer.bottom <= layout.height + 1, 'all choices and teacher controls stay visible');
+    assert.equal(layout.fit, 'contain');
+    if (viewport.width === 1920) {
+      assert.ok(layout.image.width >= 550 && layout.image.height >= 290, `100% zoom keeps the image large: ${JSON.stringify(layout.image)}`);
+    }
+    await teacher.screenshot({ path: resolve(output, `host-large-image-${viewport.width}.png`) });
+  }
+  await teacher.locator('#endBtn').click();
+  await teacher.waitForSelector('#closeBtn');
+  await teacher.locator('#closeBtn').click();
+  assert.deepEqual(errors, []);
+  allowPayments = true;
+  await teacher.goto(`${base}/quiz-mode/host`);
+  await teacher.waitForSelector('#coinRewardToggle');
+  await teacher.locator('#bankSelect').selectOption('quiz-fixture');
+  await teacher.locator('#coinRewardToggle').check();
+  await teacher.locator('#coinsPerCorrectInput').fill('8');
+  await teacher.locator('#createBtn').click();
+  await teacher.waitForSelector('#nextBtn');
+  const paidCode = (await teacher.locator('#pinValue').textContent()).trim();
+  await students[0].goto(`${base}/quiz-mode?room=${paidCode}&autojoin=1&name=Reward`);
+  await teacher.locator('#nextBtn:enabled').click();
+  await students[0].locator('[data-answer="1"]:enabled').click();
+  await teacher.waitForSelector('#retryCoinsBtn');
+  await students[0].waitForSelector('.coin-feedback');
+  assert.match(await students[0].locator('.coin-feedback').textContent(), /尚未派發/);
+  failPayments = false;
+  await teacher.locator('#retryCoinsBtn').click();
+  await teacher.waitForSelector('.coin-delivery', { state: 'detached' });
+  await students[0].waitForFunction(() => document.querySelector('.coin-feedback')?.textContent.includes('+8'));
+  assert.match(await students[0].locator('.coin-feedback').textContent(), /已存入寵物樂園/);
+  assert.ok(await students[0].locator('#answerPad').evaluate(pad => pad.getBoundingClientRect().bottom <= innerHeight));
+  await students[0].screenshot({ path: resolve(output, 'student-coins-deposited.png') });
+  assert.equal(payments, 2);
+  await teacher.locator('#endBtn').click();
+  await teacher.waitForSelector('#closeBtn'); await teacher.locator('#closeBtn').click();
+  assert.deepEqual(errors, []);
   console.log(JSON.stringify({ code, checks: ['hub integration', 'projected image and choices', 'three student screens', 'touch answers',
     'real-time counts', 'teacher and student reconnects', 'all-answered reveal', 'bar voter details', 'speed points', 'timeout and non-answers',
     'all-player scoreboards', 'final rankings', 'CSV export', 'student/anonymous authorization',
     'real audio output', 'volume and music controls', 'audio preference persistence', 'question/image review',
     'preserved voter selection', 'bar and podium transitions', 'animated scores', 'reduced motion',
     'custom trophy assets', 'responsive answer targets', 'lobby artwork', 'bounded spark effects',
-    'fullscreen pre-question countdown', 'preserved answer duration', 'intro reconnect handling', 'intro cancellation'], audio: music, firstScores, output }, null, 2));
+    'fullscreen pre-question countdown', 'preserved answer duration', 'intro reconnect handling', 'intro cancellation',
+    'coin settings and preview isolation', 'large bilingual question images at 100% zoom'], audio: music, firstScores, output }, null, 2));
 } catch (failure) {
   console.error(JSON.stringify({ errors, teacher: await teacher.locator('body').innerText(),
     students: await Promise.all(students.map(page => page.locator('body').innerText())) }, null, 2));
@@ -320,4 +401,5 @@ try {
   await browser.close();
   await new Promise(resolve => io.close(resolve));
   if (originalRepo) require.cache[repoPath] = originalRepo; else delete require.cache[repoPath];
+  if (originalPet) require.cache[petPath] = originalPet; else delete require.cache[petPath];
 }

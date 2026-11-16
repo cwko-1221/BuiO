@@ -63,6 +63,10 @@ function finalTitle() {
 }
 
 function controls(html = '') {
+  const delivery = host && state?.coinDelivery;
+  const waitingForCoins = delivery?.pending || delivery?.failed;
+  $('controls').classList.toggle('has-coin-delivery', Boolean(waitingForCoins));
+  if (html && waitingForCoins) html = `<div class="coin-delivery" role="status"><span>${text(delivery.failed ? 'qm.coinFailed' : 'qm.coinPending')}</span>${delivery.failed ? button('retryCoinsBtn', 'qm.retryCoins', 'secondary') : ''}</div>${html}`;
   $('controls').innerHTML = html;
   $('controls').hidden = !html;
   $('endBtn')?.addEventListener('click', () => { if (confirm(t('qm.confirmEnd'))) action('host:end'); });
@@ -71,6 +75,15 @@ function controls(html = '') {
   $('revealBtn')?.addEventListener('click', () => action('host:reveal'));
   $('scoresBtn')?.addEventListener('click', () => action('host:leaderboard'));
   $('finishBtn')?.addEventListener('click', () => action('host:end'));
+  $('retryCoinsBtn')?.addEventListener('click', () => action('host:retryRewards'));
+  if (waitingForCoins) for (const id of ['nextBtn', 'closeBtn']) if ($(id)) $(id).disabled = true;
+}
+
+function coinFeedback() {
+  const reward = state.me?.coinReward;
+  if (!reward?.amount) return '';
+  const key = { paid: 'qm.coinDeposited', pending: 'qm.coinPending', failed: 'qm.coinFailed', preview: 'qm.coinPreview' }[reward.status];
+  return key ? `<p class="coin-feedback" role="status">${text(key, { n: reward.amount })}</p>` : '';
 }
 
 async function action(event) {
@@ -178,7 +191,7 @@ function renderHost() {
     controls(`${button('closeBtn', 'qm.close', 'secondary danger')}${button('nextBtn', 'qm.start', 'primary', !connectedCount)}`);
   } else if (state.phase === 'question') {
     const q = state.question;
-    $('main').innerHTML = `<section class="question-stage">${roundMeta()}<div class="question-content"><div><h1 id="questionText">${escapeHtml(q.question)}</h1>${q.image ? `<figure class="question-media"><img id="questionImage" src="${escapeHtml(q.image)}" alt="${text('qm.image')}"></figure>` : ''}</div></div><div class="answer-grid host-choices">${q.choices.map((choice, index) => `<div class="choice choice-${letters[index].toLowerCase()}">${answerSymbol(index)}<span class="choice-letter">${letters[index]}</span><span class="choice-text">${escapeHtml(choice)}</span></div>`).join('')}</div></section>`;
+    $('main').innerHTML = `<section class="question-stage ${q.image ? 'has-question-image' : ''}">${roundMeta()}<div class="question-content"><div><h1 id="questionText">${escapeHtml(q.question)}</h1>${q.image ? `<figure class="question-media"><img id="questionImage" src="${escapeHtml(q.image)}" alt="${text('qm.image')}"></figure>` : ''}</div></div><div class="answer-grid host-choices">${q.choices.map((choice, index) => `<div class="choice choice-${letters[index].toLowerCase()}">${answerSymbol(index)}<span class="choice-letter">${letters[index]}</span><span class="choice-text">${escapeHtml(choice)}</span></div>`).join('')}</div></section>`;
     bindImageErrors();
     controls(`${button('endBtn', 'qm.end', 'secondary danger')}${button('revealBtn', 'qm.reveal', 'secondary')}`);
   } else if (state.phase === 'results') {
@@ -252,6 +265,14 @@ function render() {
   presentation.capturePositions();
   $('main').classList.toggle('player-main', !host);
   if (host) renderHost(); else renderStudent();
+  if (host && state.phase === 'lobby' && state.coinRewards?.enabled) {
+    document.querySelector('.lobby-facts').insertAdjacentHTML('beforeend', `<span>${text('qm.coinSetting', { n: state.coinRewards.perCorrect })}${state.coinRewards.preview ? ` · ${text('qm.coinPreviewNote')}` : ''}</span>`);
+  }
+  if (!host && state.phase === 'results') {
+    const feedback = coinFeedback();
+    document.querySelector('.player-round').classList.toggle('has-coin-reward', Boolean(feedback));
+    document.querySelector('.round-feedback').insertAdjacentHTML('beforeend', feedback);
+  }
   presentation.present(state, { host });
   if (state.phase === 'lobby') presentation.joinedPlayers();
   updateClock();
@@ -284,9 +305,12 @@ async function setupHost() {
   $('main').innerHTML = `<section class="setup"><h1>${text('qm.title')}</h1><form id="setupForm"><label class="field">${text('qm.bank')}<select id="bankSelect">${sets.map(set => `<option value="${escapeHtml(set.id)}">${escapeHtml(set.title)} (${set.questionCount})</option>`).join('')}</select></label><div class="setup-row"><label class="field">${text('qm.seconds')}<select id="secondsSelect">${[5, 10, 15, 20, 30, 45, 60, 90, 120].map(n => `<option value="${n}" ${n === 20 ? 'selected' : ''}>${text('qm.secondsValue', { n })}</option>`).join('')}</select></label><label class="field">${text('qm.limit')}<select id="limitSelect"><option value="0">${text('qm.all')}</option>${[5, 10, 20].map(n => `<option value="${n}">${text('qm.questionCount', { n })}</option>`).join('')}</select></label></div><button id="createBtn" class="primary" type="submit">${text('qm.create')}</button></form></section>`;
   $('setupForm').onsubmit = async event => {
     event.preventDefault(); $('createBtn').disabled = true;
-    try { await create({ setId: $('bankSelect').value, seconds: $('secondsSelect').value, limit: $('limitSelect').value }); }
+    try { await create({ setId: $('bankSelect').value, seconds: $('secondsSelect').value, limit: $('limitSelect').value,
+      coinRewardEnabled: $('coinRewardToggle').checked, coinsPerCorrect: Number($('coinsPerCorrectInput').value) }); }
     catch (e) { error(e.message); if ($('createBtn')) $('createBtn').disabled = false; }
   };
+  $('createBtn').insertAdjacentHTML('beforebegin', `<div class="setup-row"><label class="coin-toggle"><span><b>${text('qm.coinReward')}</b><small>${text('qm.coinRule')}</small></span><input id="coinRewardToggle" type="checkbox"></label><label class="field">${text('qm.coinsPerCorrect')}<input id="coinsPerCorrectInput" type="number" min="1" max="1000" step="1" value="10" disabled></label></div>`);
+  $('coinRewardToggle').onchange = () => { $('coinsPerCorrectInput').disabled = !$('coinRewardToggle').checked; };
 }
 
 async function create(settings) {
@@ -349,7 +373,8 @@ socket.on('connect', async () => {
       } catch { save(null); state = null; renderKey = ''; audio.setPhase(null); }
     }
     if (host) {
-      if (params.get('autocreate') === '1') await create({ setId: params.get('setId') || 'demo', seconds: params.get('seconds'), limit: params.get('limit') });
+      if (params.get('autocreate') === '1') await create({ setId: params.get('setId') || 'demo', seconds: params.get('seconds'), limit: params.get('limit'),
+        coinRewardEnabled: params.get('coinReward') === '1', coinsPerCorrect: Number(params.get('coinsPerCorrect') || 10) });
       else await setupHost();
     } else setupStudent();
   } catch (e) { error(e.message); if (host) await setupHost().catch(failure => error(failure.message)); }
