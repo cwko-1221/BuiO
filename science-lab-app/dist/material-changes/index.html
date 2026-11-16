@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#243e53"><title>可逆及不可逆變化｜變化研究所</title><script src="/shared/i18n.js?v=20260910-1"></script>  <script type="module" crossorigin src="/science-lab/assets/material-changes-DG1no5Yr.js"></script>
+  <link rel="modulepreload" crossorigin href="/science-lab/assets/preload-helper-CVfu66i7.js">
+  <link rel="stylesheet" crossorigin href="/science-lab/assets/preload-helper-CoxLJydr.css">
+  <link rel="stylesheet" crossorigin href="/science-lab/assets/material-changes-ByXtlyAE.css">
+</head>
+<body class="floating-lab">
+  <section id="bootScreen" class="loading-screen" role="status" aria-live="polite" aria-busy="true">
+    <div class="loading-inner"><div class="loading-symbol" aria-hidden="true"><span>change</span><i>↔</i></div><p class="loading-eyebrow">CHANGE LAB</p><h1 id="bootTitle">變化研究所</h1><p id="bootMessage">正在準備材料與冷熱器材…</p><div id="bootProgress" class="loading-meter" role="progressbar" aria-label="載入進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="bootFill"></span></div></div>
+  </section>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">↔</span><div><b id="brandName"></b><span>CHANGE LAB</span></div></div>
+    <div class="experiment-title" id="experimentTitle"></div>
+    <nav class="header-actions" aria-label="Experiment controls"><span class="completion-pill" id="completionCount">0 / 6</span><button id="notesButton" class="icon-button" aria-label="我的記錄">▤</button><button id="helpButton" class="icon-button" aria-label="操作及科學說明">?</button><button id="settingsButton" class="icon-button" aria-label="設定">⚙</button></nav>
+  </header>
+  <main id="laboratory">
+    <div class="mission"><span class="mission-dot"></span><span id="missionText"></span><button id="analyseButton" class="text-button"></button></div>
+    <section id="world" aria-label="3D experiment bench"><canvas id="labCanvas" aria-label="互動 3D 實驗桌"></canvas><div id="labels" aria-hidden="true"></div><div class="camera-controls"><button id="cameraButton" class="icon-button" aria-label="重設視角">⌂</button><button id="pauseButton" class="icon-button" aria-label="暫停">Ⅱ</button></div><div id="modelBadge" class="model-badge"></div></section>
+    <aside id="inspector" aria-label="Selected material">
+      <div class="specimen-heading"><div><span id="selectedLabel" class="eyebrow"></span><h1 id="sampleName"></h1></div><span id="sampleIndex" class="sample-index"></span></div>
+      <div class="live-reading"><span id="temperatureLabel"></span><strong><span id="temperatureValue">−12.0</span><small>°C</small></strong><span id="initialTemperature"></span></div>
+      <div class="state-line"><span id="stateDot"></span><b id="sampleState"></b></div>
+      <div class="thermal-track" aria-hidden="true"><span id="thermalFill"></span></div>
+      <p id="sampleHint" class="sample-hint" aria-live="polite"></p>
+      <div class="observation-actions"><button id="freshButton" class="text-button fresh-button"></button></div>
+    </aside>
+    <aside id="observationCue" class="observation-cue" hidden aria-live="polite"><span id="observationCueText"></span><button type="button" id="resumeObservation" class="text-button" hidden></button></aside>
+    <section class="material-dock" aria-label="Choose a material"><div id="materialChoices"></div></section>
+  </main>
+  <section id="stage" aria-live="polite"><div id="stageContent"></div></section>
+  <dialog id="dialog"><div id="dialogContent"></div></dialog>
+  <div id="toast" role="status"></div>
+</body></html>

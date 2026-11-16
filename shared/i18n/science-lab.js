@@ -21,7 +21,7 @@ BuiI18n.register({
   'sl.leave':        { 'zh-HK': '離開實驗室', 'en-US': 'Leave the lab' },
 
   'sl.catalogTitle': { 'zh-HK': '動手探索，<br /><em>讓發現發生。</em>', 'en-US': 'Get hands on,<br /><em>and let discovery happen.</em>' },
-  'sl.catalogLead':  { 'zh-HK': '走進 5 個安全的模擬實驗，親手拖動、連接、加入、攪拌和調節器材，從現象找出科學規律。', 'en-US': 'Step into safe simulated experiments: drag, connect, pour, stir and adjust the apparatus yourself, and find the science behind what you see.' },
+  'sl.catalogLead':  { 'zh-HK': '走進安全的模擬實驗，親手拖動、連接、加入、攪拌和調節器材，從現象找出科學規律。', 'en-US': 'Step into safe simulated experiments: drag, connect, pour, stir and adjust the apparatus yourself, and find the science behind what you see.' },
   'sl.startFirst':   { 'zh-HK': '開始第一個實驗', 'en-US': 'Start the first experiment' },
   'sl.continueMine': { 'zh-HK': '繼續我的探究', 'en-US': 'Continue my inquiry' },
   'sl.tour':         { 'zh-HK': '30 秒使用導覽', 'en-US': '30-second tour' },

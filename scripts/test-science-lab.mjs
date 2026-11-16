@@ -12,6 +12,7 @@ import { runRespiratoryInterpenetrationCheck } from './check-respiratory-interpe
 const root = path.resolve('.');
 const sourceRoot = path.join(root, 'science-lab-app', 'public');
 const distRoot = path.join(root, 'science-lab-app', 'dist');
+const linearExperiments=experiments.filter(experiment=>!experiment.launchPath);
 
 function readGlbJson(buffer, label) {
   assert.equal(buffer.toString('ascii', 0, 4), 'glTF', `${label}: valid GLB header`);
@@ -33,14 +34,17 @@ const sha256 = (contents) => createHash('sha256').update(contents).digest('hex')
 
 assert.deepEqual(
   experiments.map((item) => item.id),
-  ['density-column', 'water-filter', 'electric-crane', 'light-reflection', 'heat-conduction', 'force-coaster', 'air-expansion', 'respiratory-system'],
-  'the focused release exposes exactly the eight selected investigations in order',
+  ['density-column', 'water-filter', 'electric-crane', 'light-reflection', 'heat-conduction', 'force-coaster', 'air-expansion', 'respiratory-system','material-changes'],
+  'the island includes its eight existing investigations and the new changes inquiry',
 );
-assert.deepEqual(experiments.map((item) => item.number), [1, 2, 3, 4, 5, 6, 7, 8], 'visible experiment numbers are contiguous');
+assert.deepEqual(experiments.map((item) => item.number), [1, 2, 3, 4, 5, 6, 7, 8,9], 'visible experiment numbers are contiguous');
 for (const removedId of ['lab-safety', 'transmission', 'root-viewer', 'food-web', 'eco-house', 'light-lab', 'sound-vacuum', 'earth-moon-sun']) {
   assert.equal(experimentById.has(removedId), false, `${removedId}: removed investigation has no route entry`);
 }
-assert.equal(getNextExperiment('respiratory-system')?.id, 'density-column', 'next-station flow wraps from the last station to the first');
+assert.equal(getNextExperiment('respiratory-system')?.id, 'material-changes', 'the new inquiry follows the existing stations');
+assert.equal(getNextExperiment('material-changes')?.id, 'density-column', 'next-station flow wraps from the last station to the first');
+assert.equal(experimentById.get('material-changes').launchPath,'/science-lab/material-changes/');
+assert.ok((await readFile(path.join(distRoot,'material-changes/index.html'),'utf8')).includes('/science-lab/assets/'));
 assert.equal(getNextExperiment('sound-vacuum'), null, 'unknown legacy route cannot silently enter another experiment');
 assert.equal(new Set(experiments.map((item) => item.id)).size, experiments.length, 'experiment ids are unique');
 assert.deepEqual(
@@ -59,7 +63,7 @@ assert.deepEqual(respiratoryAdjustments.map((step) => Math.sign((step.action.min
 
 const actionTypes = new Set();
 const comparisonExperiments = [];
-for (const experiment of experiments) {
+for (const experiment of linearExperiments) {
   assert.match(experiment.id, /^[a-z0-9-]+$/, `${experiment.id}: stable id`);
   assert.ok(experiment.title && experiment.question && experiment.objective, `${experiment.id}: complete inquiry framing`);
   assert.ok(experiment.safety && experiment.modelNote, `${experiment.id}: safety and model limits`);
@@ -211,7 +215,7 @@ const sceneFiles = [
   path.join(sourceRoot, 'js', 'render', 'scenes', 'BodyScenes.js'),
 ];
 const sceneSource = (await Promise.all(sceneFiles.map((file) => readFile(file, 'utf8')))).join('\n');
-for (const experiment of experiments) {
+for (const experiment of linearExperiments) {
   assert.ok(sceneSource.includes(`'${experiment.id}'`) || sceneSource.includes(`${experiment.id}:`), `${experiment.id}: has a dedicated 3D scene builder`);
   for (const step of experiment.steps) {
     if (step.action.type === 'record') continue;

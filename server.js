@@ -611,6 +611,10 @@ app.get(['/science-lab', '/science-lab/'], requireSession, (_req, res) => {
   res.set('Cache-Control', 'no-store');
   res.sendFile('index.html', { root: scienceLabDist });
 });
+app.get(['/science-lab/material-changes','/science-lab/material-changes/','/science-lab/material-changes/index.html'],requireSession,(_req,res)=>{
+  setScienceLabHeaders(res,{document:true});res.set('Cache-Control','no-store');
+  res.sendFile('material-changes/index.html',{root:scienceLabDist});
+});
 
 app.use('/science-inquiry', requireSession, assetStatic(path.join(__dirname, 'science-inquiry-app', 'public'), {
   setHeaders: res => res.set('Cache-Control', 'private, no-store'),

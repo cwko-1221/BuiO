@@ -1,0 +1,9 @@
+{
+  "name": "change-lab-competition",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": { "three": "0.179.1" },
+  "devDependencies": { "vite": "8.2.1" }
+}

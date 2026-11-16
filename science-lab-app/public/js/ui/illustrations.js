@@ -1,6 +1,7 @@
 const common = 'stroke="#123b45" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
 
 const drawings = {
+  changes: `<g ${common}><path fill="#d4f4ff" d="m12 24 13-8 14 8v18l-13 8-14-8z"/><path d="m12 24 14 8 13-8M26 32v18"/><path fill="#58bce5" d="M52 17c-3 7-11 15-11 23a12 12 0 0 0 24 0c0-8-10-17-13-23z"/><path d="M20 60h40m-8-7 8 7-8 7M31 9H18l5-5M18 9l5 6"/><circle fill="#ffd766" cx="52" cy="40" r="3"/></g>`,
   hands: `<g ${common}><path fill="#efb68f" d="M16 52c-5-9-3-16 2-18V17c0-4 6-4 6 0v13-17c0-4 6-4 6 0v16-19c0-4 6-4 6 0v19-16c0-4 6-4 6 0v18l4-7c3-5 9-1 6 5L45 45v20H25z"/><path fill="#9c84ef" d="M12 59h39v11H12z"/><g fill="#fff"><circle cx="21" cy="25" r="2"/><circle cx="31" cy="21" r="2"/><circle cx="40" cy="28" r="2"/></g></g>`,
   density: `<g ${common}><path fill="#d9f7f5" opacity=".72" d="M22 8h36l-4 61H26z"/><path fill="#b86f18" d="M27 53h26l-1 15H28z"/><path fill="#58aee5" d="M26 39h28l-1 14H27z"/><path fill="#f4d65c" d="M25 25h30l-1 14H26z"/><ellipse fill="#fff" opacity=".55" cx="40" cy="25" rx="15" ry="3"/><circle fill="#9ed887" cx="40" cy="21" r="5"/></g>`,
   filter: `<g ${common}><path fill="#c9eff2" opacity=".75" d="M15 11h50L47 44v23H33V44z"/><path fill="#817568" d="M20 19h40l-6 9H26z"/><path fill="#e6c37a" d="M26 28h28l-6 10H32z"/><path fill="#fff" d="M32 38h16v7H32z"/><path fill="#58bce5" d="M33 52h14v15H33z"/></g>`,

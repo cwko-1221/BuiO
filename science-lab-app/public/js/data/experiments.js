@@ -3,13 +3,14 @@
 // saved progress do not care which one is loaded — only the words change.
 import { TOPICS as TOPICS_ZH, experiments as experimentsZh } from './experiments.zh.js';
 import { TOPICS as TOPICS_EN, experiments as experimentsEn } from './experiments.en.js';
+import { materialChangesDefinition } from './material-changes.js';
 
 // The test scripts import this module under Node, where there is no shared
 // runtime; without one the Chinese edition is the default.
 const english = globalThis.BuiI18n?.lang === 'en-US';
 
 export const TOPICS = english ? TOPICS_EN : TOPICS_ZH;
-export const experiments = english ? experimentsEn : experimentsZh;
+export const experiments = [...(english ? experimentsEn : experimentsZh),materialChangesDefinition(english)];
 
 export const experimentById = new Map(experiments.map((experiment) => [experiment.id, experiment]));
 

@@ -150,6 +150,7 @@ function renderProgress() {
   const percentage = Math.round((complete / experiments.length) * 100);
   dom.progressRing.style.background = `conic-gradient(var(--yellow) ${percentage}%, rgba(255,255,255,.18) 0)`;
   dom.continue.querySelector('span').textContent = t(complete ? 'sl.continueMine' : 'sl.startFirst');
+  const proof=document.querySelector('.hero-proof b');if(proof)proof.textContent=experiments.length;
 }
 
 async function ensureRenderer() {
@@ -180,6 +181,7 @@ async function ensureRenderer() {
 async function startExperiment(id, { forceNew = false } = {}) {
   const definition = experimentById.get(id);
   if (!definition) return;
+  if(definition.launchPath){location.href=`${definition.launchPath}?lang=${encodeURIComponent(window.BuiI18n.lang)}`;return;}
   const revision = ++selectionRevision;
   dom.boot.classList.remove('done');
   setBoot(35, t('sl.bootApparatus'));

@@ -237,7 +237,7 @@ try {
 
   await page.goto(`${base}/science-lab/preview`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => document.querySelector('#bootScreen')?.classList.contains('done'));
-  assert.equal(await page.locator('[data-experiment]').count(), 8, 'catalog exposes exactly the eight selected investigations');
+  assert.equal(await page.locator('[data-experiment]').count(), 9, 'catalog includes the new changes investigation');
   assert.equal(await page.locator('#catalogScreen').isVisible(), true, 'catalog is visible after boot');
   const desktopLayout = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
@@ -282,7 +282,7 @@ try {
   // Load and finish every other scene; this catches missing apparatus IDs,
   // builder exceptions, malformed results and broken persistence together.
   const alreadyCompleted = new Set(['density-column', 'electric-crane']);
-  for (const definition of experiments.filter((item) => !alreadyCompleted.has(item.id))) {
+  for (const definition of experiments.filter((item) => !item.launchPath && !alreadyCompleted.has(item.id))) {
     await openExperiment(page, definition);
     await completeWithAccessibleControls(page);
     if (definition.result.comparison) {
@@ -296,6 +296,9 @@ try {
   }
 
   await page.locator('#nextExperimentButton').click();
+  await page.waitForURL('**/science-lab/material-changes/**');
+  await page.locator('#platformMap').waitFor();
+  await page.goto(`${base}/science-lab/preview#density-column`,{waitUntil:'networkidle'});
   await passObservation(page);
   assert.equal(await page.locator('#stageNext').isDisabled(), true,
     'the experiment cannot start before a hypothesis is chosen');
@@ -305,13 +308,14 @@ try {
   await page.locator('#stageScreen').waitFor({ state: 'hidden' });
   await page.locator('#homeButton').click();
   await page.locator('#catalogScreen').waitFor({ state: 'visible' });
-  assert.match((await page.locator('#progressCount').textContent()).trim(), /^8 \/ 8$/, 'catalog shows all selected investigations completed');
+  assert.match((await page.locator('#progressCount').textContent()).trim(), /^8 \/ 9$/, 'catalog retains eight original completions and leaves the new inquiry uncompleted');
   assert.equal(await page.locator('.experiment-card.completed').count(), 8, 'all selected catalog cards retain completion state');
 
   await page.locator('#notebookButton').click();
   await page.locator('#notebookDialog[open]').waitFor();
-  assert.equal(await page.locator('[data-notebook-id]').count(), 8, 'science notebook contains every selected investigation');
-  assert.equal(await page.locator('.notebook-entry.locked').count(), 0, 'completed entries are all unlocked');
+  assert.equal(await page.locator('[data-notebook-id]').count(), 9, 'science notebook contains every selected investigation');
+  assert.equal(await page.locator('.notebook-entry.locked').count(), 1, 'only the uncompleted new inquiry remains uncompleted');
+  assert.equal(await page.locator('[data-notebook-id="material-changes"].locked').count(),1);
   await page.keyboard.press('Escape');
 
   await page.locator('#settingsButton').click();
