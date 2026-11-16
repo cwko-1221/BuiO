@@ -361,11 +361,11 @@ img { max-width: 100%; }
 .muted { color: var(--ink-soft); font-size: var(--fs-micro); line-height: 1.6; }
 
 /* ----------------------------------------------------------------- nav --- */
-/* Centred rather than a fixed column count. Flex keeps the six-tab group
-   centred whatever the tab count, and the buttons still share width evenly. */
+/* Keep every destination visible; the responsive column count is set with the
+   game-style controls below. Rows stay centred when a row is not full. */
 .pet-nav {
-  flex: 0 0 auto;
-  display: flex; justify-content: center; gap: var(--s1);
+  flex: 0 0 auto; min-width: 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s1);
   padding: var(--s1) var(--s2) calc(var(--s1) + env(safe-area-inset-bottom));
   background: rgba(255, 252, 246, .97);
   border-top: 1px solid var(--line);
@@ -381,11 +381,6 @@ img { max-width: 100%; }
   background: transparent; color: var(--ink-quiet);
   font-size: var(--fs-micro); font-weight: 800; cursor: pointer;
   transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
-}
-.pet-nav button > span { white-space: nowrap; }
-@media (max-width: 700px) {
-  .pet-nav { justify-content: flex-start; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
-  .pet-nav button { flex: 0 0 76px; }
 }
 .pet-nav button:hover { background: var(--chip); }
 .pet-nav button.active {
@@ -1296,8 +1291,6 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
 @media (max-width: 900px) {
   /* The panel no longer overlays the room — it either owns the screen or is not rendered,
      so the old absolute-overlay treatment is gone. */
-  .pet-nav { padding-left: var(--s1); padding-right: var(--s1); }
-  .pet-nav button { flex-direction: column; gap: 2px; font-size: var(--fs-micro); }
   .coin-pusher-bar { grid-template-columns: minmax(180px, 1.2fr) minmax(190px, 1fr) minmax(170px, 1fr); }
   .coin-pusher-title small { font-size: .74rem; }
   .coin-drop { min-width: 132px; }
@@ -1317,10 +1310,6 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
   .room-bar-actions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .room-bar { padding: var(--s1) var(--s2); }
   .room-bar-identity h1 { font-size: 1.05rem; }
-  /* Five Traditional-Chinese labels across 390px: no wrapping, no ragged bar. */
-  .pet-nav { gap: 4px; padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); }
-  .pet-nav button { min-height: 52px; padding: 0; letter-spacing: -.01em; }
-  .pet-nav button > span { font-size: var(--fs-micro); }
   .coin-pusher-bar { grid-template-columns: minmax(0, 1fr) auto; gap: var(--s1); }
   .coin-pusher-title { grid-column: 1 / -1; }
   .coin-pusher-title .eyebrow { display: none; }
@@ -1356,13 +1345,6 @@ button:not(:disabled):active { transform: translateY(2px) scale(.985); }
   .modal-card { padding: var(--s3) var(--s2); }
   .reveal-card img { width: 160px; height: 160px; }
   .reveal-card h2 { font-size: var(--fs-title); }
-}
-
-/* Short landscape phones: keep the play surface from squeezing the panel out. */
-@media (max-width: 900px) and (max-height: 520px) {
-  .pet-nav button { flex-direction: row; }
-  .pet-nav button span { display: none; }
-  .pet-nav button { min-height: 48px; }
 }
 
 /* ----------------------------------------------------- reduced motion ----- */
@@ -1429,26 +1411,36 @@ html.reduced-motion *, html.reduced-motion *:before, html.reduced-motion *:after
 }
 .round-button:active { transform: translateY(var(--press)); box-shadow: 0 0 0 var(--edge-cream); }
 
-/* --- bottom navigation: a row of pressable objects, not a toolbar -------- */
+/* --- bottom navigation: fit nine destinations without squeezing labels --- */
 .pet-nav {
+  --pet-nav-columns: 9;
+  --pet-nav-gap: clamp(6px, .8vw, 12px);
   background: none;
   border-top: 0;
-  padding: var(--s2) var(--s3) calc(var(--s2) + env(safe-area-inset-bottom));
-  gap: var(--s2);
+  padding: 8px max(8px, env(safe-area-inset-right), 1.5vw)
+    calc(12px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left), 1.5vw);
+  gap: var(--pet-nav-gap);
 }
 .pet-nav button {
+  flex: 0 1 calc((100% - (var(--pet-nav-columns) - 1) * var(--pet-nav-gap)) / var(--pet-nav-columns));
   flex-direction: column; gap: 2px;
+  padding: 6px 4px;
   background: var(--game-face);
   border: var(--stroke) solid var(--stroke-col);
-  border-radius: var(--r-lg);
+  border-radius: clamp(12px, 1.6vw, 24px);
   box-shadow: var(--raise);
   color: var(--ink-quiet);
-  min-height: 64px; max-width: 150px;
-  font-weight: 800;
+  min-height: clamp(52px, 6vw, 64px); max-width: 150px;
+  font-size: clamp(11px, 1.1vw, 14px); font-weight: 800;
   transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease),
               background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
 }
-.pet-nav button .icon { font-size: 1.3rem; }
+.pet-nav button .icon { flex: 0 0 auto; font-size: clamp(18px, 2vw, 22px); }
+.pet-nav-label {
+  display: block; min-width: 0; max-width: 100%;
+  white-space: normal; overflow-wrap: anywhere; text-wrap: balance;
+  line-height: 1.2; text-align: center;
+}
 .pet-nav button:hover { background: linear-gradient(#fffdf7, #fbeacd); }
 .pet-nav button:active { transform: translateY(var(--press)); box-shadow: 0 0 0 var(--edge-cream); }
 .pet-nav button.active {
@@ -1457,6 +1449,21 @@ html.reduced-motion *, html.reduced-motion *:before, html.reduced-motion *:after
   color: #6d3410;                      /* 6.1:1 on the pill's lightest stop */
 }
 .pet-nav button.active:active { box-shadow: 0 0 0 var(--edge-gold); }
+
+@media (max-width: 719px) {
+  .pet-nav { --pet-nav-columns: 5; }
+}
+@media (max-width: 479px) {
+  .pet-nav { --pet-nav-columns: 3; }
+  .pet-nav button { flex-direction: row; min-height: 44px; gap: 4px; padding: 6px 4px; }
+  .pet-nav-label { text-align: left; }
+}
+/* A wide, short screen needs only one compact row, with icons and names kept. */
+@media (min-width: 480px) and (max-height: 520px) {
+  .pet-nav { --pet-nav-columns: 9; padding-top: 6px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+  .pet-nav button { min-height: 44px; padding: 3px 1px; font-size: clamp(10px, 1.4vw, 11px); }
+  .pet-nav button .icon { font-size: clamp(16px, 2.2vw, 18px); }
+}
 
 /* --- room bar: a floating tray over the world ---------------------------- */
 .room-bar {
@@ -1522,8 +1529,6 @@ html.reduced-motion *, html.reduced-motion *:before, html.reduced-motion *:after
 .reduced-motion .decor-strip button { transition: none; }
 
 @media (max-width: 560px) {
-  .pet-nav { padding: var(--s1) var(--s1) calc(var(--s1) + env(safe-area-inset-bottom)); gap: 6px; }
-  .pet-nav button { min-height: 58px; border-radius: var(--r-md); }
   .room-bar { padding: var(--s1) var(--s2); }
 }
 

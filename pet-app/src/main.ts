@@ -292,7 +292,7 @@ class StudentApp {
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
-        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['realShop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span>${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
+        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['realShop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span class="pet-nav-label">${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
       </nav>
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
