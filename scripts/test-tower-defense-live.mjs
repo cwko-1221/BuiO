@@ -89,7 +89,7 @@ async function answerQuestion({correct=true,capturePath=null}={}){
     correct:window.__towerDefense.simulation.state.stats.quizCorrect,
   }));
   const choices=page.locator('[data-choice]');
-  if(correct)await choices.filter({hasText:correctChoice}).click();
+  if(correct)await clickExactChoice(choices,correctChoice);
   else{
     const labels=await choices.allTextContents();
     const wrongIndex=labels.findIndex(label=>!label.includes(correctChoice));
@@ -113,6 +113,12 @@ async function answerQuestion({correct=true,capturePath=null}={}){
   }
   await page.waitForFunction(()=>!document.querySelector('#questionPanel').classList.contains('open'));
   return {prompt,before,after};
+}
+
+async function clickExactChoice(choices, answer){
+  const index=await choices.evaluateAll((nodes,text)=>nodes.findIndex(node=>node.lastChild.textContent.trim()===text.trim()),answer);
+  assert(index>=0,`missing exact answer choice: ${answer}`);
+  await choices.nth(index).click();
 }
 
 try{
@@ -276,7 +282,7 @@ try{
     distance:window.__towerDefense.simulation.state.enemies[0]?.distance,
   }));
   assert(!movementBefore.paused&&!movementAfter.paused&&movementAfter.elapsed>movementBefore.elapsed+.3&&movementAfter.distance>movementBefore.distance,`question panel paused combat: ${JSON.stringify({movementBefore,movementAfter})}`);
-  await page.locator('[data-choice]').filter({hasText:movingQuestionAnswer}).click();
+  await clickExactChoice(page.locator('[data-choice]'),movingQuestionAnswer);
   await page.waitForFunction(()=>!document.querySelector('#questionPanel').classList.contains('open'));
 
   await page.evaluate(()=>{window.__towerDefense.simulation.state.focus=100;});

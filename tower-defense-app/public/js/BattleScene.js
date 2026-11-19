@@ -34,6 +34,11 @@ export class BattleScene extends Phaser.Scene {
   }
 
   create() {
+    this.selectionSignature=null;
+    this.effectBudget=0;
+    this.weatherElapsed=0;
+    this.compactEffects=false;
+    this.nextSlowReport=0;
     this.events.once('shutdown',()=>this.cleanup());
     if([`td-map-${this.sim.map.id}`,TOWER_ART.key,ENEMY_ART.key,BOSS_ART.key].some(key=>!this.textures.exists(key))){
       this.hooks.onLoadFailed?.(new Error('Game asset loading interrupted'));
@@ -96,21 +101,30 @@ export class BattleScene extends Phaser.Scene {
       const result=this.sim.useAbility(this.abilityTarget,x,y);this.hooks.onActionResult?.(result);
       if(result.ok)this.abilityTarget=null;this.drawPlacementPreview();return;
     }
+    const tower=this.sim.state.towers.find(item=>Math.abs(item.x-x)<WORLD.gridSize/2&&Math.abs(item.y-y)<WORLD.gridSize/2);
+    if(tower){this.selectTower(tower.id);return;}
     if(this.placementType){
       const point=this.snapToGrid(x,y);
       const result=this.sim.buildTower(this.placementType,point.x,point.y);this.hooks.onActionResult?.(result);
       if(result.ok)this.selectTower(result.tower.id);return;
     }
-    const tower=[...this.sim.state.towers]
-      .sort((a,b)=>Math.hypot(a.x-x,a.y-y)-Math.hypot(b.x-x,b.y-y))
-      .find(item=>Math.hypot(item.x-x,item.y-y)<38);
-    this.selectTower(tower?.id||null);
+    this.selectTower(null);
   }
 
   update(_time,deltaMs) {
     if(!this.assetsReady)return;
     this.sim.update(deltaMs/1000);
-    this.syncTowers();this.syncEnemies();this.syncProjectiles();this.updateWeather(deltaMs/1000);
+    const {enemies,speed,phase,projectiles}=this.sim.state;
+    this.compactEffects=phase==='wave'&&(speed===3||enemies.length>=14||projectiles.length>=20);
+    this.effectBudget=this.compactEffects?6:24;
+    this.syncTowers();this.syncEnemies();this.syncProjectiles();
+    this.weatherElapsed+=deltaMs/1000;
+    if(this.weatherElapsed>=.05){this.updateWeather(this.weatherElapsed);this.weatherElapsed=0;}
+    const rawDelta=this.game.loop.rawDelta;
+    if(phase==='wave'&&rawDelta>70&&this.time.now>=this.nextSlowReport&&!document.hidden){
+      this.nextSlowReport=this.time.now+10000;
+      this.hooks.onSlowFrame?.({durationMs:rawDelta,enemies:enemies.length,speed});
+    }
     const events=this.sim.drainEvents();
     for(const event of events){this.renderEvent(event);this.hooks.onEvent?.(event);}
     this.hooks.onState?.(this.sim.state);
@@ -246,10 +260,12 @@ export class BattleScene extends Phaser.Scene {
       const pulse=definition.boss?Math.sin(phase*.65)*.018:Math.sin(phase*1.3)*.026;
       view.sprite.setScale(view.baseScaleX*(1+pulse),view.baseScaleY*(1-pulse*.25));
       view.sprite.setAlpha(definition.stealth&&!this.sim.isRevealed(enemy)?.58:1);
-      view.glow.setAlpha((definition.boss?.25:.12)+(Math.sin(phase)*.5+.5)*.05);
+      view.glow.setVisible(!this.compactEffects||definition.boss);
+      view.shadow.setVisible(!this.compactEffects||definition.boss);
+      if(view.glow.visible)view.glow.setAlpha((definition.boss?.25:.12)+(Math.sin(phase)*.5+.5)*.05);
       view.snowflake.setVisible(enemy.slowTime>0||enemy.freezeTime>0).setRotation(-phase*.55).setAlpha(enemy.freezeTime>0?1:.62+Math.sin(phase*2)*.2);
-      if(enemy.hp<view.lastHp-.5)this.flashEnemy(view,definition.color);view.lastHp=enemy.hp;
-      const signature=`${Math.ceil(enemy.hp)}:${Math.ceil(enemy.shield)}:${enemy.slowTime>0}:${enemy.freezeTime>0}`;
+      if(!this.compactEffects&&enemy.hp<view.lastHp-.5&&view.flashUntil<=this.time.now){this.flashEnemy(view);view.flashUntil=this.time.now+85;}view.lastHp=enemy.hp;
+      const signature=`${Math.ceil(enemy.hp/enemy.maxHp*24)}:${enemy.shield>0}:${enemy.slowTime>0}:${enemy.freezeTime>0}`;
       if(view.signature!==signature){view.signature=signature;this.drawEnemyStatus(view,enemy);}
     }
   }
@@ -265,18 +281,17 @@ export class BattleScene extends Phaser.Scene {
     const sprite=this.add.sprite(0,0,this.enemyTexture(enemy.type),this.enemyFrame(enemy.type)).setDisplaySize(displaySize,displaySize);
     const snowflake=this.add.image(0,-displaySize*.42,'td-snowflake-particle').setTint(0xb8efff).setBlendMode(Phaser.BlendModes.ADD).setDisplaySize(definition.boss?34:21,definition.boss?34:21).setVisible(false);
     const status=this.add.graphics();container.add([shadow,glow,sprite,snowflake,status]);
-    const view={container,shadow,glow,sprite,snowflake,status,baseScaleX:sprite.scaleX,baseScaleY:sprite.scaleY,signature:'',lastHp:enemy.hp,displaySize};
-    this.drawEnemyStatus(view,enemy);return view;
+    return {container,shadow,glow,sprite,snowflake,status,baseScaleX:sprite.scaleX,baseScaleY:sprite.scaleY,signature:'',lastHp:enemy.hp,displaySize,flashUntil:0};
   }
 
-  flashEnemy(view,color) {
+  flashEnemy(view) {
     view.sprite.setTint(0xffeeee).setBlendMode(Phaser.BlendModes.ADD);view.container.x+=Math.random()*4-2;view.container.y+=Math.random()*4-2;
     this.time.delayedCall(65,()=>{if(view.sprite.active)view.sprite.clearTint().setBlendMode(Phaser.BlendModes.NORMAL);});
   }
 
   drawEnemyStatus(view,enemy) {
     const g=view.status,d=ENEMIES[enemy.type],half=view.displaySize*.43,width=d.boss?104:Math.max(34,view.displaySize*.76),y=-half-11;g.clear();
-    g.fillStyle(0x02070c,.88).fillRoundedRect(-width*.5,y,width,7,3);g.fillStyle(enemy.hp/enemy.maxHp<.3?0xff536d:0x63e2a4,1).fillRoundedRect(-width*.5,y,width*Math.max(0,enemy.hp/enemy.maxHp),7,3);
+    g.fillStyle(0x02070c,.88).fillRect(-width*.5,y,width,7);g.fillStyle(enemy.hp/enemy.maxHp<.3?0xff536d:0x63e2a4,1).fillRect(-width*.5,y,width*Math.max(0,enemy.hp/enemy.maxHp),7);
     if(enemy.maxShield)g.lineStyle(2,0x91e6ff,enemy.shield>0?.9:.16).strokeCircle(0,0,half+4);
     if(enemy.slowTime>0)g.lineStyle(2,0x78d9ff,.9).strokeCircle(0,0,half+7);
     if(enemy.freezeTime>0)g.fillStyle(0xb9eeff,.22).fillCircle(0,0,half+5);
@@ -290,7 +305,8 @@ export class BattleScene extends Phaser.Scene {
       if(!view){view=this.createProjectileView(projectile);this.projectileViews.set(projectile.id,view);}
       const dx=projectile.x-view.lastX,dy=projectile.y-view.lastY;view.container.setPosition(projectile.x,projectile.y);
       if(Math.hypot(dx,dy)>.5)view.container.setRotation(Math.atan2(dy,dx));
-      if(this.time.now-view.lastTrail>36){view.lastTrail=this.time.now;if(projectile.type==='rocket'){this.trailParticle(projectile.x,projectile.y,0xff7a35,16);this.smokeParticle(projectile.x,projectile.y);}else this.trailParticle(projectile.x,projectile.y,projectile.color,8);}
+      view.halo.setVisible(!this.compactEffects);
+      if(!this.compactEffects&&this.time.now-view.lastTrail>55){view.lastTrail=this.time.now;if(projectile.type==='rocket'){this.trailParticle(projectile.x,projectile.y,0xff7a35,16);this.smokeParticle(projectile.x,projectile.y);}else this.trailParticle(projectile.x,projectile.y,projectile.color,8);}
       view.lastX=projectile.x;view.lastY=projectile.y;
     }
   }
@@ -303,17 +319,25 @@ export class BattleScene extends Phaser.Scene {
   }
 
   trailParticle(x,y,color,size=8) {
+    if(this.effectBudget<=0)return;
+    this.effectBudget--;
     const particle=this.add.image(x,y,'td-soft-particle').setTint(color).setBlendMode(Phaser.BlendModes.ADD).setDepth(58).setDisplaySize(size,size).setAlpha(.62);
     this.tweens.add({targets:particle,alpha:0,scale:.15,duration:180,ease:'Quad.Out',onComplete:()=>particle.destroy()});
   }
 
   smokeParticle(x,y) {
+    if(this.effectBudget<=0)return;
+    this.effectBudget--;
     const particle=this.add.image(x,y,'td-soft-particle').setTint(0x73808c).setDepth(57).setDisplaySize(13,13).setAlpha(.42);
     this.tweens.add({targets:particle,y:y-5,alpha:0,scaleX:1.75,scaleY:1.75,duration:360,ease:'Quad.Out',onComplete:()=>particle.destroy()});
   }
 
   drawSelection() {
-    const g=this.selectionGraphics;g.clear();const tower=this.sim.state.towers.find(item=>item.id===this.selectedTowerId);if(!tower)return;
+    const tower=this.sim.state.towers.find(item=>item.id===this.selectedTowerId);
+    const signature=tower?`${tower.id}:${tower.level}`:'';
+    if(signature===this.selectionSignature)return;
+    this.selectionSignature=signature;
+    const g=this.selectionGraphics;g.clear();if(!tower)return;
     const stats=towerStats(tower),color=TOWERS[tower.type].color;
     g.fillStyle(color,.045).fillCircle(tower.x,tower.y,stats.range);g.lineStyle(2,color,.46).strokeCircle(tower.x,tower.y,stats.range);g.lineStyle(3,0xffffff,.9).strokeCircle(tower.x,tower.y,39);
   }
@@ -355,6 +379,15 @@ export class BattleScene extends Phaser.Scene {
   }
 
   renderEvent(event) {
+    if(this.compactEffects){
+      if(event.type==='beam'){this.energyLine([event.from,event.to],0xff65c2,3,.10);return;}
+      if(event.type==='chain'){this.energyLine(event.points,0xc9a0ff,4,.14);return;}
+      if(event.type==='frostField'||event.type==='pulse'){
+        this.ring(event.x,event.y,event.radius||event.range,event.type==='pulse'?0xffdf72:0x87ddff,.22);return;
+      }
+      if(['shot','impact','flame','heal','critical','shieldBreak'].includes(event.type))return;
+      if(event.type==='enemyKilled'&&!event.boss){this.particleBurst(event.x,event.y,0xff92b6,2);return;}
+    }
     if(event.type==='shot'){this.animateTowerAttack(event.towerId,event.towerType==='cannon'?2:1);}
     else if(event.type==='impact')this.impact(event);
     else if(event.type==='flame'){this.animateTowerAttack(event.towerId,.65);this.flameJet(event);}
@@ -405,22 +438,28 @@ export class BattleScene extends Phaser.Scene {
   }
 
   ring(x,y,radius,color,duration=.3) {
+    if(this.effectBudget<=0)return;
+    this.effectBudget--;
     const ring=this.add.graphics().setDepth(73);ring.lineStyle(7,color,.18).strokeCircle(0,0,12);ring.lineStyle(2,0xffffff,.72).strokeCircle(0,0,10);ring.setPosition(x,y).setBlendMode(Phaser.BlendModes.ADD);
     this.tweens.add({targets:ring,scale:radius/12,alpha:0,duration:duration*1000,ease:'Cubic.Out',onComplete:()=>ring.destroy()});
   }
 
   energyLine(points,color,width,duration) {
-    if(points.length<2)return;const g=this.add.graphics().setDepth(74).setBlendMode(Phaser.BlendModes.ADD);
+    if(points.length<2||this.effectBudget<=0)return;
+    this.effectBudget--;
+    const g=this.add.graphics().setDepth(74).setBlendMode(Phaser.BlendModes.ADD);
     g.lineStyle(width+10,color,.12);for(let index=0;index<points.length-1;index++)g.lineBetween(points[index].x,points[index].y,points[index+1].x,points[index+1].y);
     g.lineStyle(width+3,0xffffff,.34);for(let index=0;index<points.length-1;index++)g.lineBetween(points[index].x,points[index].y,points[index+1].x,points[index+1].y);
     g.lineStyle(width,color,1);for(let index=0;index<points.length-1;index++){
       const a=points[index],b=points[index+1];g.lineBetween(a.x,a.y,b.x,b.y);
-      for(let spark=1;spark<=3;spark++){const ratio=spark/4,x=a.x+(b.x-a.x)*ratio,y=a.y+(b.y-a.y)*ratio;this.trailParticle(x,y,color,8+spark*2);}
+      if(!this.compactEffects)for(let spark=1;spark<=3;spark++){const ratio=spark/4,x=a.x+(b.x-a.x)*ratio,y=a.y+(b.y-a.y)*ratio;this.trailParticle(x,y,color,8+spark*2);}
     }
     this.tweens.add({targets:g,alpha:0,duration:duration*1000,onComplete:()=>g.destroy()});
   }
 
   particleBurst(x,y,color,count=12,{distance=44,duration=380,size=.55,shards=false}={}) {
+    count=Math.min(count,this.effectBudget);
+    this.effectBudget-=count;
     for(let index=0;index<count;index++){
       const angle=index/count*Math.PI*2+(Math.random()-.5)*.35,length=distance*(.42+Math.random()*.75),texture=shards&&index%2===0?'td-shard-particle':'td-soft-particle';
       const particle=this.add.image(x,y,texture).setTint(color).setBlendMode(Phaser.BlendModes.ADD).setDepth(76).setAlpha(.72+Math.random()*.28).setScale(size*(.45+Math.random()*.8)).setRotation(angle);

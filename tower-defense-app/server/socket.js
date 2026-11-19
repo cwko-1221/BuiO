@@ -4,7 +4,7 @@ const setsRepo = require('../../game-app/repositories/questionSets.repo');
 const demoSet = require('../../game-app/lib/demoSet');
 const defaultSet = require('../lib/defaultQuestions');
 const config = require('../../config');
-const { startSession, sessions: questionSessions } = require('../lib/questionSessions');
+const { startSession, sessions: questionSessions, issueQuestion, gradeAnswer } = require('../lib/questionSessions');
 const {
   MAP_IDS,
   rooms,
@@ -55,6 +55,26 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
 
   nsp.on('connection', socket => {
     let startSecond = 0, startCount = 0, diagnosticMinute = 0, diagnosticCount = 0;
+    let quizSecond = 0, quizCount = 0;
+    for (const [event, action] of [['question:next', issueQuestion], ['question:answer', gradeAnswer]]) {
+      socket.on(event, (body, ack) => {
+        if (typeof ack !== 'function') return;
+        const owner = socket.request.session?.studentId;
+        const preview = !config.isProd && socket.handshake.auth?.preview === true;
+        if (!owner && !preview) return ack({ success: false, status: 401, message: '請先登入平台。' });
+        const room = rooms.get(socket.data.code);
+        if (socket.data.role !== 'player' || (room && room.players.get(socket.data.playerKey)?.socketId !== socket.id)) {
+          return ack({ success: false, status: 403, message: '你尚未加入這個塔防房間。' });
+        }
+        const second = Math.floor(Date.now() / 1000);
+        if (second !== quizSecond) { quizSecond = second; quizCount = 0; }
+        if (++quizCount > 6) return ack({ success: false, status: 429, message: '請稍後再試。' });
+        try { ack(action(owner || 'preview-player', body, socket.data.code)); }
+        catch (error) {
+          ack({ success: false, status: error.status || 500, message: error.status ? error.message : '暫時未能連接題庫。' });
+        }
+      });
+    }
     socket.on('question:session', (body, ack) => {
       if (typeof ack !== 'function') return;
       const owner = socket.request.session?.studentId;
@@ -80,11 +100,11 @@ module.exports = function registerTowerDefenseClassrooms(io, app) {
       if (minute !== diagnosticMinute) { diagnosticMinute = minute; diagnosticCount = 0; }
       if (++diagnosticCount > 100) return;
       if (typeof data.traceId !== 'string' || !/^[\w-]{16,80}$/.test(data.traceId)) return;
-      const stages = ['http-start', 'http-ok', 'http-failed', 'socket-start', 'socket-ok', 'socket-failed', 'assets-start', 'assets-progress', 'first-frame', 'battle-start', 'render-timeout', 'context-lost', 'context-restored', 'retry-scene', 'start-failed'];
+      const stages = ['http-start', 'http-ok', 'http-failed', 'socket-start', 'socket-ok', 'socket-failed', 'assets-start', 'assets-progress', 'first-frame', 'battle-start', 'render-timeout', 'context-lost', 'context-restored', 'retry-scene', 'start-failed', 'quiz-socket-ok', 'quiz-socket-failed', 'quiz-http-ok', 'quiz-http-failed', 'slow-battle'];
       if (!stages.includes(data.stage)) return;
-      const safe = { build: '20261113-recovery-1', traceId: data.traceId, stage: data.stage,
+      const safe = { build: '20261120-battle-1', traceId: data.traceId, stage: data.stage,
         elapsedMs: Math.min(3600000, Math.max(0, Number(data.elapsedMs) || 0)), transport: socket.conn.transport.name };
-      for (const key of ['durationMs', 'status', 'progress', 'inflight', 'processing']) {
+      for (const key of ['durationMs', 'status', 'progress', 'inflight', 'processing', 'enemies', 'speed']) {
         if (Number.isFinite(data[key])) safe[key] = Math.max(0, Math.min(3600000, data[key]));
       }
       console.log('[tower-start]', JSON.stringify(safe));

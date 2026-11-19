@@ -1,6 +1,13 @@
 // Crystal Bastion: student battlefield, teacher console, and all of the game
 // content — maps, towers, enemies and abilities — that the player reads on screen.
 BuiI18n.register({
+  'td.quizClose': { 'zh-HK': '關閉題目', 'en-US': 'Close question' },
+  'td.quizRetry': { 'zh-HK': '再試一次', 'en-US': 'Try again' },
+  'td.quizUnavailable': { 'zh-HK': '暫未能取得題目', 'en-US': 'Question unavailable' },
+  'td.quizConnection': { 'zh-HK': '答題連線暫時沒有回覆，可以在這裏再試一次。', 'en-US': 'The quiz connection did not respond. You can try again here.' },
+  'td.quizReference': { 'zh-HK': '查詢編號 {code}', 'en-US': 'Reference {code}' },
+  'td.reconnectingBattle': { 'zh-HK': '正在重新連接課堂…', 'en-US': 'Reconnecting to your classroom…' },
+  'td.reconnectBattle': { 'zh-HK': '重新連線', 'en-US': 'Reconnect' },
   'td.preparingBattle': { 'zh-HK': '正在準備你的戰場…', 'en-US': 'Preparing your battlefield…' },
   'td.battleReady': { 'zh-HK': '戰場已準備好，等待老師與全班一起開始', 'en-US': 'Battlefield ready. Waiting to start with your class.' },
   'td.startingTogether': { 'zh-HK': '全班準備完成，即將一起開始', 'en-US': 'Everyone is ready. Starting together shortly.' },

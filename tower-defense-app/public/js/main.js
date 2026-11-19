@@ -13,10 +13,10 @@ document.addEventListener('touchmove', event => {
 
 import { ABILITIES, DIFFICULTIES, MAPS, TOWERS, WORLD, towerStats } from './content.js?v=20260809-path-grid-1';
 import { TowerDefenseSimulation } from './simulation.js?v=20260809-path-grid-1';
-import { BattleScene } from './BattleScene.js?v=20261113-recovery-1';
+import { BattleScene } from './BattleScene.js?v=20261120-battle-1';
 import { CrystalAudio } from './audio.js?v=20261013-start-recovery-1';
-import { requestJson, startQuestionSession, socketRequest } from './session-start.js?v=20261113-recovery-1';
-import { mountBattle } from './battle-runtime.js?v=20261113-recovery-1';
+import { requestJson, startQuestionSession, socketRequest } from './session-start.js?v=20261120-battle-1';
+import { mountBattle } from './battle-runtime.js?v=20261120-battle-1';
 import { MAP_ART, MAP_THUMB, TOWER_ART, atlasPosition } from './assets.js?v=20260817-thumbs';
 
 const $=id=>document.getElementById(id);
@@ -37,9 +37,12 @@ let selectedMap=null;
 let me={name:t('td.studentFallback'),studentId:null};
 let classroom=preview?{code:null,hostName:t('td.previewMode'),setTitle:t('td.defaultBank'),phase:'preview'}:null;
 let roomsTimer=null,joining=false,classroomStarted=false,lastClassroomStateAt=0;
+let joinRetryTimer=null;
 let simulation=null,scene=null,phaserGame=null,questionSessionId=null;
 let selectedTowerId=null,panelSignature='',questionTimer=null,questionDeadline=0,activeQuestion=null,answering=false;
+let questionRequest=null, questionCloseTimer=null, pendingAnswer=null, identityRequest=null;
 let lastHudSignature='',lastSoundAt=new Map(),modalWasPaused=false;
+let nextHudUpdate=0;
 let deploymentAbort=null,sessionStartKey=null,audioFailureReported=false;
 let battleRuntime=null,startTimer=null,serverOffset=0,battleStarted=false,networkWasPaused=null;
 let lastSelectedMap=null,mapSelectionRequest=0;
@@ -98,7 +101,7 @@ function loadProfile(){
   }catch{return{unlocked:['starport'],completed:[],bestScores:{},totalCorrect:0};}
 }
 
-function saveProfile(){localStorage.setItem(profileKey,JSON.stringify(profile));}
+function saveProfile(){try{localStorage.setItem(profileKey,JSON.stringify(profile));}catch{}}
 function showScreen(id){document.querySelectorAll('.screen').forEach(screen=>screen.classList.toggle('active',screen.id===id));}
 function requestHeaders(){return previewRoute?{'x-buio-preview':'1'}:{};}
 
@@ -123,12 +126,11 @@ function renderMenu(){
 }
 
 async function loadIdentity(){
-  try{
-    const response=await fetch('/api/auth/me',{credentials:'include'});
-    if(!response.ok)return;
-    const user=(await response.json())?.student;
+  identityRequest ??= (async()=>{try{
+    const {student:user}=await requestJson('/api/auth/me',{credentials:'include'},{timeoutMs:3000});
     if(user?.name)me={name:user.name,studentId:user.id||null};
-  }catch{}
+  }catch{}})();
+  return identityRequest;
 }
 
 function escapeHtml(value){return String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
@@ -152,14 +154,27 @@ async function loadRooms(){
   }catch{$('roomList').innerHTML=`<div class="room-empty error">${escapeHtml(t('td.roomsFailed'))}</div>`;}
 }
 
-async function joinRoom(code){
-  if(joining||!socket)return;joining=true;$('joinError').textContent='';await loadIdentity();
+async function joinRoom(code,attempt=0){
+  if(joining||!socket)return;
+  clearTimeout(joinRetryTimer);
+  joining=true;$('joinError').textContent='';await loadIdentity();
   const previousMap=classroom?.code===code?(selectedMap||lastSelectedMap):null;
   const joinSentAt=Date.now();
-  socket.timeout(10000).emit('player:join',{code,name:me.name,studentId:me.studentId},(error,response)=>{
+  socket.timeout(4000).emit('player:join',{code,name:me.name,studentId:me.studentId},(error,response)=>{
     joining=false;
+    if(error&&simulation&&classroom?.code===code){
+      if(socket.connected&&attempt<2){joinRetryTimer=setTimeout(()=>joinRoom(code,attempt+1),500);return;}
+      showBattleGate(t('td.reconnectingBattle'));
+      $('battleReconnect').hidden=false;
+      return;
+    }
+    if(!error&&!response?.ok&&simulation&&classroom?.code===code){
+      leaveClassroom(serverText(response?.message)||t('td.roomClosed'));
+      return;
+    }
     if(error||!response?.ok){$('joinError').textContent=serverText(response?.message)||t('td.joinFailed');loadRooms();return;}
     clearInterval(roomsTimer);
+    $('battleReconnect').hidden=true;
     if(classroom?.code!==response.code){cancelDeployment();lastSelectedMap=null;}
     mapSelectionRequest++;
     classroom={code:response.code,hostName:response.hostName,setTitle:response.setTitle,phase:response.phase,startedAt:response.startedAt};
@@ -271,6 +286,7 @@ async function startCampaign(){
       ...lifecycle,
       onState:updateHud,
       onEvent:handleGameEvent,
+      onSlowFrame:detail=>diagnostic('slow-battle',detail),
       onTowerSelected:tower=>{selectedTowerId=tower?.id||null;document.querySelectorAll('[data-tower]').forEach(button=>button.classList.remove('selected'));renderTowerPanel(tower,true);},
       onActionResult:handleActionResult,
     }),{
@@ -302,9 +318,11 @@ function teardownGame(){
   battleStarted=false;
   networkWasPaused=null;
   clearTimeout(startTimer);battleRuntime?.close();battleRuntime=null;hideBattleGate();
-  clearInterval(questionTimer);questionTimer=null;activeQuestion=null;answering=false;
+  closeQuestion();
+  clearTimeout(joinRetryTimer);
+  $('battleReconnect').hidden=true;
   $('questionPanel').classList.remove('open');$('endModal').classList.remove('open');$('towerPanel').classList.remove('open');
-  phaserGame=null;scene=null;simulation=null;selectedTowerId=null;panelSignature='';lastHudSignature='';
+  phaserGame=null;scene=null;simulation=null;selectedTowerId=null;panelSignature='';lastHudSignature='';nextHudUpdate=0;
   audio.stopMusic();
 }
 
@@ -316,13 +334,16 @@ function selectBuildTower(id){
 }
 
 function emitClassroomState(status='playing',force=false){
-  if(!socket||!simulation||!classroomStarted||!scene||Date.now()+serverOffset<(classroom?.startedAt||0))return;
+  if(!socket?.connected||!simulation||!classroomStarted||!scene||Date.now()+serverOffset<(classroom?.startedAt||0))return;
   const now=performance.now();if(!force&&now-lastClassroomStateAt<750)return;lastClassroomStateAt=now;
   const state=simulation.state;
   socket.emit('player:state',{status,wave:state.wave,score:state.score,quizCorrect:state.stats.quizCorrect,quizAnswered:state.stats.quizAnswered});
 }
 
 function updateHud(state,force=false){
+  const now=performance.now();
+  if(!force&&now<nextHudUpdate)return;
+  nextHudUpdate=now+80;
   const signature=[state.lives,Math.floor(state.gold),state.wave,state.score,Math.floor(state.focus),state.phase,state.paused,state.speed,state.enemies.length,Math.ceil(state.buildCountdown),state.quizKeys,state.answersRequired,state.autoStartWaiting,state.stasisTime.toFixed(1),state.overdriveTime.toFixed(1),...Object.values(state.abilities).map(value=>value.toFixed(1))].join(':');
   if(!force&&signature===lastHudSignature)return;lastHudSignature=signature;
   $('livesValue').textContent=state.lives;$('goldValue').textContent=Math.floor(state.gold);$('waveValue').textContent=state.wave;$('scoreValue').textContent=Math.floor(state.score).toLocaleString('zh-HK');$('focusValue').textContent=Math.floor(state.focus);$('focusFill').style.width=`${state.focus}%`;
@@ -345,14 +366,23 @@ function updateHud(state,force=false){
   emitClassroomState(['won','lost'].includes(state.phase)?state.phase:'playing');
 }
 
-function renderTowerPanel(tower,force=false){
+function renderTowerPanel(tower){
   const panel=$('towerPanel');
   if(!tower){panel.classList.remove('open');panelSignature='';return;}
   const definition=TOWERS[tower.type],stats=towerStats(tower),maxed=tower.level>=definition.levels.length,nextCost=maxed?0:definition.upgradeCosts[tower.level-1];
-  const signature=[tower.id,tower.level,tower.targetMode,Math.floor(simulation.state.gold),Math.floor(tower.damage),tower.kills].join(':');if(!force&&signature===panelSignature)return;panelSignature=signature;
+  const signature=`${tower.id}:${tower.level}`;
+  if(signature===panelSignature){
+    $('upgradeTowerBtn').disabled=maxed||simulation.state.gold<nextCost;
+    const kills=t('td.towerKills',{count:tower.kills});
+    const damage=t('td.towerDamage',{total:Math.floor(tower.damage).toLocaleString(locale)});
+    if($('towerKills').textContent!==kills)$('towerKills').textContent=kills;
+    if($('towerDamage').textContent!==damage)$('towerDamage').textContent=damage;
+    return;
+  }
+  panelSignature=signature;
   const color=`#${definition.color.toString(16).padStart(6,'0')}`,spritePosition=atlasPosition(TOWER_ART.frames[tower.type],TOWER_ART.columns,TOWER_ART.rows);
   panel.style.setProperty('--tower-color',color);panel.classList.add('open');
-  panel.innerHTML=`<div class="tower-panel-head"><span class="tower-panel-icon tower-panel-render" style="--sprite-x:${spritePosition.x}%;--sprite-y:${spritePosition.y}%"></span><div><b>${definition.name}</b><small>Lv.${tower.level} · ${stats.name}</small></div><button class="panel-close" id="towerPanelClose">×</button></div><p class="tower-description">${definition.description}</p><div class="tower-stats"><div><span>${t('td.statDamage')}</span><b>${Math.round(stats.damage)}</b></div><div><span>${t('td.statRange')}</span><b>${Math.round(stats.range)}</b></div><div><span>${t('td.statRate')}</span><b>${(1/stats.cooldown).toFixed(1)}/s</b></div></div><label class="target-field">${t('td.targetPriority')}<select id="targetModeSelect">${Object.entries(targetNames).map(([id,name])=>`<option value="${id}" ${tower.targetMode===id?'selected':''}>${name}</option>`).join('')}</select></label><div class="tower-actions"><button class="upgrade-button" id="upgradeTowerBtn" ${maxed||simulation.state.gold<nextCost?'disabled':''}>${maxed?t('td.maxLevel'):t('td.upgradeFor',{cost:nextCost})}</button><button class="sell-button" id="sellTowerBtn">${t('td.sellFor',{value:Math.floor(tower.totalSpent*.7)})}</button></div><div class="tower-record"><span>${t('td.towerKills',{count:tower.kills})}</span><span>${t('td.towerDamage',{total:Math.floor(tower.damage).toLocaleString(locale)})}</span></div>`;
+  panel.innerHTML=`<div class="tower-panel-head"><span class="tower-panel-icon tower-panel-render" style="--sprite-x:${spritePosition.x}%;--sprite-y:${spritePosition.y}%"></span><div><b>${definition.name}</b><small>Lv.${tower.level} · ${stats.name}</small></div><button class="panel-close" id="towerPanelClose">×</button></div><p class="tower-description">${definition.description}</p><div class="tower-stats"><div><span>${t('td.statDamage')}</span><b>${Math.round(stats.damage)}</b></div><div><span>${t('td.statRange')}</span><b>${Math.round(stats.range)}</b></div><div><span>${t('td.statRate')}</span><b>${(1/stats.cooldown).toFixed(1)}/s</b></div></div><label class="target-field">${t('td.targetPriority')}<select id="targetModeSelect">${Object.entries(targetNames).map(([id,name])=>`<option value="${id}" ${tower.targetMode===id?'selected':''}>${name}</option>`).join('')}</select></label><div class="tower-actions"><button class="upgrade-button" id="upgradeTowerBtn" ${maxed||simulation.state.gold<nextCost?'disabled':''}>${maxed?t('td.maxLevel'):t('td.upgradeFor',{cost:nextCost})}</button><button class="sell-button" id="sellTowerBtn">${t('td.sellFor',{value:Math.floor(tower.totalSpent*.7)})}</button></div><div class="tower-record"><span id="towerKills">${t('td.towerKills',{count:tower.kills})}</span><span id="towerDamage">${t('td.towerDamage',{total:Math.floor(tower.damage).toLocaleString(locale)})}</span></div>`;
   $('towerPanelClose').onclick=()=>scene?.selectTower(null);
   $('targetModeSelect').onchange=event=>simulation.setTargetMode(tower.id,event.target.value);
   $('upgradeTowerBtn').onclick=()=>handleActionResult(simulation.upgradeTower(tower.id));
@@ -382,43 +412,164 @@ function handleGameEvent(event){
 
 function playThrottled(name,interval){const now=performance.now();if(now-(lastSoundAt.get(name)||0)<interval)return;lastSoundAt.set(name,now);audio.sfx(name);}
 function showBanner(text){const banner=$('waveBanner');banner.textContent=text;banner.classList.remove('show');void banner.offsetWidth;banner.classList.add('show');}
-function showToast(message,type=''){if(window.BuiLoading?.notify(message))return;const toast=document.createElement('div');toast.className=`toast ${type}`;toast.textContent=message;$('toastStack').append(toast);setTimeout(()=>toast.remove(),2600);}
+function showToast(message,type=''){const toast=document.createElement('div');toast.className=`toast ${type}`;toast.textContent=message;$('toastStack').append(toast);setTimeout(()=>toast.remove(),2600);}
 
 function beginWave(){if(!simulation)return;const result=simulation.startWave();handleActionResult(result);}
 function togglePause(){if(!simulation)return;simulation.togglePause();updateHud(simulation.state,true);audio.sfx('ui');}
 function cycleSpeed(){if(!simulation)return;simulation.setSpeed(simulation.state.speed===1?2:simulation.state.speed===2?3:1);updateHud(simulation.state,true);audio.sfx('ui');}
 
-async function openQuestion(){
+async function quizRequest(operation, body, signal) {
+  if (socket?.connected) {
+    const started=performance.now();
+    try {
+      const result=await socketRequest(socket, operation==='question'?'question:next':'question:answer', body, signal, 2200);
+      diagnostic('quiz-socket-ok',{durationMs:performance.now()-started});
+      return result;
+    } catch(error) {
+      if(signal.aborted) throw error;
+      diagnostic('quiz-socket-failed',{durationMs:performance.now()-started,status:error.status||0});
+      if(error.status&&!error.retryable) throw error;
+    }
+  }
+  const started=performance.now();
+  try {
+    const result=await api('/'+operation,{method:'POST',body,signal,timeoutMs:4000});
+    diagnostic('quiz-http-ok',{durationMs:performance.now()-started});
+    return result;
+  } catch(error) {
+    if(!signal.aborted) diagnostic('quiz-http-failed',{durationMs:performance.now()-started,status:error.status||0});
+    throw error;
+  }
+}
+
+function showQuizError(error,retry) {
+  const message=$('questionFeedback');
+  message.className='question-feedback wrong';
+  const ended=error.status===410||error.status===404||error.status===401||error.status===403;
+  message.textContent=ended ? (serverText(error.message)||t('td.connectFailed')) : t('td.quizConnection');
+  const button=$('questionRetry');
+  button.hidden=ended;
+  button.onclick=ended?null:retry;
+  $('quizReference').textContent=t('td.quizReference',{code:traceId.slice(0,8)});
+}
+
+async function openQuestion() {
   if(!simulation||!questionSessionId||$('questionPanel').classList.contains('open'))return;
-  unlockAudio();$('questionPanel').classList.add('open');$('questionPrompt').textContent=t('td.quizFetching');$('questionImage').hidden=true;$('questionImage').removeAttribute('src');$('questionChoices').innerHTML='';$('questionFeedback').textContent='';answering=false;
-  try{
-    const data=await api('/question',{method:'POST',body:{sessionId:questionSessionId}});activeQuestion=data.question;questionDeadline=activeQuestion.expiresAt;
-    $('questionPrompt').textContent=activeQuestion.prompt;
-    const questionImage=$('questionImage');questionImage.hidden=!activeQuestion.image;if(activeQuestion.image)questionImage.src=activeQuestion.image;
-    $('questionReward').textContent=t('td.quizReward',{coins:Math.floor(activeQuestion.baseReward*simulation.quizRules.quizGoldMultiplier)});
-    $('questionChoices').innerHTML=activeQuestion.choices.map((choice,index)=>`<button class="choice-button" data-choice="${index}"><span>${String.fromCharCode(65+index)}</span>${escapeHtml(choice)}</button>`).join('');
-    document.querySelectorAll('[data-choice]').forEach(button=>button.addEventListener('click',()=>answerQuestion(Number(button.dataset.choice))));
-    clearInterval(questionTimer);questionTimer=setInterval(updateQuestionTimer,100);updateQuestionTimer();
-  }catch(error){showToast(error.message,'error');closeQuestion();}
+  unlockAudio();
+  $('questionPanel').classList.add('open');
+  await loadQuestion();
 }
 
-function updateQuestionTimer(){
-  if(!activeQuestion)return;const remaining=Math.max(0,questionDeadline-Date.now()),seconds=Math.ceil(remaining/1000);$('questionSeconds').textContent=seconds;$('questionTimerRing').style.strokeDashoffset=String(107*(1-remaining/20000));if(remaining<=0&&!answering)answerQuestion(-1);
+async function loadQuestion() {
+  const id=questionSessionId, controller=new AbortController();
+  questionRequest?.abort();
+  questionRequest=controller;
+  $('questionRetry').hidden=true;
+  $('questionPrompt').textContent=t('td.quizFetching');
+  $('questionSeconds').textContent='–';
+  $('questionImage').hidden=true;
+  $('questionImage').removeAttribute('src');
+  $('questionChoices').replaceChildren();
+  $('questionFeedback').textContent='';
+  $('quizReference').textContent='';
+  try {
+    const requestId=crypto.randomUUID?.()||Array.from(crypto.getRandomValues(new Uint8Array(16)),v=>v.toString(16).padStart(2,'0')).join('');
+    const {question}=await quizRequest('question',{sessionId:id,requestId},controller.signal);
+    if(controller.signal.aborted||id!==questionSessionId)return;
+    activeQuestion=question;
+    questionDeadline=performance.now()+Math.max(0,question.remainingMs??(question.expiresAt-Date.now()));
+    $('questionPrompt').textContent=question.prompt;
+    const image=$('questionImage');
+    if(question.image){
+      image.loading='lazy';
+      image.hidden=false;
+      image.src=question.image;
+    }
+    $('questionReward').textContent=t('td.quizReward',{coins:Math.floor(question.baseReward*simulation.quizRules.quizGoldMultiplier)});
+    $('questionChoices').innerHTML=question.choices.map((choice,index)=>'<button class="choice-button" data-choice="'+index+'"><span>'+String.fromCharCode(65+index)+'</span>'+escapeHtml(choice)+'</button>').join('');
+    $('questionChoices').querySelectorAll('[data-choice]').forEach(button=>button.onclick=()=>answerQuestion(Number(button.dataset.choice)));
+    clearInterval(questionTimer);
+    questionTimer=setInterval(updateQuestionTimer,100);
+    updateQuestionTimer();
+  } catch(error) {
+    if(controller.signal.aborted)return;
+    $('questionPrompt').textContent=t('td.quizUnavailable');
+    showQuizError(error,loadQuestion);
+  }
 }
 
-async function answerQuestion(index){
-  if(answering||!activeQuestion)return;answering=true;clearInterval(questionTimer);document.querySelectorAll('[data-choice]').forEach(button=>button.disabled=true);
-  try{
-    const data=await api('/answer',{method:'POST',body:{sessionId:questionSessionId,token:activeQuestion.token,answerIndex:index}});
-    document.querySelectorAll('[data-choice]').forEach((button,choiceIndex)=>{if(choiceIndex===data.correctIndex)button.classList.add('correct');else if(choiceIndex===index)button.classList.add('wrong');});
-    const feedback=$('questionFeedback');feedback.className=`question-feedback ${data.correct?'correct':'wrong'}`;
-    if(data.correct){const granted=simulation.grantQuizReward(data);profile.totalCorrect++;saveProfile();feedback.textContent=t('td.quizCorrect',{coins:granted,have:simulation.state.quizKeys,need:simulation.state.answersRequired});audio.sfx('correct');$('quizStreak').textContent=data.streak>1?t('td.quizStreak',{count:data.streak}):'';}
-    else{simulation.grantQuizReward(data);feedback.textContent=t(data.timedOut?'td.quizTimeout':'td.quizWrong');audio.sfx('wrong');$('quizStreak').textContent='';}
-    setTimeout(closeQuestion,1250);
-  }catch(error){showToast(error.message,'error');setTimeout(closeQuestion,500);}
+function updateQuestionTimer() {
+  if(!activeQuestion)return;
+  const remaining=Math.max(0,questionDeadline-performance.now());
+  $('questionSeconds').textContent=Math.ceil(remaining/1000);
+  $('questionTimerRing').style.strokeDashoffset=String(107*(1-Math.min(20000,remaining)/20000));
+  if(remaining<=0&&!answering)answerQuestion(-1);
 }
 
-function closeQuestion(){clearInterval(questionTimer);questionTimer=null;activeQuestion=null;answering=false;$('questionPanel').classList.remove('open');}
+async function answerQuestion(index) {
+  if(answering||!activeQuestion)return;
+  const controller=new AbortController();
+  questionRequest=controller;
+  pendingAnswer??=index;
+  answering=true;
+  $('questionClose').disabled=true;
+  clearInterval(questionTimer);
+  $('questionRetry').hidden=true;
+  $('quizReference').textContent='';
+  const choices=$('questionChoices').querySelectorAll('[data-choice]');
+  choices.forEach(button=>button.disabled=true);
+  try {
+    const data=await quizRequest('answer',{sessionId:questionSessionId,token:activeQuestion.token,answerIndex:pendingAnswer},controller.signal);
+    if(controller.signal.aborted)return;
+    choices.forEach((button,i)=>{
+      if(i===data.correctIndex)button.classList.add('correct');
+      else if(i===pendingAnswer)button.classList.add('wrong');
+    });
+    const feedback=$('questionFeedback');
+    feedback.className='question-feedback '+(data.correct?'correct':'wrong');
+    const granted=simulation.grantQuizReward(data);
+    if(data.correct){
+      profile.totalCorrect++;
+      saveProfile();
+      feedback.textContent=t('td.quizCorrect',{coins:granted,have:simulation.state.quizKeys,need:simulation.state.answersRequired});
+      $('quizStreak').textContent=data.streak>1?t('td.quizStreak',{count:data.streak}):'';
+    }else{
+      feedback.textContent=t(data.timedOut?'td.quizTimeout':'td.quizWrong');
+      $('quizStreak').textContent='';
+    }
+    audio.sfx(data.correct?'correct':'wrong');
+    questionCloseTimer=setTimeout(closeQuestion,1250);
+  }catch(error){
+    if(controller.signal.aborted)return;
+    answering=false;
+    $('questionClose').disabled=false;
+    if(error.status===409){
+      activeQuestion=null;
+      pendingAnswer=null;
+      await loadQuestion();
+      return;
+    }
+    showQuizError(error,()=>answerQuestion(pendingAnswer));
+  }
+}
+
+function closeQuestion() {
+  // A sent answer can already be committed. Keep its retry available until it
+  // resolves, or the pupil explicitly leaves this question.
+  questionRequest?.abort();
+  questionRequest=null;
+  clearTimeout(questionCloseTimer);
+  clearInterval(questionTimer);
+  questionTimer=null;
+  activeQuestion=null;
+  pendingAnswer=null;
+  answering=false;
+  $('questionClose').disabled=false;
+  const image=$('questionImage');
+  image.hidden=true;
+  image.removeAttribute('src');
+  $('questionPanel').classList.remove('open');
+}
 
 function useAbility(id){
   if(!simulation||!scene)return;
@@ -445,7 +596,19 @@ function returnToCampaign(){
   showScreen('menuScreen');renderMenu();
 }
 
+function leaveClassroom(message){
+  classroomStarted=false;classroom=null;selectedMap=null;lastSelectedMap=null;
+  cancelDeployment();teardownGame();showScreen('joinScreen');
+  $('joinError').textContent=message;
+  clearInterval(roomsTimer);void loadRooms();roomsTimer=setInterval(loadRooms,3000);
+}
+
 function bindUi(){
+  document.getElementById('questionClose').onclick=closeQuestion;
+  $('battleReconnect').onclick=()=>{
+    if(socket?.connected&&classroom)void joinRoom(classroom.code);
+    else socket?.connect();
+  };
   $('startCampaignBtn').addEventListener('click',startCampaign);$('nextWaveBtn').addEventListener('click',beginWave);$('pauseBtn').addEventListener('click',togglePause);$('speedBtn').addEventListener('click',cycleSpeed);$('quizBtn').addEventListener('click',openQuestion);$('helpBtn').addEventListener('click',()=>{modalWasPaused=!!simulation?.state.paused;$('helpModal').classList.add('open');simulation?.togglePause(true);});
   $('exitBtn').addEventListener('click',()=>{if(confirm(t('td.confirmExit')))returnToCampaign();});
   $('retryBtn').addEventListener('click',()=>{selectedMap=simulation.state.mapId;startCampaign();});$('campaignBtn').addEventListener('click',returnToCampaign);
@@ -482,15 +645,17 @@ function bindUi(){
 if(socket){
   socket.on('connect',()=>{flushDiagnostics();if(classroom?.code)joinRoom(classroom.code);});
   socket.on('disconnect',()=>{
-    if(!simulation)return;
-    networkWasPaused=simulation.state.paused;
-    clearTimeout(startTimer);simulation.togglePause(true);showBattleGate(t('td.preparingBattle'));
+    if(!simulation||classroom?.phase==='ended')return;
+    networkWasPaused??=simulation.state.paused;
+    clearTimeout(startTimer);simulation.togglePause(true);showBattleGate(t('td.reconnectingBattle'));
+    $('battleReconnect').hidden=false;
   });
   socket.on('classroom:start',payload=>{
     classroomStarted=true;if(classroom){classroom.phase='playing';classroom.startedAt=payload.startedAt;}
     if(selectedMap){if(!simulation)startCampaign();else scheduleBattleStart();}else $('deploymentStatus').textContent=t('td.startedPickNow');
   });
   socket.on('classroom:ended',()=>{
+    closeQuestion();
     clearTimeout(startTimer);hideBattleGate();
     battleRuntime?.close();battleRuntime=null;scene=null;
     classroomStarted=false;if(classroom)classroom.phase='ended';cancelDeployment();
@@ -499,7 +664,7 @@ if(socket){
     $('endEyebrow').textContent=t('td.classEnded');$('endTitle').textContent=t('td.classEndedTitle');$('endDescription').textContent=t('td.classEndedBody');
     $('endModal').classList.add('open');
   });
-  socket.on('classroom:closed',({message})=>{classroomStarted=false;cancelDeployment();alert(serverText(message)||t('td.roomClosed'));location.href='/';});
+  socket.on('classroom:closed',({message})=>leaveClassroom(serverText(message)||t('td.roomClosed')));
 }
 
 renderMenu();renderTowerDock();bindUi();

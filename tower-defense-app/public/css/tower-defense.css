@@ -42,3 +42,8 @@
 .battle-gate{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(3,14,23,.88);color:#e9fffc;text-align:center;backdrop-filter:blur(5px);padding:24px}
 .battle-gate[hidden]{display:none}
 .battle-gate h2{font-size:clamp(20px,3vw,32px);margin-top:24px}
+
+.mission-chip,.resource-pills,.focus-meter{pointer-events:none}
+#questionClose{align-self:flex-start;min-width:36px;min-height:36px}
+#questionRetry[hidden],#battleReconnect[hidden]{display:none}
+#quizReference{display:block;margin-top:10px;color:#9db4c4;font-size:11px}

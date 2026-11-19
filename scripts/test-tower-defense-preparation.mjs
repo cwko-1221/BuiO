@@ -30,6 +30,7 @@ const register = require('../tower-defense-app/server/socket');
 const { rooms } = require('../tower-defense-app/lib/classrooms');
 const app = express();
 const policies = new Map(), responses = new Map(), attempts = new Map();
+const heldQuizSockets = new Set();
 app.use(express.json());
 app.use((req, _res, next) => {
   const cookie = req.headers.cookie?.split(';').map(value => value.trim()).find(value => value.startsWith('qa-student='));
@@ -67,6 +68,12 @@ app.use((error, _req, res, _next) => res.status(error.statusCode || 500).json({ 
 const server = createServer(app), io = new Server(server);
 io.engine.use((req,_res,next)=>{const cookie=req.headers.cookie?.split(';').map(v=>v.trim()).find(v=>v.startsWith('qa-student='));const owner=req.headers['x-qa-student']||cookie?.slice(11);req.session=owner?{studentId:owner}:null;next();});
 register(io, app);
+io.of('/tower-defense').on('connection', client => {
+  client.use(([event], next) => {
+    if (event === 'question:next' && heldQuizSockets.has(client.request.session?.studentId)) return;
+    next();
+  });
+});
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const base = `http://127.0.0.1:${server.address().port}`;
 const actors = [];
@@ -180,6 +187,17 @@ try {
   const forged=await emit(outsider,'question:session',students[0].body);
   assert.equal(forged.success,true);assert.notEqual(forged.sessionId,students[0].sessionId,'authenticated outsider cannot acquire another owner session');
   const anon=await socket();assert.equal((await emit(anon,'question:session',students[0].body)).status,401);
+  const pupil=students[0], quizBody={sessionId:pupil.sessionId,requestId:'qa-question-request-001'};
+  const question=(await emit(pupil.player,'question:next',quizBody)).question;
+  assert.equal((await post(pupil.owner,'/question',quizBody)).data.question.token,question.token);
+  assert(!Object.hasOwn(question,'correctIndex'));
+  const answer={sessionId:pupil.sessionId,token:question.token,answerIndex:0};
+  const graded=await emit(pupil.player,'question:answer',answer);
+  assert.deepEqual((await post(pupil.owner,'/answer',answer)).data,graded);
+  const {sessions}=require('../tower-defense-app/lib/questionSessions');
+  assert.equal(sessions.get(pupil.sessionId).answered,1);
+  assert.equal((await emit(pupil.player,'question:next',quizBody)).status,409);
+  assert.equal((await emit(outsider,'question:next',quizBody)).status,404);
   reports.push({scenario:'25 protocol pupils; 8 stalled HTTP paths recover via authenticated socket before teacher starts',ready:25});
   load.teacher.emit('host:close');
   for(const [engine,type,launch]of [['chromium',chromium,chromePath?{executablePath:chromePath}:{}],['webkit',webkit,{}]]){
@@ -231,6 +249,50 @@ try {
       const timing=await Promise.all([a.page,b].map(p=>p.evaluate(()=>window.__towerDefense.diagnostics.find(e=>e.stage==='battle-start')?.durationMs)));
       assert(timing.every(ms=>Number.isFinite(ms)&&ms<250),`start scheduling excessive delay: ${timing}`);
       await b.screenshot({path:resolve(output,`${engine}-started.png`)});
+      const quizRoute='**/api/tower-defense/question';
+      let holdHttp=true;
+      await b.route(quizRoute, async route=>{
+        if(holdHttp) await new Promise(resolve=>setTimeout(resolve,7500));
+        await route.continue().catch(()=>{});
+      });
+      await b.locator('#quizBtn').tap();
+      await b.waitForSelector('[data-choice]',{timeout:2800});
+      assert(await b.evaluate(()=>window.__towerDefense.diagnostics.some(e=>e.stage==='quiz-socket-ok')));
+      await b.locator('#questionClose').tap();
+      heldQuizSockets.add(`${engine}-b`);
+      await b.locator('#quizBtn').tap();
+      await b.waitForSelector('#questionRetry:not([hidden])',{timeout:8200});
+      await b.screenshot({path:resolve(output,`${engine}-quiz-retry.png`)});
+      holdHttp=false;
+      await b.locator('#questionRetry').tap();
+      await b.waitForSelector('[data-choice]',{timeout:4800});
+      assert(await b.evaluate(()=>window.__towerDefense.diagnostics.some(e=>e.stage==='quiz-http-ok')));
+      heldQuizSockets.delete(`${engine}-b`);
+      await b.locator('#questionClose').tap();
+      const battle = await b.evaluate(()=>{
+        const {simulation:sim,scene}=window.__towerDefense;
+        sim.state.gold=5000;
+        const points=[];
+        for(let y=36;y<720;y+=72)for(let x=36;x<1280;x+=72)if(sim.canBuild('prism',x,y).ok)points.push({x,y});
+        const target=points.reduce((best,p)=>p.x>best.x?p:best);
+        const old=sim.buildTower('prism',target.x,target.y).tower;
+        scene.setPlacement('bolt');scene.handleWorldClick(old.x+28,old.y-20);
+        const selected=scene.selectedTowerId===old.id;
+        sim.state.wave=10;
+        sim.state.quizKeys=sim.state.answersRequired;
+        sim.startWave();sim.setSpeed(3);
+        for(let i=0;i<30;i++)sim.spawnEnemy(i%2?'guard':'shielder',{progress:80+i*10,pathIndex:i%2});
+        return {selected,id:old.id};
+      });
+      assert.equal(battle.selected,true,'occupied tile must select the existing tower with build card armed');
+      await b.waitForFunction(()=>window.__towerDefense.scene.compactEffects);
+      await b.locator('#upgradeTowerBtn').evaluate(el=>{window.__upgrade=el;});
+      await b.evaluate(id=>{const sim=window.__towerDefense.simulation;sim.state.towers.find(t=>t.id===id).damage+=500;sim.state.score++;},battle.id);
+      await b.waitForFunction(()=>document.querySelector('#towerDamage').textContent.includes('500'));
+      assert.equal(await b.locator('#upgradeTowerBtn').evaluate(el=>el===window.__upgrade),true);
+      await b.screenshot({path:resolve(output,`${engine}-crowded-wave.png`)});
+      await b.locator('#upgradeTowerBtn').tap();
+      await b.waitForFunction(id=>window.__towerDefense.simulation.state.towers.find(t=>t.id===id).level===2,battle.id);
       // Unrestorable GPU loss pauses play and rebuilds in Canvas, preserving the simulation.
       const lost=await a.page.evaluate(()=>{const gl=window.__towerDefense.scene.game.renderer.gl;window.__loss=gl?.getExtension('WEBGL_lose_context');if(!window.__loss)return false;window.__loss.loseContext();return true;});
       if(lost){
