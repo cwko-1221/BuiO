@@ -53,9 +53,15 @@ test('PostgreSQL commits wallet, stock, ledger and voucher together; retains sna
   assert.equal((await repo.listProducts(true)).length, 0);
   for (const search of ['陳小星', 's001', '獎品']) assert.equal((await repo.vouchers({ search })).vouchers[0].id, voucher.id);
   assert.equal((await repo.vouchers({ search: '其他學生' })).vouchers.length, 0);
-  const redeemed = await repo.redeemVoucher('T002', voucher.id); assert.equal(redeemed.alreadyRedeemed, false);
-  const again = await repo.redeemVoucher('T001', voucher.id); assert.equal(again.alreadyRedeemed, true); assert.equal(again.voucher.redeemedBy, 'T002');
+  await assert.rejects(repo.redeemVoucher('T002', voucher.id), { status: 404 });
+  const redeemed = await repo.redeemVoucher('T001', voucher.id); assert.equal(redeemed.alreadyRedeemed, false);
+  const again = await repo.redeemVoucher('T001', voucher.id); assert.equal(again.alreadyRedeemed, true); assert.equal(again.voucher.redeemedBy, 'T001');
   assert.equal((await db.query('SELECT * FROM PetCurrencyLedger')).rows.length, 1);
+  await require('./real-shop-teacher-scope.cjs')(repo, async rows => {
+    await db.query(`INSERT INTO PetRealVouchers(VoucherID,StudentID,PurchaseKey,Code,Data,CreatedAt)
+      SELECT (v->>'id')::uuid,v->>'studentId',v->>'purchaseKey',v->>'code',v,(v->>'purchasedAt')::timestamptz
+      FROM jsonb_array_elements($1::jsonb) v`, [JSON.stringify(rows)]);
+  });
   await db.exec("DELETE FROM Users WHERE StudentID='S001'");
-  assert.equal((await repo.vouchers()).vouchers.length, 0);
+  assert.equal((await repo.vouchers({ studentId: 'S001' })).vouchers.length, 0);
 });

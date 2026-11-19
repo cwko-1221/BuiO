@@ -38,7 +38,7 @@ router.post('/teacher/images', requireTeacher, (req, res, next) => upload(req, r
   } catch { throw Object.assign(new Error('圖片無法讀取，請使用 JPG、PNG 或 WebP 圖片（最多 2500 萬像素）。'), { status: 400 }); }
   ok(res, await shop.saveImage(req.session.studentId, content));
 }));
-router.get('/teacher/vouchers', requireTeacher, route(async (req, res) => ok(res, await shop.vouchers({ code: req.query.code, before: req.query.before, search: req.query.search }))));
-router.post('/teacher/vouchers/:id/redeem', requireTeacher, route(async (req, res) => ok(res, await shop.redeemVoucher(req.session.studentId, req.params.id))));
-router.post('/teacher/redeem', requireTeacher, route(async (req, res) => ok(res, await shop.redeem(req.session.studentId, req.body?.code))));
+router.get('/teacher/vouchers', requireTeacher, requireAuth, route(async (req, res) => ok(res, await shop.vouchers({ teacherId: req.session.studentId, code: req.query.code, before: req.query.before, search: req.query.search }))));
+router.post('/teacher/vouchers/:id/redeem', requireTeacher, requireAuth, route(async (req, res) => ok(res, await shop.redeemVoucher(req.session.studentId, req.params.id))));
+router.post('/teacher/redeem', requireTeacher, requireAuth, route(async (req, res) => ok(res, await shop.redeem(req.session.studentId, req.body?.code))));
 module.exports = router;

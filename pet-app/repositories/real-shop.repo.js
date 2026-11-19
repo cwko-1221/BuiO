@@ -181,8 +181,9 @@ function normalizeCode(code) {
   return 'RW-' + value.slice(2).match(/.{4}/g).join('-');
 }
 
-async function vouchers({ studentId, code, before, search = '' } = {}) {
+async function vouchers({ studentId, teacherId, code, before, search = '' } = {}) {
   await ensure();
+  if (teacherId !== undefined && (typeof teacherId !== 'string' || !teacherId.trim())) fail('請以老師帳戶登入。', 403);
   if (code !== undefined) code = normalizeCode(code);
   if (before !== undefined && (typeof before !== 'string' || !uuid(before))) fail('分頁識別碼無效。');
   if (typeof search !== 'string' || search.length > 100) fail('搜尋文字最多 100 個字。');
@@ -190,13 +191,15 @@ async function vouchers({ studentId, code, before, search = '' } = {}) {
   let rows;
   if (config.db.mode === 'postgres') {
     const params = [], clauses = [], add = (sql, value) => { params.push(value); clauses.push(sql.replace('?', `$${params.length}`)); };
-    if (studentId) add('v.StudentID=?', studentId);
+    let cursorScope = '';
+    if (studentId) { add('v.StudentID=?', studentId); cursorScope += ` AND StudentID=$${params.length}`; }
+    if (teacherId !== undefined) { add("v.Data->>'listedBy'=?", teacherId); cursorScope += ` AND Data->>'listedBy'=$${params.length}`; }
     if (code) add('v.Code=?', code);
-    if (before) add('(v.CreatedAt,v.VoucherID) < (SELECT CreatedAt,VoucherID FROM PetRealVouchers WHERE VoucherID=?::uuid)', before);
+    if (before) add(`(v.CreatedAt,v.VoucherID) < (SELECT CreatedAt,VoucherID FROM PetRealVouchers WHERE VoucherID=?::uuid${cursorScope})`, before);
     if (search) add("strpos(lower(concat_ws(' ',u.Name,v.StudentID,v.Data->>'name')),?)>0", search);
     rows = (await getPool().query(`SELECT v.Data AS data FROM PetRealVouchers v ${search ? 'LEFT JOIN Users u ON u.StudentID=v.StudentID' : ''} ${clauses.length ? 'WHERE ' + clauses.join(' AND ') : ''} ORDER BY v.CreatedAt DESC,v.VoucherID DESC LIMIT 201`, params)).rows.map(row => row.data);
   } else {
-    rows = store.load().petRealVouchers.filter(row => (!studentId || row.studentId === studentId) && (!code || row.code === code)).slice().sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt) || b.id.localeCompare(a.id));
+    rows = store.load().petRealVouchers.filter(row => (!studentId || row.studentId === studentId) && (teacherId === undefined || row.listedBy === teacherId) && (!code || row.code === code)).slice().sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt) || b.id.localeCompare(a.id));
     if (search) { const names = new Map(store.load().users.map(user => [user.studentid, user.name || ''])); rows = rows.filter(row => `${names.get(row.studentId) || ''} ${row.studentId} ${row.name}`.toLowerCase().includes(search)); }
     if (before) { const index = rows.findIndex(row => row.id === before); rows = index < 0 ? [] : rows.slice(index + 1); }
   }
@@ -213,7 +216,8 @@ async function redeemVoucher(actorId, id) {
 async function redeemRecord(actorId, selector) {
   await ensure();
   const apply = voucher => {
-    if (!voucher) fail('找不到這張換領券。', 404);
+    // Check the purchase snapshot before returning even an already-redeemed voucher.
+    if (!actorId || !voucher || voucher.listedBy !== actorId) fail('找不到這張換領券。', 404);
     if (voucher.redeemedAt) return { voucher: voucherView(voucher), alreadyRedeemed: true };
     return { voucher: voucherView({ ...voucher, redeemedAt: new Date().toISOString(), redeemedBy: actorId }), alreadyRedeemed: false };
   };

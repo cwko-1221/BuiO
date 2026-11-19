@@ -35,7 +35,8 @@ test('real rewards atomically spend the shared wallet, issue one voucher and pre
   assert.equal(voucher.name, fields.name); assert.equal(voucher.price, 120); assert.equal(voucher.listedByName, '黃老師');
   assert.equal((await repo.listProducts()).some(p => p.id === id), false);
   assert.equal((await repo.vouchers({ studentId: purchase.voucher.studentId === 'S001' ? 'S002' : 'S001' })).vouchers.length, 0);
-  const redemptions = await Promise.all([repo.redeem('T001', voucher.code.toLowerCase()), repo.redeem('T002', voucher.code)]);
+  await assert.rejects(repo.redeem('T002', voucher.code), { status: 404 });
+  const redemptions = await Promise.all([repo.redeem('T001', voucher.code.toLowerCase()), repo.redeem('T001', voucher.code)]);
   assert.equal(redemptions.filter(r => !r.alreadyRedeemed).length, 1);
   assert.equal(redemptions[0].voucher.redeemedBy, redemptions[1].voucher.redeemedBy);
   assert.ok(redemptions[0].voucher.redeemedAt);
@@ -86,6 +87,13 @@ test('teacher deletion preserves purchased vouchers, search and direct redemptio
   assert.equal((await repo.vouchers({ search: '不存在的學生' })).vouchers.length, 0);
   const count = store.load().petCurrencyLedger.length;
   assert.equal((await repo.redeemVoucher('T001', purchase.voucher.id)).alreadyRedeemed, false);
-  assert.equal((await repo.redeemVoucher('T002', purchase.voucher.id)).alreadyRedeemed, true);
+  assert.equal((await repo.redeemVoucher('T001', purchase.voucher.id)).alreadyRedeemed, true);
+  await assert.rejects(repo.redeemVoucher('T002', purchase.voucher.id), { status: 404 });
   assert.equal(store.load().petCurrencyLedger.length, count);
+});
+
+test('teacher records and redemption stay private across search, pagination and deleted products', async () => {
+  await require('./real-shop-teacher-scope.cjs')(repo, async rows => {
+    store.load().petRealVouchers.push(...rows); store.save();
+  });
 });

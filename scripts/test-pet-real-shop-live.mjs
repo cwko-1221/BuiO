@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import sharp from 'sharp';
 import { chromium } from 'playwright';
@@ -17,6 +18,7 @@ await fs.writeFile(databaseFile, JSON.stringify({ users: [
   { studentid: 'S001', name: '陳小星', role: 'student', classname: '5A', classno: 1, language: 'zh-HK', passwordhash: bcrypt.hashSync('student123', 4) },
   { studentid: 'S002', name: '李月兒', role: 'student', classname: '5A', classno: 2, language: 'zh-HK', passwordhash: bcrypt.hashSync('student123', 4) },
   { studentid: 'T001', name: '黃老師', role: 'teacher', language: 'zh-HK', passwordhash: bcrypt.hashSync('teacher123', 4) },
+  { studentid: 'T002', name: '李老師', role: 'teacher', language: 'zh-HK', passwordhash: bcrypt.hashSync('teacher123', 4) },
 ] }));
 const server = spawn(process.execPath, ['server.js'], { cwd: path.resolve('.'), env: { ...process.env, PORT: String(port), BUIO_JSON_DB_FILE: databaseFile, MOCK_AUTH: '0', NODE_ENV: 'development', SUPABASE_DB_URL: '' }, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
 let logs = '', browser;
@@ -151,6 +153,45 @@ try {
   await other.request.post('/api/auth/login', { data: { studentId: 'S002', password: 'student123' } });
   assert.equal((await (await other.request.get('/api/pet/real-shop/vouchers')).json()).vouchers.length, 0);
   assert.equal((await other.request.get(`/api/pet/real-shop/teacher/vouchers?code=${voucher.code}`)).status(), 403);
+  const otherTeacher = await browser.newContext({ baseURL, viewport: { width: 1024, height: 768 } });
+  assert.equal((await otherTeacher.request.post('/api/auth/login', { data: { studentId: 'T002', password: 'teacher123' } })).status(), 200);
+  const otherPage = await otherTeacher.newPage(); otherPage.on('pageerror', e => errors.push(e.message));
+  await otherPage.goto('/pet'); await otherPage.locator('[data-teacher-tool="realShop"]').click();
+  await otherPage.locator('[data-section="vouchers"]').click();
+  await otherPage.getByText('暫時沒有換領券。', { exact: true }).waitFor();
+  const denyForeignRedemption = async () => {
+    for (const path of [`/teacher/vouchers/${voucher.id}/redeem`, '/teacher/redeem']) {
+      const response = await otherTeacher.request.post(`/api/pet/real-shop${path}`, { data: { code: voucher.code, teacherId: 'T001', actorId: 'T001' } });
+      assert.equal(response.status(), 404);
+      const body = await response.text();
+      for (const secret of [voucher.id, voucher.code, voucher.studentId, voucher.name]) assert.ok(!body.includes(secret));
+    }
+  };
+  for (const query of ['', '?search=陳小星', `?code=${voucher.code}`, `?before=${voucher.id}`, '?teacherId=T001&studentId=S001']) {
+    const records = await (await otherTeacher.request.get(`/api/pet/real-shop/teacher/vouchers${query}`)).json();
+    assert.deepEqual(records.vouchers, []); assert.equal(records.nextCursor, null);
+  }
+  await denyForeignRedemption();
+  // Give the second teacher their own sale, with the same reward name.
+  const otherProductId = randomUUID();
+  assert.equal((await otherTeacher.request.put(`/api/pet/real-shop/teacher/products/${otherProductId}`, { data: { name: voucher.name, description: '', price: 10, stock: 1, active: true, imageId: null, revision: 0, listedBy: 'T001' } })).status(), 200);
+  assert.equal((await other.request.post('/api/pet/dev/unlimited-money')).status(), 200);
+  const otherPurchaseResponse = await other.request.post('/api/pet/real-shop/purchase', { headers: { 'Idempotency-Key': 'other-teacher-purchase' }, data: { productId: otherProductId, expectedPrice: 10 } });
+  assert.equal(otherPurchaseResponse.status(), 200);
+  const otherVoucher = (await otherPurchaseResponse.json()).voucher;
+  assert.equal(otherVoucher.listedBy, 'T002');
+  const ownRecords = await (await otherTeacher.request.get('/api/pet/real-shop/teacher/vouchers?search=彩色鉛筆禮盒')).json();
+  assert.deepEqual(ownRecords.vouchers.map(row => row.id), [otherVoucher.id]);
+  const firstRecords = await (await teacher.request.get('/api/pet/real-shop/teacher/vouchers?search=彩色鉛筆禮盒')).json();
+  assert.equal(firstRecords.vouchers.length, 2); assert.ok(firstRecords.vouchers.every(row => row.listedBy === 'T001'));
+  assert.equal((await teacher.request.post(`/api/pet/real-shop/teacher/vouchers/${otherVoucher.id}/redeem`, { data: {} })).status(), 404);
+  await otherPage.locator('[data-refresh]').click(); await otherPage.locator(`[data-redeem="${otherVoucher.id}"]`).waitFor();
+  assert.equal(await otherPage.locator('.real-voucher').count(), 1);
+  assert.match(await otherPage.locator('.real-voucher').innerText(), /李老師/);
+  assert.match(await otherPage.locator('.real-voucher').innerText(), /李月兒/);
+  await otherPage.locator('[data-redeem]').click(); await otherPage.locator('dialog [data-confirm]').click();
+  await otherPage.getByText('核銷成功，已記錄領取時間。', { exact: true }).waitFor();
+  await otherPage.screenshot({ path: path.join(artifacts, 'teacher-private-records.png') });
   await page.locator('[data-section="vouchers"]').click();
   await page.locator('.real-lookup [name="search"]').fill('陳小星');
   await page.locator('.real-lookup .primary').click(); await page.locator(`[data-redeem="${voucher.id}"]`).waitFor();
@@ -162,17 +203,19 @@ try {
   await page.locator('dialog [data-confirm]').click();
   await page.getByText('核銷成功，已記錄領取時間。', { exact: true }).waitFor();
   const again = await (await teacher.request.post(`/api/pet/real-shop/teacher/vouchers/${voucher.id}/redeem`, { data: {} })).json(); assert.equal(again.alreadyRedeemed, true);
+  await denyForeignRedemption();
   await page.screenshot({ path: path.join(artifacts, 'teacher-redeemed.png'), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 }); await page.screenshot({ path: path.join(artifacts, 'teacher-redeemed-phone.png'), fullPage: true });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await view.locator('[data-section="vouchers"]').click(); await view.locator('.real-voucher.redeemed').waitFor();
   assert.equal(await view.locator('.real-voucher code').count(), 0, 'redeemed student vouchers also hide the code');
   const final = JSON.parse(await fs.readFile(databaseFile, 'utf8'));
-  assert.equal(final.petRealVouchers.length, 2); assert.equal(final.petCurrencyLedger.filter(row => row.kind === 'real_shop_purchase').length, 2);
-  assert.equal(final.petRealVouchers.filter(row => row.redeemedAt).length, 1);
+  assert.equal(final.petRealVouchers.length, 3); assert.equal(final.petCurrencyLedger.filter(row => row.kind === 'real_shop_purchase').length, 3);
+  assert.equal(final.petRealVouchers.filter(row => row.redeemedAt).length, 2);
+  assert.ok(final.petRealVouchers.filter(row => row.redeemedAt).every(row => row.redeemedBy === row.listedBy));
   assert.deepEqual(errors, []);
-  await fs.writeFile(path.join(artifacts, 'verification.json'), JSON.stringify({ passed: true, teacher: '黃老師', purchases: 2, redeemed: 1, duplicateCharges: 0, responseLossRecovered: true, codesHidden: true, directTeacherRedemption: true, deletedProductVouchersKept: true, teacherFormWheelScroll: scrollChecks, screenshots: 11 }, null, 2));
-  console.log('Real shop live passed: codes hidden, teacher form scrolls across four viewports, confirmed product deletion preserves vouchers, student search and direct redemption work.');
+  await fs.writeFile(path.join(artifacts, 'verification.json'), JSON.stringify({ passed: true, teachers: ['黃老師', '李老師'], purchases: 3, redeemed: 2, duplicateCharges: 0, teacherRecordsPrivate: true, foreignRedemptionDenied: true, responseLossRecovered: true, codesHidden: true, directTeacherRedemption: true, deletedProductVouchersKept: true, teacherFormWheelScroll: scrollChecks, screenshots: 12 }, null, 2));
+  console.log('Real shop live passed: two teachers see and redeem only their own sales; foreign ID/code redemption and spoofed query/body identities are rejected. Existing purchase, deletion, no-code and scroll flows pass.');
 } catch (error) { console.error(logs.slice(-3000)); throw error; }
 finally {
   await browser?.close(); server.kill();
