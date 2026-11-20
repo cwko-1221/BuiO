@@ -1,6 +1,4 @@
 import { t } from '../i18n.js';
-import { state } from '../store.js';
-
 import { iconSvg } from '../config.js';
 
 export function renderIcon(name) {
@@ -36,20 +34,14 @@ export function renderLogin() {
           <h1>${t('login_headline')}</h1>
           <p class="lv-subtitle">${t('login_tagline')}</p>
         </div>
-
-        <!-- 底部裝飾 -->
-        <div class="lv-footer-badge">
-          <span class="lv-badge-dot"></span>
-          ${t('platform_online')}
-        </div>
       </section>
 
       <section class="login-panel" aria-label="${t('login_panel_label')}">
         <div class="panel-topline"></div>
         <h2>${t('login_title')}</h2>
         <p>${t('login_subtitle')}</p>
-        ${state.loginError ? `<div class="login-error">${renderIcon('lock')} ${state.loginError}</div>` : ''}
         <form id="loginForm" class="login-form">
+          <div class="login-error" role="alert" hidden>${renderIcon('lock')}<span></span></div>
           <label>
             ${t('login_id_label')}
             <input id="userIdInput" placeholder="" autocomplete="username" required />
@@ -58,8 +50,8 @@ export function renderLogin() {
             ${t('login_pwd_label')}
             <input id="passwordInput" type="password" placeholder="" autocomplete="current-password" required />
           </label>
-          <button class="primary-action" type="submit" ${state.loginLoading ? 'disabled' : ''}>
-            ${state.loginLoading ? renderIcon('loader') + ' ' + t('login_btn_loading') : renderIcon('door') + ' ' + t('login_btn')}
+          <button class="primary-action" type="submit">
+            ${renderIcon('door')} ${t('login_btn')}
           </button>
         </form>
       </section>

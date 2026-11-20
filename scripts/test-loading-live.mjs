@@ -2,21 +2,70 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
-import { chromium, webkit } from 'playwright';
+import { chromium, devices, webkit } from 'playwright';
 
 const root = path.resolve(import.meta.dirname, '..');
 const useWebkit = process.env.BUIO_LOADING_ENGINE === 'webkit';
 const output = path.join(root, 'tmp', useWebkit ? 'loading-qa-webkit' : 'loading-qa');
 await fs.mkdir(output, { recursive: true });
 const counts = new Map();
+const hubPath = '/hub-login-fixture';
+const hubStudent = { id: 'FIXTURE', name: 'Fixture Student', role: 'student', language: 'en-US' };
+const hubSubmissions = [];
+let hubSessionChecks = 0;
 const html = `<!doctype html><html lang="zh-HK"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/shared/loading.css"><script src="/shared/loading.js"></script><script type="module" src="/slow-bootstrap.js"></script><style>body{margin:0;background:#f3f7fc;color:#254b61;font:16px system-ui}main{max-width:720px;margin:90px auto;padding:26px}h1{font-size:26px}.card{background:white;padding:32px;border-radius:22px;box-shadow:0 8px 30px #254b6112}input{padding:12px;border:1px solid #aac5d3;border-radius:10px;width:200px}</style></head><body><main><h1>BuiO 載入流程驗證</h1><div class="card" id="content"><p class="loading-card">正在準備內容…</p><label>保留中的輸入 <input id="draft" value="尚未儲存的內容"></label></div></main></body></html>`;
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   const count = (counts.get(url.pathname) || 0) + 1; counts.set(url.pathname, count);
   if (url.pathname === '/') { res.setHeader('Content-Type', 'text/html'); res.end(html); return; }
-  if (url.pathname.startsWith('/shared/')) {
-    const file = path.join(root, 'shared', path.basename(url.pathname));
-    res.setHeader('Content-Type', url.pathname.endsWith('.css') ? 'text/css' : 'text/javascript'); res.end(await fs.readFile(file)); return;
+  if (url.pathname === hubPath) {
+    res.setHeader('Content-Type', 'text/html');
+    res.end(await fs.readFile(path.join(root, 'index.html')));
+    return;
+  }
+  const referrer = new URL(req.headers.referer || 'http://localhost');
+  if (url.pathname === '/src/main.js' && referrer.searchParams.has('stall-module') && !referrer.searchParams.has('_reload')) {
+    res.setHeader('Content-Type', 'text/javascript');
+    res.flushHeaders();
+    return;
+  }
+  if (url.pathname.startsWith('/shared/') || url.pathname.startsWith('/src/') || url.pathname === '/math-app/images/logo.png') {
+    const mimeTypes = { '.css': 'text/css', '.js': 'text/javascript', '.png': 'image/png' };
+    res.setHeader('Content-Type', mimeTypes[path.extname(url.pathname)]);
+    const file = url.pathname === '/math-app/images/logo.png' ? 'math-app/public/images/logo.png' : url.pathname;
+    res.end(await fs.readFile(path.join(root, file)));
+    return;
+  }
+  if (url.pathname === '/api/auth/me' && referrer.pathname === hubPath) {
+    res.setHeader('Content-Type', 'application/json');
+    if (++hubSessionChecks === 1) {
+      res.write('{"success":');
+      return;
+    }
+    res.end(JSON.stringify({ success: true, student: hubStudent }));
+    return;
+  }
+  if (url.pathname === '/api/auth/login' && req.method === 'POST') {
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    hubSubmissions.push(JSON.parse(Buffer.concat(chunks).toString()));
+    res.setHeader('Content-Type', 'application/json');
+    switch (hubSubmissions.length) {
+      case 1:
+        res.write('{"success":');
+        return;
+      case 2:
+        res.statusCode = 401;
+        res.end(JSON.stringify({ success: false, message: '密碼錯誤' }));
+        return;
+      case 3:
+        res.statusCode = 503;
+        res.end(JSON.stringify({ success: false }));
+        return;
+      default:
+        res.end(JSON.stringify({ success: true, student: hubStudent }));
+        return;
+    }
   }
   if (url.pathname === '/slow-bootstrap.js') {
     res.setHeader('Content-Type', 'text/javascript'); setTimeout(() => res.end('window.bootFinished=true;'), 1700); return;
@@ -189,6 +238,70 @@ try {
   await page.waitForTimeout(2200); assert.equal(await page.evaluate(() => window.manualRetries), 0, 'an exhausted read must not restart an unlimited polling loop');
   await page.locator('.buio-loading-panel').getByRole('button', { name: '再試一次' }).click();
   assert.equal(await page.evaluate(() => window.manualRetries), 1);
+  const hubContext = await browser.newContext(devices['iPad (gen 7) landscape']);
+  await hubContext.addInitScript(() => localStorage.setItem('buiSettings', JSON.stringify({ language: 'en-US' })));
+  const hub = await hubContext.newPage();
+  await hub.clock.install();
+  const sessionResponse = hub.waitForResponse(response => new URL(response.url()).pathname === '/api/auth/me');
+  await hub.goto(base + hubPath);
+  await sessionResponse;
+  assert.equal(await hub.locator('.boot-splash').isVisible(), true);
+  await hub.clock.runFor(5200);
+  const form = hub.locator('#loginForm');
+  await form.waitFor();
+  assert.equal(hubSessionChecks, 1);
+  pass('hub shows the login form after one stalled session check');
+
+  const submit = form.getByRole('button', { name: 'Enter Platform' });
+  const id = form.locator('#userIdInput');
+  const password = form.locator('#passwordInput');
+  const loginResponse = hub.waitForResponse(response => new URL(response.url()).pathname === '/api/auth/login');
+  await id.fill('fixture');
+  await password.fill('fixture-password');
+  await submit.click();
+  await loginResponse;
+  const pending = form.getByRole('button', { name: 'Logging in...' });
+  assert.equal(await pending.isDisabled(), true);
+  await hub.clock.runFor(12100);
+  await form.getByText('The sign-in request timed out.', { exact: false }).waitFor();
+  const retryLogin = form.getByRole('button', { name: 'Try again' });
+  assert.equal(await retryLogin.isEnabled(), true);
+  assert.equal(await id.inputValue(), 'fixture');
+  assert.equal(await password.inputValue(), 'fixture-password');
+  assert.equal(await hub.locator('#buio-loading-status').isVisible(), false);
+  assert.equal(hubSubmissions.length, 1);
+  pass('hub login releases a stalled response and preserves the same form without replaying the request');
+
+  await retryLogin.click();
+  await form.getByText('密碼錯誤').waitFor();
+  await retryLogin.click();
+  await form.getByText('Sign-in is temporarily unavailable.', { exact: false }).waitFor();
+  await retryLogin.click();
+  await hub.locator('.app-shell').waitFor();
+  assert.deepEqual(hubSubmissions, Array.from({ length: 4 }, () => ({ studentId: 'FIXTURE', password: 'fixture-password' })));
+  await hub.reload();
+  await hub.locator('.app-shell').waitFor();
+  assert.equal(hubSessionChecks, 2);
+  assert.equal(await form.count(), 0);
+  await hubContext.close();
+  pass('hub handles rejected credentials, recovers from a temporary error, and restores a signed-in session');
+
+  const recoveringContext = await browser.newContext(devices['iPad (gen 7) landscape']);
+  const recoveringHub = await recoveringContext.newPage();
+  await recoveringHub.clock.install();
+  const stalledHubUrl = base + hubPath + '?stall-module=1';
+  await recoveringHub.goto(stalledHubUrl, { waitUntil: 'commit' });
+  const reloadHub = recoveringHub.locator('#hub-boot-retry');
+  await reloadHub.waitFor({ state: 'attached' });
+  assert.equal(await reloadHub.isVisible(), false);
+  await recoveringHub.clock.runFor(10100);
+  await reloadHub.click();
+  await recoveringHub.locator('.app-shell').waitFor();
+  assert.equal(recoveringHub.url(), stalledHubUrl);
+  assert.equal(hubSessionChecks, 3);
+  await recoveringContext.close();
+  pass('hub offers a fresh navigation while its startup module is still downloading');
+
   console.log(JSON.stringify({ passed, artifacts: output }));
 } finally {
   await browser.close(); server.closeAllConnections(); await new Promise(resolve => server.close(resolve));

@@ -15,26 +15,50 @@ export function getActiveSessions() {
   return activeSessionsCache;
 }
 
+async function requestAuth(path, timeoutMs, init) {
+  const controller = new AbortController();
+  let timer;
+  const deadline = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new DOMException('Authentication request timed out', 'TimeoutError')), timeoutMs);
+  });
+  const request = (async () => {
+    const options = { ...init, cache: 'no-store', signal: controller.signal };
+    const response = window.BuiLoading
+      ? await window.BuiLoading.fetch(path, options, { retries: 0, showStatus: false })
+      : await fetch(path, options);
+    const credentialError = response.status === 400 || response.status === 401;
+    if ((!response.ok && !credentialError) || !response.headers.get('Content-Type')?.includes('application/json')) {
+      throw new Error('Authentication service unavailable');
+    }
+    const data = await response.json();
+    return response.ok ? data : { success: false, message: data?.message };
+  })();
+  try {
+    // Bound the UI wait even if the browser has not yet settled the fetch or body read.
+    return await Promise.race([request, deadline]);
+  } finally {
+    clearTimeout(timer);
+    controller.abort();
+  }
+}
+
 export async function checkSession() {
   try {
-    const res = await fetch('/api/auth/me', { credentials: 'include' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.success && data.student) {
-        updateState({
-          currentUser: {
-            id: data.student.id,
-            name: data.student.name,
-            role: data.student.role,
-            className: data.student.className || '',
-            language: data.student.language || 'zh-HK',
-          },
-          loggedIn: true
-        });
-        return true;
-      }
+    const data = await requestAuth('/api/auth/me', 5000);
+    if (data?.success && data.student) {
+      updateState({
+        currentUser: {
+          id: data.student.id,
+          name: data.student.name,
+          role: data.student.role,
+          className: data.student.className || '',
+          language: data.student.language || 'zh-HK',
+        },
+        loggedIn: true
+      });
+      return true;
     }
-  } catch { /* not logged in */ }
+  } catch { /* Show the sign-in form if the session cannot be confirmed. */ }
   return false;
 }
 
@@ -162,13 +186,12 @@ export async function fetchSubjectTeacherSettings(academicYear = state.subjectTe
   }
 }
 
-export async function loginApi(id, password) {
-  const res = await fetch('/api/auth/login', {
+export function loginApi(id, password) {
+  return requestAuth('/api/auth/login', 12000, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ studentId: id, password })
   });
-  return await res.json();
 }
 
 export async function addStudentApi(payload) {

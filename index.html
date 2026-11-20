@@ -2,6 +2,24 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Keep a retry available even while a deferred script is still downloading.
+      setTimeout(() => {
+        const retry = document.getElementById('hub-boot-retry');
+        if (!retry) return;
+        retry.hidden = false;
+        window.BuiLoading?.ready();
+        retry.addEventListener('click', () => {
+          retry.disabled = true;
+          setTimeout(() => { retry.disabled = false; }, 3000);
+          window.stop();
+          const url = new URL(location.href);
+          url.searchParams.set('_reload', Date.now());
+          location.replace(url);
+        });
+      }, 10000);
+    </script>
     <link rel="modulepreload" href="/src/main.js" />
     <link rel="modulepreload" href="/src/services.js" />
     <link rel="modulepreload" href="/src/store.js" />
@@ -14,11 +32,10 @@
     <link rel="modulepreload" href="/src/views/Admin.js" />
     <link rel="modulepreload" href="/src/views/Settings.js" />
     <link rel="stylesheet" href="/shared/loading.css?v=20261011-1">
-    <script src="/shared/loading.js?v=20261011-1"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script defer src="/shared/loading.js?v=20261120-1"></script>
     <title data-i18n="hub.pageTitle">杯澳個人化學習平台</title>
-    <script src="/shared/i18n.js?v=20260910-1"></script>
-    <script src="/shared/i18n/hub-shell.js?v=20260910-1"></script>
+    <script defer src="/shared/i18n.js?v=20260910-1"></script>
+    <script defer src="/shared/i18n/hub-shell.js?v=20261120-1"></script>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
@@ -26,9 +43,10 @@
       <div class="boot-splash" role="status" aria-live="polite">
         <div class="boot-splash__spinner" aria-hidden="true"></div>
         <div class="boot-splash__label" data-i18n="hub.booting">載入中…</div>
+        <button id="hub-boot-retry" class="primary-action" type="button" data-i18n="hub.bootRetry" hidden>重新載入平台</button>
       </div>
     </div>
-    <script src="/shared/reliable-request.js?v=20261010"></script>
+    <script defer src="/shared/reliable-request.js?v=20261010"></script>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

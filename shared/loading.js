@@ -108,7 +108,8 @@
     const signal = options.signal || input?.signal;
     // Streaming consumers must be able to own their connection lifetime.
     if (new Headers(options.headers || input?.headers).get('Accept')?.includes('text/event-stream')) return nativeFetch(input, options);
-    const done = background ? () => {} : begin(undefined, { write: !read });
+    const showStatus = !background && policy.showStatus !== false;
+    const done = showStatus ? begin(undefined, { write: !read }) : () => {};
     try {
       for (let attempt = 0; ; attempt++) {
         if (signal?.aborted) throw signal.reason || new DOMException('Aborted', 'AbortError');
@@ -133,7 +134,7 @@
               try { Object.defineProperty(response, property, { value: original[property] }); } catch {}
             }
           }
-          if (!safeRetry || !transientStatuses.has(response.status) || attempt >= retries) return background ? response : trackBody(response, !read);
+          if (!safeRetry || !transientStatuses.has(response.status) || attempt >= retries) return showStatus ? trackBody(response, !read) : response;
           const retryAfter = response.headers.get('Retry-After');
           const seconds = Number(retryAfter);
           const indicated = retryAfter ? (Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter) - Date.now()) : 0;

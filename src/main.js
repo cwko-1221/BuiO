@@ -337,44 +337,57 @@ function joinTeacherSession(session) {
 // 綁定事件
 // =============================================
 function bindEvents() {
-  // 登入表單 — 呼叫統一的 /api/auth/login
-  document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    // 必須在 render() 之前讀取數值，否則 DOM 會被重置而讀到空值或預設值
-    const inputId = document.getElementById('userIdInput').value.trim().toUpperCase();
-    const inputPw = document.getElementById('passwordInput').value;
+  const loginForm = document.getElementById('loginForm');
+  loginForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const button = loginForm.querySelector('button[type="submit"]');
+    if (button.disabled) return;
+    const idInput = loginForm.querySelector('#userIdInput');
+    const passwordInput = loginForm.querySelector('#passwordInput');
+    const feedback = loginForm.querySelector('.login-error');
+    const message = feedback.querySelector('span');
 
-    updateState({ loginError: '', loginLoading: true });
-    render();
+    feedback.hidden = true;
+    message.textContent = '';
+    button.disabled = true;
+    idInput.readOnly = true;
+    passwordInput.readOnly = true;
+    button.innerHTML = renderIcon('loader') + ' ' + t('login_btn_loading');
 
+    let data;
+    let failure = t('login_failed');
     try {
-      const data = await loginApi(inputId, inputPw);
-
-      if (data.success) {
-        updateState({
-          currentUser: {
-            id: data.student.id,
-            name: data.student.name,
-            role: data.student.role,
-            className: data.student.className || '',
-            classNo: data.student.classNo || null,
-            language: data.student.language || 'zh-HK',
-          },
-          loggedIn: true,
-          loginLoading: false,
-          adminUnlocked: false
-        });
-        render();
-        refreshHomework();
-      } else {
-        updateState({ loginError: data.message || t('login_failed'), loginLoading: false });
-        render();
-      }
-    } catch (err) {
-      updateState({ loginError: t('connect_failed'), loginLoading: false });
-      render();
+      data = await loginApi(idInput.value.trim().toUpperCase(), passwordInput.value);
+      failure = data?.message || failure;
+    } catch (error) {
+      failure = t(error.name === 'TimeoutError' ? 'login_timeout' : 'login_unavailable');
     }
+
+    if (data?.success && data.student) {
+      passwordInput.value = '';
+      updateState({
+        currentUser: {
+          id: data.student.id,
+          name: data.student.name,
+          role: data.student.role,
+          className: data.student.className || '',
+          classNo: data.student.classNo || null,
+          language: data.student.language || 'zh-HK',
+        },
+        loggedIn: true,
+        adminUnlocked: false
+      });
+      render();
+      refreshHomework();
+      return;
+    }
+
+    message.textContent = failure;
+    feedback.hidden = false;
+    idInput.readOnly = false;
+    passwordInput.readOnly = false;
+    button.disabled = false;
+    button.innerHTML = renderIcon('door') + ' ' + t('login_retry');
   });
 
   // 導航按鈕
@@ -931,4 +944,13 @@ function refreshHomework() {
     if (state.loggedIn && state.currentUser?.id === accountId && ['dashboard', 'modules'].includes(state.activeView)) render();
   });
 }
-checkSession().finally(() => { render(); refreshHomework(); });
+checkSession().finally(() => {
+  render();
+  window.BuiLoading?.ready();
+  const url = new URL(location.href);
+  if (url.searchParams.has('_reload')) {
+    url.searchParams.delete('_reload');
+    history.replaceState(history.state, '', url);
+  }
+  refreshHomework();
+});

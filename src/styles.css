@@ -48,6 +48,7 @@
   font-size: 0.9rem;
   letter-spacing: 0.05em;
 }
+#hub-boot-retry[hidden] { display: none; }
 @keyframes boot-splash-spin {
   to { transform: rotate(360deg); }
 }
@@ -222,29 +223,6 @@ svg {
   letter-spacing: 0.01em;
 }
 
-/* footer status badge */
-.lv-footer-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: var(--muted);
-  font-weight: 600;
-  position: relative;
-  z-index: 2;
-}
-.lv-badge-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--mint);
-  box-shadow: 0 0 0 3px rgba(53,181,139,0.25);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-@keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(53,181,139,0.25); }
-  50%       { box-shadow: 0 0 0 7px rgba(53,181,139,0.1); }
-}
 /* brand lockup (shared) */
 .brand-lockup {
   display: flex;
@@ -1128,6 +1106,8 @@ input:focus {
   font-size: 0.92rem;
   font-weight: 700;
 }
+
+.login-error[hidden] { display: none; }
 
 /* Hint Text */
 .hint-text {
