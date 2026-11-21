@@ -26,6 +26,9 @@ BuiI18n.register({
   'h.teacherClassesHomework': { 'zh-HK': '功課', 'en-US': 'Homework' },
   'h.teacherClassesUpdate': { 'zh-HK': '更新狀態', 'en-US': 'Update status' },
   'h.teacherClassesSave': { 'zh-HK': '儲存已補做狀態', 'en-US': 'Save caught-up status' },
+  'h.term': { 'zh-HK': '學段', 'en-US': 'Term' },
+  'h.termUnconfigured': { 'zh-HK': '此學段尚未設定日期，請聯絡 Admin。', 'en-US': 'This term needs dates from your administrator.' },
+  'h.correctRecord': { 'zh-HK': '更正記錄', 'en-US': 'Correct record' },
 
   'h.statusComplete': { 'zh-HK': '完成', 'en-US': 'Done' },
   'h.statusMissing': { 'zh-HK': '欠交', 'en-US': 'Missing' },

@@ -646,6 +646,9 @@ app.get('/multiplication-checklist', requireSession, (req, res) => {
 // Missing-homework module (teachers and appointed subject monitors only).
 app.use('/homework/css', assetStatic(path.join(__dirname, 'homework-app', 'public', 'css'), CACHE_APP));
 app.use('/homework/js', assetStatic(path.join(__dirname, 'homework-app', 'public', 'js'), CACHE_APP));
+app.get('/homework/art/reward-rabbit.webp', (_req, res) => {
+  res.sendFile('pet-app/public/assets/art/pets/crescent-rabbit-1-3683ff470a.webp', { root: __dirname, maxAge: '30d' });
+});
 app.get('/homework', requireSession, async (req, res, next) => {
   try {
     if (req.session.role !== 'teacher') {
@@ -734,6 +737,7 @@ app.use((err, req, res, _next) => {
 setImmediate(() => { try { require('./chinese-app/lib/google').warmup(); } catch {} });
 
 httpServer.listen(PORT, '0.0.0.0', () => {
+  require('./homework-app/repositories/streak-rewards.repo').startSettlement();
   console.log('');
   console.log('🚀 =========================================');
   console.log(`🚀  杯澳個人化學習平台 (${config.env} • db=${config.db.mode})`);

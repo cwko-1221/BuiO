@@ -11,6 +11,34 @@ const escapeHtml = value => String(value ?? '')
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#039;');
 
+function renderHomeworkTermSettings() {
+  const settings = state.homeworkTermSettings;
+  const terms = ['T1', 'T2', 'T3'];
+  return `<section class="glass-card homework-term-settings" aria-labelledby="homeworkTermHeading">
+    <h3 id="homeworkTermHeading">${t('homework_term_settings')}</h3>
+    ${settings ? `<p>${t('homework_term_settings_year', { year: escapeHtml(settings.academicYear) })}</p>
+      <form id="homeworkTermForm" class="homework-term-form">
+        <div class="homework-term-options">
+          <label>${t('homework_term_active')}<select name="activeTerm">${terms.map(term => `<option ${settings.activeTerm === term ? 'selected' : ''}>${term}</option>`).join('')}</select></label>
+          <label>${t('homework_term_base_coins')}<input name="baseCoins" type="number" min="1" max="${escapeHtml(settings.maxBaseCoins)}" step="1" value="${escapeHtml(settings.baseCoins)}" required></label>
+        </div>
+        <div class="homework-term-calendar">
+          ${terms.map(term => `<fieldset><legend>${term}</legend>
+            <label>${t('homework_term_first_day')}<input name="${term}From" type="date" value="${escapeHtml(settings.terms[term]?.dateFrom)}" required></label>
+            <label>${t('homework_term_last_day')}<input name="${term}To" type="date" value="${escapeHtml(settings.terms[term]?.dateTo)}" required></label>
+          </fieldset>`).join('')}
+        </div>
+        <p>${t('homework_term_reward_rule')}</p>
+        <div class="homework-term-actions">
+          <span role="status" class="${state.homeworkTermSettingsError ? 'homework-term-error' : ''}">${escapeHtml(state.homeworkTermSettingsMessage)}</span>
+          <button class="primary-action" ${state.homeworkTermSaving ? 'disabled' : ''}>${t('homework_term_save')}</button>
+        </div>
+      </form>` : state.homeworkTermSettingsError
+      ? `<p class="homework-term-error" role="status">${t('homework_term_load_error')}</p><button class="secondary-action" id="reloadHomeworkTermSettings">${t('homework_term_retry')}</button>`
+      : `<p role="status">${t('homework_loading')}</p>`}
+  </section>`;
+}
+
 export async function fetchStudentsListWrapper() {
   updateState({ studentsLoaded: true });
   const success = await fetchStudentsList();
@@ -219,6 +247,8 @@ export function renderAdminPage() {
       </div>
       <button id="upgradeStudentsBtn" class="primary-action" style="background:var(--violet); color:white;">${renderIcon('spark')} ${t('year_rollover_btn')}</button>
     </div>
+
+    ${renderHomeworkTermSettings()}
     
     <div class="glass-card" style="margin-bottom:2rem; padding:1.5rem;">
       <h3>${t('add_teacher_title')}</h3>

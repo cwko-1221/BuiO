@@ -21,7 +21,7 @@
     "check:security": "npm audit --omit=dev --audit-level=low",
     "check:tower-defense": "node scripts/test-tower-defense.mjs",
     "check:tower-defense-start": "node scripts/test-tower-defense-preparation.mjs",
-    "check:homework": "node scripts/test-homework-module.mjs",
+    "check:homework": "node scripts/test-homework-module.mjs && node --test tests/homework-streak-rewards.test.cjs",
     "check:homework-recovery": "node scripts/test-homework-recovery-live.mjs",
     "check:quiz-navigation": "node scripts/test-quiz-navigation-live.mjs",
     "check:homework-excel": "node scripts/test-homework-excel.mjs",

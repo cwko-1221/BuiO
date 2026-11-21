@@ -20,6 +20,11 @@ export const state = {
   homeworkAccess: false,
   homeworkPending: [],
   homeworkHistory: [],
+  homeworkTerm: null,
+  homeworkReward: null,
+  homeworkTermSettings: null,
+  homeworkTermSettingsMessage: '',
+  homeworkTermSettingsError: false,
   homeworkPendingLoaded: false,
   homeworkPendingError: false,
 };

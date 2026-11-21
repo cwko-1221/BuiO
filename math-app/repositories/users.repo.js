@@ -217,6 +217,7 @@ async function deleteById(studentId) {
   if (Array.isArray(d.studentAcademicYears)) {
     d.studentAcademicYears = d.studentAcademicYears.filter(row => row.studentId !== studentId);
   }
+  for (const progress of Object.values(d.homeworkRewardProgress || {})) delete progress[studentId];
   d.studentStats = d.studentStats.filter(s => s.studentid !== studentId);
   d.questionLogs = d.questionLogs.filter(l => l.studentid !== studentId);
   if (Array.isArray(d.multiplicationChecks)) {

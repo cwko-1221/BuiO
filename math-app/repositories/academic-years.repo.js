@@ -214,8 +214,8 @@ async function upsertCurrentStudent(user, opts = {}) {
     chineseGroup: user.chineseGroup || '', englishGroup: user.englishGroup || '', mathGroup: user.mathGroup || '',
   };
   const index = data.studentAcademicYears.findIndex(row => row.academicYear === academicYear && row.studentId === user.studentId);
-  if (index >= 0) data.studentAcademicYears[index] = snapshot;
-  else data.studentAcademicYears.push(snapshot);
+  if (index >= 0) data.studentAcademicYears[index] = { ...data.studentAcademicYears[index], ...snapshot };
+  else data.studentAcademicYears.push({ ...snapshot, createdAt: new Date().toISOString() });
   store.save();
   notifyEnrollmentChanged();
 }

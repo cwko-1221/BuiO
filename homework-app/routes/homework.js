@@ -4,6 +4,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const repo = require('../repositories/homework.repo');
+const termRepo = require('../repositories/terms.repo');
+const rewards = require('../repositories/streak-rewards.repo');
+const { TERMS, MAX_BASE_COINS, publicSettings, validateSettings } = require('../lib/terms');
 const { buildClassAnalysis } = require('../lib/class-analysis');
 const { buildExport, reportPeriod, GRADES } = require('../lib/excel-export');
 const weeklyReports = require('../lib/weekly-reports');
@@ -25,6 +28,10 @@ const conflict = (res, record) => {
   return res.status(409).json({ success: false, code: 'HOMEWORK_CHANGED', message: '功課記錄已被更新，請核對最新記錄後再儲存。', record });
 };
 const text = (value, max = 100) => String(value || '').trim().slice(0, max);
+
+async function settlePastRecord(academicYear, date) {
+  if (date < todayHongKong()) await rewards.reconcile(academicYear);
+}
 
 function pdfHex(value) {
   const bytes = [0xfe, 0xff];
@@ -99,9 +106,10 @@ async function requireAssignment(req, res) {
 
 router.get('/meta', async (req, res, next) => {
   try {
-    const [currentAcademicYear, academicYears] = await Promise.all([
+    const [currentAcademicYear, academicYears, termSettings] = await Promise.all([
       academicYearsRepo.getCurrentAcademicYear(),
       academicYearsRepo.listAcademicYears(),
+      req.session.role === 'teacher' ? termRepo.listPublicSettings() : {},
     ]);
     const assignments = req.session.role === 'teacher' ? [] : await repo.listMonitors({
       studentId: req.session.studentId,
@@ -110,7 +118,7 @@ router.get('/meta', async (req, res, next) => {
     const teacherAssignments = req.session.role === 'teacher'
       ? await repo.listSubjectTeachers({ teacherId: req.session.studentId, academicYear: currentAcademicYear })
       : [];
-    res.json({
+    res.set('Cache-Control', 'no-store').json({
       success: true,
       role: req.session.role,
       canAccess: req.session.role === 'teacher' || assignments.length > 0,
@@ -119,7 +127,31 @@ router.get('/meta', async (req, res, next) => {
       currentAcademicYear,
       assignments,
       teacherAssignments,
+      termSettings,
     });
+  } catch (error) { next(error); }
+});
+
+router.get('/term-settings', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
+  try {
+    const academicYear = await academicYearsRepo.getCurrentAcademicYear();
+    const settings = await termRepo.getSettings(academicYear);
+    res.set('Cache-Control', 'no-store').json({
+      success: true, academicYear, ...publicSettings(settings),
+      baseCoins: settings?.baseCoins ?? 10, maxBaseCoins: MAX_BASE_COINS,
+    });
+  } catch (error) { next(error); }
+});
+
+router.put('/term-settings', requireTeacher, requireAdminUnlocked, async (req, res, next) => {
+  try {
+    const academicYear = await academicYearsRepo.getCurrentAcademicYear();
+    if (req.body?.academicYear !== academicYear) return fail(res, 409, '目前學年已變更，請重新載入設定。');
+    let settings;
+    try { settings = validateSettings(req.body, academicYear); }
+    catch (error) { return fail(res, 400, error.message); }
+    await termRepo.saveSettings(academicYear, settings);
+    res.json({ success: true, academicYear, ...settings, maxBaseCoins: MAX_BASE_COINS });
   } catch (error) { next(error); }
 });
 
@@ -212,11 +244,16 @@ router.get('/teacher-classes', requireTeacher, async (req, res, next) => {
   try {
     const academicYear = text(req.query.academicYear, 10) || await academicYearsRepo.getCurrentAcademicYear();
     if (!isAcademicYear(academicYear)) return fail(res, 400, '學年不正確');
+    if (req.query.term !== undefined && !TERMS.includes(req.query.term)) return fail(res, 400, '學段不正確');
+    const settings = await termRepo.getSettings(academicYear);
+    const term = req.query.term || publicSettings(settings).activeTerm;
+    const period = settings?.terms?.[term];
     const assignments = await repo.listSubjectTeachers({ teacherId: req.session.studentId, academicYear });
+    const hasRecords = period || (!settings && term === 'T1');
     const groups = await Promise.all(assignments.map(async assignment => {
       const [students, records] = await Promise.all([
         repo.listClassStudents(academicYear, assignment.className),
-        repo.listRecords({ academicYear, className: assignment.className, subject: assignment.subject }),
+        hasRecords ? repo.listRecords({ academicYear, className: assignment.className, subject: assignment.subject, ...period }) : [],
       ]);
       const studentMap = new Map(students.map(student => [student.id, student]));
       const rows = [];
@@ -248,6 +285,7 @@ router.get('/teacher-classes', requireTeacher, async (req, res, next) => {
     res.json({
       success: true,
       academicYear,
+      term,
       assignments: groups,
       totalMissing: groups.reduce((total, group) => total + group.missingCount, 0),
     });
@@ -453,7 +491,9 @@ router.post('/records', async (req, res, next) => {
     if (result.error) return fail(res, 400, result.error, result.code);
     const persist = async client => ({ success: true, message: isTeacher ? '老師記錄已新增' : '欠交功課記錄已儲存',
       record: await repo.createRecord({ ...assignment, date, homeworks: result.homeworks, createdBy: req.session.studentId }, { client }) });
-    res.status(201).json(op ? await receipts.run(op, persist) : await persist(null));
+    const saved = op ? await receipts.run(op, persist) : await persist(null);
+    await settlePastRecord(assignment.academicYear, date);
+    res.status(201).json(saved);
   } catch (error) {
     if (error.code === '23505' || error.code === 'RECORD_EXISTS') return fail(res, 409, '此日期的記錄已儲存');
     next(error);
@@ -494,7 +534,9 @@ router.put('/records', async (req, res, next) => {
       if (!record) throw Object.assign(new Error('找不到記錄'), { code: 'HOMEWORK_MISSING' });
       return { success: true, message: '記錄已更新', record };
     };
-    res.json(op ? await receipts.run(op, persist) : await persist(null));
+    const saved = op ? await receipts.run(op, persist) : await persist(null);
+    await settlePastRecord(assignment.academicYear, date);
+    res.json(saved);
   } catch (error) {
     if (error.code === 'HOMEWORK_CHANGED') return conflict(res, error.record);
     if (error.code === 'HOMEWORK_MISSING') return fail(res, 404, error.message, error.code);
@@ -518,6 +560,7 @@ router.delete('/records', requireTeacher, async (req, res, next) => {
     if (!isIsoDate(date)) return fail(res, 400, '日期不正確');
     const removed = await repo.deleteRecord({ ...assignment, date });
     if (!removed) return fail(res, 404, '找不到記錄');
+    await settlePastRecord(assignment.academicYear, date);
     res.json({ success: true, message: '記錄已刪除', record: removed });
   } catch (error) { next(error); }
 });
@@ -588,7 +631,12 @@ router.get('/pending', async (req, res, next) => {
     const academicYear = await academicYearsRepo.getCurrentAcademicYear();
     const user = await repo.findUser(req.session.studentId, academicYear);
     if (!user) return fail(res, 404, '找不到學生');
-    const records = await repo.listRecords({ academicYear, className: user.classname || '' });
+    const settings = await termRepo.getSettings(academicYear);
+    const term = settings?.activeTerm || null;
+    const [records, rewardProgress] = await Promise.all([
+      repo.listRecords({ academicYear, className: user.classname || '', ...settings?.terms?.[term] }),
+      settings ? rewards.getProgress(academicYear, req.session.studentId) : null,
+    ]);
     const pending = [];
     const history = [];
     for (const record of records) for (const homework of record.homeworks) {
@@ -603,7 +651,12 @@ router.get('/pending', async (req, res, next) => {
       if (item.madeUp) history.push({ ...reminder, madeUp: true });
       else pending.push(reminder);
     }
-    res.json({ success: true, pending, history });
+    res.set('Cache-Control', 'no-store').json({
+      success: true, pending, history, term,
+      reward: settings && /^P[1-6]$/.test(user.classname)
+        ? { ...(rewardProgress || { date: null, streak: 0, coins: 0 }), baseCoins: settings.baseCoins }
+        : null,
+    });
   } catch (error) { next(error); }
 });
 
@@ -611,18 +664,40 @@ router.get('/class-analysis', requireTeacher, async (req, res, next) => {
   try {
     const academicYear = text(req.query.academicYear, 10);
     const className = text(req.query.className, 10);
-    const dateFrom = text(req.query.dateFrom, 10);
-    const dateTo = text(req.query.dateTo, 10);
-    if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className) || !isIsoDate(dateFrom) || !isIsoDate(dateTo) || dateFrom > dateTo) {
+    let dateFrom = text(req.query.dateFrom, 10);
+    let dateTo = text(req.query.dateTo, 10);
+    if (!isAcademicYear(academicYear) || !/^P[1-6]$/.test(className)) {
       return fail(res, 400, '請選擇正確的學年、班級及日期範圍');
     }
     if (req.query.mode === 'week') {
+      if (!isIsoDate(dateFrom) || !isIsoDate(dateTo) || dateFrom > dateTo) {
+        return fail(res, 400, '請選擇正確的學年、班級及日期範圍');
+      }
       const period = reportPeriod(req.query);
       return res.json({ success: true, ...await weeklyReports.preview(period, className) });
     }
+    let period;
+    if (req.query.term !== undefined || (!dateFrom && !dateTo)) {
+      if (req.query.term !== undefined && !TERMS.includes(req.query.term)) return fail(res, 400, '學段不正確');
+      const settings = await termRepo.getSettings(academicYear);
+      const active = publicSettings(settings).activeTerm;
+      const term = req.query.term || active;
+      period = settings?.terms?.[term];
+      if (!period && term !== 'T1') return fail(res, 400, '此學段尚未設定日期。');
+      dateFrom ||= period?.dateFrom || `${academicYear.slice(0, 4)}-09-01`;
+      const currentYear = await academicYearsRepo.getCurrentAcademicYear();
+      dateTo ||= academicYear === currentYear && term === active ? todayHongKong() : period?.dateTo || todayHongKong();
+    }
+    if (!isIsoDate(dateFrom) || !isIsoDate(dateTo) || dateFrom > dateTo) {
+      return fail(res, 400, '請選擇正確的學年、班級及日期範圍');
+    }
+    if (period) {
+      dateFrom = dateFrom < period.dateFrom ? period.dateFrom : dateFrom;
+      dateTo = dateTo > period.dateTo ? period.dateTo : dateTo;
+    }
     const [students, records] = await Promise.all([
       repo.listClassStudents(academicYear, className),
-      repo.listRecords({ academicYear, className, dateFrom, dateTo }),
+      dateFrom <= dateTo ? repo.listRecords({ academicYear, className, dateFrom, dateTo }) : [],
     ]);
     res.json({ success: true, ...buildClassAnalysis(students, records) });
   } catch (error) {

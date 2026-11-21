@@ -55,6 +55,8 @@ async function ensureSchema() {
       ON PetCurrencyLedger(StudentID, IdempotencyKey) WHERE IdempotencyKey IS NOT NULL;
     CREATE INDEX IF NOT EXISTS idx_pet_ledger_unseen_grants
       ON PetCurrencyLedger(StudentID, CreatedAt) WHERE Kind='teacher_grant' AND SeenAt IS NULL;
+    CREATE INDEX IF NOT EXISTS idx_pet_ledger_homework_rewards
+      ON PetCurrencyLedger ((Metadata->>'academicYear'), StudentID) WHERE Kind='homework_streak';
     CREATE TABLE IF NOT EXISTS PetInstances (
       PetID UUID PRIMARY KEY, StudentID VARCHAR(20) NOT NULL REFERENCES Users(StudentID) ON DELETE CASCADE,
       SpeciesID VARCHAR(80) NOT NULL, XP INTEGER NOT NULL DEFAULT 0 CHECK (XP >= 0),
@@ -207,7 +209,9 @@ async function ensureStudent(studentId, runner) {
   const data = ensureJsonData();
   if (!data.petProfiles.some((row) => row.studentId === studentId)) {
     data.petProfiles.push({ studentId, activePetId: null, starterEggClaimed: false, eggPity: 0, stardust: 0, createdAt: nowIso(), updatedAt: nowIso() });
-    data.petWallets.push({ studentId, balance: 0, updatedAt: nowIso() });
+    if (!data.petWallets.some((row) => row.studentId === studentId)) {
+      data.petWallets.push({ studentId, balance: 0, updatedAt: nowIso() });
+    }
     data.petRoomLayouts.push({ studentId, themeId: 'sunny-oak', visibility: 'private', placements: starterPlacements(), updatedAt: nowIso() });
     data.petInventory.push(...starterInventoryRows(studentId));
     store.save();

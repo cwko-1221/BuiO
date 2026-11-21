@@ -20,6 +20,7 @@ function renderStudentDashboard() {
       <div class="hero-copy">
         <h2>${t('today_advice')}</h2>
         <p>${t('student_advice_desc')}</p>
+        ${renderHomeworkReward()}
         ${renderHomeworkReminder()}
         ${mathStatusHtml}
         <div class="action-row">
@@ -48,26 +49,48 @@ function renderStudentDashboard() {
   `;
 }
 
+function renderHomeworkReward() {
+  const reward = state.homeworkReward;
+  if (!reward || state.homeworkPendingError) return '';
+  const { streak, coins, baseCoins, date } = reward;
+  return `<section class="homework-reward" aria-labelledby="homeworkRewardTitle">
+    <div class="homework-reward-copy">
+      <h3 id="homeworkRewardTitle">${t('homework_streak_title', { days: streak })}</h3>
+      <div class="homework-reward-amount">
+        <span class="homework-reward-coin" aria-hidden="true">✦</span>
+        <strong>${t(date ? 'homework_streak_coins' : 'homework_streak_start', { coins: date ? coins : baseCoins })}</strong>
+      </div>
+      <div class="homework-reward-footer">
+        <span>${t('homework_streak_midnight')}</span>
+        <a href="/pet/">${t('homework_streak_pet')} <span aria-hidden="true">→</span></a>
+      </div>
+    </div>
+    <div class="homework-reward-art" aria-hidden="true"><span>✧</span><span>✦</span><img src="/homework/art/reward-rabbit.webp" width="640" height="640" alt=""></div>
+  </section>`;
+}
+
 function renderHomeworkReminder() {
   if (!state.homeworkPendingLoaded || state.homeworkPendingError) {
     return `<div class="homework-reminder" role="status">${t(state.homeworkPendingError ? 'homework_unavailable' : 'homework_loading')}</div>`;
   }
   const pending = uniqueHomeworkReminders(state.homeworkPending || []);
   const history = uniqueHomeworkReminders(state.homeworkHistory || []);
+  const term = state.homeworkTerm;
+  const clearText = t(term ? 'homework_term_clear' : 'homework_clear', { term });
   const allRecords = uniqueHomeworkReminders([...pending, ...history])
     .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
   if (!allRecords.length) {
-    return `<div class="homework-reminder clear">${renderIcon('check')} ${t('homework_clear')}</div>`;
+    return `<div class="homework-reminder clear">${renderIcon('check')} ${clearText}</div>`;
   }
   return `<div class="homework-reminders">
     <section class="homework-reminder ${pending.length ? 'pending' : 'clear'}">
       ${pending.length
-        ? `<strong>${t('homework_pending', { count: pending.length })}</strong>${renderHomeworkReminderList(pending, 'homework_pending_more')}`
-        : `${renderIcon('check')} ${t('homework_clear')}`}
+        ? `<strong>${t(term ? 'homework_term_pending' : 'homework_pending', { term, count: pending.length })}</strong>${renderHomeworkReminderList(pending, 'homework_pending_more')}`
+        : `${renderIcon('check')} ${clearText}`}
     </section>
     <section class="homework-reminder history">
       <div class="homework-reminder-head">
-        <strong>${t('homework_total_records', { count: allRecords.length })}</strong>
+        <strong>${t(term ? 'homework_term_total' : 'homework_total_records', { term, count: allRecords.length })}</strong>
         <button type="button" class="homework-total-records-toggle" data-homework-total-toggle aria-expanded="false" aria-controls="homeworkTotalRecordsPanel">
           <span data-homework-total-expand>${t('homework_expand')}</span>
           <span data-homework-total-collapse hidden>${t('homework_collapse')}</span>

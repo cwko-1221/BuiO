@@ -5,7 +5,8 @@ const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Hong_Kong', yea
 const { t } = window.BuiI18n;
 const statusLabels = { complete: t('h.statusComplete'), missing: t('h.statusMissing'), absent: t('h.statusAbsent') };
 const grades = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'];
-const state = { meta: null, view: 'monitors', roster: [], record: null, homeworks: [], teacherClasses: [], teacherClassYear: '', teacherClassesLoaded: false, teacherClassesTotal: 0, message: '', messageType: '' };
+const terms = ['T1', 'T2', 'T3'];
+const state = { meta: null, view: 'monitors', roster: [], record: null, homeworks: [], teacherClasses: [], teacherClassYear: '', teacherClassTerm: 'T1', teacherClassesLoaded: false, message: '', messageType: '' };
 
 const escapeHtml = value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 const subjectName = id => state.meta?.subjects.find(subject => subject.id === id)?.name || id;
@@ -17,6 +18,10 @@ const api = async (path, options = {}) => {
   return data;
 };
 const options = (items, selected, label = value => value, value = item => item) => items.map(item => `<option value="${escapeHtml(value(item))}" ${value(item) === selected ? 'selected' : ''}>${escapeHtml(label(item))}</option>`).join('');
+const defaultTerm = year => state.meta.termSettings?.[year]?.activeTerm || 'T1';
+const termPeriod = (year, term) => state.meta.termSettings?.[year]?.terms?.[term];
+const termIsUnconfigured = (year, term) => term !== 'T1' && !termPeriod(year, term);
+const termField = (id, term) => `<div class="field"><label for="${id}">${escapeHtml(t('h.term'))}</label><select id="${id}">${options(terms, term)}</select></div>`;
 const notice = () => state.readRecovery ? '<div data-homework-read-status></div>' : state.message ? `<div class="notice ${state.messageType}">${escapeHtml(state.message)}</div>` : '';
 function setMessage(message, type = 'success') { if (type === 'error' && window.BuiLoading?.notify(message)) return; state.message = message; state.messageType = type; render(); }
 
@@ -115,7 +120,7 @@ const filterState = {
   monitors: { academicYear: '', className: 'P4', subject: 'chinese-a' },
   records: { academicYear: '', className: 'P4', subject: 'chinese-a', date: today },
   analysis: { academicYear: '', className: 'P4', studentId: '' },
-  classAnalysis: { academicYear: '', className: 'P4', dateFrom: '', dateTo: today },
+  classAnalysis: { academicYear: '', term: 'T1', className: 'P4', dateFrom: '', dateTo: today },
   summaryExport: { academicYear: '', className: 'P4', dateFrom: '', dateTo: today, mode: 'week', week: '6', exportScope: 'all' },
 };
 
@@ -169,17 +174,20 @@ async function loadTeacherRecord() {
 }
 
 async function loadTeacherClasses() {
-  const academicYear = state.teacherClassYear || state.meta.currentAcademicYear;
-  state.teacherClassYear = academicYear;
+  const { teacherClassYear, teacherClassTerm } = state;
+  const request = state.teacherClassesRequest = (state.teacherClassesRequest || 0) + 1;
+  state.teacherClassesLoaded = false;
+  state.readRecovery = null;
+  render();
   try {
-    const result = await api(`/teacher-classes?academicYear=${encodeURIComponent(academicYear)}`);
+    const result = await api(`/teacher-classes?academicYear=${encodeURIComponent(teacherClassYear)}&term=${teacherClassTerm}`);
+    if (request !== state.teacherClassesRequest || state.view !== 'classes') return;
     state.teacherClasses = result.assignments || [];
-    state.teacherClassesTotal = result.totalMissing || 0;
     state.teacherClassesLoaded = true;
     state.message = ''; state.readRecovery = null;
   } catch (error) {
+    if (request !== state.teacherClassesRequest || state.view !== 'classes') return;
     state.teacherClasses = [];
-    state.teacherClassesTotal = 0;
     state.teacherClassesLoaded = true;
     state.message = ''; state.readRecovery = { error, retry: loadTeacherClasses };
   }
@@ -189,6 +197,7 @@ async function loadTeacherClasses() {
 function renderTeacherClasses() {
   const groups = state.teacherClasses || [];
   const academicYear = state.teacherClassYear || state.meta.currentAcademicYear;
+  const term = state.teacherClassTerm;
   const total = groups.reduce((count, group) => count + (group.missingCount || 0), 0);
   const cards = groups.map(group => `<article class="teacher-class-card">
     <div class="teacher-class-card-head">
@@ -201,16 +210,16 @@ function renderTeacherClasses() {
         <span>${escapeHtml(row.date)}</span>
         <span><strong>${escapeHtml(row.studentName)}</strong><small>${escapeHtml(row.classNo ? t('h.classNoSuffix', { no: row.classNo }) : row.studentId)}</small></span>
         <span>${escapeHtml(row.homework)}</span>
-        <span class="missing-record-status"><span class="status-tag missing">${escapeHtml(t('h.statusMissing'))}</span><label class="caught-up-check"><input type="checkbox" class="teacher-class-made-up" data-class="${escapeHtml(row.className)}" data-subject="${escapeHtml(row.subject)}" data-date="${escapeHtml(row.date)}" data-student="${escapeHtml(row.studentId)}" data-hw-id="${escapeHtml(row.homeworkId)}" ${row.madeUp ? 'checked' : ''}>${escapeHtml(t('h.madeUp'))}</label></span>
+        <span class="missing-record-status"><span class="status-tag missing">${escapeHtml(t('h.statusMissing'))}</span><label class="caught-up-check"><input type="checkbox" class="teacher-class-made-up" data-class="${escapeHtml(row.className)}" data-subject="${escapeHtml(row.subject)}" data-date="${escapeHtml(row.date)}" data-student="${escapeHtml(row.studentId)}" data-hw-id="${escapeHtml(row.homeworkId)}" ${row.madeUp ? 'checked' : ''}>${escapeHtml(t('h.madeUp'))}</label><button type="button" class="record-correction" data-edit-record data-class="${escapeHtml(row.className)}" data-subject="${escapeHtml(row.subject)}" data-date="${escapeHtml(row.date)}">${escapeHtml(t('h.correctRecord'))}</button></span>
       </div>`).join('')}
     </div><div class="teacher-class-card-actions"><button type="button" class="button secondary teacher-class-save" data-group="${escapeHtml(group.className)}|${escapeHtml(group.subject)}">${escapeHtml(t('h.teacherClassesSave'))}</button></div>` : `<div class="empty">${escapeHtml(t('h.teacherClassesNoMissing'))}</div>`}
   </article>`).join('');
 
   return shell(`<section class="panel">
     <div class="panel-head"><div><h2>${escapeHtml(t('h.teacherClassesTitle'))}</h2><p class="hint">${escapeHtml(t('h.teacherClassesHint'))}</p></div><span class="assignment">${escapeHtml(academicYear)}</span></div>
-    <div class="filters teacher-class-filter"><div class="field"><label for="teacherClassYear">${escapeHtml(t('h.year'))}</label><select id="teacherClassYear">${options(state.meta.academicYears, academicYear)}</select></div><div class="teacher-class-total">${escapeHtml(t('h.teacherClassesTotal', { count: total }))}</div></div>
+    <div class="filters teacher-class-filter"><div class="field"><label for="teacherClassYear">${escapeHtml(t('h.year'))}</label><select id="teacherClassYear">${options(state.meta.academicYears, academicYear)}</select></div>${termField('teacherClassTerm', term)}${state.teacherClassesLoaded ? `<div class="teacher-class-total">${escapeHtml(t('h.teacherClassesTotal', { count: total }))}</div>` : ''}</div>
   </section>
-  <section class="panel teacher-classes-panel">${!state.teacherClassesLoaded ? `<div class="loading-inline">${escapeHtml(t('h.booting'))}</div>` : cards || `<div class="empty">${escapeHtml(t('h.teacherClassesNoAssignments'))}</div>`}</section>`);
+  <section class="panel teacher-classes-panel">${!state.teacherClassesLoaded ? `<div class="loading-inline">${escapeHtml(t('h.booting'))}</div>` : termIsUnconfigured(academicYear, term) ? `<div class="empty">${escapeHtml(t('h.termUnconfigured'))}</div>` : cards || `<div class="empty">${escapeHtml(t('h.teacherClassesNoAssignments'))}</div>`}</section>`);
 }
 
 function statusControls(homework, student, teacher = false, locked = false) {
@@ -286,7 +295,7 @@ async function loadClassAnalysis() {
   const request = state.classAnalysisRequest = (state.classAnalysisRequest || 0) + 1;
   if (!validPeriod(f)) return setMessage(t('h.badPeriod'), 'error');
   try {
-    const result = await api(`/class-analysis?academicYear=${encodeURIComponent(f.academicYear)}&className=${f.className}&dateFrom=${f.dateFrom}&dateTo=${f.dateTo}`);
+    const result = await api(`/class-analysis?academicYear=${encodeURIComponent(f.academicYear)}&term=${f.term}&className=${f.className}&dateFrom=${f.dateFrom}&dateTo=${f.dateTo}`);
     if (request !== state.classAnalysisRequest || state.view !== 'class-analysis') return;
     state.classAnalysisRows = result.rows;
     state.classAnalysisTotal = result.totalMissing;
@@ -302,6 +311,18 @@ async function loadClassAnalysis() {
 
 function validPeriod(f) {
   return Boolean(f.dateFrom && f.dateTo && f.dateFrom <= f.dateTo);
+}
+
+function setClassAnalysisPeriod(academicYear, term = defaultTerm(academicYear)) {
+  const f = filterState.classAnalysis;
+  const period = termPeriod(academicYear, term);
+  const unavailable = termIsUnconfigured(academicYear, term);
+  const isCurrent = academicYear === state.meta.currentAcademicYear && term === defaultTerm(academicYear);
+  Object.assign(f, {
+    academicYear, term,
+    dateFrom: unavailable ? '' : period?.dateFrom || `${academicYear.slice(0, 4)}-09-01`,
+    dateTo: unavailable ? '' : isCurrent ? today : period?.dateTo || today,
+  });
 }
 
 function resetClassAnalysis() {
@@ -397,6 +418,7 @@ async function uploadWeeklyReport() {
 
 function renderClassAnalysis() {
   const f = filterState.classAnalysis;
+  const unavailable = termIsUnconfigured(f.academicYear, f.term);
   const rows = state.classAnalysisRows || [];
   const studentCards = rows.map(row => {
     const records = row.missingRecords || [];
@@ -418,13 +440,14 @@ function renderClassAnalysis() {
     <div class="panel-head"><div><h2>${escapeHtml(t('h.classAnalysisTitle'))}</h2><p class="hint">${escapeHtml(t('h.classAnalysisHint'))}</p></div></div>
     <div class="filters">
       <div class="field"><label for="classAnalysisYear">${escapeHtml(t('h.year'))}</label><select id="classAnalysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
+      ${termField('classAnalysisTerm', f.term)}
       <div class="field"><label for="classAnalysisClass">${escapeHtml(t('h.class'))}</label><select id="classAnalysisClass">${options(grades, f.className)}</select></div>
-      <div class="field"><label for="classAnalysisFrom">${escapeHtml(t('h.from'))}</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}"></div>
-      <div class="field"><label for="classAnalysisTo">${escapeHtml(t('h.to'))}</label><input id="classAnalysisTo" type="date" value="${f.dateTo}"></div>
+      <div class="field"><label for="classAnalysisFrom">${escapeHtml(t('h.from'))}</label><input id="classAnalysisFrom" type="date" value="${f.dateFrom}" ${unavailable ? 'disabled' : ''}></div>
+      <div class="field"><label for="classAnalysisTo">${escapeHtml(t('h.to'))}</label><input id="classAnalysisTo" type="date" value="${f.dateTo}" ${unavailable ? 'disabled' : ''}></div>
     </div>
     <div class="actions" style="margin-top:16px"><button class="button primary" id="runClassAnalysis" ${!validPeriod(f) ? 'disabled' : ''}>${escapeHtml(t('h.showClassStats'))}</button></div>
   </section>
-  <section class="panel">${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><div class="class-analysis-students">${studentCards}</div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t('h.pickPeriod'))}</div>`}</section>`);
+  <section class="panel">${rows.length ? `<div class="analysis-total">${t('h.classTotal', { count: state.classAnalysisTotal || 0 })}</div><div class="class-analysis-students">${studentCards}</div>` : `<div class="empty" style="margin-top:20px">${escapeHtml(t(unavailable ? 'h.termUnconfigured' : 'h.pickPeriod'))}</div>`}</section>`);
 }
 
 function renderSummaryExport() {
@@ -531,7 +554,7 @@ function bindCommon() {
       state.classAnalysisRequest = (state.classAnalysisRequest || 0) + 1;
       state.summaryExportRequest = (state.summaryExportRequest || 0) + 1;
       state.view = button.dataset.view; state.message = ''; state.readRecovery = null;
-      if (state.view === 'classes') { state.teacherClassesLoaded = false; loadTeacherClasses(); }
+      if (state.view === 'classes') loadTeacherClasses();
       else if (state.view === 'monitors') loadMonitorRoster();
       else if (state.view === 'records') loadTeacherRecord();
       else if (state.view === 'analysis') loadAnalysisStudents();
@@ -554,9 +577,18 @@ function bindTeacher() {
   if (state.view === 'classes') {
     document.getElementById('teacherClassYear').onchange = event => {
       state.teacherClassYear = event.target.value;
-      state.teacherClassesLoaded = false;
+      state.teacherClassTerm = defaultTerm(state.teacherClassYear);
       loadTeacherClasses();
     };
+    document.getElementById('teacherClassTerm').onchange = event => {
+      state.teacherClassTerm = event.target.value;
+      loadTeacherClasses();
+    };
+    document.querySelectorAll('[data-edit-record]').forEach(button => button.addEventListener('click', () => {
+      filterState.records = { academicYear: state.teacherClassYear, className: button.dataset.class, subject: button.dataset.subject, date: button.dataset.date };
+      state.view = 'records';
+      loadTeacherRecord();
+    }));
     document.querySelectorAll('.teacher-class-save').forEach(button => button.addEventListener('click', async () => {
       const card = button.closest('.teacher-class-card');
       const updates = [...card.querySelectorAll('.teacher-class-made-up')].map(input => ({
@@ -645,9 +677,12 @@ function bindTeacher() {
       } catch (error) { setMessage(error.message, 'error'); }
     });
   } else if (state.view === 'class-analysis') {
-    classAnalysisYear.onchange = () => {
-      filterState.classAnalysis.academicYear = classAnalysisYear.value;
-      filterState.classAnalysis.dateFrom = `${classAnalysisYear.value.slice(0, 4)}-09-01`;
+    document.getElementById('classAnalysisYear').onchange = event => {
+      setClassAnalysisPeriod(event.target.value);
+      resetClassAnalysis();
+    };
+    document.getElementById('classAnalysisTerm').onchange = event => {
+      setClassAnalysisPeriod(filterState.classAnalysis.academicYear, event.target.value);
       resetClassAnalysis();
     };
     classAnalysisClass.onchange = () => { filterState.classAnalysis.className = classAnalysisClass.value; resetClassAnalysis(); };
@@ -722,10 +757,11 @@ async function boot() {
     state.meta = meta;
     if (!state.meta.canAccess) throw new Error(t('h.notMonitor'));
     filterState.monitors.academicYear = filterState.records.academicYear = filterState.analysis.academicYear = filterState.classAnalysis.academicYear = state.meta.currentAcademicYear;
-    filterState.classAnalysis.dateFrom = `${state.meta.currentAcademicYear.slice(0, 4)}-09-01`;
+    setClassAnalysisPeriod(state.meta.currentAcademicYear);
     filterState.summaryExport.academicYear = state.meta.currentAcademicYear;
     Object.assign(filterState.summaryExport, defaultWeekPeriod(state.meta.currentAcademicYear, today));
     state.teacherClassYear = state.meta.currentAcademicYear;
+    state.teacherClassTerm = defaultTerm(state.teacherClassYear);
     const drafts = await window.BuiReliable?.homeworkDrafts().catch(() => []) || [];
     const requested = new URLSearchParams(location.search).get('draft');
     const preferred = drafts.find(draft => draft.resource === requested) || drafts.find(draft => draft.blocked) || drafts[0];

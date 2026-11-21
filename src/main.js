@@ -18,7 +18,7 @@ function loadExcelJs() {
 import { MATH_QUIZ_URL, MATH_DASHBOARD_URL, WHITEBOARD_BASE, MODULES, iconSvg } from './config.js';
 import { state, updateState } from './store.js';
 import { t, I18N, currentLanguage } from './i18n.js';
-import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, fetchSubjectTeacherSettings, loginApi, fetchHomeworkInfo } from './services.js';
+import { checkSession, clearSession, fetchActiveSessions, getActiveSessions, endTeacherSession, fetchStudentsList, fetchSubjectTeacherSettings, loginApi, fetchHomeworkInfo, requestHomeworkTermSettings } from './services.js';
 import { renderTopbar, renderShell } from './views/Shell.js';
 import { renderDashboard } from './views/Dashboard.js';
 import { renderModulesPage } from './views/Modules.js';
@@ -216,10 +216,12 @@ async function downloadStudentTemplate() {
   URL.revokeObjectURL(url);
 }
 
+function renderSessionViews() {
+  if (state.loggedIn && ['dashboard', 'modules'].includes(state.activeView)) render();
+}
+
 function saveTeacherSession(teacher) {
-  fetchActiveSessions(sessions => {
-    if (state.loggedIn) render(); // 有更新時重新渲染畫面
-  });
+  fetchActiveSessions(renderSessionViews);
 }
 
 // Poll active whiteboard sessions only on views that show them, and only when tab visible.
@@ -227,9 +229,7 @@ setInterval(() => {
   if (!state.loggedIn) return;
   if (document.visibilityState !== 'visible') return;
   if (state.activeView !== 'dashboard' && state.activeView !== 'modules') return;
-  fetchActiveSessions(() => {
-    if (state.loggedIn) render();
-  });
+  fetchActiveSessions(renderSessionViews);
 }, 3000);
 
 // When the portal tab regains focus (e.g. after opening the whiteboard in a
@@ -239,7 +239,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   if (!state.loggedIn) return;
   if (state.activeView !== 'dashboard' && state.activeView !== 'modules') return;
-  fetchActiveSessions(() => { if (state.loggedIn) render(); });
+  fetchActiveSessions(renderSessionViews);
 });
 
 // =============================================
@@ -393,9 +393,11 @@ function bindEvents() {
   // 導航按鈕
   document.querySelectorAll('[data-view]').forEach(btn => {
     btn.addEventListener('click', () => {
+      const returningHome = state.activeView !== 'dashboard' && btn.dataset.view === 'dashboard';
       updateState({ activeView: btn.dataset.view });
       if (state.activeView === 'students') updateState({ studentsLoaded: false }); // 強制重新讀取
       render();
+      if (returningHome && state.currentUser?.role === 'student') refreshHomework();
     });
   });
 
@@ -412,19 +414,28 @@ function bindEvents() {
   });
 
   document.getElementById('adminBtn')?.addEventListener('click', async () => {
+    const account = state.currentUser;
     state.activeView = 'admin';
     state.studentsLoaded = false;
     state.subjectTeachersLoaded = false;
     state.subjectTeachersLoading = false;
+    state.homeworkTermSettings = null;
+    state.homeworkTermSettingsMessage = '';
+    state.homeworkTermSettingsError = false;
     render();
     try {
       const response = await fetch('/api/auth/admin-status', { credentials: 'include' });
       const data = await response.json();
-      updateState({ adminUnlocked: Boolean(response.ok && data.unlocked) });
-      render();
+      if (state.currentUser !== account || state.activeView !== 'admin') return;
+      const wasUnlocked = state.adminUnlocked;
+      state.adminUnlocked = Boolean(response.ok && data.unlocked);
+      if (state.adminUnlocked) void loadHomeworkTermSettings();
+      else if (wasUnlocked) render();
     } catch {
-      updateState({ adminUnlocked: false });
-      render();
+      if (state.currentUser === account && state.activeView === 'admin' && state.adminUnlocked) {
+        state.adminUnlocked = false;
+        render();
+      }
     }
   });
 
@@ -444,11 +455,47 @@ function bindEvents() {
       const data = await response.json();
       if (!response.ok || !data.success) throw new Error(data.message || t('admin_pwd_wrong'));
       updateState({ adminUnlocked: true, studentsLoaded: false, subjectTeachersLoaded: false, subjectTeachersLoading: false });
-      render();
+      void loadHomeworkTermSettings();
     } catch (unlockError) {
       error.textContent = unlockError.message || t('admin_unlock_failed');
       error.style.display = 'block';
       button.disabled = false;
+    }
+  });
+
+  document.getElementById('reloadHomeworkTermSettings')?.addEventListener('click', loadHomeworkTermSettings);
+  const termForm = document.getElementById('homeworkTermForm');
+  const readTermForm = () => {
+    const values = new FormData(termForm);
+    return {
+      ...state.homeworkTermSettings,
+      activeTerm: values.get('activeTerm'),
+      baseCoins: values.get('baseCoins'),
+      terms: Object.fromEntries(['T1', 'T2', 'T3'].map(term => [term, {
+        dateFrom: values.get(`${term}From`), dateTo: values.get(`${term}To`),
+      }])),
+    };
+  };
+  termForm?.addEventListener('input', () => { state.homeworkTermSettings = readTermForm(); });
+  termForm?.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (state.homeworkTermSaving) return;
+    const account = state.currentUser;
+    const { academicYear, activeTerm, terms, baseCoins } = readTermForm();
+    state.homeworkTermSaving = true;
+    termForm.querySelector('button').disabled = true;
+    try {
+      const saved = await requestHomeworkTermSettings({ academicYear, activeTerm, terms, baseCoins: Number(baseCoins) });
+      if (state.currentUser !== account) return;
+      updateState({ homeworkTermSettings: saved, homeworkTermSettingsError: false, homeworkTermSettingsMessage: t('homework_term_saved') });
+    } catch (error) {
+      if (state.currentUser !== account) return;
+      updateState({ homeworkTermSettingsError: true, homeworkTermSettingsMessage: error.message || t('homework_term_save_error') });
+    } finally {
+      if (state.currentUser === account) {
+        state.homeworkTermSaving = false;
+        if (state.activeView === 'admin') render();
+      }
     }
   });
 
@@ -555,7 +602,11 @@ function bindEvents() {
           subjectTeacherYear: data.currentAcademicYear,
           subjectTeachersLoaded: false,
           subjectTeachersLoading: false,
+          homeworkTermSettings: null,
+          homeworkTermSettingsMessage: '',
+          homeworkTermSettingsError: false,
         });
+        void loadHomeworkTermSettings();
         await fetchStudentsList(data.currentAcademicYear);
         render();
       } else {
@@ -873,6 +924,10 @@ function bindEvents() {
     state.homeworkAccess = false;
     state.homeworkPending = [];
     state.homeworkHistory = [];
+    state.homeworkTerm = null;
+    state.homeworkReward = null;
+    state.homeworkTermSettings = null;
+    state.homeworkTermSaving = false;
     state.homeworkPendingLoaded = false;
     state.homeworkPendingError = false;
     state.adminUnlocked = false;
@@ -934,16 +989,37 @@ function render() {
   bindEvents();
 }
 
+let termSettingsRequest = 0;
+async function loadHomeworkTermSettings() {
+  const account = state.currentUser;
+  const request = ++termSettingsRequest;
+  state.homeworkTermSettingsError = false;
+  if (state.activeView === 'admin') render();
+  try {
+    const settings = await requestHomeworkTermSettings();
+    if (state.currentUser === account && request === termSettingsRequest) state.homeworkTermSettings = settings;
+  } catch {
+    if (state.currentUser === account && request === termSettingsRequest) state.homeworkTermSettingsError = true;
+  }
+  if (state.currentUser === account && request === termSettingsRequest && state.activeView === 'admin') render();
+}
+
 // index.html 已預先顯示 boot splash；等 checkSession 回來才 render，
 // 避免已登入的學生先看到閃過的登入頁再切換到首頁。
+let homeworkRefreshedAt = 0;
 function refreshHomework() {
   if (!state.loggedIn) return;
+  homeworkRefreshedAt = Date.now();
   const accountId = state.currentUser.id;
   // Do not replace a settings/admin form opened while these reads were pending.
   fetchHomeworkInfo().finally(() => {
     if (state.loggedIn && state.currentUser?.id === accountId && ['dashboard', 'modules'].includes(state.activeView)) render();
   });
 }
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && state.activeView === 'dashboard' && state.currentUser?.role === 'student'
+    && Date.now() - homeworkRefreshedAt > 30000) refreshHomework();
+});
 checkSession().finally(() => {
   render();
   window.BuiLoading?.ready();

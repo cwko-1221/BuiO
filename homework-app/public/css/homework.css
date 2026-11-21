@@ -454,7 +454,7 @@ button { cursor: pointer; }
 .analysis-made-up-label:has(input:checked) { border-color: var(--amber); background: #fff7e0; color: #875800; }
 .analysis-made-up-label input { width: 16px; height: 16px; accent-color: var(--amber); cursor: pointer; }
 
-.teacher-class-filter { grid-template-columns: minmax(180px, 260px) 1fr; }
+.teacher-class-filter { grid-template-columns: minmax(150px, 260px) minmax(100px, 180px) 1fr; }
 .teacher-class-total {
   align-self: stretch;
   display: flex;
@@ -515,6 +515,17 @@ button { cursor: pointer; }
   cursor: pointer;
 }
 .caught-up-check input { width: 16px; height: 16px; accent-color: var(--amber); cursor: pointer; }
+.record-correction {
+  padding: 4px;
+  border: 0;
+  background: transparent;
+  color: #087477;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 750;
+  text-decoration: underline;
+  cursor: pointer;
+}
 .teacher-class-card-actions { display: flex; justify-content: flex-end; padding: 12px 18px 16px; }
 .loading-inline { padding: 28px; color: var(--muted); text-align: center; }
 

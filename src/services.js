@@ -80,11 +80,25 @@ export async function fetchHomeworkInfo() {
   }).catch(() => false);
   const pending = state.currentUser.role === 'student'
     ? read('/api/homework/pending').then(data => {
-        if (current()) updateState({ homeworkPending: data.pending || [], homeworkHistory: data.history || [], homeworkPendingLoaded: true, homeworkPendingError: false });
+        if (current()) updateState({
+          homeworkPending: data.pending || [], homeworkHistory: data.history || [],
+          homeworkTerm: data.term, homeworkReward: data.reward,
+          homeworkPendingLoaded: true, homeworkPendingError: false,
+        });
       }).catch(() => { if (current()) updateState({ homeworkPendingLoaded: true, homeworkPendingError: true }); })
     : Promise.resolve();
   const [canAccess] = await Promise.all([access, pending]);
   return canAccess;
+}
+
+export async function requestHomeworkTermSettings(settings) {
+  const response = await fetch('/api/homework/term-settings', {
+    credentials: 'include', cache: 'no-store',
+    ...(settings && { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) }),
+  });
+  const data = await response.json();
+  if (!response.ok || !data.success) throw new Error(data.message || t('homework_term_save_error'));
+  return data;
 }
 
 export function clearSession() {
