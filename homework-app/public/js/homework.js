@@ -438,7 +438,7 @@ function renderClassAnalysis() {
   }).join('');
   return shell(`<section class="panel">
     <div class="panel-head"><div><h2>${escapeHtml(t('h.classAnalysisTitle'))}</h2><p class="hint">${escapeHtml(t('h.classAnalysisHint'))}</p></div></div>
-    <div class="filters">
+    <div class="filters class-analysis-filters">
       <div class="field"><label for="classAnalysisYear">${escapeHtml(t('h.year'))}</label><select id="classAnalysisYear">${options(state.meta.academicYears, f.academicYear)}</select></div>
       ${termField('classAnalysisTerm', f.term)}
       <div class="field"><label for="classAnalysisClass">${escapeHtml(t('h.class'))}</label><select id="classAnalysisClass">${options(grades, f.className)}</select></div>

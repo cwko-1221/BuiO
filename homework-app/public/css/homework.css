@@ -399,6 +399,15 @@ button { cursor: pointer; }
 .analysis-table th,
 .analysis-table td { padding: 12px; border-bottom: 1px solid var(--line); text-align: left; }
 .analysis-table th { background: #f4f8fa; color: var(--muted); font-size: 0.84rem; font-weight: 850; }
+.filters.class-analysis-filters {
+  grid-template-columns: minmax(7rem, 1fr) repeat(2, minmax(4.5rem, 0.75fr)) repeat(2, minmax(9.5rem, 1.25fr));
+  gap: clamp(8px, 1vw, 14px);
+  overflow-x: auto;
+  margin: -4px;
+  padding: 4px;
+}
+.class-analysis-filters .field { min-width: 0; }
+.class-analysis-filters :is(input, select) { min-width: 0; height: 44px; }
 .class-analysis-students { display: grid; gap: 10px; margin-top: 18px; }
 .class-analysis-student {
   overflow: hidden;
