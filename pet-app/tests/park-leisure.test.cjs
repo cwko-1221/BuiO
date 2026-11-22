@@ -1,10 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
 const games=import('../lib/park-games.mjs'),leisure=import('../lib/park-leisure.mjs');
-test('each venue has a different game and only the chimes retain memory; existing clue visits remain possible',async()=>{
-  const w=await import('../lib/park-world.mjs');assert.equal(w.OBJECTS.filter(o=>w.activityModes(o).includes('melody')).length,1);
-  for(const [id,kind]of [['pond','fishing'],['drum','rhythm'],['bell','lantern'],['garden-bench','golf']])assert.ok(w.OBJECTS.find(o=>o.id===id).games.includes(kind));
-  assert.ok(w.CLUES.pond);assert.ok(w.activityModes(w.OBJECTS.find(o=>o.id==='hollow')).includes('maze'));assert.equal(w.QUESTS.length,14);
-});
 test('seeded mazes are connected and reject jumps, row wrapping, incomplete paths and wall crossings',async()=>{
   const a=await import('../lib/park-activities.mjs');for(let seed=1;seed<=50;seed++){const c=a.createChallenge('maze','hollow',seed),queue=[[0]],seen=new Set([0]);let path;while(queue.length){const p=queue.shift(),at=p.at(-1);if(at===24){path=p;break;}for(const [i,d]of [-5,1,5,-1].entries())if(c.cells[at]>>i&1&&!seen.has(at+d)){seen.add(at+d);queue.push([...p,at+d]);}}
     assert.ok(path);assert.equal(a.verifyChallenge(c,path),true);assert.equal(a.verifyChallenge(c,[0,24]),false);assert.equal(a.verifyChallenge(c,[0,4,5,24]),false);assert.equal(a.verifyChallenge(c,path.slice(1)),false);assert.deepEqual(c,a.createChallenge('maze','hollow',seed));}

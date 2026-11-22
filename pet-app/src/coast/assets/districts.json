@@ -1,0 +1,509 @@
+{
+  "density": 2.5,
+  "terrain": [
+    {
+      "id": "market",
+      "bounds": [
+        0,
+        0,
+        580,
+        307
+      ],
+      "uvRect": [
+        0,
+        0,
+        1454,
+        772
+      ]
+    },
+    {
+      "id": "market-hill",
+      "bounds": [
+        580,
+        0,
+        1090,
+        307
+      ],
+      "uvRect": [
+        1446,
+        0,
+        1283,
+        772
+      ]
+    },
+    {
+      "id": "observatory",
+      "bounds": [
+        1090,
+        0,
+        1672,
+        307
+      ],
+      "uvRect": [
+        2721,
+        0,
+        1459,
+        772
+      ]
+    },
+    {
+      "id": "garden",
+      "bounds": [
+        0,
+        307,
+        580,
+        530
+      ],
+      "uvRect": [
+        0,
+        764,
+        1454,
+        565
+      ]
+    },
+    {
+      "id": "square",
+      "bounds": [
+        580,
+        307,
+        1090,
+        530
+      ],
+      "uvRect": [
+        1446,
+        764,
+        1283,
+        565
+      ]
+    },
+    {
+      "id": "marina",
+      "bounds": [
+        1090,
+        307,
+        1672,
+        530
+      ],
+      "uvRect": [
+        2721,
+        764,
+        1459,
+        565
+      ]
+    },
+    {
+      "id": "lagoon",
+      "bounds": [
+        0,
+        530,
+        580,
+        941
+      ],
+      "uvRect": [
+        0,
+        1321,
+        1454,
+        1031
+      ]
+    },
+    {
+      "id": "village",
+      "bounds": [
+        580,
+        530,
+        1090,
+        941
+      ],
+      "uvRect": [
+        1446,
+        1321,
+        1283,
+        1031
+      ]
+    },
+    {
+      "id": "village-east",
+      "bounds": [
+        1090,
+        530,
+        1672,
+        941
+      ],
+      "uvRect": [
+        2721,
+        1321,
+        1459,
+        1031
+      ]
+    }
+  ],
+  "landmarks": [
+    {
+      "id": "crescent-sculpture",
+      "source": [
+        1918,
+        585
+      ],
+      "atlas": [
+        2,
+        2
+      ]
+    },
+    {
+      "id": "observatory",
+      "source": [
+        3192,
+        22
+      ],
+      "atlas": [
+        349,
+        2
+      ]
+    },
+    {
+      "id": "garden-golden-tree",
+      "source": [
+        208,
+        580
+      ],
+      "atlas": [
+        694,
+        2
+      ]
+    },
+    {
+      "id": "village-pine",
+      "source": [
+        2295,
+        1325
+      ],
+      "atlas": [
+        1106,
+        2
+      ]
+    },
+    {
+      "id": "garden-rotunda",
+      "source": [
+        700,
+        658
+      ],
+      "atlas": [
+        1338,
+        2
+      ]
+    },
+    {
+      "id": "marina-boathouse",
+      "source": [
+        3552,
+        692
+      ],
+      "atlas": [
+        2,
+        390
+      ]
+    },
+    {
+      "id": "village-golden-tree",
+      "source": [
+        1280,
+        1520
+      ],
+      "atlas": [
+        490,
+        390
+      ]
+    },
+    {
+      "id": "village-west-cottage",
+      "source": [
+        1512,
+        1630
+      ],
+      "atlas": [
+        837,
+        390
+      ]
+    },
+    {
+      "id": "village-central-cottage",
+      "source": [
+        1872,
+        1410
+      ],
+      "atlas": [
+        1172,
+        390
+      ]
+    },
+    {
+      "id": "marina-palm",
+      "source": [
+        2962,
+        698
+      ],
+      "atlas": [
+        1527,
+        390
+      ]
+    },
+    {
+      "id": "village-cart",
+      "source": [
+        3208,
+        1650
+      ],
+      "atlas": [
+        1762,
+        390
+      ]
+    },
+    {
+      "id": "flower-arch-left",
+      "source": [
+        350,
+        928
+      ],
+      "atlas": [
+        2,
+        721
+      ]
+    },
+    {
+      "id": "plaza-east-lamp",
+      "source": [
+        2402,
+        935
+      ],
+      "atlas": [
+        159,
+        721
+      ]
+    },
+    {
+      "id": "market-cherry-tree",
+      "source": [
+        1382,
+        720
+      ],
+      "atlas": [
+        217,
+        721
+      ]
+    },
+    {
+      "id": "plaza-west-lamp",
+      "source": [
+        1742,
+        932
+      ],
+      "atlas": [
+        465,
+        721
+      ]
+    },
+    {
+      "id": "market-front-stall",
+      "source": [
+        808,
+        370
+      ],
+      "atlas": [
+        518,
+        721
+      ]
+    },
+    {
+      "id": "east-plaza-planter",
+      "source": [
+        2305,
+        992
+      ],
+      "atlas": [
+        777,
+        721
+      ]
+    },
+    {
+      "id": "west-plaza-planter",
+      "source": [
+        1605,
+        995
+      ],
+      "atlas": [
+        1092,
+        721
+      ]
+    },
+    {
+      "id": "garden-arch-right",
+      "source": [
+        572,
+        985
+      ],
+      "atlas": [
+        1457,
+        721
+      ]
+    },
+    {
+      "id": "market-cart",
+      "source": [
+        1175,
+        532
+      ],
+      "atlas": [
+        1525,
+        721
+      ]
+    },
+    {
+      "id": "village-bridge-front",
+      "source": [
+        2752,
+        1128
+      ],
+      "atlas": [
+        2,
+        950
+      ]
+    },
+    {
+      "id": "garden-bridge-front",
+      "source": [
+        912,
+        1205
+      ],
+      "atlas": [
+        343,
+        950
+      ]
+    },
+    {
+      "id": "fountain-rim",
+      "source": [
+        1798,
+        902
+      ],
+      "atlas": [
+        744,
+        950
+      ]
+    },
+    {
+      "id": "garden-arch-crown",
+      "source": [
+        348,
+        895
+      ],
+      "atlas": [
+        1336,
+        950
+      ]
+    },
+    {
+      "id": "marina-flower-box",
+      "source": [
+        3910,
+        1112
+      ],
+      "atlas": [
+        1613,
+        950
+      ]
+    },
+    {
+      "id": "quay-bollard-0",
+      "source": [
+        3700,
+        1152
+      ],
+      "atlas": [
+        1730,
+        950
+      ]
+    },
+    {
+      "id": "quay-bollard-1",
+      "source": [
+        3800,
+        1175
+      ],
+      "atlas": [
+        1757,
+        950
+      ]
+    },
+    {
+      "id": "quay-bollard-2",
+      "source": [
+        3892,
+        1165
+      ],
+      "atlas": [
+        1784,
+        950
+      ]
+    },
+    {
+      "id": "quay-bollard-3",
+      "source": [
+        4020,
+        1178
+      ],
+      "atlas": [
+        1812,
+        950
+      ]
+    },
+    {
+      "id": "observatory-stair-post",
+      "source": [
+        3208,
+        370
+      ],
+      "atlas": [
+        1839,
+        950
+      ]
+    },
+    {
+      "id": "quay-rope-1",
+      "source": [
+        3710,
+        1164
+      ],
+      "atlas": [
+        1866,
+        950
+      ]
+    },
+    {
+      "id": "quay-rope-3",
+      "source": [
+        3902,
+        1177
+      ],
+      "atlas": [
+        2,
+        1107
+      ]
+    },
+    {
+      "id": "quay-rope-2",
+      "source": [
+        3810,
+        1177
+      ],
+      "atlas": [
+        135,
+        1107
+      ]
+    }
+  ],
+  "atlasSize": [
+    2048,
+    1129
+  ]
+}

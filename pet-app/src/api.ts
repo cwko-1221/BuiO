@@ -57,8 +57,6 @@ export const api = {
   buyRealProduct: (productId: string, expectedPrice: number, key: string) => request<{ voucher: RealVoucher; balance: number }>('/api/pet/real-shop/purchase', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ productId, expectedPrice }) }),
   realVouchers: (teacher = false, search = '', before = '') => { const params = new URLSearchParams(); if (search) params.set('search', search); if (before) params.set('before', before); return request<VoucherPage>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}vouchers?${params}`); },
   redeemRealVoucher: (id: string) => request<{ voucher: RealVoucher; alreadyRedeemed: boolean }>(`/api/pet/real-shop/teacher/vouchers/${encodeURIComponent(id)}/redeem`, { method: 'POST', body: '{}' }),
-  parkSettings: () => request<{ dailyCap: number }>('/api/pet/teacher/park/settings'),
-  saveParkSettings: (dailyCap: number) => request<{ dailyCap: number }>('/api/pet/teacher/park/settings', { method: 'PUT', body: JSON.stringify({ dailyCap }) }),
   brawlRanking: () => request<import('./brawl/ranking-types').RankedOverview>('/api/pet/brawl/ranking'),
   petAccess: () => quietRequest<{ access: PetAccessStatus }>('/api/pet/access'),
   teacherAccess: () => request<PetAccessSettings>('/api/pet/teacher/access'),

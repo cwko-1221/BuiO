@@ -14,7 +14,7 @@ const port = await new Promise(resolve => {
 const baseURL = `http://127.0.0.1:${port}`;
 const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'buio-pet-navigation-'));
 const databaseFile = path.join(directory, 'db.json');
-const artifacts = path.resolve('artifacts/pet-navigation');
+const artifacts = path.resolve(process.env.PET_NAV_TEST_OUTPUT || 'artifacts/pet-navigation');
 await fs.mkdir(artifacts, { recursive: true });
 await fs.writeFile(databaseFile, JSON.stringify({ users: [
   { studentid: 'NAVZH', name: '導覽測試', role: 'student', language: 'zh-HK', classname: '5A', passwordhash: bcrypt.hashSync('navigation123', 4) },
@@ -36,6 +36,7 @@ const viewports = [
   { width: 844, height: 390 }, { width: 667, height: 375 }, { width: 568, height: 320 },
 ];
 const capture = new Set([1440, 1024, 768, 390, 320, 844, 667, 568]);
+const tabs = ['home', 'coast', 'collection', 'shop', 'realShop', 'coinPusher', 'brawl', 'visit', 'settings'];
 try {
   for (let n = 0; n < 100; n++) {
     try { if ((await fetch(`${baseURL}/health`)).ok) break; } catch {}
@@ -47,8 +48,15 @@ try {
     const context = await browser.newContext({ baseURL, viewport: viewports[0], reducedMotion: 'reduce' });
     assert.equal((await context.request.post('/api/auth/login', { data: { studentId, password: 'navigation123' } })).status(), 200);
     assert.equal((await context.request.post('/api/pet/starter-egg/hatch', { headers: { 'Idempotency-Key': `hatch-${studentId}` }, data: {} })).status(), 201);
+    for (const url of ['/api/pet/park/state', '/pet/park-3d-qa/', '/pet/assets/art/park/wish-plaza-v1/ground-v1-644668151f96.webp', '/pet/assets/art/park/island-v1/grass-d5bb82ad4fcc.webp']) {
+      assert.equal((await context.request.get(url)).status(), 404, url);
+    }
     const page = await context.newPage(); page.on('pageerror', error => errors.push(error.message));
+    await page.addInitScript(id => sessionStorage.setItem('pet-park-open:' + id, '1'), studentId);
     await page.goto('/pet'); await page.locator('.pet-nav button').first().waitFor();
+    await page.waitForFunction(() => window.__petGame?.scene.isActive('Bedroom'));
+    assert.equal(await page.locator('[data-tab="home"][aria-current="page"]').count(), 1);
+    assert.equal(await page.evaluate(() => window.__petGame.textures.exists('park:room-exit')), false);
     for (const viewport of viewports) {
       await page.setViewportSize(viewport);
       const state = await page.locator('.pet-nav').evaluate(nav => {
@@ -65,8 +73,8 @@ try {
       });
       const label = `${locale} ${viewport.width}x${viewport.height}`;
       try {
-        assert.equal(state.buttons.length, 9, label);
-        assert.ok(state.contentWidth <= state.width + 1, `${label}: all nine buttons must fit without horizontal scrolling`);
+        assert.deepEqual(state.buttons.map(button => button.tab), tabs, label);
+        assert.ok(state.contentWidth <= state.width + 1, `${label}: all buttons must fit without horizontal scrolling`);
         assert.ok(state.rect.bottom <= viewport.height + 1 && state.mainHeight >= 100, `${label}: navigation must stay in the viewport and leave room for the pet`);
         for (const button of state.buttons) {
           const r = button.rect, text = button.label;
@@ -98,7 +106,7 @@ try {
   }
   assert.deepEqual(errors, []);
   await fs.writeFile(path.join(artifacts, 'verification.json'), JSON.stringify({ passed: true, configurations: results.length, results }, null, 2));
-  console.log(`Pet navigation passed: ${results.length} Chinese/English layouts; all nine destinations visible, separate and clickable, with labels and 44px targets.`);
+  console.log(`Pet navigation passed: ${results.length} Chinese/English layouts, ${tabs.length} visible destinations, and a working room without the retired map.`);
 } catch (error) { console.error(logs.split('\n').filter(line => /\[pet\]|Error:/.test(line)).slice(-10).join('\n')); throw error; }
 finally {
   await browser?.close(); server.kill();

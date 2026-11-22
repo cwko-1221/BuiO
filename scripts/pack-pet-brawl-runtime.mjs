@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createRequire } from 'node:module';
 import sharp from 'sharp';
 import { FIGHTERS } from '../pet-app/lib/brawl/catalog.mjs';
@@ -102,5 +102,19 @@ for (const id of ['starpatch-cat', 'cloud-ear-dog', 'pudding-pig']) {
         beforeBytes, afterBytes: image.length,
         beforeTextureBytes: 2 * 2048 * 2048 * 4, afterTextureBytes: width * height * 4 });
 }
-await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+const temporary = manifestPath + '.' + randomUUID() + '.tmp';
+try {
+    await fs.writeFile(temporary, JSON.stringify(manifest, null, 2) + '\n', { flag: 'wx' });
+    for (let attempt = 0; ; attempt++) {
+        try {
+            await fs.rename(temporary, manifestPath);
+            break;
+        } catch (error) {
+            if (process.platform !== 'win32' || attempt === 7 || !['EBUSY', 'EPERM', 'UNKNOWN'].includes(error.code)) throw error;
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+    }
+} finally {
+    await fs.unlink(temporary).catch(error => { if (error.code !== 'ENOENT') throw error; });
+}
 console.log(JSON.stringify({ packedBattleAtlases: report }));

@@ -196,7 +196,7 @@ const io = new Server(httpServer, {
   pingTimeout: 20000,
 });
 // Share the signed login session with Socket.IO so whiteboard classroom events
-// can be tied to the same student account used by Pet Park rewards.
+// can be tied to the same student account used by Pet Paradise rewards.
 io.engine.use(sessionMiddleware);
 require('./math-app/server/quiz-socket')(io);
 const whiteboard = require('./whiteboard-app/server/socket')(io, app);
@@ -215,7 +215,6 @@ require('./game-app/server/socket')(io, app);   // namespace /game
 require('./tower-defense-app/server/socket')(io, app); // namespace /tower-defense
 require('./quiz-app/server/socket')(io, app); // namespace /quiz, big-screen live quiz
 require('./pet-app/server/duel')(io); // student presence, invitations and authoritative duels
-require('./pet-app/server/park')(io); // shared outdoor park and verified NPC interactions
 
 // ----------------------------------------------------------------
 // Health / debug
