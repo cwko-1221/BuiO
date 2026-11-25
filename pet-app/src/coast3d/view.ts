@@ -3,11 +3,11 @@ import type { Locale, PetDefinition } from '../types';
 import { loadWalker } from '../coast/pet-model';
 import { contactShadow, disposeGroup } from '../coast/scenery';
 import { ASSETS } from './assets';
-import { BRIDGE_CHECKPOINTS, DISTRICTS, district, dist, ground, nearestTrail, onStairTread, route, visibleFoot, type Point } from './island';
+import { BRIDGE_CHECKPOINTS, DISTRICTS, SPAWN, district, dist, ground, nearestTrail, onStairTread, route, visibleFoot, type Point } from './island';
 import { CAMERA, FollowCamera } from './follow-camera';
 import { createMovement, WALK_SPEED } from './movement';
 import type { ArtMaterials } from './terrain';
-import { createIsland, lighting, officialModels, overviewCamera } from './world';
+import { capModelTextures, CLUTTER_LAYER, createIsland, lighting, OFFICIAL_ASSET_IDS, officialModels, overviewCamera } from './world';
 import '../coast/coast.css';
 import './view.css';
 
@@ -82,20 +82,23 @@ export class Coast3dView {
     try {
       const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
       this.renderer=renderer;
-      renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+      const coarsePointer=matchMedia('(pointer: coarse)').matches;
+      renderer.setPixelRatio(Math.min(devicePixelRatio||1,coarsePointer?1.25:1.5));
       renderer.outputColorSpace=T.SRGBColorSpace;
       renderer.toneMapping=T.ACESFilmicToneMapping;
       renderer.toneMappingExposure=1.02;
       renderer.shadowMap.enabled=true;
       renderer.shadowMap.type=T.PCFSoftShadowMap;
       renderer.shadowMap.autoUpdate=false;
+      this.camera.camera.layers.enable(CLUTTER_LAYER);
+      this.mapCamera.layers.enable(CLUTTER_LAYER);
       renderer.domElement.setAttribute('aria-label',this.t('完整 3D 海岸小鎮','Full 3D Moonbay Coast'));
       this.root.querySelector('.moonbay-world')!.append(renderer.domElement);
       renderer.domElement.addEventListener('webglcontextlost', e=>{e.preventDefault();cancelAnimationFrame(this.frame);this.fail();},{signal});
       const preview=import.meta.env.DEV||import.meta.env.VITE_COAST3D_PREVIEW==='1';
       const sources=preview&&!this.options.requireFinal?import('./trial-models'):undefined;
       const trials=sources?.then(module=>module.loadTrialModels())??Promise.resolve([]);
-      const drafts=sources?.then(module=>module.loadSculptedModels())??Promise.resolve(new Map());
+      const drafts=sources?.then(module=>module.loadSculptedModels(OFFICIAL_ASSET_IDS))??Promise.resolve(new Map());
       const materials:Promise<ArtMaterials>=sources?.then(module=>module.loadArtMaterials())??Promise.resolve({});
       const [walker,assets,additions,sculpted,surfaces]=await Promise.allSettled([loadWalker(this.options.definition.id,1),officialModels(),trials,drafts,materials] as const);
       if(walker.status==='fulfilled')this.walker=walker.value;
@@ -118,9 +121,13 @@ export class Coast3dView {
       this.root.dataset.world='full-3d';
       this.root.dataset.models=String(assets.value.size);
       this.root.dataset.trialModels=String(additions.value.length);
-      this.root.dataset.blenderModels=String(sculpted.value.size);
+      this.root.dataset.blenderModels=String(new Set([...assets.value.keys(),...sculpted.value.keys()]).size);
       this.root.dataset.previewModels=String([...sculpted.value].filter(([id,asset])=>asset.preview&&!assets.value.has(id)).length);
       this.root.dataset.joints=String(walker.value.joints);
+      const maxTextureDim=coarsePointer?768:1024;
+      for(const item of assets.value.values())capModelTextures(item.model,maxTextureDim);
+      for(const item of sculpted.value.values())capModelTextures(item.model,maxTextureDim);
+      for(const item of additions.value)capModelTextures(item.object,maxTextureDim);
       this.island=createIsland(this.scene,assets.value,additions.value,sculpted.value,surfaces.value);
       const collisionSurfaces=[...this.island.pieces.map(p=>p.geometry),...this.island.structures];
       const radius=walker.value.radius;
@@ -132,6 +139,7 @@ export class Coast3dView {
           roadDistance:nearestTrail(placement.x,placement.z).distance,
         }));
         const renderArt=(camera:T.PerspectiveCamera,focus?:[number,number,number])=>{
+          camera.layers.enable(CLUTTER_LAYER);
           const fog=this.scene.fog,sun=this.sun!,pose=sun.position.clone(),target=sun.target.position.clone();
           const shadow=sun.shadow.camera;
           const bounds={left:shadow.left,right:shadow.right,top:shadow.top,bottom:shadow.bottom,far:shadow.far};
@@ -225,13 +233,32 @@ export class Coast3dView {
       this.petShadow.scale.setScalar(.24);
       this.scene.add(this.petShadow);
       this.sun=lighting(this.scene);
-      if(matchMedia('(pointer: coarse)').matches)this.sun.shadow.mapSize.set(512,512);
+      if(coarsePointer){
+        this.sun.shadow.mapSize.set(512,512);
+        Object.assign(this.sun.shadow.camera,{left:-18,right:18,top:18,bottom:-18});
+        this.sun.shadow.camera.updateProjectionMatrix();
+      }
       if(walker.value.companion) {
         const guide=this.root.querySelector<HTMLElement>('.coast3d-guide')!;
         guide.textContent=this.t('同行嚮導・金毛幼犬','Trail guide · Golden Pup');guide.hidden=false;
       }
       this.resize=new ResizeObserver(()=>this.fit());
       this.resize.observe(this.root);this.fit();
+      const [sx,sz]=SPAWN, sy=ground(sx,sz);
+      walker.value.pivot.position.set(sx,sy+.006,sz);
+      this.camera.follow(1,{x:sx,y:sy,z:sz},this.walk.visibility,true,this.island.moonBounds);
+      const shadowX=Math.round(sx/4)*4,shadowZ=Math.round(sz/4)*4,shadowY=Math.round(sy/2)*2;
+      this.shadowCell=shadowX+':'+shadowZ+':'+shadowY;
+      this.sun.target.position.set(shadowX,shadowY,shadowZ);
+      this.sun.position.set(shadowX-16,shadowY+36,shadowZ+22);
+      this.sun.target.updateMatrixWorld();
+      renderer.shadowMap.needsUpdate=true;
+      this.island.showChunks(sx,sz,true);
+      await renderer.compileAsync(this.scene,this.camera.camera);
+      if(signal.aborted)return;
+      this.island.fountain.warm(renderer,this.scene);
+      this.island.showChunks(sx,sz,false);
+      if(signal.aborted)return;
       this.status.hidden=true;
       this.root.dataset.ready='true';
       this.draw(performance.now());
@@ -353,6 +380,7 @@ export class Coast3dView {
     const {clientWidth:w,clientHeight:h}=this.root;
     if(!w||!h)return;
     this.renderer?.setSize(w,h,false);this.camera.resize(w/h);this.mapCamera=overviewCamera(w/h);
+    this.mapCamera.layers.enable(CLUTTER_LAYER);
   }
   private manualDirection():Point {
     let x=0,z=0;
@@ -376,7 +404,7 @@ export class Coast3dView {
     return overlap<0?[-heading[0],-heading[1]]:heading;
   }
   private draw=(time:number)=>{
-    const dt=this.last?Math.min(.10,(time-this.last)/1000):0;this.last=time;
+    const dt=this.last?Math.max(0,Math.min(.10,(time-this.last)/1000)):0;this.last=time;
     if(!document.hidden){
       const travel=this.walk!,start=travel.position(),canMove=!this.locked&&!this.overview;
       const input=canMove?this.manualDirection():STILL;

@@ -55,11 +55,14 @@ export async function loadTrialModels():Promise<TrialModel[]> {
   return models;
 }
 
-export async function loadSculptedModels() {
+export async function loadSculptedModels(skipGeneratedIds?:ReadonlySet<AssetId>) {
   const generated=import.meta.glob<string>('./generated-models/*.glb',{eager:true,query:'?url',import:'default'});
   const previews=import.meta.glob<string>('./preview-models/*.glb',{eager:true,query:'?url',import:'default'});
   const files=new Map<string,{url:string;preview:boolean}>();
-  for(const [file,url] of Object.entries(generated))files.set(file.slice('./generated-models/'.length,-4),{url,preview:false});
+  for(const [file,url] of Object.entries(generated)){
+    const id=file.slice('./generated-models/'.length,-4) as AssetId;
+    if(!skipGeneratedIds?.has(id))files.set(id,{url,preview:false});
+  }
   for(const [file,url] of Object.entries(previews))files.set(file.slice('./preview-models/'.length,-4),{url,preview:true});
   const loader=createIslandModelLoader();
   const results=await Promise.allSettled(Array.from(files,async ([name,{url,preview}])=>{

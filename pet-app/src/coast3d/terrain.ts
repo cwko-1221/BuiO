@@ -107,10 +107,14 @@ export function groundMaterials(art:ArtMaterials={}) {
   return { terrainMaterial,textures };
 }
 
-export function createTerrain(material:T.Material) {
+export function createTerrain(material:T.Material, edgesOut?:Float32Array) {
   const pieces:T.Mesh<T.BufferGeometry,T.Material>[]=[];
   const vertices:(ReturnType<typeof terrain>)[]=[];
-  for(let z=0;z<=DEPTH;z++) for(let x=0;x<=WIDTH;x++) vertices.push(terrain(x,z,true));
+  for(let z=0;z<=DEPTH;z++) for(let x=0;x<=WIDTH;x++) {
+    const v=terrain(x,z,true);
+    vertices.push(v);
+    if(edgesOut)edgesOut[z*(WIDTH+1)+x]=v.edge;
+  }
   // Normals use the same neighbours on both sides of every chunk boundary.
   const get=(x:number,z:number)=>vertices[Math.min(DEPTH,Math.max(0,z))*(WIDTH+1)+Math.min(WIDTH,Math.max(0,x))];
   for(let z0=0;z0<DEPTH;z0+=CHUNK) for(let x0=0;x0<WIDTH;x0+=CHUNK) {
@@ -197,7 +201,7 @@ export function createScarps(grain:T.Texture) {
   });
 }
 
-export function createWater(detail:T.Texture|undefined, reefs:readonly (readonly [x:number,z:number,r:number])[]) {
+export function createWater(detail:T.Texture|undefined, reefs:readonly (readonly [x:number,z:number,r:number])[], cachedEdges?:Float32Array) {
   const material=new T.ShaderMaterial({
     uniforms:{ clock:{value:0}, foam:{value:null as T.DataTexture|null}, caustics:{value:detail??null} },
     vertexShader:`varying vec3 world; void main(){ world=(modelMatrix*vec4(position,1.0)).xyz; gl_Position=projectionMatrix*viewMatrix*vec4(world,1.0); }`,
@@ -224,14 +228,15 @@ export function createWater(detail:T.Texture|undefined, reefs:readonly (readonly
         crest=max(crest,coast.g*(.37+.29*sin(clock*2.1+warp*2.3)));
         c+=vec3(.029,.138,.176)*ripple+vec3(.041,.057,.052)*pow(max(0.,fine),9.)+vec3(.58,.70,.62)*crest;
         ${detail?'vec3 pattern=texture2D(caustics,p*.104+vec2(clock*.009,clock*.006)+warp*.037).rgb; c+=vec3(.18,.36,.33)*(dot(pattern,vec3(.14,.66,.20))-.40)*(.30+.70*(1.-shallows));':''}
-        gl_FragColor=vec4(c,1.);
+        gl_FragColor=vec4(c,1.); 
         #include <colorspace_fragment>
       }`,
   });
   const w=WIDTH+1,h=DEPTH+1,d=new Uint8Array(w*h*4);
   for(let z=0;z<h;z++) for(let x=0;x<w;x++) {
-    const i=(z*w+x)*4;
-    d[i]=Math.round(255*Math.max(0,Math.min(1,.5-terrain(x,z).edge/20)));d[i+3]=255;
+    const idx=z*w+x, i=idx*4;
+    const edge=cachedEdges?cachedEdges[idx]:terrain(x,z).edge;
+    d[i]=Math.round(255*Math.max(0,Math.min(1,.5-edge/20)));d[i+3]=255;
   }
   for(const [cx,cz,r] of reefs)for(let z=Math.max(0,Math.floor(cz-r-1));z<Math.min(h,cz+r+1);z++){
     for(let x=Math.max(0,Math.floor(cx-r-1));x<Math.min(w,cx+r+1);x++){
