@@ -459,7 +459,7 @@ export class Coast3dView {
     this.abort.abort();cancelAnimationFrame(this.frame);this.resize?.disconnect();
     this.walk?.release();this.island?.finish();releaseWalker(this.walker);
     if(this.petShadow)disposeGroup(this.petShadow);
-    this.sun?.shadow.dispose();this.renderer?.dispose();
+    this.sun?.shadow.dispose();this.renderer?.dispose();this.renderer?.forceContextLoss();
     this.scene.clear();this.root.replaceChildren();
     for(const key of Object.keys(this.root.dataset))delete this.root.dataset[key];
   }

@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { PetAvatar } from './PetAvatar';
+import type { RoomPet3d } from './RoomPet3d';
 import parkArt from '../park/world-art-assets.json';
 import { DISPLAY_PET_STAGE, petForDisplay } from './petDisplay';
 import { sizedFootprint, SIZE_STEPS } from '../furniture-size';
@@ -162,6 +163,7 @@ export class BedroomScene extends Phaser.Scene {
   private parkExit?: Phaser.GameObjects.Container;
   model!: BedroomData;
   avatar?: PetAvatar;
+  private roomPet?: RoomPet3d;
   placements: RoomPlacement[] = [];
   furniture = new Map<string, Phaser.GameObjects.Container>();
   editing = false;
@@ -271,11 +273,12 @@ export class BedroomScene extends Phaser.Scene {
       ambient: this.ambientLight(),
     });
     this.seatPet(this.petSpot);
+    this.loadRoomPet(this.avatar);
     this.ghost = this.add.graphics().setDepth(15);
     if (this.model.allowParkExit) {
       const x = 1120, y = 555;
       const arch = this.add.image(0, 14, 'park:room-exit').setOrigin(.5, .95).setDisplaySize(126, 186);
-      const title = this.add.text(0, 49, this.model.locale === 'en-US' ? 'Pet Town →' : '出去樂園 →', { fontFamily: '"Microsoft JhengHei", sans-serif', fontSize: '18px', color: '#416750', backgroundColor: '#fff5dfeF', padding: { x: 13, y: 8 } }).setOrigin(.5);
+      const title = this.add.text(0, 49, this.model.locale === 'en-US' ? 'Moonbay Coast →' : '海岸小鎮 →', { fontFamily: '"Microsoft JhengHei", sans-serif', fontSize: '18px', color: '#416750', backgroundColor: '#fff5dfeF', padding: { x: 13, y: 8 } }).setOrigin(.5);
       this.parkExit = this.add.container(x, y, [arch, title]).setDepth(9000).setSize(150, 300);
       this.parkExit.setInteractive(new Phaser.Geom.Rectangle(0, 0, 150, 300), Phaser.Geom.Rectangle.Contains);
       this.parkExit.on('pointerup', (pointer: Phaser.Input.Pointer) => { if (!this.editing && pointer.getDistance() < 18) this.requestParkExit(); });
@@ -333,6 +336,50 @@ export class BedroomScene extends Phaser.Scene {
       this.game.events.off('room:grow-selected', this.growSelected, this); this.game.events.off('room:shrink-selected', this.shrinkSelected, this);
     });
   }
+  update(_time: number, delta: number) {
+    if (this.avatar) this.roomPet?.update(delta, this.avatar.action, this.avatar.roomModelFacing);
+  }
+
+  private loadRoomPet(avatar: PetAvatar) {
+    const species = this.model.petDefinition.id;
+    const canvas = this.game.canvas;
+    canvas.dataset.roomPetRenderer = 'sprite';
+    const lifecycle = new AbortController();
+    const dispose = () => {
+      lifecycle.abort();
+      this.roomPet?.destroy();
+      this.roomPet = undefined;
+      delete canvas.dataset.roomPetRenderer;
+      this.events.off(Phaser.Scenes.Events.DESTROY, dispose);
+      this.events.off(Phaser.Scenes.Events.SHUTDOWN, dispose);
+    };
+    this.events.once(Phaser.Scenes.Events.DESTROY, dispose);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, dispose);
+    // Fitted outfits are authored against the directional atlas.
+    if (this.model.activePet.equippedWearables?.length) return;
+
+    void import('./RoomPet3d').then(async ({ RoomPet3d }) => {
+      if (lifecycle.signal.aborted) return;
+      const roomPet = await RoomPet3d.create(this, species, this.ambientLight(), lifecycle.signal, () => {
+        this.roomPet?.destroy();
+        this.roomPet = undefined;
+        avatar.setRoomModelActive(false);
+        canvas.dataset.roomPetRenderer = 'sprite';
+      });
+      if (!roomPet) return;
+      if (lifecycle.signal.aborted) {
+        roomPet.destroy();
+        return;
+      }
+      this.roomPet = roomPet;
+      avatar.add(roomPet.image);
+      avatar.setRoomModelActive(true);
+      canvas.dataset.roomPetRenderer = '3d';
+    }).catch(error => {
+      if (!lifecycle.signal.aborted) console.warn('Room pet model unavailable', error);
+    });
+  }
+
   /**
    * Stand-in room for a theme whose art has not been generated yet: a back wall, a trapezoid
    * floor and the two wedges of side wall between them. Drawn from the same numbers the grid

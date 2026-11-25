@@ -55,6 +55,8 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   private textureKey = '';
   private animationPrefix = '';
   private facing: PetFacing = 'front';
+  private modelFacing: PetFacing = 'front';
+  private roomModelActive = false;
   private current: PetAction = 'idle';
   private reducedMotion: boolean;
   private anchors?: PetAnchors;
@@ -421,7 +423,8 @@ export class PetAvatar extends Phaser.GameObjects.Container {
     }
   }
   /** Play an action. One-shot actions fall back to idle when they finish. */
-  play(action: PetAction, facing: PetFacing = this.facing) {
+  play(action: PetAction, facing: PetFacing = this.roomModelActive ? this.modelFacing : this.facing) {
+    this.modelFacing = facing;
     this.facing = facing;
     this.current = action;
     if (!this.sprite || !this.layout) return this.tweenFallback(action);
@@ -466,7 +469,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   }
 
   private settle() {
-    if (this.current !== 'sleep') this.play('idle', this.facing);
+    if (this.current !== 'sleep') this.play('idle');
   }
 
   setFacing(facing: PetFacing) {
@@ -476,6 +479,14 @@ export class PetAvatar extends Phaser.GameObjects.Container {
 
   /** What the creature is doing, so the room can tell walking apart from a one-shot reaction. */
   get action() { return this.current; }
+
+  get roomModelFacing() { return this.modelFacing; }
+
+  setRoomModelActive(active: boolean) {
+    this.roomModelActive = active;
+    this.sprite?.setVisible(!active);
+    this.staticArt?.setVisible(!active);
+  }
 
   /**
    * Keep long humanoid walks in step with world travel. Stopping an eight-frame gait at an
@@ -500,7 +511,7 @@ export class PetAvatar extends Phaser.GameObjects.Container {
   emote(type: string) {
     const action = EMOTE_ACTION[type] ?? 'happy';
     this.play(action);
-    if (this.reducedMotion) return;
+    if (this.reducedMotion || this.roomModelActive) return;
     // A short positional accent on top of the frame animation — the frames carry the squash and
     // stretch, so this only adds travel the atlas cannot express.
     if (action === 'happy') {

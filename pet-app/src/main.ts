@@ -7,8 +7,6 @@ import { CoinPusherSettlementRetries, coinPusherPayoutEventId, rejectCoinPusherP
 import { lockCoinPusherBrowserInteractions } from './game/CoinPusherBrowserInteractions';
 import { CoinPusherTeacherSettings } from './teacher/CoinPusherSettings';
 import { PetAccessTeacherSettings } from './teacher/PetAccessSettings';
-import { ParkTeacherSettings } from './teacher/ParkSettings';
-import type { ParkController } from './park/controller';
 import type { Coast3dView } from './coast3d/view';
 import { PetAccessGate } from './PetAccessGate';
 import { QuietRoom } from './quiet-room';
@@ -77,7 +75,7 @@ if (localStorage.getItem('pet-reduced-motion') === '1') document.documentElement
 
 const UI = {
   'zh-HK': {
-    title:'寵物樂園', home:'我的房間', park:'戶外樂園', collection:'寵物圖鑑', shop:'魔法商店', realShop:'實體商店', coinPusher:'推銀仔', brawl:'大亂鬥', visit:'同班參觀', settings:'設定',
+    title:'寵物樂園', home:'我的房間', park:'海岸小鎮', collection:'寵物圖鑑', shop:'魔法商店', realShop:'實體商店', coinPusher:'推銀仔', brawl:'大亂鬥', visit:'同班參觀', settings:'設定',
     coins:'金幣', dust:'星塵', feed:'餵食', play:'一起玩', sleep:'休息', decorate:'佈置房間', save:'儲存佈置', private:'私人房間', class:'開放同班參觀',
     hatchTitle:'你的第一顆蛋正在等待！', hatchCopy:'蛋內藏着三隻完成版寵物之一。首次孵化完全免費。', hatch:'開始孵化',
     owned:'已擁有', locked:'未擁有', active:'主寵', choose:'選為主寵', buy:'購買', visitRoom:'參觀房間', back:'返回房間',
@@ -85,7 +83,7 @@ const UI = {
     empty:'暫時沒有內容。', daily:'今日經驗', probability:'目前開放 12 隻完成版寵物', pity:'保底', randomEgg:'隨機寵物蛋', directPet:'指定寵物',
   },
   'en-US': {
-    title:'Pet Paradise', home:'My Room', park:'Pet Town', collection:'Pet Collection', shop:'Magic Shop', realShop:'Reward Shop', coinPusher:'Coin Pusher', brawl:'Pet Brawl', visit:'Class Visits', settings:'Settings',
+    title:'Pet Paradise', home:'My Room', park:'Moonbay Coast', collection:'Pet Collection', shop:'Magic Shop', realShop:'Reward Shop', coinPusher:'Coin Pusher', brawl:'Pet Brawl', visit:'Class Visits', settings:'Settings',
     coins:'Coins', dust:'Stardust', feed:'Feed', play:'Play', sleep:'Rest', decorate:'Decorate', save:'Save room', private:'Private room', class:'Open to class',
     hatchTitle:'Your first egg is waiting!', hatchCopy:'One of the three completed pets is inside. Your first hatch is free.', hatch:'Hatch now',
     owned:'Owned', locked:'Not owned', active:'Active', choose:'Make active', buy:'Buy', visitRoom:'Visit room', back:'Back to room',
@@ -142,12 +140,8 @@ const REFUSALS: Record<string, string> = {
   'Invalid reaction': '呢個反應唔啱。',
 };
 
-const moonbayPreviewEnabled = (import.meta.env.DEV || import.meta.env.VITE_COAST3D_PREVIEW === '1') &&
-  new URLSearchParams(location.search).get('coast3d') === '1';
-
 class StudentApp {
-  private parkController?: ParkController;
-  private moonbayPreview?: Coast3dView;
+  private moonbay?: Coast3dView;
   private parkGeneration = 0;
   private restoreParkWhenAllowed = false;
   private accessLocked = false;
@@ -213,8 +207,7 @@ class StudentApp {
   constructor(identity: Identity) { this.identity = identity; this.locale = identity.language || 'zh-HK'; }
   setAccessLocked(locked: boolean) {
     this.accessLocked = locked;
-    this.parkController?.setAccessLocked(locked);
-    this.moonbayPreview?.setLocked(locked);
+    this.moonbay?.setLocked(locked);
     if (!locked && this.restoreParkWhenAllowed && this.state) { this.restoreParkWhenAllowed = false; queueMicrotask(() => { if (!this.accessLocked) this.openTab('park'); }); }
     this.pvp?.setAccessLocked(locked);
     this.brawlController?.setAccessLocked(locked);
@@ -298,7 +291,7 @@ class StudentApp {
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
-        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['realShop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span class="pet-nav-label">${tab === 'park' && moonbayPreviewEnabled ? (this.locale === 'zh-HK' ? '海岸小鎮' : 'Moonbay Coast') : this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
+        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['realShop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span class="pet-nav-label">${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
       </nav>
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
@@ -553,34 +546,13 @@ class StudentApp {
     else if(tab==='park')void this.openPark();else if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
   }
   private destroyPark(clearRestore = true) {
-    this.parkGeneration++; this.parkController?.destroy(); this.parkController = undefined;
-    this.moonbayPreview?.destroy(); this.moonbayPreview = undefined;
+    this.parkGeneration++;
+    this.moonbay?.destroy(); this.moonbay = undefined;
     const root = document.querySelector<HTMLElement>('#park-root'); if (root) { root.hidden = true; root.innerHTML = ''; }
     if (clearRestore) sessionStorage.removeItem('pet-park-open:' + this.identity.id);
   }
   private async openPark() {
     if (this.accessLocked) return;
-    if (moonbayPreviewEnabled) return this.openMoonbayPreview();
-    if (!this.activePet()) { this.toast(this.locale === 'zh-HK' ? '先孵出寵物，再一起出門吧！' : 'Hatch your pet before heading outside!'); this.openTab('home'); return; }
-    const generation = this.parkGeneration;
-    this.destroyCoinPusher(true); this.game?.scene.stop('Bedroom'); this.setLayout('room');
-    document.querySelector('#petMain')?.setAttribute('data-mode', 'park');
-    document.querySelector('.pet-shell')?.setAttribute('data-screen', 'park');
-    document.querySelector('#roomBar')!.innerHTML = ''; document.querySelector('#gameHud')!.innerHTML = '';
-    const root = document.querySelector<HTMLElement>('#park-root')!; root.hidden = false;
-    sessionStorage.setItem('pet-park-open:' + this.identity.id, '1');
-    try {
-      const { ParkController } = await import('./park/controller');
-      if (generation !== this.parkGeneration || this.tab !== 'park') return;
-      this.parkController = new ParkController(root, this.state, this.identity, {
-        home: () => this.openTab('home'), retry: () => this.openTab('park'),
-        wallet: balance => { this.state.wallet.balance = balance; this.updateWallet(); }, online: () => this.pvp?.peers || [],
-      });
-      await this.parkController.open();
-      if (this.accessLocked) this.parkController?.setAccessLocked(true);
-    } catch (error) { if (generation === this.parkGeneration) { this.toast((error as Error).message); this.openTab('home'); } }
-  }
-  private async openMoonbayPreview() {
     const pet = this.activePet(), definition = pet && this.definition(pet);
     if (!definition) {
       this.toast(this.locale === 'zh-HK' ? '先孵出寵物，再一起去海邊。' : 'Hatch your pet before visiting the coast.');
@@ -593,14 +565,16 @@ class StudentApp {
       if (generation !== this.parkGeneration || this.tab !== 'park') return;
       this.destroyCoinPusher(true); this.game?.scene.stop('Bedroom'); this.setLayout('room');
       document.querySelector('.pet-shell')?.setAttribute('data-screen', 'coast');
+      document.querySelector<HTMLElement>('#roomBar')!.replaceChildren();
       document.querySelector<HTMLElement>('#game-root')!.style.display = 'none';
       document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display = 'none';
       document.querySelector<HTMLElement>('#gameHud')!.replaceChildren();
       const root = document.querySelector<HTMLElement>('#park-root')!;
       root.hidden = false;
-      this.moonbayPreview = new Coast3dView(root, { definition, locale: this.locale, close: () => this.openTab('home') });
-      this.moonbayPreview.setLocked(this.accessLocked);
-      await this.moonbayPreview.open();
+      this.moonbay = new Coast3dView(root, { definition, locale: this.locale, close: () => this.openTab('home') });
+      this.moonbay.setLocked(this.accessLocked);
+      sessionStorage.setItem('pet-park-open:' + this.identity.id, '1');
+      await this.moonbay.open();
     } catch(error) {
       if (generation === this.parkGeneration) {
         this.toast((error as Error).message); this.openTab('home');
@@ -1086,7 +1060,18 @@ class StudentApp {
       }).catch(()=>{ canvas.dataset.ready='error'; });
     });
   }
-  private async feed(foodId:string){const pet=this.activePet()!;const result=await api.feed(pet.id,foodId,idempotencyKey());audio.sfx('feed');this.game?.events.emit('pet:emote',result.evolved?'evolve':'eat');if(result.evolved){audio.sfx('evolve');this.celebrate('evolve');}await this.reload();this.startBedroom();this.renderHomePanel();this.renderFeedPicker();}
+  private async feed(foodId: string) {
+    const pet = this.activePet()!;
+    const result = await api.feed(pet.id, foodId, idempotencyKey());
+    audio.sfx('feed');
+    const stillWithPet = () => this.tab === 'home' && !this.visiting && this.activePet()?.id === pet.id;
+    if (stillWithPet()) this.game?.events.emit('pet:emote', result.evolved ? 'evolve' : 'eat');
+    if (result.evolved) { audio.sfx('evolve'); this.celebrate('evolve'); }
+    await this.reload();
+    if (!stillWithPet()) return;
+    this.renderHomePanel();
+    this.renderFeedPicker();
+  }
   private async activate(petId:string){await api.activatePet(petId);await this.reload();audio.sfx('happy');this.renderCollection();}
   private renderCollection() { this.setLayout('full');const owned=new Map(this.state.pets.map((pet)=>[pet.speciesId,pet]));const forms=this.state.catalog.pets.length*4;document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">${this.state.catalog.pets.length} SPECIES · ${forms} FORMS</p><h1>${this.t('collection')}</h1><div class="collection-grid">${this.state.catalog.pets.map((definition)=>{const pet=owned.get(definition.id);const stage=pet?displayPetStage(pet.stage):DISPLAY_PET_STAGE;const mystery=MYSTERY_PET_IDS.has(definition.id);return `<article class="pet-card ${definition.rarity} ${pet?'':'locked'} ${mystery?'mystery-pet':''}" data-species-id="${definition.id}"><div class="pet-art"><img src="${definition.art[stage-1]}" alt="" loading="lazy"></div><span class="rarity ${definition.rarity}">${definition.rarity}</span><h3>${mystery?'???':escapeHtml(this.petName(definition,stage))}</h3><p>${pet?`Stage ${stage} · ${pet.xp} XP`:this.t('locked')}</p>${pet?`<button data-action="activate" data-id="${pet.id}" ${pet.id===this.state.profile.activePetId?'disabled':''}>${pet.id===this.state.profile.activePetId?this.t('active'):this.t('choose')}</button>`:''}</article>`}).join('')}</div></div>`; }
   private renderShop(category='eggs') {
@@ -2289,7 +2274,6 @@ type RosterFilterField = 'className' | 'chineseGroup' | 'englishGroup' | 'mathGr
 
 class TeacherApp {
   private realShop?: RealShop;
-  private parkSettings?: ParkTeacherSettings;
   quietRoom?:QuietRoom;
   private coinPusherSettings?:CoinPusherTeacherSettings;
   private accessSettings?:PetAccessTeacherSettings;
@@ -2315,7 +2299,6 @@ class TeacherApp {
     this.quietRoom=undefined;
     this.coinPusherSettings=undefined;
     this.accessSettings?.dispose();this.accessSettings=undefined;
-    this.parkSettings=undefined;
     this.realShop=undefined;
     const zh=this.zh();
     app.innerHTML=`<div class="teacher-shell">
@@ -2366,25 +2349,21 @@ class TeacherApp {
       <main id="teacherQuietMain" class="teacher-quiet-main" hidden></main>
       <main id="teacherArcadeMain" class="teacher-arcade-main" hidden></main>
       <main id="teacherAccessMain" class="teacher-access-main" hidden></main>
-      <main id="teacherParkMain" class="teacher-arcade-main" hidden></main>
       <main id="teacherRealShopMain" class="teacher-real-shop-main" hidden></main>
       <div class="modal-root" id="modalRoot"></div>
     </div>`;
-    app.querySelector('.teacher-tool-tabs')!.insertAdjacentHTML('beforeend', `<button type="button" data-teacher-tool="park" aria-pressed="false">${zh?'戶外樂園設定':'Outdoor park settings'}</button>`);
     app.querySelector('.teacher-tool-tabs')!.insertAdjacentHTML('beforeend', `<button type="button" data-teacher-tool="realShop" aria-pressed="false">🎁 ${zh?'實體商店':'Reward Shop'}</button>`);
     this.bind();this.updateSummary();
     document.querySelectorAll<HTMLButtonElement>('[data-teacher-tool]').forEach(button=>button.addEventListener('click',()=>{
       const quiet=button.dataset.teacherTool==='quiet';
       const arcade=button.dataset.teacherTool==='arcade';
       const access=button.dataset.teacherTool==='access';
-      const park=button.dataset.teacherTool==='park';
       const realShop=button.dataset.teacherTool==='realShop';
       document.querySelectorAll<HTMLElement>('[data-teacher-tool]').forEach(item=>{item.classList.toggle('active',item===button);item.setAttribute('aria-pressed',String(item===button));});
-      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade||access||park||realShop;
+      document.querySelector<HTMLElement>('#teacherCoinMain')!.hidden=quiet||arcade||access||realShop;
       document.querySelector<HTMLElement>('#teacherQuietMain')!.hidden=!quiet;
       document.querySelector<HTMLElement>('#teacherArcadeMain')!.hidden=!arcade;
       document.querySelector<HTMLElement>('#teacherAccessMain')!.hidden=!access;
-      document.querySelector<HTMLElement>('#teacherParkMain')!.hidden=!park;
       document.querySelector<HTMLElement>('#teacherRealShopMain')!.hidden=!realShop;
       if(!quiet)this.quietRoom?.hide();
       if(quiet&&!this.quietRoom){
@@ -2398,7 +2377,6 @@ class TeacherApp {
         void this.coinPusherSettings.init();
       }
       if(access&&!this.accessSettings){this.accessSettings=new PetAccessTeacherSettings(document.querySelector<HTMLElement>('#teacherAccessMain')!,this.locale);void this.accessSettings.init();}
-      if(park&&!this.parkSettings){this.parkSettings=new ParkTeacherSettings(document.querySelector<HTMLElement>('#teacherParkMain')!,this.locale);void this.parkSettings.init();}
       if(realShop&&!this.realShop){this.realShop=new RealShop(document.querySelector<HTMLElement>('#teacherRealShopMain')!,this.locale,true,'',0,undefined,this.roster.students,this.identity.name);void this.realShop.init();}
     }));
   }
