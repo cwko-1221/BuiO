@@ -127,6 +127,7 @@ const REFUSALS: Record<string, string> = {
   'Food not owned': '你冇呢款食物。',
   'Food not found': '搵唔到呢款食物。',
   'Wearable not owned': '你冇呢件飾物。',
+  'Pet outfits are temporarily paused.': '寵物服飾暫停使用。',
   'Invalid outfit': '呢套裝備唔合規則。',
   'Outfit slots must be unique': '同一個部位只可以著一件。',
   'Room theme not owned': '你未擁有呢個房間主題。',
@@ -234,6 +235,7 @@ class StudentApp {
    * artwork for them.
    */
   private canDress(pet?: PetInstance) {
+    if (this.state.catalog.wearablesPaused) return false;
     // A server older than this build sends no list. Fall back to the same default the catalogue
     // ships rather than sealing the wardrobe for every pet, which is the worse failure.
     const open=this.state.catalog.wearablePetIds?.length?this.state.catalog.wearablePetIds:WEARABLE_PET_IDS;
@@ -634,7 +636,6 @@ class StudentApp {
     // browser checks reach the live scene through here to assert what is actually on screen.
     (window as unknown as { __petGame?: Phaser.Game }).__petGame = this.game;
     this.game.scene.add('Bedroom',BedroomScene,false);
-    this.game.events.on('room:exit-park', () => { if (!this.accessLocked && this.tab === 'home' && !this.visiting) this.openTab('park'); });
     this.game.events.on(Phaser.Core.Events.READY,()=>{if(this.accessLocked)this.game?.loop.sleep();});
     document.addEventListener('visibilitychange',()=>{if(this.accessLocked)this.game?.loop.sleep();});
     this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));this.refreshDecorStrip();});
@@ -681,7 +682,7 @@ class StudentApp {
       surface.style.backgroundPosition='center';
       surface.style.backgroundRepeat='no-repeat';
     }
-    this.game!.scene.stop('Bedroom');this.game!.scene.start('Bedroom',{bootstrap:this.state,activePet:pet,petDefinition:definition,allowParkExit:!roomOverride&&this.tab==='home',locale:this.locale});
+    this.game!.scene.stop('Bedroom');this.game!.scene.start('Bedroom',{bootstrap:this.state,activePet:pet,petDefinition:definition});
     // The canvas is sized from its container. If anything started the scene while the stage
     // was still hidden the canvas would be zero-sized, so re-measure once it is on screen.
     this.refreshStage();
@@ -776,11 +777,11 @@ class StudentApp {
       ['sleep','moon',this.t('sleep')],
       ['decorate','decorate',this.t('decorate')],
       ['open-feed','food',this.t('feed')],
-      // The button stays for every pet; species without finished wearable art get the
-      // "not open yet" notice inside the picker rather than a missing action.
-      ['open-outfit','spark',this.locale==='zh-HK'?'換裝':'Outfit'],
-      ['arcade-prize-bag','spark',this.locale==='zh-HK'?'獎品袋':'Prize bag'],
     ];
+    if (!this.state.catalog.wearablesPaused) {
+      actions.push(['open-outfit','spark',this.locale==='zh-HK'?'換裝':'Outfit']);
+    }
+    actions.push(['arcade-prize-bag','spark',this.locale==='zh-HK'?'獎品袋':'Prize bag']);
     // Identity rides in the top bar alongside the coin pill; the room bar carries only actions.
     document.querySelector('#petStatus')!.innerHTML=`<span class="rarity ${definition.rarity}">${definition.rarity}</span><b>${escapeHtml(this.petName(definition,stage))}</b><span class="room-bar-stage">Stage ${stage}/4</span><div class="progress" role="progressbar" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i></div><small>${pet.xp.toLocaleString()} XP · ${this.t('daily')} ${dailyXp}/${this.state.catalog.dailyXpCap}</small>`;
     document.querySelector('#roomBar')!.innerHTML=`<div class="room-bar-actions">${actions.map(([action,glyph,label])=>`<button data-action="${action}">${icon(glyph)}<span>${escapeHtml(label)}</span></button>`).join('')}</div>`;
@@ -907,6 +908,7 @@ class StudentApp {
   private renderOutfitPicker() {
     const pet=this.activePet(); if(!pet) return;
     const zh=this.locale==='zh-HK';
+    if (this.state.catalog.wearablesPaused) return;
     if(!this.canDress(pet)) return this.picker(zh?'裝備':'Equipment',
       `<div class="empty-state">${zh?'呢隻寵物嘅飾物系統暫未開放。<br>暫時只有星斑幼貓、雲耳幼犬同布丁小豬可以換裝。':'The outfit system is not open for this pet yet.<br>Only the Starpatch Kitten, the Cloud-ear Puppy and the Pudding Piglet can dress up for now.'}</div>`);
     const definition=this.state.catalog.pets.find((item)=>item.id===pet.speciesId)!;
@@ -1082,7 +1084,9 @@ class StudentApp {
     if(category==='eggs')cards=`<article class="shop-feature"><div class="shop-egg"></div><div><span class="rarity common">${this.t('probability')}</span><h3>${this.t('randomEgg')}</h3><p>${this.locale==='zh-HK'?'隨機獲得已開放寵物之一；未擁有品種優先。':'Receive one of the released pets; unseen species are favoured.'}</p><button class="primary" data-action="buy-random-egg">${this.t('buy')} · ${this.state.catalog.egg.randomPrice} ${this.t('coins')}</button></div></article><h2>${this.t('directPet')}</h2><div class="shop-grid">${this.state.catalog.pets.map((item)=>{const owned=this.state.pets.some((pet)=>pet.speciesId===item.id);const mystery=MYSTERY_PET_IDS.has(item.id);return `<article class="shop-card ${mystery?'mystery-pet':''}"><img src="${item.art[0]}" alt="" loading="lazy"><span class="rarity ${item.rarity}">${item.rarity}</span><h3>${mystery?'???':escapeHtml(this.petName(item,1))}</h3><button data-action="buy-direct-egg" data-id="${item.id}" ${owned?'disabled':''}>${owned?this.t('owned'):`${this.t('buy')} · ${item.directPrice ?? (item.rarity==='common'?1200:2200)}`}</button></article>`;}).join('')}</div>`;
     const list = category==='food'?this.state.catalog.foods:category==='wearables'?this.state.catalog.wearables:category==='rooms'?this.state.catalog.rooms.filter((room)=>!room.pending||this.inventory(`room:${room.id}`)>0).map((item)=>({...item,id:`room:${item.id}`,category:'room_theme'})):category==='furniture'?this.state.catalog.furniture:[];
     if(category!=='eggs')cards=`<div class="shop-grid">${list.map((item:any)=>{const owned=this.inventory(item.id)>0;const art=item.art||'';return `<article class="shop-card ${owned?'owned':''}">${art?`<img src="${art}" alt="" loading="lazy">`:`<div class="item-glyph ${item.category}">${icon(item.category==='food'?'food':item.kind||'spark')}</div>`}<h3>${escapeHtml(this.name(item.name))}</h3><p>${item.xp?`+${item.xp} XP`:item.kind||item.category}</p><button data-action="buy-item" data-id="${item.id}" ${owned&&!['food','furniture'].includes(item.category)?'disabled':''}>${owned&&!['food','furniture'].includes(item.category)?this.t('owned'):`${this.t('buy')} · ${item.price} ${this.t('coins')}`}</button></article>`}).join('')}</div>`;
-    document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">MAGIC MARKET</p><h1>${this.t('shop')}</h1><div class="filter-row" role="tablist">${categories.map(([id,label])=>`<button data-action="shop-category" data-id="${id}" role="tab" aria-selected="${category===id}" class="${category===id?'active':''}">${label}</button>`).join('')}</div>${cards}</div>`;
+    const wearablesNotice = category === 'wearables' && this.state.catalog.wearablesPaused
+      ? `<p class="muted">${this.locale==='zh-HK'?'服飾暫停穿戴。':'Equipping pet outfits is temporarily paused.'}</p>` : '';
+    document.querySelector('#sidePanel')!.innerHTML=`<div class="panel-scroll"><p class="eyebrow">MAGIC MARKET</p><h1>${this.t('shop')}</h1><div class="filter-row" role="tablist">${categories.map(([id,label])=>`<button data-action="shop-category" data-id="${id}" role="tab" aria-selected="${category===id}" class="${category===id?'active':''}">${label}</button>`).join('')}</div>${wearablesNotice}${cards}</div>`;
   }
   private renderCoinPusher() {
     const zh=this.locale==='zh-HK';
@@ -2111,6 +2115,7 @@ class StudentApp {
     await this.saveOutfit(pet.id,pet.equippedWearables.filter((id)=>this.state.catalog.wearables.find((item)=>item.id===id)?.slot!==slot));
   }
   private async saveOutfit(petId:string,outfit:string[]){
+    if (this.state.catalog.wearablesPaused) return;
     await api.setOutfit(petId,outfit); audio.sfx('happy');
     await this.reload(); this.startBedroom(); this.renderHomePanel(); this.renderOutfitPicker();
   }

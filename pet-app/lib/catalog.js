@@ -497,6 +497,7 @@ const catalog = Object.freeze({
   rooms: ROOMS,
   foods: FOODS,
   wearables: WEARABLES,
+  wearablesPaused: true,
   wearablePetIds: Array.from(WEARABLE_PET_IDS),
   furniture: FURNITURE,
   evolutionThresholds: EVOLUTION_THRESHOLDS,

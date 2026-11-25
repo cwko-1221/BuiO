@@ -257,12 +257,10 @@ img { max-width: 100%; }
 .room-bar-stage { font-weight: 600; font-size: .82rem; color: var(--ink-soft); }
 .room-bar-identity .progress { flex: 1 1 140px; min-width: 120px; max-width: 320px; }
 
-/* Six equal actions on one row (or two complete rows of three on phones). These are
-   the primary controls of the app, so
-   they get a generous target rather than the 32px chips they replaced. */
+/* Equal action targets on desktop, with up to three actions per row on phones. */
 .room-bar-actions {
   display: grid; gap: var(--s1);
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(1px, 1fr));
 }
 .room-bar-actions button {
   min-height: 56px; padding: var(--s1);

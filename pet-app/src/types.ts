@@ -111,6 +111,7 @@ export interface FurnitureDefinition {
 export interface Catalog {
   version: string; pets: PetDefinition[]; rooms: RoomDefinition[];
   foods: FoodDefinition[]; wearables: WearableDefinition[];
+  wearablesPaused?: boolean;
   /** The species whose wearable art is finished; only these may open the dressing room. */
   wearablePetIds?: string[];
   furniture: FurnitureDefinition[]; evolutionThresholds: number[]; dailyXpCap: number;

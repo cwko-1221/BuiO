@@ -247,12 +247,8 @@ function publicPet(row) {
     xp: Number(row.xp) || 0, stage: Number(row.stage) || 1,
     dailyXp: Number(row.dailyXp ?? row.dailyxp) || 0,
     dailyXpDate: row.dailyXpDate || row.dailyxpdate || '',
-    // Outfits are still a live feature — setOutfit(), PUT /pets/:petId/outfit and the
-    // EquippedWearables column all remain. Omitting it here left the client reading
-    // .length off undefined and the room scene failing to build the pet.
-    // Retired catalogue entries can remain in an old save. Do not send them back to the client,
-    // where they would otherwise keep rendering after the shop item itself has been withdrawn.
-    equippedWearables: equippedWearables.filter((id) => indexes.wearables.has(id)),
+    // Preserve the stored outfit during the pause and omit retired catalogue entries from display.
+    equippedWearables: catalog.wearablesPaused ? [] : equippedWearables.filter((id) => indexes.wearables.has(id)),
   };
 }
 

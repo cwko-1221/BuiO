@@ -130,6 +130,7 @@ router.post('/pets/:petId/feed', requireStudent, asyncRoute(async (req, res) => 
 
 
 router.put('/pets/:petId/outfit', requireStudent, asyncRoute(async (req, res) => {
+  if (catalog.wearablesPaused) return res.status(409).json({ success: false, message: 'Pet outfits are temporarily paused.' });
   sendResult(res, await repo.setOutfit(req.session.studentId, req.params.petId, req.body?.wearableIds || []));
 }));
 
