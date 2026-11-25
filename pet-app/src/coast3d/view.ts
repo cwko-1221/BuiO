@@ -7,7 +7,7 @@ import { BRIDGE_CHECKPOINTS, DISTRICTS, SPAWN, district, dist, ground, nearestTr
 import { CAMERA, FollowCamera } from './follow-camera';
 import { createMovement, WALK_SPEED } from './movement';
 import type { ArtMaterials } from './terrain';
-import { capModelTextures, CLUTTER_LAYER, createIsland, lighting, OFFICIAL_ASSET_IDS, officialModels, overviewCamera } from './world';
+import { capModelTextures, CLUTTER_LAYER, createIsland, lighting, OFFICIAL_ASSET_IDS, officialModels, overviewCamera, type LoadProgress } from './world';
 import '../coast/coast.css';
 import './view.css';
 
@@ -16,6 +16,13 @@ const moves:Record<string,Point>={KeyW:[0,-1],ArrowUp:[0,-1],KeyS:[0,1],ArrowDow
 const cameraKeys:Record<string,readonly [yaw:number,pitch:number]>={KeyQ:[-.10,0],KeyE:[.10,0],PageUp:[0,-.09],PageDown:[0,.09]};
 const STILL:Point=[0,0];
 function unit(x:number,z:number):Point {const l=Math.hypot(x,z);return l>0?[x/l,z/l]:[0,0];}
+const nextFrame=(signal:AbortSignal)=>new Promise<void>(resolve=>{
+  if(signal.aborted||document.hidden){resolve();return;}
+  let settled=false;
+  const finish=()=>{if(!settled){settled=true;resolve();}};
+  requestAnimationFrame(finish);
+  setTimeout(finish,40);
+});
 const releaseWalker = (walker:Awaited<ReturnType<typeof loadWalker>>|undefined)=>{
   walker?.pivot.removeFromParent();walker?.release();
 };
@@ -71,11 +78,39 @@ export class Coast3dView {
       </div>
       <div class="coast3d-joystick" aria-label="${t('移動搖桿','Movement joystick')}" role="group" aria-hidden="true"><span></span></div>
       <p class="moonbay-hint"><span class="coast3d-hint-desktop">${t('方向鍵移動 · 左右／上下拖曳轉鏡頭','Arrow keys to move · Drag sideways or vertically to look')}</span><span class="coast3d-hint-touch">${t('按住左邊滑動移動 · 右邊滑動控制視角','Hold and drag left side to move · Drag right side to look')}</span></p>
-      <div class="moonbay-status" role="status">${t('正在載入海岸小鎮…','Loading Moonbay Coast…')}</div>`;
+      <div class="moonbay-status" role="status">
+        <div class="coast3d-status-head">
+          <span class="coast3d-status-text">${t('正在載入海岸小鎮…','Loading Moonbay Coast…')}</span>
+          <span class="coast3d-status-pct">0%</span>
+        </div>
+        <div class="coast3d-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-progress="0">
+          <span class="coast3d-progress-bar"></span>
+        </div>
+      </div>`;
     this.bind();
   }
   private t(zh:string,en:string){return this.options.locale==='zh-HK'?zh:en;}
   private get status(){return this.root.querySelector<HTMLElement>('.moonbay-status')!;}
+  private highestProgress=0;
+  private setProgress(percent:number,label?:string) {
+    if(this.abort.signal.aborted)return;
+    const clamped=Math.max(this.highestProgress,Math.min(100,Math.round(percent)));
+    this.highestProgress=clamped;
+    const status=this.status;
+    delete status.dataset.mode;
+    if(label)status.querySelector('.coast3d-status-text')!.textContent=label;
+    status.querySelector('.coast3d-status-pct')!.textContent=`${clamped}%`;
+    const bar=status.querySelector<HTMLElement>('.coast3d-progress')!;
+    bar.setAttribute('aria-valuenow',String(clamped));
+    bar.dataset.progress=String(clamped);
+    status.querySelector<HTMLElement>('.coast3d-progress-bar')!.style.width=`${clamped}%`;
+  }
+  private showStatusNote(text:string) {
+    const status=this.status;
+    status.dataset.mode='notice';
+    status.querySelector('.coast3d-status-text')!.textContent=text;
+    status.hidden=false;
+  }
 
   async open() {
     const signal=this.abort.signal;
@@ -97,10 +132,27 @@ export class Coast3dView {
       renderer.domElement.addEventListener('webglcontextlost', e=>{e.preventDefault();cancelAnimationFrame(this.frame);this.fail();},{signal});
       const preview=import.meta.env.DEV||import.meta.env.VITE_COAST3D_PREVIEW==='1';
       const sources=preview&&!this.options.requireFinal?import('./trial-models'):undefined;
-      const trials=sources?.then(module=>module.loadTrialModels())??Promise.resolve([]);
-      const drafts=sources?.then(module=>module.loadSculptedModels(OFFICIAL_ASSET_IDS))??Promise.resolve(new Map());
-      const materials:Promise<ArtMaterials>=sources?.then(module=>module.loadArtMaterials())??Promise.resolve({});
-      const [walker,assets,additions,sculpted,surfaces]=await Promise.allSettled([loadWalker(this.options.definition.id,1),officialModels(),trials,drafts,materials] as const);
+      let loadedAssets=0,totalAssets=0,registrations=0;
+      const expectedRegistrations=sources?5:2;
+      const loadingModelsText=this.t('正在載入島嶼模型…','Loading island models…');
+      const progress:LoadProgress={
+        addTotal:(n:number)=>{totalAssets+=n;registrations++;},
+        step:()=>{
+          loadedAssets++;
+          const denom=registrations>=expectedRegistrations?Math.max(1,totalAssets):Math.max(67,totalAssets);
+          const pct=registrations>=expectedRegistrations
+            ?5+Math.round(67*(loadedAssets/denom))
+            :Math.min(18,5+Math.round(67*(loadedAssets/denom)));
+          this.setProgress(pct,loadingModelsText);
+        },
+      };
+      this.setProgress(5,loadingModelsText);
+      progress.addTotal(1);
+      const walkerTask=loadWalker(this.options.definition.id,1).finally(()=>progress.step());
+      const trials=sources?.then(module=>module.loadTrialModels(progress))??Promise.resolve([]);
+      const drafts=sources?.then(module=>module.loadSculptedModels(OFFICIAL_ASSET_IDS,progress))??Promise.resolve(new Map());
+      const materials:Promise<ArtMaterials>=sources?.then(module=>module.loadArtMaterials(progress))??Promise.resolve({});
+      const [walker,assets,additions,sculpted,surfaces]=await Promise.allSettled([walkerTask,officialModels(progress),trials,drafts,materials] as const);
       if(walker.status==='fulfilled')this.walker=walker.value;
       if(signal.aborted||walker.status==='rejected'||assets.status==='rejected'||additions.status==='rejected'||sculpted.status==='rejected'||surfaces.status==='rejected'){
         if(additions.status==='fulfilled')additions.value.forEach(item=>disposeGroup(item.object));
@@ -128,9 +180,15 @@ export class Coast3dView {
       for(const item of assets.value.values())capModelTextures(item.model,maxTextureDim);
       for(const item of sculpted.value.values())capModelTextures(item.model,maxTextureDim);
       for(const item of additions.value)capModelTextures(item.object,maxTextureDim);
+      this.setProgress(75,this.t('正在建立島嶼地形與場景…','Building island & terrain…'));
+      await nextFrame(signal);
+      if(signal.aborted)return;
       this.island=createIsland(this.scene,assets.value,additions.value,sculpted.value,surfaces.value);
       const collisionSurfaces=[...this.island.pieces.map(p=>p.geometry),...this.island.structures];
       const radius=walker.value.radius;
+      this.setProgress(82,this.t('正在建立移動與物理碰撞…','Building terrain physics…'));
+      await nextFrame(signal);
+      if(signal.aborted)return;
       this.walk=createMovement(collisionSurfaces,this.island.boxes,{radius});
       if (import.meta.env.DEV || import.meta.env.VITE_COAST3D_PREVIEW === '1') {
         const island=this.island;
@@ -253,20 +311,26 @@ export class Coast3dView {
       this.sun.position.set(shadowX-16,shadowY+36,shadowZ+22);
       this.sun.target.updateMatrixWorld();
       renderer.shadowMap.needsUpdate=true;
+      this.setProgress(88,this.t('正在準備光影與水面著色…','Preparing lighting & water shaders…'));
+      await nextFrame(signal);
+      if(signal.aborted)return;
       this.island.showChunks(sx,sz,true);
       await renderer.compileAsync(this.scene,this.camera.camera);
+      if(signal.aborted)return;
+      this.setProgress(95,this.t('正在預熱噴泉倒影…','Warming fountain reflection…'));
+      await nextFrame(signal);
       if(signal.aborted)return;
       this.island.fountain.warm(renderer,this.scene);
       this.island.showChunks(sx,sz,false);
       if(signal.aborted)return;
+      this.setProgress(100,this.t('載入完成！','Ready!'));
       this.status.hidden=true;
       this.root.dataset.ready='true';
       this.draw(performance.now());
     }catch(error){if(!signal.aborted){console.error('[moonbay 3d]',error);this.fail();}}
   }
   private fail() {
-    this.status.hidden=false;
-    this.status.textContent=this.t('海岸小鎮未能載入，請返回房間再試。','The coast could not load. Return to your room and try again.');
+    this.showStatusNote(this.t('海岸小鎮未能載入，請返回房間再試。','The coast could not load. Return to your room and try again.'));
   }
   setLocked(value:boolean) {
     this.locked=value;
@@ -425,8 +489,7 @@ export class Coast3dView {
         this.stall=moved?0:this.stall+dt;
         if(this.stall>1.5){
           this.cancelRoute();
-          this.status.textContent=this.t('路線受阻，請沿步道移動。','The route is blocked. Move along the path.');
-          this.status.hidden=false;
+          this.showStatusNote(this.t('路線受阻，請沿步道移動。','The route is blocked. Move along the path.'));
           setTimeout(()=>{if(!this.abort.signal.aborted)this.status.hidden=true;},1600);
         }
       }

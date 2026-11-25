@@ -613,18 +613,22 @@ function appendMiteredDockSpan(trail:typeof trails[number], primitives:DockPrimi
     appendMiterSleeper(trail,nextTrail,nx,nz,w,bEdge,pickDockWoodPrimitive(primitives),group);
   }
 }
+export type LoadProgress = { addTotal(n:number):void; step():void };
 export function createIslandModelLoader() {
   const loader=new GLTFLoader();
   loader.register(parser=>{parser.textureLoader=new T.TextureLoader(loader.manager);return {name:'Moonbay3dEmbeddedTextures'};});
   return loader;
 }
-export async function officialModels() {
+export async function officialModels(progress?:LoadProgress) {
   const loader=createIslandModelLoader();
+  const entries=Object.entries(officialGlbUrls);
+  progress?.addTotal(entries.length);
   const models = new Map<AssetId,Appearance>();
-  await Promise.all(Object.entries(officialGlbUrls).map(async ([file,url])=>{
+  await Promise.all(entries.map(async ([file,url])=>{
     const id=file.slice('./models/'.length,-4) as AssetId;
     if(!Object.hasOwn(ASSETS,id))throw Error('Unknown Moonbay model '+id);
     const {scene}=await loader.loadAsync(url);
+    progress?.step();
     const bbox=new T.Box3().setFromObject(scene), measures=bbox.getSize(new T.Vector3());
     const [w,d,h]=ASSETS[id].size;
     if (Math.abs(measures.x/w-1)>.12 || Math.abs(measures.z/d-1)>.12 || Math.abs(measures.y/h-1)>.12 ||

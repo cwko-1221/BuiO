@@ -2,7 +2,7 @@ import * as T from 'three';
 import { disposeGroup } from '../coast/scenery';
 import { ground, terrain } from './island';
 import { ASSETS, type AssetId } from './assets';
-import { createIslandModelLoader, type Appearance } from './world';
+import { createIslandModelLoader, type Appearance, type LoadProgress } from './world';
 import { TRIAL_MODELS, type TrialModelId, type TrialPlacement } from './trial-placements';
 
 export interface TrialModel {
@@ -12,14 +12,16 @@ export interface TrialModel {
   size: T.Vector3;
 }
 
-export async function loadTrialModels():Promise<TrialModel[]> {
+export async function loadTrialModels(progress?:LoadProgress):Promise<TrialModel[]> {
   const files=import.meta.glob<string>('./trial-assets/*.glb',{eager:true,query:'?url',import:'default'});
   const loader=createIslandModelLoader();
   const entries=Object.entries(TRIAL_MODELS) as [TrialModelId,TrialPlacement][];
+  progress?.addTotal(entries.length);
   const results=await Promise.allSettled(entries.map(async ([id,placement])=>{
     const file=files['./trial-assets/'+id+'.glb'];
     if(!file)throw Error('Trial model missing from the preview: '+id);
     const {scene}=await loader.loadAsync(file);
+    progress?.step();
     const box=new T.Box3().setFromObject(scene,true);
     const size=box.getSize(new T.Vector3()), centre=box.getCenter(new T.Vector3());
     const unit=placement.measure==='width'?size.x:size.y;
@@ -55,7 +57,7 @@ export async function loadTrialModels():Promise<TrialModel[]> {
   return models;
 }
 
-export async function loadSculptedModels(skipGeneratedIds?:ReadonlySet<AssetId>) {
+export async function loadSculptedModels(skipGeneratedIds?:ReadonlySet<AssetId>, progress?:LoadProgress) {
   const generated=import.meta.glob<string>('./generated-models/*.glb',{eager:true,query:'?url',import:'default'});
   const previews=import.meta.glob<string>('./preview-models/*.glb',{eager:true,query:'?url',import:'default'});
   const files=new Map<string,{url:string;preview:boolean}>();
@@ -64,11 +66,13 @@ export async function loadSculptedModels(skipGeneratedIds?:ReadonlySet<AssetId>)
     if(!skipGeneratedIds?.has(id))files.set(id,{url,preview:false});
   }
   for(const [file,url] of Object.entries(previews))files.set(file.slice('./preview-models/'.length,-4),{url,preview:true});
+  progress?.addTotal(files.size);
   const loader=createIslandModelLoader();
   const results=await Promise.allSettled(Array.from(files,async ([name,{url,preview}])=>{
     const id=name as AssetId;
     if(!Object.hasOwn(ASSETS,id))throw Error('Unknown sculpted model: '+id);
     const {scene}=await loader.loadAsync(url);
+    progress?.step();
     const bbox=new T.Box3().setFromObject(scene);
     const size=bbox.getSize(new T.Vector3()),[w,d,h]=ASSETS[id].size;
     if(Math.abs(size.x-w)>.03||Math.abs(size.z-d)>.03||Math.abs(size.y-h)>.03||Math.abs(bbox.min.y)>.02){
@@ -81,13 +85,16 @@ export async function loadSculptedModels(skipGeneratedIds?:ReadonlySet<AssetId>)
   if(failed){models.forEach(item=>disposeGroup(item.model));throw failed.reason;}
   return models;
 }
-export async function loadArtMaterials() {
+export async function loadArtMaterials(progress?:LoadProgress) {
   const files=import.meta.glob<string>('./trial-assets/*.webp',{eager:true,query:'?url',import:'default'});
   const loader=new T.TextureLoader();
-  const result=await Promise.all((['grass','soil','stone','water'] as const).map(async key=>{
+  const keys=['grass','soil','stone','water'] as const;
+  progress?.addTotal(keys.length);
+  const result=await Promise.all(keys.map(async key=>{
     const file=files['./trial-assets/'+key+'.webp'];
     if(!file)throw Error('Missing authored terrain material: '+key);
     const texture=await loader.loadAsync(file);
+    progress?.step();
     texture.colorSpace=T.SRGBColorSpace;texture.wrapS=texture.wrapT=T.RepeatWrapping;texture.anisotropy=4;
     return [key,texture] as const;
   }));
