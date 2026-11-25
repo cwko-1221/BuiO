@@ -1,7 +1,20 @@
-import { writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { brotliCompressSync, constants as zlibConstants } from 'node:zlib';
 import { defineConfig, type Plugin } from 'vite';
+import { ASSETS } from './src/coast3d/assets';
+
+function requireMoonbayModels(): Plugin {
+  return {
+    name: 'moonbay-3d-final-models',
+    apply: 'build',
+    configResolved(config) {
+      if (config.env.VITE_COAST3D_RELEASE !== '1') return;
+      const missing = Object.keys(ASSETS).filter(id => !existsSync(join(config.root,'src/coast3d/models',id+'.glb')));
+      if (missing.length) throw Error('Moonbay 3D release requires approved GLBs: '+missing.join(', '));
+    },
+  };
+}
 
 function precompressRapierWasm(): Plugin {
   return {
@@ -27,7 +40,7 @@ function precompressRapierWasm(): Plugin {
 
 export default defineConfig({
   base: '/pet/',
-  plugins: [precompressRapierWasm()],
+  plugins: [requireMoonbayModels(), precompressRapierWasm()],
   // Rapier's standard ESM build imports a WASM module. Keep it out of dependency
   // prebundling so dev mode uses one shared WebAssembly instance for its glue code.
   optimizeDeps: {

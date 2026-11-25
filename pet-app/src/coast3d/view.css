@@ -1,0 +1,89 @@
+.moonbay-3d .moonbay-world {
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+.moonbay-3d .moonbay-world:active { cursor: grabbing; }
+.moonbay-3d .moonbay-hud {
+  inset: max(var(--coast-side), env(safe-area-inset-top)) max(var(--coast-side), env(safe-area-inset-right)) auto max(var(--coast-side), env(safe-area-inset-left));
+}
+.coast3d-destinations {
+  position: absolute;
+  bottom: max(var(--coast-side), env(safe-area-inset-bottom));
+  left: 50%;
+  translate: -50%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: min(820px, calc(100% - 22px));
+  gap: 7px;
+}
+.coast3d-destinations i {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-inline-end: 5px;
+  border-radius: 50%;
+  background: var(--district);
+}
+.coast3d-map-marker {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #fff9e0;
+  background: #ea784b;
+  box-shadow: 0 1px 5px #002b34b3;
+  translate: -50% -50%;
+  pointer-events: none;
+}
+.coast3d-joystick {
+  display: none;
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  top: 0;
+  translate: -50% -50%;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #18443b38 0%, #10322b7a 100%);
+  border: 2px solid #fff2cfba;
+  box-shadow: inset 0 0 0 12px #fff2cf12, 0 4px 18px #071e1a4d;
+  backdrop-filter: blur(4px);
+  touch-action: none;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  align-items: center;
+  justify-content: center;
+}
+.coast3d-joystick span {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #ffffff 0%, #fff3d2 62%, #ebd09b 100%);
+  border: 2px solid #8a704288;
+  box-shadow: 0 3px 10px #061d1955;
+  pointer-events: none;
+}
+.moonbay-3d[data-ready]:not([data-overview="true"]) .coast3d-joystick[data-active="true"] { display: flex; }
+.coast3d-hint-touch { display: none; }
+@media (pointer: coarse) {
+  .coast3d-hint-desktop { display: none; }
+  .coast3d-hint-touch { display: inline; }
+  .moonbay-3d[data-ready]:not([data-overview="true"]):not([data-touched="true"]) .moonbay-hint {
+    display: block;
+    left: 50%;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    translate: -50%;
+    text-align: center;
+    width: max-content;
+    max-width: calc(100% - 24px);
+    font-size: 12px;
+  }
+}
+.moonbay-3d[data-overview="true"] [data-coast="turn"] { display: none; }

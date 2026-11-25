@@ -9,6 +9,7 @@ import { CoinPusherTeacherSettings } from './teacher/CoinPusherSettings';
 import { PetAccessTeacherSettings } from './teacher/PetAccessSettings';
 import { ParkTeacherSettings } from './teacher/ParkSettings';
 import type { ParkController } from './park/controller';
+import type { Coast3dView } from './coast3d/view';
 import { PetAccessGate } from './PetAccessGate';
 import { QuietRoom } from './quiet-room';
 import { prizeIcon, prizeLabel, type ArcadePrize } from './game/ArcadePrizes';
@@ -141,8 +142,12 @@ const REFUSALS: Record<string, string> = {
   'Invalid reaction': '呢個反應唔啱。',
 };
 
+const moonbayPreviewEnabled = (import.meta.env.DEV || import.meta.env.VITE_COAST3D_PREVIEW === '1') &&
+  new URLSearchParams(location.search).get('coast3d') === '1';
+
 class StudentApp {
   private parkController?: ParkController;
+  private moonbayPreview?: Coast3dView;
   private parkGeneration = 0;
   private restoreParkWhenAllowed = false;
   private accessLocked = false;
@@ -209,6 +214,7 @@ class StudentApp {
   setAccessLocked(locked: boolean) {
     this.accessLocked = locked;
     this.parkController?.setAccessLocked(locked);
+    this.moonbayPreview?.setLocked(locked);
     if (!locked && this.restoreParkWhenAllowed && this.state) { this.restoreParkWhenAllowed = false; queueMicrotask(() => { if (!this.accessLocked) this.openTab('park'); }); }
     this.pvp?.setAccessLocked(locked);
     this.brawlController?.setAccessLocked(locked);
@@ -292,7 +298,7 @@ class StudentApp {
         <aside class="side-panel" id="sidePanel"></aside>
       </main>
       <nav class="pet-nav" aria-label="Pet Paradise">
-        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['realShop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span class="pet-nav-label">${this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
+        ${[['home','home'],['park','visit'],['collection','collection'],['shop','shop'],['realShop','shop'],['coinPusher','coin-pusher'],['brawl','brawl'],['visit','visit'],['settings','settings']].map(([tab,glyph])=>`<button data-tab="${tab}" class="${tab===this.tab?'active':''}" aria-current="${tab===this.tab?'page':'false'}">${icon(glyph)}<span class="pet-nav-label">${tab === 'park' && moonbayPreviewEnabled ? (this.locale === 'zh-HK' ? '海岸小鎮' : 'Moonbay Coast') : this.t(tab as keyof typeof UI['zh-HK'])}</span></button>`).join('')}
       </nav>
       <div class="toast-stack" id="toasts" aria-live="polite"></div>
       <div class="modal-root" id="modalRoot"></div>
@@ -548,11 +554,13 @@ class StudentApp {
   }
   private destroyPark(clearRestore = true) {
     this.parkGeneration++; this.parkController?.destroy(); this.parkController = undefined;
+    this.moonbayPreview?.destroy(); this.moonbayPreview = undefined;
     const root = document.querySelector<HTMLElement>('#park-root'); if (root) { root.hidden = true; root.innerHTML = ''; }
     if (clearRestore) sessionStorage.removeItem('pet-park-open:' + this.identity.id);
   }
   private async openPark() {
     if (this.accessLocked) return;
+    if (moonbayPreviewEnabled) return this.openMoonbayPreview();
     if (!this.activePet()) { this.toast(this.locale === 'zh-HK' ? '先孵出寵物，再一起出門吧！' : 'Hatch your pet before heading outside!'); this.openTab('home'); return; }
     const generation = this.parkGeneration;
     this.destroyCoinPusher(true); this.game?.scene.stop('Bedroom'); this.setLayout('room');
@@ -571,6 +579,33 @@ class StudentApp {
       await this.parkController.open();
       if (this.accessLocked) this.parkController?.setAccessLocked(true);
     } catch (error) { if (generation === this.parkGeneration) { this.toast((error as Error).message); this.openTab('home'); } }
+  }
+  private async openMoonbayPreview() {
+    const pet = this.activePet(), definition = pet && this.definition(pet);
+    if (!definition) {
+      this.toast(this.locale === 'zh-HK' ? '先孵出寵物，再一起去海邊。' : 'Hatch your pet before visiting the coast.');
+      this.openTab('home');
+      return;
+    }
+    const generation = this.parkGeneration;
+    try {
+      const { Coast3dView } = await import('./coast3d/view');
+      if (generation !== this.parkGeneration || this.tab !== 'park') return;
+      this.destroyCoinPusher(true); this.game?.scene.stop('Bedroom'); this.setLayout('room');
+      document.querySelector('.pet-shell')?.setAttribute('data-screen', 'coast');
+      document.querySelector<HTMLElement>('#game-root')!.style.display = 'none';
+      document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display = 'none';
+      document.querySelector<HTMLElement>('#gameHud')!.replaceChildren();
+      const root = document.querySelector<HTMLElement>('#park-root')!;
+      root.hidden = false;
+      this.moonbayPreview = new Coast3dView(root, { definition, locale: this.locale, close: () => this.openTab('home') });
+      this.moonbayPreview.setLocked(this.accessLocked);
+      await this.moonbayPreview.open();
+    } catch(error) {
+      if (generation === this.parkGeneration) {
+        this.toast((error as Error).message); this.openTab('home');
+      }
+    }
   }
   private async openLiveDuel(){
     if(this.accessLocked)return;
