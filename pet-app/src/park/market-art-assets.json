@@ -1,0 +1,279 @@
+{
+  "version": "market-v1",
+  "generator": "Built-in ImageGen; genuine alpha, optical crop/downscale/WebP only",
+  "assets": {
+    "fish-crucian": {
+      "file": "fish-crucian-2f32f199ce2c.webp",
+      "width": 480,
+      "height": 299,
+      "bytes": 58126,
+      "crop": {
+        "left": 26,
+        "top": 46,
+        "width": 1495,
+        "height": 932
+      },
+      "source": "exec-8e13bafe-0889-43bf-bc8b-006666a38fe3.png"
+    },
+    "fish-perch": {
+      "file": "fish-perch-bf5fe6d17c43.webp",
+      "width": 480,
+      "height": 238,
+      "bytes": 49144,
+      "crop": {
+        "left": 33,
+        "top": 14,
+        "width": 1715,
+        "height": 850
+      },
+      "source": "exec-1f2483cf-e5ba-4ef1-b8ab-900133a304d1.png"
+    },
+    "fish-loach": {
+      "file": "fish-loach-181c1b33e859.webp",
+      "width": 480,
+      "height": 143,
+      "bytes": 32264,
+      "crop": {
+        "left": 17,
+        "top": 174,
+        "width": 1755,
+        "height": 522
+      },
+      "source": "exec-e6070478-04bc-4f0e-b945-e5b6be04cca2.png"
+    },
+    "fish-catfish": {
+      "file": "fish-catfish-5f7d7105adae.webp",
+      "width": 480,
+      "height": 184,
+      "bytes": 37604,
+      "crop": {
+        "left": 24,
+        "top": 109,
+        "width": 1743,
+        "height": 669
+      },
+      "source": "exec-71af7804-6608-4a87-aacf-de24401212bd.png"
+    },
+    "fish-rainbow": {
+      "file": "fish-rainbow-22b228b4e51e.webp",
+      "width": 480,
+      "height": 207,
+      "bytes": 46592,
+      "crop": {
+        "left": 23,
+        "top": 60,
+        "width": 1738,
+        "height": 751
+      },
+      "source": "exec-8c9004c3-e2a7-48ce-b6fc-154df1794a27.png"
+    },
+    "fish-koi": {
+      "file": "fish-koi-32d5ea332d34.webp",
+      "width": 480,
+      "height": 259,
+      "bytes": 47434,
+      "crop": {
+        "left": 7,
+        "top": 103,
+        "width": 1521,
+        "height": 820
+      },
+      "source": "exec-b95ad12c-757c-4e30-a847-2ac2941f5003.png"
+    },
+    "fish-bitterling": {
+      "file": "fish-bitterling-bc28d76b6b84.webp",
+      "width": 480,
+      "height": 210,
+      "bytes": 41640,
+      "crop": {
+        "left": 59,
+        "top": 84,
+        "width": 1656,
+        "height": 724
+      },
+      "source": "exec-9515e6f9-980f-4943-a8d1-ac8b2b307e62.png"
+    },
+    "fish-bass": {
+      "file": "fish-bass-1685925cb08a.webp",
+      "width": 480,
+      "height": 227,
+      "bytes": 48462,
+      "crop": {
+        "left": 7,
+        "top": 29,
+        "width": 1763,
+        "height": 832
+      },
+      "source": "exec-a4bb397a-4cc9-48d8-93e5-64efd093b62a.png"
+    },
+    "fish-tilapia": {
+      "file": "fish-tilapia-719fc8948597.webp",
+      "width": 480,
+      "height": 287,
+      "bytes": 59708,
+      "crop": {
+        "left": 19,
+        "top": 74,
+        "width": 1508,
+        "height": 901
+      },
+      "source": "exec-95828936-4268-4c75-958f-f27a5ed4801b.png"
+    },
+    "fish-sturgeon": {
+      "file": "fish-sturgeon-3dfa5d2a9a42.webp",
+      "width": 480,
+      "height": 155,
+      "bytes": 31370,
+      "crop": {
+        "left": 8,
+        "top": 155,
+        "width": 1757,
+        "height": 569
+      },
+      "source": "exec-35dab9f9-c23d-47c7-a180-7ea368f61544.png"
+    },
+    "fish-arowana": {
+      "file": "fish-arowana-9efdafec994b.webp",
+      "width": 480,
+      "height": 172,
+      "bytes": 39836,
+      "crop": {
+        "left": 5,
+        "top": 109,
+        "width": 1765,
+        "height": 634
+      },
+      "source": "exec-564da3f1-06a2-4433-b046-eced7bf8c62f.png"
+    },
+    "fish-betta": {
+      "file": "fish-betta-246387b0064d.webp",
+      "width": 480,
+      "height": 321,
+      "bytes": 70534,
+      "crop": {
+        "left": 31,
+        "top": 11,
+        "width": 1493,
+        "height": 998
+      },
+      "source": "exec-532bf0c3-1968-430e-929e-ead196f558e3.png"
+    },
+    "fish-chub": {
+      "file": "fish-chub-bd2f2f02a585.webp",
+      "width": 480,
+      "height": 207,
+      "bytes": 41410,
+      "crop": {
+        "left": 5,
+        "top": 59,
+        "width": 1764,
+        "height": 762
+      },
+      "source": "exec-0eeba171-702c-48c3-89f8-d848b8f6006d.png"
+    },
+    "fish-crystal": {
+      "file": "fish-crystal-decc62d6d2cb.webp",
+      "width": 480,
+      "height": 236,
+      "bytes": 50728,
+      "crop": {
+        "left": 12,
+        "top": 12,
+        "width": 1750,
+        "height": 860
+      },
+      "source": "exec-14c6152f-d74d-400c-8d94-4ba35a254ba4.png"
+    },
+    "merchant": {
+      "file": "merchant-23535e0b46bb.webp",
+      "width": 480,
+      "height": 464,
+      "bytes": 90734,
+      "crop": {
+        "left": 72,
+        "top": 34,
+        "width": 1182,
+        "height": 1143
+      },
+      "source": "exec-7c6c3920-a4f3-45c2-8b05-322c6e630919.png"
+    },
+    "eco": {
+      "file": "eco-117efc92780c.webp",
+      "width": 480,
+      "height": 552,
+      "bytes": 105022,
+      "crop": {
+        "left": 142,
+        "top": 47,
+        "width": 1033,
+        "height": 1188
+      },
+      "source": "exec-9c450f4a-b530-4232-ae76-fed77c7dba7b.png"
+    },
+    "apple": {
+      "file": "apple-f498d4fdabf3.webp",
+      "width": 240,
+      "height": 257,
+      "bytes": 26612,
+      "crop": {
+        "left": 149,
+        "top": 29,
+        "width": 1054,
+        "height": 1127
+      },
+      "source": "exec-b9d2c7b7-3879-4da2-ad81-8e77f2dc225f.png"
+    },
+    "flowers": {
+      "file": "flowers-9da849d3fee5.webp",
+      "width": 240,
+      "height": 228,
+      "bytes": 28676,
+      "crop": {
+        "left": 68,
+        "top": 45,
+        "width": 1175,
+        "height": 1116
+      },
+      "source": "exec-4d56eb44-c2b1-4bb6-a08c-193a67388767.png"
+    },
+    "trash-can": {
+      "file": "trash-can-b2b4e5b9ad4e.webp",
+      "width": 240,
+      "height": 193,
+      "bytes": 20080,
+      "crop": {
+        "left": 75,
+        "top": 71,
+        "width": 1253,
+        "height": 1007
+      },
+      "source": "exec-affef8da-d735-43d2-bdf8-49f83cbb9efb.png"
+    },
+    "trash-bottle": {
+      "file": "trash-bottle-28de8e88f710.webp",
+      "width": 240,
+      "height": 121,
+      "bytes": 16974,
+      "crop": {
+        "left": 60,
+        "top": 177,
+        "width": 1434,
+        "height": 721
+      },
+      "source": "exec-d5a1689c-e17e-4806-92e2-60982fa16b27.png"
+    },
+    "trash-paper": {
+      "file": "trash-paper-bd710e1336b5.webp",
+      "width": 240,
+      "height": 169,
+      "bytes": 12748,
+      "crop": {
+        "left": 168,
+        "top": 80,
+        "width": 1228,
+        "height": 864
+      },
+      "source": "exec-e370ccf2-f9f5-4eb4-a176-71be0c8e9167.png"
+    }
+  }
+}

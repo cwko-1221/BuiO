@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "assets": {
+    "meadow": {
+      "file": "meadow-1381dcab5b4d.webp",
+      "width": 1024,
+      "height": 1024,
+      "bytes": 309498
+    },
+    "banana": {
+      "file": "banana-e2b0dd80f21c.webp",
+      "width": 384,
+      "height": 341,
+      "bytes": 30312
+    },
+    "banana-stand": {
+      "file": "banana-stand-f5f377f9a26e.webp",
+      "width": 640,
+      "height": 686,
+      "bytes": 135318
+    },
+    "sky-stand": {
+      "file": "sky-stand-0669c73030c2.webp",
+      "width": 640,
+      "height": 1091,
+      "bytes": 180694
+    }
+  }
+}

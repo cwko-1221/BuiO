@@ -1,0 +1,11 @@
+{
+  "version": "storybook-v3",
+  "source": "Built-in ImageGen; see artifacts/park-art/storybook-v3",
+  "assets": {
+    "terrain": {
+      "file": "garden-terrain-ad9318fad2b9.webp",
+      "width": 1499,
+      "height": 1049
+    }
+  }
+}

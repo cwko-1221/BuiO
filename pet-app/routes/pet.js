@@ -6,6 +6,7 @@ const repo = require('../repositories/pet.repo');
 const prizes = require('../repositories/arcade-prizes.repo');
 const quietRooms = require('../repositories/quiet-room.repo');
 const accessLocks = require('../repositories/access-lock.repo');
+const park = require('../repositories/park.repo');
 const { catalog } = require('../lib/catalog');
 const academicYears = require('../../math-app/repositories/academic-years.repo');
 const users = require('../../math-app/repositories/users.repo');
@@ -59,6 +60,17 @@ router.use('/real-shop', require('./real-shop'));
 
 router.get('/bootstrap', requireStudent, asyncRoute(async (req, res) => {
   sendResult(res, await repo.getBootstrap(req.session.studentId));
+}));
+
+router.get('/park/state', requireStudent, asyncRoute(async (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  sendResult(res, { state: await park.read(req.session.studentId), ...(await park.settings()) });
+}));
+router.get('/teacher/park/settings', requireTeacher, asyncRoute(async (_req, res) => {
+  res.set('Cache-Control', 'no-store'); sendResult(res, await park.settings());
+}));
+router.put('/teacher/park/settings', requireTeacher, asyncRoute(async (req, res) => {
+  sendResult(res, await park.updateSettings(req.session.studentId, req.body?.dailyCap));
 }));
 
 router.post('/coin-pusher/prizes', requireStudent, asyncRoute(async (req, res) => {

@@ -1,0 +1,78 @@
+{
+  "version": "modular-v4",
+  "generator": "Built-in ImageGen; native-size Sharp WebP packaging only",
+  "assets": {
+    "grass": {
+      "file": "grass-3d163a8a28fd.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 501722
+    },
+    "stone": {
+      "file": "stone-ab409dc6b737.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 418784
+    },
+    "soil": {
+      "file": "soil-19e5b56f65c4.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 575088
+    },
+    "water": {
+      "file": "water-d2b0d36d505d.webp",
+      "width": 1254,
+      "height": 1254,
+      "bytes": 433274
+    },
+    "sprout": {
+      "file": "sprout-e14740248979.webp",
+      "width": 384,
+      "height": 274,
+      "bytes": 37398
+    },
+    "crop-tulips": {
+      "file": "crop-tulips-f1d19fddf136.webp",
+      "width": 384,
+      "height": 377,
+      "bytes": 64120
+    },
+    "crop-sunflowers": {
+      "file": "crop-sunflowers-0b56d19560ec.webp",
+      "width": 384,
+      "height": 416,
+      "bytes": 77826
+    },
+    "crop-daisies": {
+      "file": "crop-daisies-ee12d632c906.webp",
+      "width": 384,
+      "height": 361,
+      "bytes": 73760
+    },
+    "border-flowers": {
+      "file": "border-flowers-e205d0960b6e.webp",
+      "width": 768,
+      "height": 238,
+      "bytes": 132900
+    },
+    "border-lavender": {
+      "file": "border-lavender-1a18044af4c6.webp",
+      "width": 768,
+      "height": 277,
+      "bytes": 141320
+    },
+    "waterworks": {
+      "file": "waterworks-a0e54d530f0a.webp",
+      "width": 384,
+      "height": 384,
+      "bytes": 71406
+    },
+    "bank-rocks": {
+      "file": "bank-rocks-890f50c0c371.webp",
+      "width": 384,
+      "height": 217,
+      "bytes": 52012
+    }
+  }
+}

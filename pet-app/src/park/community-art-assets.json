@@ -1,0 +1,134 @@
+{
+  "version": "community-v1",
+  "generator": "Built-in image_gen, genuine alpha; optical bounding crop and downscale/WebP only",
+  "assets": {
+    "wood-deck": {
+      "file": "wood-deck-d319e87c6fa5.webp",
+      "width": 1320,
+      "height": 378,
+      "bytes": 227804,
+      "source": "exec-62fda56e-587f-4694-ab13-e82aefc72e17.png",
+      "crop": {
+        "left": 86,
+        "top": 112,
+        "width": 1876,
+        "height": 537
+      },
+      "alphaThreshold": 220,
+      "sourceWidth": 2048,
+      "sourceHeight": 768
+    },
+    "wood-rail": {
+      "file": "wood-rail-cf0f32e664a2.webp",
+      "width": 1360,
+      "height": 307,
+      "bytes": 126358,
+      "source": "exec-ececf9bc-5844-4b79-a9bf-8a06783143ee.png",
+      "crop": {
+        "left": 12,
+        "top": 111,
+        "width": 2110,
+        "height": 477
+      },
+      "alphaThreshold": 16,
+      "sourceWidth": 2135,
+      "sourceHeight": 736
+    },
+    "stone-deck": {
+      "file": "stone-deck-a18261350f6b.webp",
+      "width": 1320,
+      "height": 344,
+      "bytes": 219930,
+      "source": "exec-0a19a151-a29d-4e7d-90ba-15485e99eb1f.png",
+      "crop": {
+        "left": 63,
+        "top": 130,
+        "width": 1929,
+        "height": 503
+      },
+      "alphaThreshold": 220,
+      "sourceWidth": 2048,
+      "sourceHeight": 768
+    },
+    "stone-rail": {
+      "file": "stone-rail-a2342dee1abe.webp",
+      "width": 1360,
+      "height": 245,
+      "bytes": 109662,
+      "source": "exec-27bd6927-9509-443a-97db-14cdc6ffb240.png",
+      "crop": {
+        "left": 35,
+        "top": 159,
+        "width": 2134,
+        "height": 385
+      },
+      "alphaThreshold": 16,
+      "sourceWidth": 2206,
+      "sourceHeight": 713
+    },
+    "garden-bed": {
+      "file": "garden-bed-2095dce46082.webp",
+      "width": 600,
+      "height": 337,
+      "bytes": 100136,
+      "source": "exec-4238ac1c-714a-4b9f-a642-55332c0bdf3b.png",
+      "crop": {
+        "left": 32,
+        "top": 97,
+        "width": 1451,
+        "height": 816
+      },
+      "alphaThreshold": 24,
+      "sourceWidth": 1508,
+      "sourceHeight": 1043
+    },
+    "garland": {
+      "file": "garland-6fc916e4b8c1.webp",
+      "width": 480,
+      "height": 146,
+      "bytes": 38260,
+      "source": "exec-5a7624cb-fbeb-41f1-8dda-1da5b7e3dcd0.png",
+      "crop": {
+        "left": 26,
+        "top": 51,
+        "width": 2083,
+        "height": 632
+      },
+      "alphaThreshold": 12,
+      "sourceWidth": 2141,
+      "sourceHeight": 734
+    },
+    "lily": {
+      "file": "lily-7a2214282987.webp",
+      "width": 256,
+      "height": 174,
+      "bytes": 20158,
+      "source": "exec-2dde8dbb-c0b0-4fc2-8935-42cabece7036.png",
+      "crop": {
+        "left": 116,
+        "top": 61,
+        "width": 1322,
+        "height": 900
+      },
+      "alphaThreshold": 110,
+      "sourceWidth": 1536,
+      "sourceHeight": 1024
+    },
+    "lantern": {
+      "file": "lantern-4ceec4c2745c.webp",
+      "width": 256,
+      "height": 655,
+      "bytes": 38882,
+      "source": "exec-b9a47ffd-1839-407a-9380-53e487c38e8e.png",
+      "crop": {
+        "left": 247,
+        "top": 89,
+        "width": 531,
+        "height": 1358
+      },
+      "alphaThreshold": 50,
+      "sourceWidth": 1024,
+      "sourceHeight": 1536
+    }
+  }
+}

@@ -1,0 +1,15 @@
+import type { Point } from './park-world.mjs';
+import type { PARK_BRIDGES } from './park-layout-v4.mjs';
+export const GARDEN_ROAD_WIDTH: number;
+export const GARDEN_ROADS: Point[][];
+export const GARDEN_TRAILS: Point[][];
+export const GARDEN_COURTS: (Point & { id: string; rx: number; ry: number; material: string })[];
+export const CREEK_WIDTH: number;
+export const CREEK: Point[];
+export const GARDEN_BRIDGES: (typeof PARK_BRIDGES[number] & { a: Point; b: Point; halfWidth: number })[];
+export function gardenCurve(controls: Point[], spacing?: number): Point[];
+export function segmentDistanceSquared(point: Point, a: Point, b: Point): number;
+export function nearGardenPath(point: Point, paths: Point[][], distance: number): boolean;
+export function inGardenCourt(point: Point, padding?: number): boolean;
+export function onGardenBridge(point: Point): boolean;
+export function inCreek(point: Point): boolean;
