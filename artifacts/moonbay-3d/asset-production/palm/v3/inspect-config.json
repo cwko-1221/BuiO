@@ -1,0 +1,14 @@
+{
+  "cameras": {
+    "palm-cove-lineup": [[179.0, 4.8, 93.5], [191.5, 2.8, 79.5], 45],
+    "palm-marina-closeup": [[186.5, 3.6, 89.0], [194.5, 2.8, 79.0], 42],
+    "palm-boathouse-vista": [[206.5, 5.4, 94.0], [196.0, 2.6, 78.5], 44],
+    "palm-north-cape": [[193.5, 5.2, 72.5], [204.2, 3.2, 62.2], 44]
+  },
+  "probes": [
+    {"offset": 0, "start": [191.0, 86.0], "target": [193.5, 86.0]},
+    {"offset": 0, "start": [204.0, 84.0], "target": [206.5, 84.0]},
+    {"offset": 0, "start": [121.0, 106.0], "target": [123.5, 106.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

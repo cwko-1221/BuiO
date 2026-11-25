@@ -1,0 +1,45 @@
+{
+  "approved": 39,
+  "errors": [],
+  "routes": {
+    "garden": {
+      "arrived": true,
+      "position": {
+        "x": 43.07203674316406,
+        "y": 2.626857271194458,
+        "z": 91.27263641357422
+      },
+      "crossedWest": true,
+      "crossedEast": false
+    },
+    "square": {
+      "arrived": true,
+      "position": {
+        "x": 120.99146270751953,
+        "y": 4.913033237457276,
+        "z": 107.27954864501953
+      },
+      "crossedWest": true,
+      "crossedEast": false
+    }
+  },
+  "probes": [
+    {
+      "offset": 0,
+      "start": [
+        31,
+        102
+      ],
+      "target": [
+        31,
+        90
+      ],
+      "finish": {
+        "x": 32.09354782104492,
+        "y": 3.6677091026306154,
+        "z": 90.13854217529297
+      },
+      "remaining": 1.1022888783104927
+    }
+  ]
+}

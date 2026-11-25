@@ -1,0 +1,16 @@
+{
+  "cameras": {
+    "daisy-plaza-bed": [[113.8, 5.4, 113.2], [109.5, 4.35, 109.8], 40],
+    "daisy-west-garden": [[41.5, 3.6, 88.2], [38.2, 2.65, 85.4], 40],
+    "daisy-close-macro": [[36.4, 3.35, 83.4], [37.4, 2.72, 86.2], 36],
+    "daisy-trio-grove": [[90.5, 3.5, 120.5], [96.0, 2.55, 116.8], 42],
+    "daisy-village-band": [[163.8, 4.1, 150.2], [168.5, 3.10, 147.6], 42],
+    "daisy-summit-rim": [[169.5, 14.3, 52.5], [163.8, 12.6, 47.8], 42]
+  },
+  "probes": [
+    {"offset": 0, "start": [143.0, 88.0], "target": [144.8, 88.8]},
+    {"offset": 0, "start": [76.0, 96.5], "target": [78.5, 96.5]},
+    {"offset": 0, "start": [97.8, 89.0], "target": [97.8, 92.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

@@ -1,0 +1,14 @@
+{
+  "cameras": {
+    "canopy-west": [[39.8, 7.6, 56.5], [52.5, 6.9, 44.5], 54],
+    "canopy-coral-gap": [[58.2, 6.9, 51.0], [52.4, 6.2, 42.5], 48],
+    "canopy-east": [[82.5, 8.4, 57.5], [77.4, 6.8, 43.0], 54],
+    "canopy-overhead": [[65, 29, 64], [65, 5.0, 44], 54]
+  },
+  "probes": [
+    {"offset": -0.5, "start": [46, 52], "target": [64, 52]},
+    {"offset": 0,    "start": [46, 52.5], "target": [64, 52.5]},
+    {"offset": 0.5,  "start": [46, 53], "target": [64, 53]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

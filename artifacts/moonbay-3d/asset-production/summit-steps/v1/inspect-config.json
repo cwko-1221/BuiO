@@ -1,0 +1,15 @@
+{
+  "cameras": {
+    "summit-lower-flight": [[159.5, 6.4, 79.0], [154.5, 4.9, 67.5], 44],
+    "summit-steep-flight": [[163.5, 9.2, 62.5], [155.5, 6.8, 60.2], 44],
+    "summit-profile-close": [[165.0, 10.6, 60.4], [164.5, 8.7, 56.5], 40],
+    "summit-upper-overlook": [[183.5, 16.0, 44.5], [172.0, 10.6, 52.5], 50]
+  },
+  "probes": [
+    {"offset": 1, "start": [157.0, 75.0], "target": [153.0, 64.0]},
+    {"offset": 2, "start": [153.0, 64.0], "target": [158.0, 57.0]},
+    {"offset": 3, "start": [158.0, 57.0], "target": [171.0, 56.0]},
+    {"offset": 4, "start": [171.0, 56.0], "target": [181.0, 45.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

@@ -1,0 +1,14 @@
+{
+  "cameras": {
+    "railing-arc-nw": [[112.0, 8.2, 82.0], [102.0, 5.2, 74.0], 50],
+    "railing-joint-closeup": [[107.0, 6.2, 74.6], [104.2, 5.25, 72.5], 38],
+    "railing-north-gate": [[121.0, 7.6, 76.5], [121.0, 5.1, 64.5], 50],
+    "railing-arc-ne": [[128.0, 8.2, 82.0], [139.0, 5.2, 74.0], 50]
+  },
+  "probes": [
+    {"offset": -0.6, "start": [120.4, 76], "target": [120.4, 62]},
+    {"offset": 0,    "start": [121.0, 76], "target": [121.0, 62]},
+    {"offset": 0.6,  "start": [121.6, 76], "target": [121.6, 62]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

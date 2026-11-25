@@ -1,0 +1,20 @@
+{
+  "cameras": {
+    "dock-deck-overview": [[224.0, 12.5, 114.0], [208.0, 1.75, 91.5], 45],
+    "dock-deck-approach": [[174.5, 4.4, 83.2], [188.5, 1.8, 88.2], 42],
+    "dock-deck-corner": [[230.0, 4.8, 108.5], [222.5, 1.75, 98.0], 42],
+    "dock-deck-side-low": [[212.5, 2.2, 95.5], [220.5, 1.75, 90.0], 38]
+  },
+  "probes": [
+    {"offset": 0, "start": [177.0, 87.0], "target": [182.0, 91.0]},
+    {"offset": 1.4, "start": [176.1, 88.1], "target": [181.2, 92.0]},
+    {"offset": -1.4, "start": [177.9, 85.9], "target": [182.8, 89.9]},
+    {"offset": 0, "start": [193.0, 86.0], "target": [206.0, 83.0]},
+    {"offset": 0, "start": [225.0, 92.0], "target": [227.4, 104.8]},
+    {"offset": 1.2, "start": [226.1, 91.8], "target": [228.5, 104.6]},
+    {"offset": -1.2, "start": [225.4, 99.2], "target": [226.1, 104.5]},
+    {"offset": -1.4, "start": [226.3, 106.0], "target": [214.4, 111.0]},
+    {"offset": 0, "start": [227.4, 104.8], "target": [214.0, 110.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

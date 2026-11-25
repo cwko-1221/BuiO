@@ -1,0 +1,12 @@
+{
+  "cameras": {
+    "market-salmon-front": [[76.4, 5.2, 43.2], [76.4, 4.4, 33.4], 44],
+    "market-salmon-awning-shutter": [[82.8, 4.8, 42.0], [76.8, 4.2, 33.4], 40],
+    "market-salmon-rear": [[70.0, 7.2, 23.5], [76.4, 4.4, 33.4], 42],
+    "market-salmon-ctx": [[91.0, 12.0, 56.0], [74.0, 4.4, 35.0], 46]
+  },
+  "probes": [
+    {"offset": 0, "start": [76.4, 43.0], "target": [76.4, 38.2]}
+  ],
+  "routes": ["market", "square"]
+}

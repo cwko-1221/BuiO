@@ -1,0 +1,16 @@
+{
+  "cameras": {
+    "pink-plaza-stairs": [[125.0, 7.2, 117.5], [135.1, 6.6, 108.0], 42],
+    "pink-east-plaza": [[155.5, 6.8, 97.0], [146.5, 6.4, 89.0], 42],
+    "pink-under-canopy": [[105.0, 4.2, 117.5], [101.8, 6.4, 123.6], 45],
+    "pink-trio-grove": [[115.0, 8.8, 114.5], [102.5, 6.2, 123.6], 44],
+    "pink-sw-relocated": [[86.0, 6.2, 92.5], [77.85, 5.2, 100.41], 44],
+    "pink-east-village": [[175.0, 6.2, 146.5], [187.37, 5.4, 140.63], 44]
+  },
+  "probes": [
+    {"offset": 0, "start": [143.0, 88.0], "target": [144.8, 88.8]},
+    {"offset": 0, "start": [76.0, 96.5], "target": [78.5, 96.5]},
+    {"offset": 0, "start": [97.8, 89.0], "target": [97.8, 92.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

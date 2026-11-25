@@ -1,0 +1,16 @@
+{
+  "cameras": {
+    "bed-west-close": [[110.5, 6.1, 110.8], [113.0, 5.15, 107.6], 42],
+    "bed-east-close": [[131.6, 6.1, 108.0], [128.6, 5.15, 104.8], 42],
+    "bed-plaza-south-gate": [[121.0, 8.8, 120.5], [121.0, 5.0, 107.5], 54],
+    "bed-overhead-steps": [[121.0, 13.5, 116.5], [121.0, 4.9, 107.5], 50]
+  },
+  "probes": [
+    {"offset": 0,   "start": [121.0, 115.0], "target": [121.0, 105.0]},
+    {"offset": -1,  "start": [110.0, 106.0], "target": [116.0, 106.0]},
+    {"offset": -2,  "start": [110.5, 109.2], "target": [116.0, 109.2]},
+    {"offset": 1,   "start": [124.0, 103.0], "target": [131.5, 103.0]},
+    {"offset": 2,   "start": [124.0, 107.2], "target": [131.5, 107.2]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

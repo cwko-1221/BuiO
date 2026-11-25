@@ -1,0 +1,45 @@
+{
+  "approved": 40,
+  "errors": [],
+  "routes": {
+    "market": {
+      "arrived": true,
+      "position": {
+        "x": 67.18889617919922,
+        "y": 5.015811672210694,
+        "z": 52.20991134643555
+      },
+      "crossedWest": false,
+      "crossedEast": false
+    },
+    "square": {
+      "arrived": true,
+      "position": {
+        "x": 120.99127960205078,
+        "y": 4.912757148742676,
+        "z": 107.28668212890625
+      },
+      "crossedWest": false,
+      "crossedEast": false
+    }
+  },
+  "probes": [
+    {
+      "offset": 0,
+      "start": [
+        76.4,
+        43
+      ],
+      "target": [
+        76.4,
+        38.2
+      ],
+      "finish": {
+        "x": 76.41688537597656,
+        "y": 5.006149520874024,
+        "z": 38.35044479370117
+      },
+      "remaining": 0.1513894047602308
+    }
+  ]
+}

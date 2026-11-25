@@ -1,0 +1,13 @@
+{
+  "cameras": {
+    "observatory-front-porch": [[182.0, 17.5, 48.0], [183.0, 16.5, 34.0], 42],
+    "observatory-door-ivy": [[175.5, 16.5, 44.5], [179.5, 16.5, 35.0], 38],
+    "observatory-dome-telescope": [[171.0, 25.0, 48.0], [184.5, 22.0, 32.5], 44],
+    "observatory-summit-ctx": [[162.0, 29.0, 62.0], [187.0, 17.5, 34.0], 46]
+  },
+  "probes": [
+    {"offset": 0, "start": [183.0, 45.0], "target": [183.0, 39.5]},
+    {"offset": 0, "start": [173.0, 39.0], "target": [178.0, 34.0]}
+  ],
+  "routes": ["observatory", "marina"]
+}

@@ -1,0 +1,15 @@
+{
+  "cameras": {
+    "green-spawn-overlook": [[121.0, 5.8, 120.5], [113.8, 5.6, 126.0], 45],
+    "green-plaza-twins": [[121.0, 6.8, 127.0], [109.5, 6.2, 115.0], 45],
+    "green-cottage-giant": [[174.5, 7.6, 141.5], [164.6, 6.8, 130.5], 45],
+    "green-under-canopy": [[118.2, 4.0, 130.0], [113.8, 6.6, 126.0], 46],
+    "green-plaza-east": [[144.0, 6.8, 104.0], [132.5, 5.8, 115.0], 45]
+  },
+  "probes": [
+    {"offset": 0, "start": [121.0, 106.0], "target": [123.5, 106.0]},
+    {"offset": 0, "start": [117.5, 126.0], "target": [120.0, 126.0]},
+    {"offset": 0, "start": [168.0, 144.0], "target": [170.5, 144.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

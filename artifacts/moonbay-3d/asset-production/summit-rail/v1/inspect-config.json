@@ -1,0 +1,15 @@
+{
+  "cameras": {
+    "rail-south-overlook": [[188.0, 16.5, 57.5], [188.0, 13.5, 49.5], 46],
+    "rail-east-orrery": [[207.5, 16.2, 46.5], [198.5, 13.8, 39.5], 45],
+    "rail-close-detail": [[189.0, 14.5, 47.0], [191.1, 13.45, 50.4], 38],
+    "rail-summit-overview": [[160.0, 26.0, 62.0], [183.0, 12.5, 42.0], 48]
+  },
+  "probes": [
+    {"offset": 0, "start": [182.0, 48.0], "target": [198.0, 43.0]},
+    {"offset": 1, "start": [195.0, 45.0], "target": [201.0, 34.0]},
+    {"offset": 2, "start": [174.0, 48.0], "target": [181.0, 45.0]},
+    {"offset": 3, "start": [174.0, 33.0], "target": [165.0, 34.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

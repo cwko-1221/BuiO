@@ -1,0 +1,535 @@
+{
+  "instances": 231,
+  "batches": 87,
+  "variants": {
+    "shore-rock-shear": 78,
+    "shore-rock-split": 74,
+    "shore-rock-shelf": 79
+  },
+  "materials": [
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot",
+    "Shore slate and damp mineral foot"
+  ],
+  "textures": [
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ],
+    [
+      true,
+      true,
+      true
+    ]
+  ]
+}

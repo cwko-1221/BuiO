@@ -1,0 +1,14 @@
+{
+  "cameras": {
+    "village-cart-front": [[182.2, 5.2, 160.2], [184.7, 3.6, 151.5], 40],
+    "village-cart-side-wheel": [[192.4, 3.8, 156.2], [184.8, 3.2, 151.5], 38],
+    "village-cart-rear-shelf": [[187.8, 5.4, 143.6], [184.7, 3.6, 151.5], 40],
+    "village-cart-village-ctx": [[175.0, 9.8, 166.0], [183.0, 3.6, 146.5], 44]
+  },
+  "probes": [
+    {"offset": 0, "start": [143.0, 88.0], "target": [144.8, 88.8]},
+    {"offset": 0, "start": [174.0, 146.0], "target": [180.5, 146.0]},
+    {"offset": 0, "start": [179.0, 156.0], "target": [188.0, 156.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

@@ -1,0 +1,14 @@
+{
+  "cameras": {
+    "dock-rope-approach": [[175.8, 3.6, 84.4], [181.2, 2.5, 88.6], 38],
+    "dock-rope-corner": [[229.6, 3.8, 106.8], [225.0, 2.4, 102.0], 36],
+    "dock-rope-bay-side": [[213.8, 2.9, 93.2], [217.5, 2.5, 90.0], 34],
+    "dock-rope-marina": [[224.0, 11.5, 113.5], [208.0, 1.8, 92.0], 45]
+  },
+  "probes": [
+    {"offset": 0, "start": [177.0, 87.0], "target": [182.0, 91.0]},
+    {"offset": 0, "start": [225.0, 92.0], "target": [227.4, 104.8]},
+    {"offset": 0, "start": [227.4, 104.8], "target": [214.0, 110.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

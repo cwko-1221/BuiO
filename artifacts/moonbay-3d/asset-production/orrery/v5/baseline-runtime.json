@@ -1,0 +1,53 @@
+{
+  "approved": 40,
+  "errors": [],
+  "routes": {
+    "observatory": {
+      "arrived": false,
+      "position": {
+        "x": 158.7449188232422,
+        "y": 3.9450194740295412,
+        "z": 76.74728393554688
+      },
+      "blockedAt": [
+        157,
+        75
+      ],
+      "crossedWest": false,
+      "crossedEast": false
+    },
+    "marina": {
+      "arrived": false,
+      "position": {
+        "x": 158.7517852783203,
+        "y": 3.9329678916931154,
+        "z": 76.75487518310547
+      },
+      "blockedAt": [
+        157,
+        75
+      ],
+      "crossedWest": false,
+      "crossedEast": false
+    }
+  },
+  "probes": [
+    {
+      "offset": 0,
+      "start": [
+        197,
+        44
+      ],
+      "target": [
+        199.8,
+        40.5
+      ],
+      "finish": {
+        "x": 200.7550811767578,
+        "y": 13.0250980758667,
+        "z": 41.00661849975586
+      },
+      "remaining": 1.081130130230373
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "cameras": {
+    "sailboat-pier-close": [[222.5, 4.2, 102.5], [213.8, 1.9, 96.5], 38],
+    "sailboat-bow-broad": [[206.5, 3.4, 96.8], [215.2, 1.8, 97.2], 38],
+    "sailboat-trio-bay": [[203.0, 5.2, 108.0], [208.5, 1.6, 95.5], 42],
+    "sailboat-marina-overview": [[225.0, 11.5, 113.5], [207.5, 1.6, 94.0], 44]
+  },
+  "probes": [
+    {"offset": 0, "start": [225.0, 92.0], "target": [227.4, 104.8]},
+    {"offset": 0, "start": [227.4, 104.8], "target": [214.0, 110.0]},
+    {"offset": 0, "start": [193.0, 86.0], "target": [206.0, 83.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

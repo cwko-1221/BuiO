@@ -1,0 +1,119 @@
+{
+  "approved": 27,
+  "errors": [],
+  "routes": {
+    "garden": {
+      "arrived": true,
+      "position": {
+        "x": 43.07192611694336,
+        "y": 2.6265904808044436,
+        "z": 91.27220153808594
+      },
+      "crossedWest": true,
+      "crossedEast": false
+    },
+    "market": {
+      "arrived": true,
+      "position": {
+        "x": 66.69302368164062,
+        "y": 5.025144329071045,
+        "z": 52.02412414550781
+      },
+      "crossedWest": false,
+      "crossedEast": false
+    },
+    "observatory": {
+      "arrived": true,
+      "position": {
+        "x": 180.71620178222656,
+        "y": 13.037113418579102,
+        "z": 45.124717712402344
+      },
+      "crossedWest": false,
+      "crossedEast": false
+    },
+    "marina": {
+      "arrived": true,
+      "position": {
+        "x": 224.85040283203125,
+        "y": 1.7750985527038574,
+        "z": 91.75419616699219
+      },
+      "crossedWest": false,
+      "crossedEast": false
+    },
+    "village": {
+      "arrived": true,
+      "position": {
+        "x": 142.29319763183594,
+        "y": 2.8254191780090334,
+        "z": 147.95655822753906
+      },
+      "crossedWest": false,
+      "crossedEast": true
+    },
+    "square": {
+      "arrived": true,
+      "position": {
+        "x": 121.0087661743164,
+        "y": 4.91301082611084,
+        "z": 107.27977752685547
+      },
+      "crossedWest": false,
+      "crossedEast": true
+    }
+  },
+  "probes": [
+    {
+      "offset": 0,
+      "start": [
+        143,
+        88
+      ],
+      "target": [
+        144.8,
+        88.8
+      ],
+      "finish": {
+        "x": 144.668701171875,
+        "y": 4.905675163269043,
+        "z": 88.73492431640625
+      },
+      "remaining": 0.14654087096163573
+    },
+    {
+      "offset": 0,
+      "start": [
+        76,
+        96.5
+      ],
+      "target": [
+        78.5,
+        96.5
+      ],
+      "finish": {
+        "x": 78.34736633300781,
+        "y": 3.2490248584747317,
+        "z": 96.48738098144531
+      },
+      "remaining": 0.15315441857408338
+    },
+    {
+      "offset": 0,
+      "start": [
+        97.8,
+        89
+      ],
+      "target": [
+        97.8,
+        92
+      ],
+      "finish": {
+        "x": 97.70769500732422,
+        "y": 4.905693759918213,
+        "z": 91.8611068725586
+      },
+      "remaining": 0.16676784019507546
+    }
+  ]
+}

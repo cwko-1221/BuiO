@@ -1,0 +1,45 @@
+{
+  "approved": 41,
+  "errors": [],
+  "routes": {
+    "village": {
+      "arrived": true,
+      "position": {
+        "x": 142.29652404785156,
+        "y": 2.8254189395904543,
+        "z": 147.95651245117188
+      },
+      "crossedWest": false,
+      "crossedEast": true
+    },
+    "square": {
+      "arrived": true,
+      "position": {
+        "x": 121.00851440429688,
+        "y": 4.912961711883545,
+        "z": 107.28105163574219
+      },
+      "crossedWest": false,
+      "crossedEast": true
+    }
+  },
+  "probes": [
+    {
+      "offset": 0,
+      "start": [
+        176,
+        136
+      ],
+      "target": [
+        176,
+        132.5
+      ],
+      "finish": {
+        "x": 176.6600341796875,
+        "y": 3.7937934303283694,
+        "z": 132.01527404785156
+      },
+      "remaining": 0.8189043699003934
+    }
+  ]
+}

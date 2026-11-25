@@ -1,0 +1,15 @@
+{
+  "cameras": {
+    "pine-summit-crest": [[179.0, 15.6, 40.5], [168.0, 15.5, 32.0], 42],
+    "pine-plaza-se": [[125.0, 7.2, 114.5], [135.0, 6.2, 121.0], 44],
+    "pine-trio-grove": [[115.0, 7.6, 115.0], [108.0, 5.4, 123.0], 44],
+    "pine-village-grove": [[172.0, 6.8, 146.5], [164.5, 5.0, 136.5], 44],
+    "pine-cottage-north": [[192.0, 6.8, 115.0], [183.5, 5.2, 121.2], 44]
+  },
+  "probes": [
+    {"offset": 0, "start": [176.0, 38.0], "target": [178.5, 38.0]},
+    {"offset": 0, "start": [168.0, 144.0], "target": [170.5, 144.0]},
+    {"offset": 0, "start": [121.0, 106.0], "target": [123.5, 106.0]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

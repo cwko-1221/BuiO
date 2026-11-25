@@ -1,0 +1,12 @@
+{
+  "cameras": {
+    "market-coral-front": [[54.5, 6.2, 54.0], [51.6, 4.8, 38.6], 42],
+    "market-coral-turret": [[42.8, 5.6, 48.2], [49.0, 4.6, 38.6], 42],
+    "market-coral-rear": [[60.5, 7.5, 25.5], [51.6, 4.8, 38.6], 42],
+    "market-coral-ctx": [[66.5, 12.5, 62.0], [56.0, 4.8, 38.0], 46]
+  },
+  "probes": [
+    {"offset": 0, "start": [51.6, 48.0], "target": [51.6, 43.2]}
+  ],
+  "routes": ["market", "square"]
+}

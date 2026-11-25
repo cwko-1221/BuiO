@@ -1,0 +1,14 @@
+{
+  "cameras": {
+    "east-post-crown-close": [[169.5, 4.7, 106.0], [173.4, 3.7, 110.2], 40],
+    "east-post-crown-top": [[172.0, 9.6, 109.0], [172.0, 3.3, 109.0], 46],
+    "east-post-north-top": [[164.0, 9.2, 102.0], [164.0, 2.5, 102.0], 46],
+    "east-post-bridge-view": [[184.5, 4.2, 118.8], [171.5, 3.4, 108.8], 44]
+  },
+  "probes": [
+    {"offset": 0,  "start": [161.0, 99.5],  "target": [172.0, 109.0]},
+    {"offset": 1,  "start": [172.0, 109.0], "target": [185.0, 119.5]},
+    {"offset": -1, "start": [185.0, 119.5], "target": [161.0, 99.5]}
+  ],
+  "routes": ["garden", "market", "observatory", "marina", "village", "square"]
+}

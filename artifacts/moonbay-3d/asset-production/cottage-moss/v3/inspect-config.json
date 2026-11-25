@@ -1,0 +1,12 @@
+{
+  "cameras": {
+    "cottage-moss-front": [[121.0, 6.2, 145.0], [123.0, 4.8, 133.3], 42],
+    "cottage-moss-door-window": [[128.4, 6.4, 141.5], [123.0, 4.8, 133.3], 40],
+    "cottage-moss-rear": [[115.0, 7.6, 123.0], [123.0, 4.4, 133.3], 42],
+    "cottage-moss-village-ctx": [[136.0, 10.5, 152.0], [122.0, 4.6, 134.0], 46]
+  },
+  "probes": [
+    {"offset": 0, "start": [123.0, 142.0], "target": [123.0, 138.0]}
+  ],
+  "routes": ["village", "square"]
+}
