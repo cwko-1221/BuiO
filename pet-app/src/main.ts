@@ -215,7 +215,11 @@ class StudentApp {
     this.coinPusherView?.setAccessLocked(locked);
     for (const scene of this.game?.scene.getScenes(true) || []) scene.input.keyboard?.resetKeys();
     audio.setAccessLocked(locked);
-    if (locked) { this.game?.loop.sleep(); void this.persistCoinPusherSession(); }
+    if (locked) {
+      this.game?.events.emit('room:cancel-input');
+      this.game?.loop.sleep();
+      void this.persistCoinPusherSession();
+    }
     else {
       if (this.game?.isBooted) this.game.loop.wake();
       if (this.coinPusherPendingDrop && !this.coinPusherPendingDrop.applied) void this.dropCoinPusher(this.coinPusherPendingDrop.worldX, true);

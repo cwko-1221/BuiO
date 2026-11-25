@@ -153,6 +153,11 @@ function floorMap(corners: [number, number][]) {
 }
 /** The creature's size on the front row; every other row scales down from here. */
 const PET_SCALE = .86;
+const ROOM_WALK_SPEED = 1.45; // Floor cells per second.
+const STICK_RADIUS = 38; // CSS pixels, independent of the canvas scale.
+const STICK_DEAD_ZONE = 6;
+const STEP_EPSILON = .0001;
+type FloorPoint = { x: number; y: number };
 
 /** How far the room's colour pulls the creature and its outfit. Subtle on purpose. */
 const AMBIENT_STRENGTH = 0.12;
@@ -178,8 +183,10 @@ export class BedroomScene extends Phaser.Scene {
 
   /** This room's grid, built from the corners that were pointed at on its picture. */
   private floor = floorMap(DEFAULT_FLOOR);
-  petLegs?: { x: number; y: number }[];
-  petStep?: Phaser.Tweens.Tween;
+  private petLegs: FloorPoint[] = [];
+  private stick?: { pointerId: number; origin: FloorPoint; vector: FloorPoint };
+  private stickDragged = false;
+  private cancelStick?: () => void;
   roomTextureKey = '';
   petTextureKey = '';
 
@@ -198,8 +205,7 @@ export class BedroomScene extends Phaser.Scene {
     this.grid = undefined;
     this.ghost = undefined;
     this.avatar = undefined;
-    this.petLegs = undefined;
-    this.petStep = undefined;
+    this.petLegs = [];
   }
   preload() {
     (window as any).BuiLoading?.watchScene(this);
@@ -272,9 +278,10 @@ export class BedroomScene extends Phaser.Scene {
     this.seatPet(this.petSpot);
     this.loadRoomPet(this.avatar);
     this.ghost = this.add.graphics().setDepth(15);
+    this.bindJoystick();
     // A tap that hits no furniture is a tap on the floor, which is where the child wants the pet.
     this.input.on('pointerup', (pointer: Phaser.Input.Pointer, targets: Phaser.GameObjects.GameObject[]) => {
-      if (this.editing || targets.length) return;
+      if ((pointer.wasTouch && this.stickDragged) || pointer.wasCanceled || this.editing || targets.length) return;
       if (pointer.getDistance() > 16) return;   // a drag across the room is not a destination
       this.walkTo(this.screenToCell(pointer.worldX, pointer.worldY));
     });
@@ -326,7 +333,93 @@ export class BedroomScene extends Phaser.Scene {
     });
   }
   update(_time: number, delta: number) {
-    if (this.avatar) this.roomPet?.update(delta, this.avatar.action, this.avatar.roomModelFacing);
+    const avatar = this.avatar;
+    if (!avatar) return;
+    const dt = Math.min(delta, 50);
+    const a = this.petCentre(this.petSpot);
+    this.stepPet(dt / 1000, avatar);
+    const b = this.petCentre(this.petSpot);
+    this.roomPet?.update(dt, avatar.action, b.x - a.x, b.y - a.y, avatar.scaleX);
+  }
+
+  private bindJoystick() {
+    const canvas = this.game.canvas;
+    const parent = canvas.parentElement!;
+    const joystick = document.createElement('div');
+    joystick.className = 'room-joystick';
+    joystick.hidden = true;
+    joystick.setAttribute('aria-hidden', 'true');
+    const thumb = joystick.appendChild(document.createElement('span'));
+    parent.append(joystick);
+    parent.classList.add('room-touch-surface');
+    const lifecycle = new AbortController();
+    const { signal } = lifecycle;
+    let thumbRange = 0;
+
+    parent.addEventListener('pointerdown', (pointer) => {
+      if (this.editing || this.stick || pointer.pointerType !== 'touch') return;
+      this.stickDragged = false;
+      const bounds = parent.getBoundingClientRect();
+      if (pointer.clientX >= bounds.left + bounds.width / 2) return;
+      joystick.style.left = `${pointer.clientX - bounds.left}px`;
+      joystick.style.top = `${pointer.clientY - bounds.top}px`;
+      thumb.style.translate = '';
+      joystick.hidden = false;
+      thumbRange = Math.max(0, (joystick.clientWidth - thumb.offsetWidth) / 2 - 3);
+      this.stick = { pointerId: pointer.pointerId, origin: { x: pointer.clientX, y: pointer.clientY }, vector: { x: 0, y: 0 } };
+      parent.setPointerCapture(pointer.pointerId);
+    }, { signal });
+    parent.addEventListener('pointermove', (pointer) => {
+      const stick = this.stick;
+      if (!stick || stick.pointerId !== pointer.pointerId) return;
+      const x = pointer.clientX - stick.origin.x;
+      const y = pointer.clientY - stick.origin.y;
+      const distance = Math.hypot(x, y);
+      const maxOffset = thumbRange / Math.max(distance, STICK_RADIUS);
+      thumb.style.translate = `${x * maxOffset}px ${y * maxOffset}px`;
+      if (distance <= STICK_DEAD_ZONE) {
+        stick.vector = { x: 0, y: 0 };
+        return;
+      }
+      const amount = Math.min(1, (distance - STICK_DEAD_ZONE) / (STICK_RADIUS - STICK_DEAD_ZONE)) / distance;
+      stick.vector = { x: x * amount, y: y * amount };
+      this.stickDragged = true;
+      this.petLegs = [];
+    }, { signal });
+    this.cancelStick = () => {
+      const id = this.stick?.pointerId;
+      this.stick = undefined;
+      joystick.hidden = true;
+      if (id !== undefined && parent.hasPointerCapture(id)) parent.releasePointerCapture(id);
+    };
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture'] as const) {
+      parent.addEventListener(type, (pointer) => {
+        if (this.stick?.pointerId === pointer.pointerId) this.cancelStick?.();
+      }, { signal });
+    }
+    const cancel = () => this.haltWalk();
+    window.addEventListener('blur', cancel, { signal });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) cancel();
+    }, { signal });
+    this.scale.on(Phaser.Scale.Events.RESIZE, cancel);
+    this.game.events.on('room:cancel-input', cancel);
+    this.events.on(Phaser.Scenes.Events.SLEEP, cancel);
+    const dispose = () => {
+      lifecycle.abort();
+      this.cancelStick?.();
+      this.cancelStick = undefined;
+      this.stickDragged = false;
+      this.scale.off(Phaser.Scale.Events.RESIZE, cancel);
+      this.game.events.off('room:cancel-input', cancel);
+      this.events.off(Phaser.Scenes.Events.SLEEP, cancel);
+      this.events.off(Phaser.Scenes.Events.SHUTDOWN, dispose);
+      this.events.off(Phaser.Scenes.Events.DESTROY, dispose);
+      parent.classList.remove('room-touch-surface');
+      joystick.remove();
+    };
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, dispose);
+    this.events.once(Phaser.Scenes.Events.DESTROY, dispose);
   }
 
   private loadRoomPet(avatar: PetAvatar) {
@@ -892,46 +985,53 @@ export class BedroomScene extends Phaser.Scene {
       }
     }
     if (!legs) return;
-    this.petStep?.stop();
     this.petLegs = legs;
-    this.walkNextLeg();
   }
 
-  private walkNextLeg() {
-    const avatar = this.avatar;
-    const next = this.petLegs?.shift();
-    if (!avatar || this.editing || !next) {
-      this.petLegs = undefined;
-      this.petStep = undefined;
-      avatar?.play('idle');
+  private stepPet(dt: number, avatar: PetAvatar) {
+    const from = this.petSpot;
+    const speed = this.roomPet?.walkSpeed ?? ROOM_WALK_SPEED;
+    const stick = this.stick?.vector;
+    let next = from;
+    if (!this.editing && dt > 0) {
+      if (stick && (stick.x || stick.y)) {
+        const x = stick.x * speed * dt, y = stick.y * speed * dt;
+        const blocked = this.blockedCells();
+        // Keep following an open edge when the other component hits a piece of furniture.
+        const candidates = [this.onFloor({ x: from.x + x, y: from.y + y }),
+          this.onFloor({ x: from.x + x, y: from.y }), this.onFloor({ x: from.x, y: from.y + y })];
+        next = candidates.find(candidate => Math.hypot(candidate.x - from.x, candidate.y - from.y) > STEP_EPSILON
+          && this.clearRun(from, candidate, blocked)) ?? from;
+      } else {
+        const target = this.petLegs[0];
+        if (target) {
+          const x = target.x - from.x, y = target.y - from.y;
+          const distance = Math.hypot(x, y), step = speed * dt;
+          if (distance <= step) {
+            next = this.petLegs.shift()!;
+          } else {
+            next = { x: from.x + x / distance * step, y: from.y + y / distance * step };
+          }
+        }
+      }
+    }
+    const x = next.x - from.x, y = next.y - from.y;
+    const distance = Math.hypot(x, y);
+    if (distance <= STEP_EPSILON) {
+      if (avatar.action === 'walk') avatar.play('idle');
       return;
     }
-    const from = this.petCentre(this.petSpot);
-    const to = this.petCentre(next);
-    const facing: PetFacing = Math.abs(to.x - from.x) >= Math.abs(to.y - from.y)
-      ? (to.x >= from.x ? 'right' : 'left')
-      : (to.y >= from.y ? 'front' : 'back');
-    avatar.play('walk', facing);
-
-    const began = { x: this.petSpot.x, y: this.petSpot.y };
-    this.petStep = this.tweens.addCounter({
-      from: 0,
-      to: 1,
-      duration: avatar.walkingDuration(Phaser.Math.Distance.Between(from.x, from.y, to.x, to.y)),
-      ease: 'Linear',
-      onUpdate: (tween) => {
-        const t = tween.getValue() ?? 0;
-        this.petSpot = { x: began.x + (next.x - began.x) * t, y: began.y + (next.y - began.y) * t };
-        this.seatPet(this.petSpot);
-      },
-      onComplete: () => { this.petSpot = next; this.seatPet(next); this.walkNextLeg(); },
-    });
+    const facing: PetFacing = Math.abs(x) >= Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'front' : 'back');
+    if (avatar.action !== 'walk' || avatar.roomModelFacing !== facing) avatar.play('walk', facing);
+    avatar.setRoomWalkRate(distance / (dt * speed));
+    this.petSpot = next;
+    this.seatPet(next);
   }
   /** Stop where it stands. Used while decorating, and while a one-shot reaction plays. */
   private haltWalk() {
-    this.petStep?.stop();
-    this.petStep = undefined;
-    this.petLegs = undefined;
+    this.cancelStick?.();
+    this.petLegs = [];
+    if (this.avatar?.action === 'walk') this.avatar.play('idle');
   }
 
   private petEmote(type: 'happy'|'eat'|'attack'|'hurt'|'sleep'|'evolve') {

@@ -1,24 +1,33 @@
 import type Phaser from 'phaser';
 import * as T from 'three';
 import { hasWalker, loadWalker } from '../coast/pet-model';
-import type { PetAction, PetFacing } from '../types';
+import type { PetAction } from '../types';
 
 const SIZE = 256;
-const FRAME_INTERVAL = 1000 / 24;
-const HEADING: Record<PetFacing, number> = { front: 0, right: Math.PI / 2, back: Math.PI, left: -Math.PI / 2 };
+const DISPLAY_SIZE = 257;
+const FRAME_HEIGHT = 1.5;
+const LOOK_AT_Y = .52;
+const CAMERA_ELEVATION = Math.PI / 6;
+const GROUND_PROJECTION = Math.sin(CAMERA_ELEVATION);
 type Walker = Awaited<ReturnType<typeof loadWalker>>;
 
 /** Render the model as a transparent room layer so it participates in Phaser's furniture sorting. */
 export class RoomPet3d {
   readonly image: Phaser.GameObjects.Image;
   private readonly scene = new T.Scene();
-  private readonly camera = new T.OrthographicCamera(-.75, .75, .75, -.75, .1, 12);
+  private readonly camera = new T.OrthographicCamera(-FRAME_HEIGHT / 2, FRAME_HEIGHT / 2, FRAME_HEIGHT / 2, -FRAME_HEIGHT / 2, .1, 12);
   private readonly pose = new T.Group();
   private readonly reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches
     || localStorage.getItem('pet-reduced-motion') === '1';
   private action: PetAction = 'idle';
   private actionTime = 0;
   private elapsed = 0;
+  private heading = 0;
+
+  get walkSpeed() {
+    // Short-stride rigs cover less ground per second without needing to race through the clip.
+    return T.MathUtils.clamp(this.walker.strideSpeed * 1.95, 1, 1.6);
+  }
 
   static async create(host: Phaser.Scene, species: string, ambient: number, signal: AbortSignal, fallback: () => void) {
     if (!hasWalker(species) || !window.WebGL2RenderingContext) return undefined;
@@ -70,21 +79,32 @@ export class RoomPet3d {
     rim.position.set(3, 3, -2);
     this.pose.add(walker.pivot);
     this.scene.add(this.pose, key, rim);
-    this.camera.position.set(0, 1.74, 4);
-    this.camera.lookAt(0, .52, 0);
-    this.image = host.add.image(0, 30, texture.key).setOrigin(.5, .83).setDisplaySize(257, 257);
+    this.camera.position.set(0, LOOK_AT_Y + 4 * Math.tan(CAMERA_ELEVATION), 4);
+    this.camera.lookAt(0, LOOK_AT_Y, 0);
+    const footOrigin = .5 + LOOK_AT_Y * Math.cos(CAMERA_ELEVATION) / FRAME_HEIGHT;
+    this.image = host.add.image(0, 30, texture.key).setOrigin(.5, footOrigin).setDisplaySize(DISPLAY_SIZE, DISPLAY_SIZE);
     renderer.domElement.addEventListener('webglcontextlost', this.fallback);
   }
 
-  update(delta: number, action: PetAction, facing: PetFacing) {
+  update(delta: number, action: PetAction, dx: number, dy: number, displayScale: number) {
     const changed = action !== this.action;
-    const dt = Math.min(delta / 1000, .1);
+    const dt = delta / 1000;
     this.actionTime = changed ? 0 : this.actionTime + dt;
     this.action = action;
-    this.walker.update(dt, action === 'walk', HEADING[facing]);
+    // Undo the orthographic camera's foreshortening before matching the rig to floor travel.
+    const dz = dy / GROUND_PROJECTION;
+    const moving = action === 'walk' && dt > 0 && (dx !== 0 || dz !== 0);
+    let walkRate = 1;
+    if (moving) {
+      this.heading = Math.atan2(dx, dz);
+      const modelUnits = Math.hypot(dx, dz) * FRAME_HEIGHT / (DISPLAY_SIZE * displayScale);
+      walkRate = modelUnits / (dt * this.walker.strideSpeed);
+    }
+    this.walker.update(dt, moving, this.heading, walkRate);
     this.elapsed += delta;
-    if (this.elapsed < FRAME_INTERVAL && !changed) return;
-    this.elapsed %= FRAME_INTERVAL;
+    const frameInterval = 1000 / (moving ? 30 : 24);
+    if (this.elapsed < frameInterval && !changed) return;
+    this.elapsed %= frameInterval;
     this.animateReaction();
     this.render();
   }
