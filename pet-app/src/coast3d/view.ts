@@ -213,6 +213,7 @@ export class Coast3dView {
           sun.position.copy(sun.target.position).add(focus?new T.Vector3(-28,63,38.5):new T.Vector3(-77,172,105));
           if(!focus){Object.assign(shadow,{left:-141,right:141,top:109,bottom:-109,far:420});shadow.updateProjectionMatrix();}
           sun.target.updateMatrixWorld();renderer.shadowMap.needsUpdate=true;
+          island.fountain.update(renderer,this.scene,camera,true);
           renderer.render(this.scene,camera);
           const image=renderer.domElement.toDataURL('image/png');
           sun.position.copy(pose);sun.target.position.copy(target);sun.target.updateMatrixWorld();
@@ -558,7 +559,9 @@ export class Coast3dView {
         marker.style.top=50-this.framing.y*50+'%';
       }
       else this.island!.softenCanopies(this.camera.camera.position,this.walker!.pivot.position);
-      this.renderer!.render(this.scene,this.overview?this.mapCamera:this.camera.camera);
+      const activeCamera=this.overview?this.mapCamera:this.camera.camera;
+      if(!this.overview)this.island!.fountain.update(this.renderer!,this.scene,activeCamera);
+      this.renderer!.render(this.scene,activeCamera);
       this.scene.fog=fog;
     }
     this.frame=requestAnimationFrame(this.draw);

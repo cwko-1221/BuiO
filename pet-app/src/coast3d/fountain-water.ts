@@ -6,7 +6,7 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   const group=new T.Group();
   group.position.set(x,y,z);
   const compact=matchMedia('(pointer: coarse)').matches;
-  const resolution=compact?160:256;
+  const resolution=compact?128:256;
   const basin=new Reflector(new T.CircleGeometry(width*.446,48),{
     textureWidth:resolution,textureHeight:resolution,multisample:0,clipBias:.002,
     shader:{
@@ -34,19 +34,23 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
           vec2 wave=vec2(sin(dot(p,vec2(3.5,1.8))-clock*2.7),cos(dot(p,vec2(-1.7,3.1))+clock*2.2));
           wave+=.55*vec2(cos(dot(p,vec2(7.2,-3.7))+clock*4.2),sin(dot(p,vec2(2.4,6.5))-clock*3.4));
           float splash=0.;
-          const vec2 J0=vec2(1.,0.),J1=vec2(.70710678,.70710678),J2=vec2(0.,1.),J3=vec2(-.70710678,.70710678);
-          for(int i=0;i<8;i++){
-            vec2 dir=i==0?J0:i==1?J1:i==2?J2:i==3?J3:i==4?-J0:i==5?-J1:i==6?-J2:-J3;
-            vec2 offset=p-impact*dir;
-            float d2=dot(offset,offset);
-            if(d2<1.5625){
-              float d=sqrt(d2);
-              float pulse=sin(d*18.-clock*11.);
-              float nearJet=1.-smoothstep(.07,1.25,d);
-              float sp=max(0.,pulse);
-              float sp2=sp*sp, sp4=sp2*sp2;
-              wave+=offset/(d+.04)*pulse*nearJet*1.15;
-              splash+=nearJet*(.23*sp4*sp4+.22*(1.-smoothstep(.08,.20,d)));
+          float pr=length(p);
+          if(abs(pr-impact)<1.26){
+            const vec2 J0=vec2(1.,0.),J1=vec2(.70710678,.70710678),J2=vec2(0.,1.),J3=vec2(-.70710678,.70710678);
+            for(int i=0;i<8;i++){
+              vec2 dir=i==0?J0:i==1?J1:i==2?J2:i==3?J3:i==4?-J0:i==5?-J1:i==6?-J2:-J3;
+              if(dot(p,dir)<=0.)continue;
+              vec2 offset=p-impact*dir;
+              float d2=dot(offset,offset);
+              if(d2<1.5625){
+                float d=sqrt(d2);
+                float pulse=sin(d*18.-clock*11.);
+                float nearJet=1.-smoothstep(.07,1.25,d);
+                float sp=max(0.,pulse);
+                float sp2=sp*sp, sp4=sp2*sp2;
+                wave+=offset/(d+.04)*pulse*nearJet*1.15;
+                splash+=nearJet*(.23*sp4*sp4+.22*(1.-smoothstep(.08,.20,d)));
+              }
             }
           }
           vec3 eye=normalize(cameraPosition-worldPoint);
@@ -68,24 +72,42 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
         }`,
     },
   });
+  if(compact)basin.getRenderTarget().texture.type=T.UnsignedByteType;
   basin.rotation.x=-Math.PI/2;basin.position.y=waterline;
   const surfaceMaterial=basin.material as T.ShaderMaterial;
   surfaceMaterial.uniforms.clock=clock;
   const reflect=basin.onBeforeRender.bind(basin);
+  basin.onBeforeRender=()=>{};
   let previousCamera:T.Camera|undefined,lastReflection=-Infinity;
   const lastCamPos=new T.Vector3(Infinity,0,0), lastForward=new T.Vector3(), camForward=new T.Vector3();
-  basin.onBeforeRender=(...args)=>{
-    const now=performance.now(), camera=args[2];
-    const distSq=(camera.position.x-x)**2+(camera.position.z-z)**2;
-    if(distSq>(compact?900:1444) && previousCamera!==undefined)return;
-    const moved=camera!==previousCamera
-      || camera.position.distanceToSquared(lastCamPos)>.0025
-      || (camera.getWorldDirection(camForward), camForward.distanceToSquared(lastForward)>(compact?.0025:.0004));
-    const interval=moved?(compact?220:65):(compact?420:160);
-    if(camera===previousCamera&&now-lastReflection<interval)return;
-    previousCamera=camera;lastReflection=now;
-    lastCamPos.copy(camera.position);camera.getWorldDirection(lastForward);
-    reflect(...args);
+  const update=(renderer:T.WebGLRenderer,scene:T.Scene,camera:T.Camera,force=false)=>{
+    if(!force){
+      const dx=x-camera.position.x, dz=z-camera.position.z, distSq=dx*dx+dz*dz;
+      if(distSq>(compact?784:1444) && previousCamera!==undefined)return;
+      camera.getWorldDirection(camForward);
+      if(distSq>25 && dx*camForward.x+dz*camForward.z<-Math.sqrt(distSq)*.25 && previousCamera!==undefined)return;
+      const moved=camera!==previousCamera
+        || camera.position.distanceToSquared(lastCamPos)>(compact?.01:.0025)
+        || camForward.distanceToSquared(lastForward)>(compact?.004:.0006);
+      if(!moved)return;
+      const now=performance.now();
+      if(camera===previousCamera && now-lastReflection<(compact?280:80))return;
+      lastReflection=now;
+    } else {
+      camera.getWorldDirection(camForward);
+      lastReflection=performance.now();
+    }
+    previousCamera=camera;
+    lastCamPos.copy(camera.position);lastForward.copy(camForward);
+    const prevTarget=renderer.getRenderTarget();
+    const prevClear=renderer.autoClear;
+    const prevShadowNeeds=renderer.shadowMap.needsUpdate;
+    renderer.autoClear=true;
+    renderer.shadowMap.needsUpdate=false;
+    reflect(renderer,scene,camera,basin.geometry,surfaceMaterial,null!);
+    renderer.shadowMap.needsUpdate=prevShadowNeeds;
+    renderer.autoClear=prevClear;
+    renderer.setRenderTarget(prevTarget);
   };
   group.add(basin);
 
@@ -133,5 +155,5 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
     const flow=new T.CatmullRomCurve3(controls.map(([r,y])=>new T.Vector3(dx*r,y,dz*r)));
     group.add(new T.Mesh(new T.TubeGeometry(flow,16,.047,6),runningWater));
   }
-  return {group,clock,warm,release:()=>basin.getRenderTarget().dispose()};
+  return {group,clock,warm,update,release:()=>basin.getRenderTarget().dispose()};
 }
