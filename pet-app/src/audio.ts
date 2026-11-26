@@ -1,11 +1,17 @@
 type SoundName = 'brawlBlock' | 'brawlHeavy' | 'brawlWarning' | 'tap' | 'buy' | 'coin' | 'arcadeDrop' | 'arcadeLand' | 'arcadeRattle' | 'arcadeTiming' | 'arcadePayout' | 'arcadeKeepsake' | 'arcadeStroke' | 'hatch' | 'evolve' | 'feed' | 'happy' | 'step' | 'attack' | 'skill' | 'hurt' | 'win' | 'lose' | 'decorate' | 'reaction';
 
 import {brawlSound} from '../lib/brawl/sound.mjs';
+import {skySound,SKY_CUES} from '../lib/sky-sound.mjs';
+import {fishingSound,FISHING_CUES} from '../lib/fishing-sound.mjs';
 const THEMES: Record<string, { tempo: number; root: number; scale: number[]; pattern: number[] }> = {
   brawl: { tempo: 118, root: 55, scale: [0,2,3,7,9], pattern: [0,0,3,2,4,3,2,1] },
   bedroom: { tempo: 92, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,4,3] },
   shop: { tempo: 116, root: 65, scale: [0,2,4,7,9], pattern: [0,1,2,4,3,2,1,3] },
   arcade: { tempo: 128, root: 72, scale: [0,2,4,7,9], pattern: [0,4,2,3,4,2,1,3] },
+  flight: { tempo: 124, root: 62, scale: [0,3,5,7,10], pattern: [0,2,4,3,2,1,3,4,0,2,3,4,2,1,0,3] },
+  banana: { tempo: 106, root: 65, scale: [0,2,4,7,9], pattern: [0,3,2,1,4,2,3,1] },
+  fishing: { tempo: 72, root: 60, scale: [0,2,4,7,9], pattern: [0,2,4,2,1,3,2,1] },
+  'fishing-fight': { tempo: 112, root: 57, scale: [0,2,3,7,10], pattern: [0,2,3,1,4,2,3,1] },
 };
 
 export class AudioEngine {
@@ -18,9 +24,40 @@ export class AudioEngine {
   private nextNoteTime = 0;
   private theme = 'bedroom';
   private accessLocked = false;
+  private musicPaused = false;
+  private skyBuffers = new Map<string,AudioBuffer>();
+  private skyBus?:DynamicsCompressorNode;
+  private skyVoices = new Set<AudioBufferSourceNode>();
+  skySoundsPlayed = 0;
+  private fishingBuffers=new Map<string,AudioBuffer>();
+  private fishingVoices=new Set<AudioBufferSourceNode>();
+  fishingSoundsPlayed=0;
+  private noiseBuffers=new Map<number,AudioBuffer>();
+  prepareFishingSounds(){const c=this.context;if(!c)return;for(const cue of FISHING_CUES)if(!this.fishingBuffers.has(cue)){const samples=fishingSound(cue,c.sampleRate),buffer=c.createBuffer(1,samples.length,c.sampleRate);buffer.copyToChannel(samples,0);this.fishingBuffers.set(cue,buffer);}}
+  fishing(cue:string){const c=this.context,b=this.fishingBuffers.get(cue);if(!c||!b||!this.sfxGain||c.state!=='running'||!this.enabled||this.isDocumentHidden()||this.sfxLevel<=0||this.fishingVoices.size>=8)return;const source=c.createBufferSource();source.buffer=b;source.connect(this.sfxGain);this.fishingVoices.add(source);this.fishingSoundsPlayed++;source.onended=()=>{this.fishingVoices.delete(source);source.disconnect();};source.start();}
+  stopFishingSounds(){for(const source of this.fishingVoices){try{source.stop();}catch{}}this.fishingVoices.clear();}
+  getTheme() { return this.theme; }
+  setMusicPaused(paused:boolean) { this.musicPaused=paused; this.updateLevels(); this.syncMusicLoop(); }
+  stopSkySounds() { for(const voice of this.skyVoices) { try { voice.stop(); } catch { /* Already ended. */ } } this.skyVoices.clear(); }
+  async prepareSkySounds() {
+    const context=this.context;if(!context)return;
+    for(const cue of SKY_CUES)if(!this.skyBuffers.has(cue)){
+      const samples=skySound(cue,context.sampleRate),buffer=context.createBuffer(1,samples.length,context.sampleRate);buffer.copyToChannel(samples,0);this.skyBuffers.set(cue,buffer);
+      await new Promise<void>(resolve=>window.setTimeout(resolve,0));
+    }
+  }
+  sky(cue:string,pan=0,level=1) {
+    const context=this.context,destination=this.sfxGain;
+    if(!context||!destination||context.state!=='running'||!this.enabled||this.isDocumentHidden()||this.sfxLevel<=0||this.skyVoices.size>=18)return;
+    let buffer=this.skyBuffers.get(cue);
+    if(!buffer){const samples=skySound(cue,context.sampleRate);buffer=context.createBuffer(1,samples.length,context.sampleRate);buffer.copyToChannel(samples,0);this.skyBuffers.set(cue,buffer);}
+    if(!this.skyBus){this.skyBus=context.createDynamicsCompressor();this.skyBus.threshold.value=-18;this.skyBus.knee.value=12;this.skyBus.ratio.value=8;this.skyBus.attack.value=.003;this.skyBus.release.value=.12;this.skyBus.connect(destination);}
+    const source=context.createBufferSource(),gain=context.createGain(),panner=context.createStereoPanner();source.buffer=buffer;
+    gain.gain.value=Math.max(0,Math.min(.8,level*.48));panner.pan.value=Math.max(-.7,Math.min(.7,pan));source.connect(gain).connect(panner).connect(this.skyBus);this.skyVoices.add(source);this.skySoundsPlayed++;
+    source.onended=()=>{this.skyVoices.delete(source);source.disconnect();gain.disconnect();panner.disconnect();};source.start();
+  }
   setAccessLocked(locked: boolean) { this.accessLocked = locked; this.updateLevels(); this.syncMusicLoop(); }
   private brawlBuffers=new Map<string,AudioBuffer>();
-  private noiseBuffers=new Map<number,AudioBuffer>();
   private brawlVoices=0;
   brawlSoundsPlayed=0;
   enabled = localStorage.getItem('pet-audio-muted') !== '1';
@@ -51,6 +88,7 @@ export class AudioEngine {
     const canPlay = !!this.context
       && this.context.state === 'running'
       && this.enabled
+      && !this.musicPaused
       && this.musicLevel > 0
       && !this.isDocumentHidden();
     if (canPlay) {
@@ -91,7 +129,7 @@ export class AudioEngine {
   private updateLevels() {
     if (!this.master || !this.music || !this.sfxGain) return;
     this.master.gain.value = this.enabled && !this.isDocumentHidden() ? .85 : 0;
-    this.music.gain.value = this.musicLevel;
+    this.music.gain.value = this.musicPaused ? 0 : this.musicLevel;
     this.sfxGain.gain.value = this.sfxLevel;
   }
 
@@ -107,7 +145,7 @@ export class AudioEngine {
     source.onended=()=>{this.brawlVoices--;source.disconnect();gain.disconnect();panner.disconnect();};source.start();
   }
   private startLoop() {
-    if (!this.context || !this.enabled || this.musicLevel <= 0 || this.isDocumentHidden()) return;
+    if (!this.context || !this.enabled || this.musicPaused || this.musicLevel <= 0 || this.isDocumentHidden()) return;
     this.nextNoteTime = this.context.currentTime + .02;
     const scheduleBeat = (delay: number) => {
       const theme = THEMES[this.theme];
@@ -137,7 +175,7 @@ export class AudioEngine {
     };
     const tick = () => {
       this.timer = 0;
-      if (!this.context || !this.enabled || this.musicLevel <= 0 || this.isDocumentHidden()) return;
+      if (!this.context || !this.enabled || this.musicPaused || this.musicLevel <= 0 || this.isDocumentHidden()) return;
       const now = this.context.currentTime;
       if (this.nextNoteTime < now - .25) this.nextNoteTime = now + .02;
       while (this.nextNoteTime < now + .22) scheduleBeat(Math.max(0, this.nextNoteTime - now));
