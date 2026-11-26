@@ -7,7 +7,7 @@ import { BRIDGE_CHECKPOINTS, DISTRICTS, SPAWN, district, dist, ground, nearestTr
 import { CAMERA, FollowCamera } from './follow-camera';
 import { createMovement, WALK_SPEED } from './movement';
 import type { ArtMaterials } from './terrain';
-import { capModelTextures, CLUTTER_LAYER, createIsland, lighting, OFFICIAL_ASSET_IDS, officialModels, overviewCamera, type LoadProgress } from './world';
+import { capArtTextures, capModelTextures, CLUTTER_LAYER, createIsland, lighting, OFFICIAL_ASSET_IDS, officialModels, overviewCamera, releaseTextureScratch, type LoadProgress } from './world';
 import '../coast/coast.css';
 import './view.css';
 
@@ -64,6 +64,17 @@ export class Coast3dView {
   private phoneViewport=false;
   private minFrameMs=0;
   private lastDataset:Record<string,string>={};
+  private openedAt=0;
+  private perfOn=new URLSearchParams(location.search).get('perf')==='1';
+  private perfEl?:HTMLElement;
+  private perfFrames=0;
+  private perfLastReport=0;
+  private perfJsSum=0;
+  private perfPhysSum=0;
+  private perfRenSum=0;
+  private perfShd=0;
+  private perfRafMax=0;
+  private perfLastRaf=0;
 
   constructor(private readonly root:HTMLElement,private readonly options:{locale:Locale;definition:PetDefinition;close:()=>void;requireFinal?:boolean}) {
     const t=(zh:string,en:string)=>this.t(zh,en);
@@ -71,7 +82,7 @@ export class Coast3dView {
     root.innerHTML=`
       <div class="moonbay-world"></div>
       <div class="moonbay-hud">
-        <div class="moonbay-area" aria-live="polite"><strong>${t('月灣廣場','Crescent Square')}</strong><small class="coast3d-guide" hidden></small></div>
+        <div class="moonbay-area" aria-live="polite"><strong>${t('月灣廣場','Crescent Square')}</strong><small class="coast3d-guide" hidden></small><small class="coast3d-perf" hidden></small></div>
         <div class="moonbay-actions">
           <button type="button" data-coast="turn">${t('鏡頭回正','Reset camera')}</button>
           <button type="button" data-coast="map" aria-pressed="false">${t('全島地圖','Island map')}</button>
@@ -189,10 +200,13 @@ export class Coast3dView {
       this.root.dataset.blenderModels=String(new Set([...assets.value.keys(),...sculpted.value.keys()]).size);
       this.root.dataset.previewModels=String([...sculpted.value].filter(([id,asset])=>asset.preview&&!assets.value.has(id)).length);
       this.root.dataset.joints=String(walker.value.joints);
-      const maxTextureDim=this.phoneViewport?512:coarsePointer?768:1024;
-      for(const item of assets.value.values())capModelTextures(item.model,maxTextureDim);
-      for(const item of sculpted.value.values())capModelTextures(item.model,maxTextureDim);
-      for(const item of additions.value)capModelTextures(item.object,maxTextureDim);
+      const maxTextureDim=this.phoneViewport?256:coarsePointer?512:1024;
+      const stripSecondary=this.phoneViewport;
+      for(const item of assets.value.values())capModelTextures(item.model,maxTextureDim,stripSecondary);
+      for(const item of sculpted.value.values())capModelTextures(item.model,maxTextureDim,stripSecondary);
+      for(const item of additions.value)capModelTextures(item.object,maxTextureDim,stripSecondary);
+      if(this.phoneViewport)capArtTextures(surfaces.value,384);
+      releaseTextureScratch();
       this.setProgress(75,this.t('正在建立島嶼地形與場景…','Building island & terrain…'));
       await nextFrame(signal);
       if(signal.aborted)return;
@@ -305,8 +319,12 @@ export class Coast3dView {
       this.petShadow.scale.setScalar(.24);
       this.scene.add(this.petShadow);
       this.sun=lighting(this.scene);
-      this.shadowLead=coarsePointer?14:24;
-      if(coarsePointer){
+      this.shadowLead=this.phoneViewport?0:coarsePointer?14:24;
+      if(this.phoneViewport){
+        this.sun.shadow.mapSize.set(512,512);
+        Object.assign(this.sun.shadow.camera,{left:-44,right:44,top:44,bottom:-44,near:1,far:108});
+        this.sun.shadow.camera.updateProjectionMatrix();
+      } else if(coarsePointer){
         this.sun.shadow.mapSize.set(768,768);
         Object.assign(this.sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,near:1,far:98});
         this.sun.shadow.camera.updateProjectionMatrix();
@@ -336,6 +354,9 @@ export class Coast3dView {
       this.setProgress(100,this.t('載入完成！','Ready!'));
       this.status.hidden=true;
       this.root.dataset.ready='true';
+      this.openedAt=performance.now();
+      this.perfEl=this.root.querySelector<HTMLElement>('.coast3d-perf')!;
+      if(this.perfOn)this.perfEl.hidden=false;
       this.draw(performance.now());
     }catch(error){if(!signal.aborted){console.error('[moonbay 3d]',error);this.fail();}}
   }
@@ -371,6 +392,18 @@ export class Coast3dView {
         if(this.frame){cancelAnimationFrame(this.frame);this.frame=0;}
       } else if(this.renderer && this.walk && !this.frame && !this.abort.signal.aborted){
         this.frame=requestAnimationFrame(this.draw);
+      }
+    },{signal});
+    let areaTaps=0, areaTapAt=0;
+    this.root.querySelector('.moonbay-area')?.addEventListener('click',()=>{
+      const now=performance.now();
+      areaTaps=now-areaTapAt<1200?areaTaps+1:1;
+      areaTapAt=now;
+      if(areaTaps>=3){
+        areaTaps=0;
+        this.perfOn=!this.perfOn;
+        if(this.perfEl){this.perfEl.hidden=!this.perfOn;if(!this.perfOn)this.perfEl.textContent='';}
+        this.perfFrames=0;this.perfLastReport=now;this.perfJsSum=0;this.perfPhysSum=0;this.perfRenSum=0;this.perfShd=0;this.perfRafMax=0;this.perfLastRaf=now;
       }
     },{signal});
     this.root.addEventListener('click',e=>{
@@ -492,23 +525,31 @@ export class Coast3dView {
   }
   private updateShadowBox(x:number,y:number,z:number,force=false) {
     const yaw=this.camera.yaw;
-    const tx=x-Math.sin(yaw)*this.shadowLead, tz=z-Math.cos(yaw)*this.shadowLead;
-    const threshold=this.shadowLead===14?12:8;
+    const tx=this.shadowLead?x-Math.sin(yaw)*this.shadowLead:x;
+    const tz=this.shadowLead?z-Math.cos(yaw)*this.shadowLead:z;
+    const threshold=this.shadowLead===0?14:this.shadowLead===14?12:8;
     if(!force && Math.hypot(tx-this.shadowX,tz-this.shadowZ)<threshold && Math.abs(y-this.shadowY)<4)return;
     const sx=Math.round(tx), sy=Math.round(y), sz=Math.round(tz);
     this.shadowX=sx;this.shadowY=sy;this.shadowZ=sz;
-    const coarse=this.shadowLead===14;
+    const coarse=this.shadowLead<=14;
     this.sun!.target.position.set(sx,sy,sz);
     this.sun!.position.set(sx-(coarse?24:28),sy+(coarse?54:63),sz+(coarse?33:38.5));
     this.sun!.target.updateMatrixWorld();
     this.sun!.updateMatrixWorld();
     this.renderer!.shadowMap.needsUpdate=true;
+    if(this.perfOn)this.perfShd++;
   }
   private draw=(time:number)=>{
     if(document.hidden){this.frame=0;return;}
     if(this.minFrameMs && this.last && time-this.last<this.minFrameMs){
       this.frame=requestAnimationFrame(this.draw);
       return;
+    }
+    const perf=this.perfOn;
+    const t0=perf?performance.now():0;
+    if(perf){
+      if(this.perfLastRaf)this.perfRafMax=Math.max(this.perfRafMax,t0-this.perfLastRaf);
+      this.perfLastRaf=t0;
     }
     const dt=this.last?Math.max(0,Math.min(.10,(time-this.last)/1000)):0;this.last=time;
     {
@@ -550,6 +591,7 @@ export class Coast3dView {
       this.petShadow!.quaternion.setFromUnitVectors(this.up,this.visualNormal);
       this.walker!.update(dt,moved,heading,Math.max(.45,Math.min(1.5,this.visualSpeed/this.walker!.strideSpeed)),this.visualNormal);
       this.camera.follow(dt,{x:p.x,y:this.footY-.006,z:p.z},travel.visibility,this.prefersReduced,this.island!.moonBounds);
+      const tPhys=perf?performance.now():0;
       const region=district(here);
       if(this.root.dataset.district!==region.id){this.root.dataset.district=region.id;this.root.querySelector('.moonbay-area strong')!.textContent=this.t(region.zh,region.en);}
       if(import.meta.env.DEV||import.meta.env.VITE_COAST3D_PREVIEW==='1') {
@@ -580,9 +622,29 @@ export class Coast3dView {
       }
       else this.island!.softenCanopies(this.camera.camera.position,this.walker!.pivot.position);
       const activeCamera=this.overview?this.mapCamera:this.camera.camera;
+      const tRen=perf?performance.now():0;
       if(!this.overview)this.island!.fountain.update(this.renderer!,this.scene,activeCamera);
       this.renderer!.render(this.scene,activeCamera);
       this.scene.fog=fog;
+      if(perf){
+        const tEnd=performance.now();
+        this.perfFrames++;
+        this.perfJsSum+=tEnd-t0;
+        this.perfPhysSum+=tPhys-t0;
+        this.perfRenSum+=tEnd-tRen;
+        if(!this.perfLastReport)this.perfLastReport=tEnd;
+        const span=tEnd-this.perfLastReport;
+        if(span>=500 && this.perfEl){
+          const fps=Math.round(this.perfFrames*1000/span);
+          const js=(this.perfJsSum/this.perfFrames).toFixed(1);
+          const ph=(this.perfPhysSum/this.perfFrames).toFixed(1);
+          const rn=(this.perfRenSum/this.perfFrames).toFixed(1);
+          const info=this.renderer!.info;
+          const sec=Math.floor((tEnd-this.openedAt)/1000);
+          this.perfEl.textContent=`${sec}s ${fps}fps max${Math.round(this.perfRafMax)}ms | js${js}(p${ph} r${rn}) | c${info.render.calls} ${Math.round(info.render.triangles/1000)}k t${info.memory.textures} s${this.perfShd}`;
+          this.perfFrames=0;this.perfJsSum=0;this.perfPhysSum=0;this.perfRenSum=0;this.perfShd=0;this.perfRafMax=0;this.perfLastReport=tEnd;
+        }
+      }
     }
     this.frame=requestAnimationFrame(this.draw);
   };

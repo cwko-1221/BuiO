@@ -19,6 +19,28 @@ export class PetAccessGate {
   private verifiedUntil = 0;
   private validityTimer?: number;
   private authenticationRequired = false;
+  private blockingEventsBound = false;
+  private readonly preventGameInput = (event: Event) => {
+    if (!this.blocked) return;
+    const inside = event.target instanceof Node && this.root.contains(event.target);
+    if (event.type === 'keydown' || event.type === 'keyup' || !inside) event.stopImmediatePropagation();
+    if (!inside) event.preventDefault();
+    if (event instanceof KeyboardEvent && event.key === 'Tab') {
+      const nodes = [...this.root.querySelectorAll<HTMLElement>('button:not(:disabled), a[href]')];
+      if (!nodes.length) return;
+      const index = nodes.indexOf(document.activeElement as HTMLElement);
+      if (event.shiftKey ? index <= 0 : index === nodes.length - 1 || index < 0) {
+        event.preventDefault(); nodes[event.shiftKey ? nodes.length - 1 : 0].focus();
+      }
+    }
+  };
+  private syncBlockingListeners(blocked: boolean) {
+    if (this.blockingEventsBound === blocked) return;
+    this.blockingEventsBound = blocked;
+    const types = ['keydown', 'keyup', 'pointerdown', 'pointerup', 'pointermove', 'click', 'touchstart', 'touchmove'];
+    if (blocked) types.forEach(type => window.addEventListener(type, this.preventGameInput, { capture: true, passive: false }));
+    else types.forEach(type => window.removeEventListener(type, this.preventGameInput, { capture: true }));
+  }
   constructor(private app: HTMLElement, private locale: Locale, private startApp: () => Promise<void>, private setLocked: (locked: boolean) => void) {
     this.root.className = 'pet-access-overlay'; this.root.setAttribute('role', 'dialog');
     this.root.setAttribute('aria-modal', 'true'); this.root.setAttribute('aria-labelledby', 'petAccessTitle');
@@ -26,21 +48,6 @@ export class PetAccessGate {
     this.setBlocked(true);
     this.setLocked(true);
     const signal = this.abort.signal;
-    const preventGameInput = (event: Event) => {
-      if (!this.blocked) return;
-      const inside = event.target instanceof Node && this.root.contains(event.target);
-      if (event.type === 'keydown' || event.type === 'keyup' || !inside) event.stopImmediatePropagation();
-      if (!inside) event.preventDefault();
-      if (event instanceof KeyboardEvent && event.key === 'Tab') {
-        const nodes = [...this.root.querySelectorAll<HTMLElement>('button:not(:disabled), a[href]')];
-        if (!nodes.length) return;
-        const index = nodes.indexOf(document.activeElement as HTMLElement);
-        if (event.shiftKey ? index <= 0 : index === nodes.length - 1 || index < 0) {
-          event.preventDefault(); nodes[event.shiftKey ? nodes.length - 1 : 0].focus();
-        }
-      }
-    };
-    ['keydown', 'keyup', 'pointerdown', 'pointerup', 'pointermove', 'click', 'touchstart', 'touchmove'].forEach(type => window.addEventListener(type, preventGameInput, { signal, capture: true, passive: false }));
     window.addEventListener('pet:access', event => {
       const access=(event as CustomEvent<PetAccessStatus>).detail;
       if(!this.validStatus(access))return;
@@ -63,6 +70,7 @@ export class PetAccessGate {
   private setBlocked(blocked: boolean) {
     const changed = this.blocked !== blocked;
     this.blocked = blocked; this.app.inert = blocked;
+    this.syncBlockingListeners(blocked);
     const notifications = document.querySelector<HTMLElement>('#pvp-notifications');
     if (notifications) notifications.inert = blocked;
     document.body.classList.toggle('pet-access-blocked', blocked);
@@ -145,5 +153,5 @@ export class PetAccessGate {
         Math.min(30000, 2000 * 2 ** Math.min(this.failures, 4)) + Math.random() * 500);
     }
   }
-  private dispose() { this.abort.abort(); clearTimeout(this.timer); clearTimeout(this.validityTimer); }
+  private dispose() { this.syncBlockingListeners(false); this.abort.abort(); clearTimeout(this.timer); clearTimeout(this.validityTimer); }
 }

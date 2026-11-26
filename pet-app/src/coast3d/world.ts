@@ -50,28 +50,54 @@ const instancedOfficialAssets = new Set<AssetId>([
   'east-post','west-post','east-rail','west-rail',
   'pine','green-tree','gold-tree','pink-tree','palm','lamp','parasol','market-stall',
 ]);
-export function capModelTextures(root:T.Object3D, maxDim:number) {
+const secondaryPbrMaps = ['normalMap','roughnessMap','metalnessMap','aoMap','bumpMap','displacementMap'] as const;
+let scratchCanvas:HTMLCanvasElement|undefined;
+function resizeTextureToImageData(tex:T.Texture, maxDim:number) {
+  const img=tex.image as { width?:number; height?:number }|undefined;
+  const w=img?.width??0, h=img?.height??0;
+  if(w<=maxDim && h<=maxDim)return;
+  const scale=maxDim/Math.max(w,h), nw=Math.max(64,Math.round(w*scale)), nh=Math.max(64,Math.round(h*scale));
+  const canvas=scratchCanvas??=document.createElement('canvas');
+  canvas.width=nw;canvas.height=nh;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true});
+  if(ctx){
+    ctx.clearRect(0,0,nw,nh);
+    ctx.drawImage(img as CanvasImageSource,0,0,nw,nh);
+    tex.image=ctx.getImageData(0,0,nw,nh);
+    tex.needsUpdate=true;
+  }
+}
+export function releaseTextureScratch() {
+  if(scratchCanvas){scratchCanvas.width=0;scratchCanvas.height=0;scratchCanvas=undefined;}
+}
+export function capModelTextures(root:T.Object3D, maxDim:number, stripSecondary=false) {
   const seen=new Set<T.Texture>();
   root.traverse(node=>{
     if(!(node instanceof T.Mesh))return;
     for(const mat of Array.isArray(node.material)?node.material:[node.material]){
       if(!mat)continue;
+      if(stripSecondary){
+        const std=mat as T.MeshStandardMaterial;
+        for(const key of secondaryPbrMaps){
+          const map=std[key] as T.Texture|null|undefined;
+          if(!map)continue;
+          if(key==='metalnessMap' && typeof std.metalness==='number' && std.metalness>.35)std.metalness=.15;
+          if(key==='roughnessMap' && typeof std.roughness==='number' && std.roughness<.45)std.roughness=.85;
+          map.dispose();
+          (std as unknown as Record<string,unknown>)[key]=null;
+          mat.needsUpdate=true;
+        }
+      }
       for(const val of Object.values(mat)){
         if(!(val instanceof T.Texture)||seen.has(val))continue;
         seen.add(val);
-        const img=val.image as { width?:number; height?:number }|undefined;
-        const w=img?.width??0, h=img?.height??0;
-        if(w<=maxDim && h<=maxDim)continue;
-        const scale=maxDim/Math.max(w,h), nw=Math.max(64,Math.round(w*scale)), nh=Math.max(64,Math.round(h*scale));
-        const canvas=document.createElement('canvas');canvas.width=nw;canvas.height=nh;
-        const ctx=canvas.getContext('2d');
-        if(ctx){
-          ctx.drawImage(img as CanvasImageSource,0,0,nw,nh);
-          (val as T.Texture).image=canvas;val.needsUpdate=true;
-        }
+        resizeTextureToImageData(val,maxDim);
       }
     }
   });
+}
+export function capArtTextures(art:ArtMaterials, maxDim:number) {
+  for(const tex of Object.values(art))if(tex)resizeTextureToImageData(tex,maxDim);
 }
 
 function plazaStonework(boxes:IslandCollider[], plants:Placement[]) {

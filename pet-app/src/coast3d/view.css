@@ -9,6 +9,16 @@
 .moonbay-3d .moonbay-hud {
   inset: max(var(--coast-side), env(safe-area-inset-top)) max(var(--coast-side), env(safe-area-inset-right)) auto max(var(--coast-side), env(safe-area-inset-left));
 }
+.moonbay-3d .moonbay-area { pointer-events: auto; user-select: none; -webkit-user-select: none; }
+.coast3d-perf {
+  display: block;
+  margin-top: 3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  line-height: 1.25;
+  color: #1c504b;
+  white-space: nowrap;
+}
 .coast3d-destinations {
   position: absolute;
   bottom: max(var(--coast-side), env(safe-area-inset-bottom));
