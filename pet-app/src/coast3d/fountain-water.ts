@@ -6,7 +6,7 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   const group=new T.Group();
   group.position.set(x,y,z);
   const compact=matchMedia('(pointer: coarse)').matches;
-  const resolution=compact?192:256;
+  const resolution=compact?160:256;
   const basin=new Reflector(new T.CircleGeometry(width*.446,48),{
     textureWidth:resolution,textureHeight:resolution,multisample:0,clipBias:.002,
     shader:{
@@ -77,11 +77,11 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   basin.onBeforeRender=(...args)=>{
     const now=performance.now(), camera=args[2];
     const distSq=(camera.position.x-x)**2+(camera.position.z-z)**2;
-    if(distSq>1444 && previousCamera!==undefined)return;
+    if(distSq>(compact?900:1444) && previousCamera!==undefined)return;
     const moved=camera!==previousCamera
       || camera.position.distanceToSquared(lastCamPos)>.0025
-      || (camera.getWorldDirection(camForward), camForward.distanceToSquared(lastForward)>.0004);
-    const interval=moved?(compact?105:65):(compact?240:160);
+      || (camera.getWorldDirection(camForward), camForward.distanceToSquared(lastForward)>(compact?.0025:.0004));
+    const interval=moved?(compact?220:65):(compact?420:160);
     if(camera===previousCamera&&now-lastReflection<interval)return;
     previousCamera=camera;lastReflection=now;
     lastCamPos.copy(camera.position);camera.getWorldDirection(lastForward);

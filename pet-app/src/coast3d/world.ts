@@ -22,12 +22,19 @@ const yaxis=new T.Vector3(0,1,0), dynamicMatrix=new T.Matrix4();
 const landmarkAssets = new Set<AssetId>([
   'crescent','fountain','market-coral','market-salmon','market-canopy','gazebo','flower-arch',
   'observatory','orrery','waterfall','boathouse','west-bridge','east-bridge','sailboat',
-  'market-cart','village-cart',
+  'cottage-moss','cottage-clay','cottage-clay-annex','cottage-teal',
 ]);
 const skylineAssets = new Set<AssetId>([
   'pine','green-tree','gold-tree','pink-tree','palm','cliff-rock','shore-rock','parasol',
   'dock-deck','dock-post','west-post','east-post','west-rail','east-rail','market-stall',
-  'lamp','plaza-steps','summit-steps',
+  'market-cart','village-cart','lamp','plaza-steps','summit-steps',
+]);
+const noShadowAssets = new Set<AssetId>([
+  'daisy','lavender','hydrangea','shrub','flower-pot','flower-bed',
+  'plaza-steps','summit-steps','dock-deck','dock-rope','west-rail','east-rail',
+]);
+const coarseNoShadowAssets = new Set<AssetId>([
+  'shore-rock','plaza-railing','summit-rail','dock-post','market-sign','west-post','east-post',
 ]);
 const clutterAssets = new Set<AssetId>([
   'daisy','lavender','hydrangea','shrub','flower-pot','flower-bed','bench',
@@ -279,7 +286,7 @@ export function lighting(scene:T.Scene) {
   scene.add(new T.HemisphereLight(0xfff0df,0x9eb9b1,1.56));
   const sun=new T.DirectionalLight(0xffe3be,2.23);
   sun.castShadow=true;
-  Object.assign(sun.shadow.camera,{left:-66,right:66,top:66,bottom:-66,near:1,far:220});
+  Object.assign(sun.shadow.camera,{left:-62,right:62,top:62,bottom:-62,near:1,far:145});
   sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.00035;sun.shadow.normalBias=.065;
   scene.add(sun,sun.target);
   return sun;
@@ -652,6 +659,8 @@ export async function officialModels(progress?:LoadProgress) {
 }
 
 export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, trials:TrialModel[]=[], sculpted=new Map<AssetId,Appearance>(), art:ArtMaterials={}) {
+  const coarseDevice=matchMedia('(pointer: coarse)').matches;
+  const phoneDevice=coarseDevice && Math.min(window.innerWidth,window.innerHeight)<560;
   const group=new T.Group(), {textures,terrainMaterial}=groundMaterials(art);
   const reefs=objects.filter(p=>p.id==='shore-rock' && (p.y??0)<=.13 && shore(p.x,p.z)<1.3)
     .map(p=>[p.x,p.z,1.17*(p.scale??1)*(p.stretch?.[0]??1)] as const);
@@ -665,6 +674,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   const boxes:IslandCollider[]=[], planterPlants:Placement[]=[], structures=scarps.map(scarp=>scarp.geometry), vegetation:Vegetation[]=[];
   const gazeboFloors:ReturnType<typeof gazeboFloor>[]=[];
   const lagoon=lagoonBotanics(), walkways=cottageWalkways();
+  if(coarseDevice)walkways.castShadow=false;
   water.layers.set(CLUTTER_LAYER);
   lagoon.traverse(o=>{if(o instanceof T.Mesh)o.layers.set(CLUTTER_LAYER);});
   walkways.layers.set(CLUTTER_LAYER);
@@ -678,7 +688,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   };
   type Tile = { group:T.Group; x:number; z:number };
   const skylineTiles=new Map<string,Tile>(), detailTiles=new Map<string,Tile>();
-  const tileSize=CHUNK*2;
+  const tileSize=CHUNK;
   const tileFor=(p:Pick<Placement,'x'|'z'>, id:AssetId)=>{
     const isSky=skylineAssets.has(id);
     const store=isSky?skylineTiles:detailTiles;
@@ -720,6 +730,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   planterPlants.forEach(add);
   for(const {id:trialId,placement,object,size} of trials){
     if(trialId==='wooden-signpost' && approved.has('market-sign'))continue;
+    object.traverse(child=>{if(child instanceof T.Mesh){child.layers.set(CLUTTER_LAYER);if(coarseDevice && size.y<=1.45)child.castShadow=false;}});
     group.add(object);
     const {x,z,yaw,collider}=placement;
     if(!collider)continue;
@@ -856,10 +867,10 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
         const y=a.y+rise*(t*length-pad)/run;
         railPoints.push(new T.Vector3(x,y+.77,z));
         const post=new T.Mesh(balusterGeometry,railStone);
-        post.position.set(x,y+.035,z);post.receiveShadow=true;post.castShadow=true;group.add(post);
+        post.position.set(x,y+.035,z);post.receiveShadow=true;post.castShadow=!coarseDevice;group.add(post);
       }
       const rail=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(railPoints),count*2,.105,8),railStone);
-      rail.castShadow=true;rail.receiveShadow=true;group.add(rail);
+      rail.castShadow=!coarseDevice;rail.receiveShadow=true;group.add(rail);
     }
     landings.add(a);landings.add(b);
   }
@@ -882,6 +893,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     const stoneBatches=(id==='shore-rock'||id==='cliff-rock')&&replace?.official?rockInstanceSources(model,id):undefined;
     const officialBatches=!stoneBatches&&replace?.official&&instancedOfficialAssets.has(id)&&placements.length>=2
       ? officialInstanceSources(model) : undefined;
+    const castShadow=!noShadowAssets.has(id) && !(coarseDevice && coarseNoShadowAssets.has(id)) && (asset.size[2]>.70||id==='village-fence');
     const direct=!stoneBatches&&!officialBatches&&replace&&(replace.official||replace.preview||['cottage','observatory','gazebo','moon','basin','boat','cascade','orrery','bridge'].includes(asset.shape));
     const transform=new T.Object3D();
     if(previewGazebo) {
@@ -927,7 +939,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
       const pose=model.clone(true);
       pose.position.set(p.x,p.y??terrain(p.x,p.z).y,p.z);pose.rotation.set(0,p.yaw,p.roll??0,'YXZ');
       pose.scale.set(...p.stretch??[1,1,1]).multiplyScalar(p.scale??1);
-      pose.traverse(child=>{if(child instanceof T.Mesh){child.castShadow=asset.size[2]>.70||id==='village-fence';child.receiveShadow=true;if(clutterAssets.has(id))child.layers.set(CLUTTER_LAYER);}});
+      pose.traverse(child=>{if(child instanceof T.Mesh){child.castShadow=castShadow;child.receiveShadow=true;if(clutterAssets.has(id))child.layers.set(CLUTTER_LAYER);}});
       if(id==='waterfall'&&replace.official){
         waterfall.dress(pose);
         const bed=pose.getObjectByName('Cascade_bedrock_and_fractured_banks');
@@ -946,7 +958,6 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
       }
     }
     else if(officialBatches) {
-      const castShadow=asset.size[2]>.70||id==='village-fence';
       const isClutter=clutterAssets.has(id);
       for(const [tile,local] of buckets) for(const part of officialBatches) {
         const mesh=new T.InstancedMesh(part.geometry,part.material,local.length);
@@ -973,7 +984,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
         if(!rocks.length)continue;
         const instances=new T.InstancedMesh(stone.geometry,stone.material,rocks.length);
         instances.name=stone.name;
-        instances.castShadow=true;
+        instances.castShadow=castShadow;
         instances.receiveShadow=true;
         instances.layers.set(CLUTTER_LAYER);
         for(const [i,p] of rocks.entries()) {
@@ -994,7 +1005,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
       const isClutter=clutterAssets.has(id);
       for(const [tile,local] of buckets) {
         const mesh=new T.InstancedMesh(geometry,id==='shore-rock'||id==='cliff-rock'?stoneFaces:solidMaterial,local.length);
-        mesh.name=id+(canopy?'-canopy':'');mesh.castShadow=asset.size[2]>.70||id==='village-fence';mesh.receiveShadow=true;
+        mesh.name=id+(canopy?'-canopy':'');mesh.castShadow=castShadow;mesh.receiveShadow=true;
         if(isClutter)mesh.layers.set(CLUTTER_LAYER);
         for(const [i,p] of local.entries()) {
           transform.position.set(p.x,p.y??terrain(p.x,p.z).y,p.z);
@@ -1075,8 +1086,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   }
   // Cape, beach and plains use the same chunk meshes for visible ground and collision.
   scene.add(group);
-  const coarseDevice=matchMedia('(pointer: coarse)').matches;
-  const skylineRange=coarseDevice?185:240, detailRange=coarseDevice?125:165;
+  const skylineRange=phoneDevice?115:coarseDevice?145:220, detailRange=phoneDevice?58:coarseDevice?75:145;
   const faded = new Map<Vegetation,T.Mesh>();
   const ray=new T.Line3(), closest=new T.Vector3(), canopyRay=new T.Ray(), hit=new T.Vector3();
   function softenCanopies(eye:T.Vector3,subject:T.Vector3) {
