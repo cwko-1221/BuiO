@@ -221,7 +221,7 @@ class StudentApp {
       void this.persistCoinPusherSession();
     }
     else {
-      if (this.game?.isBooted) this.game.loop.wake();
+      if (this.game?.isBooted && !this.moonbay) this.game.loop.wake();
       if (this.coinPusherPendingDrop && !this.coinPusherPendingDrop.applied) void this.dropCoinPusher(this.coinPusherPendingDrop.worldX, true);
       this.retryPendingCoinPusherPayouts();
       if(this.state)void api.bootstrap().then(state=>{this.state=state;this.updateWallet();}).catch(()=>{});
@@ -552,9 +552,11 @@ class StudentApp {
     else if(tab==='park')void this.openPark();else if(tab==='home')this.openHome();else if(tab==='collection')this.renderCollection();else if(tab==='shop')this.renderShop('eggs');else if(tab==='coinPusher')this.renderCoinPusher();else if(tab==='brawl')void this.renderBrawl();else if(tab==='visit')this.renderVisits();else this.renderSettings();
   }
   private destroyPark(clearRestore = true) {
+    const leavingPark = !!this.moonbay;
     this.parkGeneration++;
     this.moonbay?.destroy(); this.moonbay = undefined;
     const root = document.querySelector<HTMLElement>('#park-root'); if (root) { root.hidden = true; root.innerHTML = ''; }
+    if (leavingPark && !this.accessLocked && this.game?.isBooted) this.game.loop.wake();
     if (clearRestore) sessionStorage.removeItem('pet-park-open:' + this.identity.id);
   }
   private async openPark() {
@@ -569,7 +571,7 @@ class StudentApp {
     try {
       const { Coast3dView } = await import('./coast3d/view');
       if (generation !== this.parkGeneration || this.tab !== 'park') return;
-      this.destroyCoinPusher(true); this.game?.scene.stop('Bedroom'); this.setLayout('room');
+      this.destroyCoinPusher(true); this.game?.scene.stop('Bedroom'); this.game?.loop.sleep(); this.setLayout('room');
       document.querySelector('.pet-shell')?.setAttribute('data-screen', 'coast');
       document.querySelector<HTMLElement>('#roomBar')!.replaceChildren();
       document.querySelector<HTMLElement>('#game-root')!.style.display = 'none';
@@ -598,7 +600,7 @@ class StudentApp {
     const loadingDone = (window as any).BuiLoading?.begin(this.locale==='zh-HK'?'正在準備對戰素材…':'Preparing battle assets…');
     const generation=++this.brawlGeneration;
     this.brawlController?.destroy();this.brawlController=undefined;
-    this.destroyCoinPusher(true);this.setLayout('room');this.ensureGame();this.game!.scene.stop('Bedroom');
+    this.destroyCoinPusher(true);this.setLayout('room');this.ensureGame();if(!this.accessLocked&&this.game!.isBooted)this.game!.loop.wake();this.game!.scene.stop('Bedroom');
     document.querySelector('#roomBar')!.innerHTML='';document.querySelector('#gameHud')!.innerHTML='';
     document.querySelector<HTMLElement>('#game-root')!.style.display='block';document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display='none';
     try {const {BrawlController}=await import('./brawl/controller');if(generation!==this.brawlGeneration||this.tab!=='brawl')return;
@@ -640,8 +642,8 @@ class StudentApp {
     // browser checks reach the live scene through here to assert what is actually on screen.
     (window as unknown as { __petGame?: Phaser.Game }).__petGame = this.game;
     this.game.scene.add('Bedroom',BedroomScene,false);
-    this.game.events.on(Phaser.Core.Events.READY,()=>{if(this.accessLocked)this.game?.loop.sleep();});
-    document.addEventListener('visibilitychange',()=>{if(this.accessLocked)this.game?.loop.sleep();});
+    this.game.events.on(Phaser.Core.Events.READY,()=>{if(this.accessLocked||this.moonbay)this.game?.loop.sleep();});
+    document.addEventListener('visibilitychange',()=>{if(this.accessLocked||this.moonbay)this.game?.loop.sleep();});
     this.game.events.on('room:placements',(placements:RoomPlacement[])=>{this.roomPlacements=placements.map((item)=>({...item}));this.refreshDecorStrip();});
     this.game.events.on('room:selected',(id:string)=>{this.selectedFurniture=id;document.querySelector('#furnitureActions')?.classList.add('visible');});
   }
@@ -670,7 +672,7 @@ class StudentApp {
 
   private startBedroom(roomOverride?: any, petOverride?: PetInstance) {
     this.destroyCoinPusher(true);
-    this.ensureGame(); const sourcePet=petOverride||this.activePet();if(!sourcePet)return;const pet=petForDisplay(sourcePet);const definition=this.definition(sourcePet)!;
+    this.ensureGame(); if(!this.accessLocked&&this.game!.isBooted)this.game!.loop.wake(); const sourcePet=petOverride||this.activePet();if(!sourcePet)return;const pet=petForDisplay(sourcePet);const definition=this.definition(sourcePet)!;
     document.querySelector<HTMLElement>('#game-root')!.style.display='block';
     document.querySelector<HTMLElement>('#coin-pusher-root')!.style.display='none';
     const originalRoom=this.state.room;if(roomOverride)this.state.room={themeId:roomOverride.themeId,visibility:roomOverride.visibility,placements:roomOverride.placements};

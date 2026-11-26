@@ -62,6 +62,7 @@ export class Coast3dView {
   private shadowZ=Infinity;
   private shadowLead=24;
   private phoneViewport=false;
+  private minFrameMs=0;
   private lastDataset:Record<string,string>={};
 
   constructor(private readonly root:HTMLElement,private readonly options:{locale:Locale;definition:PetDefinition;close:()=>void;requireFinal?:boolean}) {
@@ -120,11 +121,17 @@ export class Coast3dView {
   async open() {
     const signal=this.abort.signal;
     try {
-      const renderer=new T.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
-      this.renderer=renderer;
       const coarsePointer=matchMedia('(pointer: coarse)').matches;
       this.phoneViewport=coarsePointer && Math.min(window.innerWidth,window.innerHeight)<560;
-      renderer.setPixelRatio(Math.min(devicePixelRatio||1,this.phoneViewport?1.0:coarsePointer?1.2:1.5));
+      this.minFrameMs=this.phoneViewport?31:0;
+      const renderer=new T.WebGLRenderer({
+        antialias:!this.phoneViewport,
+        alpha:false,
+        stencil:false,
+        powerPreference:coarsePointer?'default':'high-performance',
+      });
+      this.renderer=renderer;
+      renderer.setPixelRatio(Math.min(devicePixelRatio||1,this.phoneViewport?1.15:coarsePointer?1.2:1.5));
       renderer.outputColorSpace=T.SRGBColorSpace;
       renderer.toneMapping=T.ACESFilmicToneMapping;
       renderer.toneMappingExposure=1.02;
@@ -357,7 +364,15 @@ export class Coast3dView {
     },{signal});
     window.addEventListener('keyup',e=>this.held.delete(e.code),{signal});
     const stop=()=>{this.clearInput();this.last=0;};
-    window.addEventListener('blur',stop,{signal});document.addEventListener('visibilitychange',stop,{signal});
+    window.addEventListener('blur',stop,{signal});
+    document.addEventListener('visibilitychange',()=>{
+      stop();
+      if(document.hidden){
+        if(this.frame){cancelAnimationFrame(this.frame);this.frame=0;}
+      } else if(this.renderer && this.walk && !this.frame && !this.abort.signal.aborted){
+        this.frame=requestAnimationFrame(this.draw);
+      }
+    },{signal});
     this.root.addEventListener('click',e=>{
       if(this.locked)return;
       const button=(e.target as HTMLElement).closest<HTMLButtonElement>('button');
@@ -490,8 +505,13 @@ export class Coast3dView {
     this.renderer!.shadowMap.needsUpdate=true;
   }
   private draw=(time:number)=>{
+    if(document.hidden){this.frame=0;return;}
+    if(this.minFrameMs && this.last && time-this.last<this.minFrameMs){
+      this.frame=requestAnimationFrame(this.draw);
+      return;
+    }
     const dt=this.last?Math.max(0,Math.min(.10,(time-this.last)/1000)):0;this.last=time;
-    if(!document.hidden){
+    {
       const travel=this.walk!,start=travel.position(),canMove=!this.locked&&!this.overview;
       const input=canMove?this.manualDirection():STILL;
       const manual=!!(input[0]||input[1]);
@@ -532,13 +552,13 @@ export class Coast3dView {
       this.camera.follow(dt,{x:p.x,y:this.footY-.006,z:p.z},travel.visibility,this.prefersReduced,this.island!.moonBounds);
       const region=district(here);
       if(this.root.dataset.district!==region.id){this.root.dataset.district=region.id;this.root.querySelector('.moonbay-area strong')!.textContent=this.t(region.zh,region.en);}
-      this.setData('x',p.x.toFixed(2));
-      this.setData('z',p.z.toFixed(2));
-      this.setData('height',p.y.toFixed(2));
-      this.setData('yaw',this.camera.yaw.toFixed(4));
-      this.setData('pitch',this.camera.pitch.toFixed(4));
-      this.setData('gait',moved?'Walk':'Idle');
       if(import.meta.env.DEV||import.meta.env.VITE_COAST3D_PREVIEW==='1') {
+        this.setData('x',p.x.toFixed(2));
+        this.setData('z',p.z.toFixed(2));
+        this.setData('height',p.y.toFixed(2));
+        this.setData('yaw',this.camera.yaw.toFixed(4));
+        this.setData('pitch',this.camera.pitch.toFixed(4));
+        this.setData('gait',moved?'Walk':'Idle');
         const feet=(1-this.framing.set(p.x,p.y,p.z).project(this.camera.camera).y)/2;
         const top=(1-this.framing.set(p.x,p.y+1,p.z).project(this.camera.camera).y)/2;
         this.setData('projectedFeet',feet.toFixed(3));

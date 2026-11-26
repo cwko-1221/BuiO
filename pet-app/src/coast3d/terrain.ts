@@ -37,13 +37,14 @@ function surfaceTexture(key:Surface) {
   return t;
 }
 export function groundMaterials(art:ArtMaterials={}) {
+  const phone=typeof window!=='undefined' && matchMedia('(pointer: coarse)').matches && Math.min(window.innerWidth,window.innerHeight)<560;
   const textures=Object.fromEntries(palette.map(k=>[k,art[k]??surfaceTexture(k)])) as Record<Surface,T.Texture>;
   const terrainMaterial=new T.MeshStandardMaterial({ roughness:.93, map:textures.grass });
   terrainMaterial.onBeforeCompile = shader => {
     for (const k of ['grass','soil','sand','stone','rock'] as const) shader.uniforms[k+'Detail']={value:textures[k]};
     shader.vertexShader=shader.vertexShader.replace('#include <common>','#include <common>\nattribute vec4 blend; attribute float altitude; varying vec4 vBlend; varying vec2 metres; varying float tideHeight;')
       .replace('#include <begin_vertex>','#include <begin_vertex>\nvBlend=blend; metres=position.xz; tideHeight=altitude;');
-    shader.fragmentShader=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec4 vBlend; varying vec2 metres; varying float tideHeight; uniform sampler2D grassDetail, soilDetail, sandDetail, stoneDetail, rockDetail;')
+    const frag=shader.fragmentShader.replace('#include <common>','#include <common>\nvarying vec4 vBlend; varying vec2 metres; varying float tideHeight; uniform sampler2D grassDetail, soilDetail, sandDetail, stoneDetail, rockDetail;')
       .replace('#include <map_fragment>',`
         vec3 groundColor=texture2D(grassDetail,metres*${art.grass?'.25':'.73'}).rgb;
         float meadows=.5+.5*sin(metres.x*.176+sin(metres.y*.18+metres.x*.21))*cos(metres.y*.192);
@@ -55,7 +56,7 @@ export function groundMaterials(art:ArtMaterials={}) {
         earth=mix(earth,vec3(.70,.47,.26)*(.78+.48*grains),.78);
         vec3 paving=texture2D(stoneDetail,metres*${art.stone?'.29':'.83'}).rgb;
         float villageRoad=smoothstep(132.0,139.5,metres.y)*smoothstep(71.0,85.0,metres.x);
-        float gravel=dot(texture2D(stoneDetail,metres*.92).rgb,vec3(.30,.57,.13));
+        float gravel=dot(${phone?'paving':'texture2D(stoneDetail,metres*.92).rgb'},vec3(.30,.57,.13));
         vec3 warmTrack=mix(earth*vec3(1.10,.96,.91),vec3(.82,.57,.36),.20)*(.89+.31*gravel);
         groundColor=mix(groundColor,mix(earth,warmTrack,villageRoad),vBlend.x);
         vec2 plaza=metres-vec2(121.0,88.0);float plazaRadius=length(plaza);
@@ -86,7 +87,7 @@ export function groundMaterials(art:ArtMaterials={}) {
         sand*=mix(vec3(.73,.68,.62),vec3(1.08,1.04,.98),smoothstep(.04,.66,tideHeight));
         groundColor=mix(groundColor,sand,vBlend.z);
         vec3 strataA=texture2D(rockDetail,vec2(metres.x+metres.y*.31,tideHeight*.41)*.62).rgb;
-        vec3 strataB=texture2D(rockDetail,vec2(metres.y-metres.x*.43,tideHeight*.76)*.92).rgb;
+        ${phone?'vec3 strataB=strataA;':'vec3 strataB=texture2D(rockDetail,vec2(metres.y-metres.x*.43,tideHeight*.76)*.92).rgb;'}
         float exposure=.5+.5*sin(metres.x*.23+metres.y*.32);
         float bedline=sin(tideHeight*2.82+sin(metres.x*.33+metres.y*.44)*.71);
         vec3 grit=mix(strataA,strataB,.43)*mix(vec3(.89,.90,1.00),vec3(1.16,1.11,1.03),exposure);
@@ -94,8 +95,9 @@ export function groundMaterials(art:ArtMaterials={}) {
         groundColor=mix(groundColor,grit,vBlend.w);
         float lightPatch=sin(metres.x*.32+sin(metres.y*.13))*sin(metres.y*.23);
         diffuseColor.rgb*=groundColor*(1.04+lightPatch*.085);
-        float grainHeight=mix(dot(groundColor,vec3(.31,.52,.17))*.071,dot(grit,vec3(.29,.55,.16))*.24,vBlend.w);
-      `).replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+        ${phone?'':'float grainHeight=mix(dot(groundColor,vec3(.31,.52,.17))*.071,dot(grit,vec3(.29,.55,.16))*.24,vBlend.w);'}
+      `);
+    shader.fragmentShader=phone?frag:frag.replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
         vec3 axisX=normalize(dFdx(-vViewPosition));
         vec3 axisY=normalize(dFdy(-vViewPosition));
         vec3 crossX=cross(axisY,normal),crossY=cross(normal,axisX);
@@ -202,6 +204,7 @@ export function createScarps(grain:T.Texture) {
 }
 
 export function createWater(detail:T.Texture|undefined, reefs:readonly (readonly [x:number,z:number,r:number])[], cachedEdges?:Float32Array) {
+  const phone=typeof window!=='undefined' && matchMedia('(pointer: coarse)').matches && Math.min(window.innerWidth,window.innerHeight)<560;
   const material=new T.ShaderMaterial({
     uniforms:{ clock:{value:0}, foam:{value:null as T.DataTexture|null}, caustics:{value:detail??null} },
     vertexShader:`varying vec3 world; void main(){ world=(modelMatrix*vec4(position,1.0)).xyz; gl_Position=projectionMatrix*viewMatrix*vec4(world,1.0); }`,
@@ -219,14 +222,14 @@ export function createWater(detail:T.Texture|undefined, reefs:readonly (readonly
         float rip=sin(p.x*.87+p.y*1.6+warp*2.1+clock*1.25)
           *sin(p.y*.76-p.x*.92+.77*warp-clock*.68);
         float ripple=pow(max(0.,rip),5.)*(.48+.52*sin(p.y*.84+warp*2.));
-        float fine=(sin(p.x*5.43+p.y*.74+warp*.88-clock*.74)*sin(p.y*3.34+p.x*.70+warp*.91+clock*.39));
+        ${phone?'':'float fine=(sin(p.x*5.43+p.y*.74+warp*.88-clock*.74)*sin(p.y*3.34+p.x*.70+warp*.91+clock*.39));'}
         float line=abs(depth-.30-.25*sin(clock*1.35+p.x*.85+p.y*.58));
         float surge=sin(p.x*.76+p.y*.67+sin(p.y*1.53-p.x*.42)+clock*.55);
         float front=1.-smoothstep(.09,.40,line);
         float wash=1.-smoothstep(.10,.36,abs(depth-1.18-.33*surge));
         float crest=front*(.34+.66*smoothstep(-.73,.68,surge))+.24*wash*smoothstep(.15,.9,surge);
         crest=max(crest,coast.g*(.37+.29*sin(clock*2.1+warp*2.3)));
-        c+=vec3(.029,.138,.176)*ripple+vec3(.041,.057,.052)*pow(max(0.,fine),9.)+vec3(.58,.70,.62)*crest;
+        c+=vec3(.029,.138,.176)*ripple+${phone?'':'vec3(.041,.057,.052)*pow(max(0.,fine),9.)+'}vec3(.58,.70,.62)*crest;
         ${detail?'vec3 pattern=texture2D(caustics,p*.104+vec2(clock*.009,clock*.006)+warp*.037).rgb; c+=vec3(.18,.36,.33)*(dot(pattern,vec3(.14,.66,.20))-.40)*(.30+.70*(1.-shallows));':''}
         gl_FragColor=vec4(c,1.); 
         #include <colorspace_fragment>
@@ -248,7 +251,8 @@ export function createWater(detail:T.Texture|undefined, reefs:readonly (readonly
   }
   const foam=new T.DataTexture(d,w,h);
   foam.minFilter=foam.magFilter=T.LinearFilter;foam.needsUpdate=true;material.uniforms.foam.value=foam;
-  const surface=new T.Mesh(new T.PlaneGeometry(1800,1800).rotateX(-Math.PI/2),material);
+  const span=phone?760:1800;
+  const surface=new T.Mesh(new T.PlaneGeometry(span,span).rotateX(-Math.PI/2),material);
   surface.position.set(WIDTH/2,.018,DEPTH/2);
   return surface;
 }
