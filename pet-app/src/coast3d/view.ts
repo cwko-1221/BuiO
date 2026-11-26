@@ -3,6 +3,7 @@ import type { Locale, PetDefinition } from '../types';
 import { loadWalker } from '../coast/pet-model';
 import { contactShadow, disposeGroup } from '../coast/scenery';
 import { ASSETS } from './assets';
+import { detectDeviceTier, type DeviceTier } from './device';
 import { BRIDGE_CHECKPOINTS, DISTRICTS, SPAWN, district, dist, ground, nearestTrail, onStairTread, route, visibleFoot, type Point } from './island';
 import { CAMERA, FollowCamera } from './follow-camera';
 import { createMovement, WALK_SPEED } from './movement';
@@ -61,6 +62,7 @@ export class Coast3dView {
   private shadowY=Infinity;
   private shadowZ=Infinity;
   private shadowLead=24;
+  private tier:DeviceTier='desktop';
   private phoneViewport=false;
   private minFrameMs=0;
   private lastDataset:Record<string,string>={};
@@ -132,11 +134,12 @@ export class Coast3dView {
   async open() {
     const signal=this.abort.signal;
     try {
-      const coarsePointer=matchMedia('(pointer: coarse)').matches;
-      this.phoneViewport=coarsePointer && Math.min(window.innerWidth,window.innerHeight)<560;
+      this.tier=detectDeviceTier();
+      const coarsePointer=this.tier!=='desktop';
+      this.phoneViewport=this.tier==='phone';
       this.minFrameMs=this.phoneViewport?31:0;
       const renderer=new T.WebGLRenderer({
-        antialias:!this.phoneViewport,
+        antialias:!this.phoneViewport && !(coarsePointer && (devicePixelRatio||1)>=2),
         alpha:false,
         stencil:false,
         powerPreference:coarsePointer?'default':'high-performance',
@@ -200,8 +203,8 @@ export class Coast3dView {
       this.root.dataset.blenderModels=String(new Set([...assets.value.keys(),...sculpted.value.keys()]).size);
       this.root.dataset.previewModels=String([...sculpted.value].filter(([id,asset])=>asset.preview&&!assets.value.has(id)).length);
       this.root.dataset.joints=String(walker.value.joints);
-      const maxTextureDim=this.phoneViewport?256:coarsePointer?512:1024;
-      const stripSecondary=this.phoneViewport;
+      const maxTextureDim=this.phoneViewport?256:coarsePointer?384:1024;
+      const stripSecondary=coarsePointer;
       for(const item of assets.value.values())capModelTextures(item.model,maxTextureDim,stripSecondary);
       for(const item of sculpted.value.values())capModelTextures(item.model,maxTextureDim,stripSecondary);
       for(const item of additions.value)capModelTextures(item.object,maxTextureDim,stripSecondary);
@@ -319,14 +322,14 @@ export class Coast3dView {
       this.petShadow.scale.setScalar(.24);
       this.scene.add(this.petShadow);
       this.sun=lighting(this.scene);
-      this.shadowLead=this.phoneViewport?0:coarsePointer?14:24;
+      this.shadowLead=coarsePointer?0:24;
       if(this.phoneViewport){
         this.sun.shadow.mapSize.set(512,512);
         Object.assign(this.sun.shadow.camera,{left:-44,right:44,top:44,bottom:-44,near:1,far:108});
         this.sun.shadow.camera.updateProjectionMatrix();
       } else if(coarsePointer){
         this.sun.shadow.mapSize.set(768,768);
-        Object.assign(this.sun.shadow.camera,{left:-38,right:38,top:38,bottom:-38,near:1,far:98});
+        Object.assign(this.sun.shadow.camera,{left:-44,right:44,top:44,bottom:-44,near:1,far:108});
         this.sun.shadow.camera.updateProjectionMatrix();
       }
       if(walker.value.companion) {
@@ -494,7 +497,15 @@ export class Coast3dView {
   private fit() {
     const {clientWidth:w,clientHeight:h}=this.root;
     if(!w||!h)return;
-    this.renderer?.setSize(w,h,false);this.camera.resize(w/h);this.mapCamera=overviewCamera(w/h);
+    if(this.renderer){
+      const baseDpr=Math.min(devicePixelRatio||1,this.phoneViewport?1.15:this.tier==='tablet'?1.2:1.5);
+      const maxPixels=this.phoneViewport?400000:this.tier==='tablet'?950000:Infinity;
+      const area=w*h;
+      const dpr=area*baseDpr*baseDpr>maxPixels?Math.max(.45,Math.sqrt(maxPixels/area)):baseDpr;
+      this.renderer.setPixelRatio(dpr);
+      this.renderer.setSize(w,h,false);
+    }
+    this.camera.resize(w/h);this.mapCamera=overviewCamera(w/h);
     this.mapCamera.layers.enable(CLUTTER_LAYER);
   }
   private manualDirection():Point {
@@ -641,7 +652,9 @@ export class Coast3dView {
           const rn=(this.perfRenSum/this.perfFrames).toFixed(1);
           const info=this.renderer!.info;
           const sec=Math.floor((tEnd-this.openedAt)/1000);
-          this.perfEl.textContent=`${sec}s ${fps}fps max${Math.round(this.perfRafMax)}ms | js${js}(p${ph} r${rn}) | c${info.render.calls} ${Math.round(info.render.triangles/1000)}k t${info.memory.textures} s${this.perfShd}`;
+          const tag=this.tier==='phone'?'ph':this.tier==='tablet'?'tb':'dk';
+          const cw=this.renderer!.domElement.width, ch=this.renderer!.domElement.height;
+          this.perfEl.textContent=`${tag} ${cw}x${ch} ${sec}s ${fps}fps max${Math.round(this.perfRafMax)}ms | js${js}(p${ph} r${rn}) | c${info.render.calls} ${Math.round(info.render.triangles/1000)}k t${info.memory.textures} s${this.perfShd}`;
           this.perfFrames=0;this.perfJsSum=0;this.perfPhysSum=0;this.perfRenSum=0;this.perfShd=0;this.perfRafMax=0;this.perfLastReport=tEnd;
         }
       }

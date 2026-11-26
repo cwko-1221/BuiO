@@ -2,6 +2,7 @@ import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { ASSETS, authoredObjectCount, cottageLocation, cottagePlots, fountainPlacement, moonPlacement, objects, type Asset, type AssetId, type Placement } from './assets';
+import { detectDeviceTier } from './device';
 import { createFountainWater } from './fountain-water';
 import { createWaterfallWater } from './waterfall-water';
 import { WIDTH, DEPTH, CHUNK, STAIR_LANDING_RADIUS, trails, terrain, nodes, staircase, stairLevels, shore, trailHeight, nearestTrail } from './island';
@@ -100,7 +101,7 @@ export function capArtTextures(art:ArtMaterials, maxDim:number) {
   for(const tex of Object.values(art))if(tex)resizeTextureToImageData(tex,maxDim);
 }
 
-function plazaStonework(boxes:IslandCollider[], plants:Placement[]) {
+function plazaStonework(boxes:IslandCollider[], plants:Placement[], phoneDevice=false) {
   const stonework=new T.Group();
   const color=new T.MeshStandardMaterial({color:0xf2d1ae,roughness:.86});
   const blocks=new T.InstancedMesh(new T.BoxGeometry(1.02,.49,.55),color,154);
@@ -138,6 +139,7 @@ function plazaStonework(boxes:IslandCollider[], plants:Placement[]) {
         const bottom=Math.min(...edges.map(p=>p.y))-.61, top=Math.max(...edges.map(p=>p.y))+.14;
         boxes.push({x,y:(top+bottom)*.5,z,w:r*.038+.083,h:top-bottom,d:2.18,yaw:middle});
         for(const [row,plantRadius] of [24.12,25.07].entries()) {
+          if(phoneDevice && (i+row)%3!==0)continue;
           const a=middle+Math.sin(i*2.4+row)*.010;
           const px=121+Math.sin(a)*plantRadius,pz=88+Math.cos(a)*plantRadius;
           if(objects.some(o=>(ASSETS[o.id] as Asset).collision==='trunk'&&Math.hypot(o.x-px,o.z-pz)<1.25))continue;
@@ -685,8 +687,9 @@ export async function officialModels(progress?:LoadProgress) {
 }
 
 export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, trials:TrialModel[]=[], sculpted=new Map<AssetId,Appearance>(), art:ArtMaterials={}) {
-  const coarseDevice=matchMedia('(pointer: coarse)').matches;
-  const phoneDevice=coarseDevice && Math.min(window.innerWidth,window.innerHeight)<560;
+  const tier=detectDeviceTier();
+  const coarseDevice=tier!=='desktop';
+  const phoneDevice=tier==='phone';
   const group=new T.Group(), {textures,terrainMaterial}=groundMaterials(art);
   const reefs=objects.filter(p=>p.id==='shore-rock' && (p.y??0)<=.13 && shore(p.x,p.z)<1.3)
     .map(p=>[p.x,p.z,1.17*(p.scale??1)*(p.stretch?.[0]??1)] as const);
@@ -704,7 +707,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   water.layers.set(CLUTTER_LAYER);
   lagoon.traverse(o=>{if(o instanceof T.Mesh)o.layers.set(CLUTTER_LAYER);});
   walkways.layers.set(CLUTTER_LAYER);
-  group.add(...pieces,...scarps,water,fountain.group,plazaStonework(boxes,planterPlants),lagoon,islandBanners(),walkways);
+  group.add(...pieces,...scarps,water,fountain.group,plazaStonework(boxes,planterPlants,phoneDevice),lagoon,islandBanners(),walkways);
   const officialCanopies: { bounds:T.Box3; meshes:{ mesh:T.Mesh; solid:T.Material|T.Material[]; fade:T.Material|T.Material[] }[] }[]=[];
   const sharedCanopyFade=new Map<T.Material,T.Material>();
   const getCanopyFade=(m:T.Material)=>{
@@ -716,7 +719,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   const skylineTiles=new Map<string,Tile>(), detailTiles=new Map<string,Tile>();
   const tileSize=CHUNK;
   const tileFor=(p:Pick<Placement,'x'|'z'>, id:AssetId)=>{
-    const isSky=skylineAssets.has(id);
+    const isSky=skylineAssets.has(id) && !(coarseDevice && id==='shore-rock');
     const store=isSky?skylineTiles:detailTiles;
     const x=Math.floor(p.x/tileSize)*tileSize,z=Math.floor(p.z/tileSize)*tileSize,key=(isSky?'s:':'d:')+x+':'+z;
     if(!store.has(key)){const tile=new T.Group();tile.name='objects-'+key;store.set(key,{group:tile,x:x+tileSize*.5,z:z+tileSize*.5});group.add(tile);}
@@ -1112,7 +1115,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   }
   // Cape, beach and plains use the same chunk meshes for visible ground and collision.
   scene.add(group);
-  const skylineRange=phoneDevice?115:coarseDevice?145:220, detailRange=phoneDevice?58:coarseDevice?75:145;
+  const skylineRange=phoneDevice?88:coarseDevice?125:220, detailRange=phoneDevice?40:coarseDevice?62:145;
   const faded = new Map<Vegetation,T.Mesh>();
   const ray=new T.Line3(), closest=new T.Vector3(), canopyRay=new T.Ray(), hit=new T.Vector3();
   function softenCanopies(eye:T.Vector3,subject:T.Vector3) {

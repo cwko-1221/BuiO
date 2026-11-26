@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { detectDeviceTier } from './device';
 import { WIDTH, DEPTH, CHUNK, terrain, trails, type Surface } from './island';
 
 const colors: Record<Surface,[number,number,number]> = {
@@ -37,7 +38,7 @@ function surfaceTexture(key:Surface) {
   return t;
 }
 export function groundMaterials(art:ArtMaterials={}) {
-  const phone=typeof window!=='undefined' && matchMedia('(pointer: coarse)').matches && Math.min(window.innerWidth,window.innerHeight)<560;
+  const phone=detectDeviceTier()==='phone';
   const textures=Object.fromEntries(palette.map(k=>[k,art[k]??surfaceTexture(k)])) as Record<Surface,T.Texture>;
   const terrainMaterial=new T.MeshStandardMaterial({ roughness:.93, map:textures.grass });
   terrainMaterial.onBeforeCompile = shader => {
@@ -204,7 +205,7 @@ export function createScarps(grain:T.Texture) {
 }
 
 export function createWater(detail:T.Texture|undefined, reefs:readonly (readonly [x:number,z:number,r:number])[], cachedEdges?:Float32Array) {
-  const phone=typeof window!=='undefined' && matchMedia('(pointer: coarse)').matches && Math.min(window.innerWidth,window.innerHeight)<560;
+  const phone=detectDeviceTier()==='phone';
   const material=new T.ShaderMaterial({
     uniforms:{ clock:{value:0}, foam:{value:null as T.DataTexture|null}, caustics:{value:detail??null} },
     vertexShader:`varying vec3 world; void main(){ world=(modelMatrix*vec4(position,1.0)).xyz; gl_Position=projectionMatrix*viewMatrix*vec4(world,1.0); }`,

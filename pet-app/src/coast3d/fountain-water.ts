@@ -1,11 +1,13 @@
 import * as T from 'three';
 import { Reflector } from 'three/addons/objects/Reflector.js';
+import { detectDeviceTier } from './device';
 
 export function createFountainWater(x:number,y:number,z:number,width:number,height:number) {
   const clock={value:0}, waterline=height*.345, impact=width*.218;
   const group=new T.Group();
   group.position.set(x,y,z);
-  const compact=matchMedia('(pointer: coarse)').matches;
+  const tier=detectDeviceTier();
+  const compact=tier!=='desktop', phone=tier==='phone';
   const resolution=compact?128:256;
   const basin=new Reflector(new T.CircleGeometry(width*.446,48),{
     textureWidth:resolution,textureHeight:resolution,multisample:0,clipBias:.002,
@@ -87,11 +89,11 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
       camera.getWorldDirection(camForward);
       if(distSq>25 && dx*camForward.x+dz*camForward.z<-Math.sqrt(distSq)*.25 && previousCamera!==undefined)return;
       const moved=camera!==previousCamera
-        || camera.position.distanceToSquared(lastCamPos)>(compact?.01:.0025)
-        || camForward.distanceToSquared(lastForward)>(compact?.004:.0006);
+        || camera.position.distanceToSquared(lastCamPos)>(phone?16:compact?4:.0025)
+        || (!compact && camForward.distanceToSquared(lastForward)>.0006);
       if(!moved)return;
       const now=performance.now();
-      if(camera===previousCamera && now-lastReflection<(compact?280:80))return;
+      if(camera===previousCamera && now-lastReflection<(phone?1200:compact?600:80))return;
       lastReflection=now;
     } else {
       camera.getWorldDirection(camForward);
