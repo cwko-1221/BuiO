@@ -58,6 +58,7 @@ export class Coast3dView {
   private locked=false;
   private stall=0;
   private shadowCell='';
+  private shadowLead=28;
 
   constructor(private readonly root:HTMLElement,private readonly options:{locale:Locale;definition:PetDefinition;close:()=>void;requireFinal?:boolean}) {
     const t=(zh:string,en:string)=>this.t(zh,en);
@@ -204,7 +205,7 @@ export class Coast3dView {
           this.scene.fog=null;island.showChunks(0,0,true);
           const point=focus??[121,4,95];
           sun.target.position.set(...point);
-          sun.position.copy(sun.target.position).add(focus?new T.Vector3(-16,36,22):new T.Vector3(-77,172,105));
+          sun.position.copy(sun.target.position).add(focus?new T.Vector3(-32,72,44):new T.Vector3(-77,172,105));
           if(!focus){Object.assign(shadow,{left:-141,right:141,top:109,bottom:-109,far:420});shadow.updateProjectionMatrix();}
           sun.target.updateMatrixWorld();renderer.shadowMap.needsUpdate=true;
           renderer.render(this.scene,camera);
@@ -291,9 +292,10 @@ export class Coast3dView {
       this.petShadow.scale.setScalar(.24);
       this.scene.add(this.petShadow);
       this.sun=lighting(this.scene);
+      this.shadowLead=coarsePointer?22:28;
       if(coarsePointer){
-        this.sun.shadow.mapSize.set(512,512);
-        Object.assign(this.sun.shadow.camera,{left:-18,right:18,top:18,bottom:-18});
+        this.sun.shadow.mapSize.set(1024,1024);
+        Object.assign(this.sun.shadow.camera,{left:-50,right:50,top:50,bottom:-50,near:1,far:200});
         this.sun.shadow.camera.updateProjectionMatrix();
       }
       if(walker.value.companion) {
@@ -305,12 +307,7 @@ export class Coast3dView {
       const [sx,sz]=SPAWN, sy=ground(sx,sz);
       walker.value.pivot.position.set(sx,sy+.006,sz);
       this.camera.follow(1,{x:sx,y:sy,z:sz},this.walk.visibility,true,this.island.moonBounds);
-      const shadowX=Math.round(sx/4)*4,shadowZ=Math.round(sz/4)*4,shadowY=Math.round(sy/2)*2;
-      this.shadowCell=shadowX+':'+shadowZ+':'+shadowY;
-      this.sun.target.position.set(shadowX,shadowY,shadowZ);
-      this.sun.position.set(shadowX-16,shadowY+36,shadowZ+22);
-      this.sun.target.updateMatrixWorld();
-      renderer.shadowMap.needsUpdate=true;
+      this.updateShadowBox(sx,sy,sz,true);
       this.setProgress(88,this.t('正在準備光影與水面著色…','Preparing lighting & water shaders…'));
       await nextFrame(signal);
       if(signal.aborted)return;
@@ -321,7 +318,7 @@ export class Coast3dView {
       await nextFrame(signal);
       if(signal.aborted)return;
       this.island.fountain.warm(renderer,this.scene);
-      this.island.showChunks(sx,sz,false);
+      if(this.island.showChunks(sx,sz,false))renderer.shadowMap.needsUpdate=true;
       if(signal.aborted)return;
       this.setProgress(100,this.t('載入完成！','Ready!'));
       this.status.hidden=true;
@@ -467,6 +464,20 @@ export class Coast3dView {
     if(Math.abs(overlap)<.62*Math.hypot(...direction))return STILL;
     return overlap<0?[-heading[0],-heading[1]]:heading;
   }
+  private updateShadowBox(x:number,y:number,z:number,force=false) {
+    const step=8, yaw=this.camera.yaw;
+    const shadowX=Math.round((x-Math.sin(yaw)*this.shadowLead)/step)*step;
+    const shadowZ=Math.round((z-Math.cos(yaw)*this.shadowLead)/step)*step;
+    const shadowY=Math.round(y/4)*4;
+    const shadowCell=shadowX+':'+shadowZ+':'+shadowY;
+    if(shadowCell===this.shadowCell && !force)return;
+    this.shadowCell=shadowCell;
+    this.sun!.target.position.set(shadowX,shadowY,shadowZ);
+    this.sun!.position.set(shadowX-32,shadowY+72,shadowZ+44);
+    this.sun!.target.updateMatrixWorld();
+    this.sun!.updateMatrixWorld();
+    this.renderer!.shadowMap.needsUpdate=true;
+  }
   private draw=(time:number)=>{
     const dt=this.last?Math.max(0,Math.min(.10,(time-this.last)/1000)):0;this.last=time;
     if(!document.hidden){
@@ -519,20 +530,12 @@ export class Coast3dView {
         this.root.dataset.projectedMetre=(feet-top).toFixed(3);
         this.root.dataset.speed=speed.toFixed(2);
       }
-      const shadowX=Math.round(p.x/4)*4,shadowZ=Math.round(p.z/4)*4,shadowY=Math.round(p.y/2)*2;
-      const shadowCell=shadowX+':'+shadowZ+':'+shadowY;
-      if(shadowCell!==this.shadowCell){
-        this.shadowCell=shadowCell;
-        this.sun!.target.position.set(shadowX,shadowY,shadowZ);
-        this.sun!.position.set(shadowX-16,shadowY+36,shadowZ+22);
-        this.sun!.target.updateMatrixWorld();
-        this.renderer!.shadowMap.needsUpdate=true;
-      }
       this.island!.water.material.uniforms.clock.value=this.prefersReduced?0:time/1000;
       this.island!.fountain.clock.value=this.island!.water.material.uniforms.clock.value;
       this.island!.waterfall.clock.value=this.island!.water.material.uniforms.clock.value;
       const fog=this.scene.fog;
-      this.island!.showChunks(p.x,p.z,this.overview);
+      const chunksChanged=this.island!.showChunks(p.x,p.z,this.overview);
+      this.updateShadowBox(p.x,p.y,p.z,chunksChanged);
       if(this.overview){
         this.scene.fog=null;
         const marker=this.root.querySelector<HTMLElement>('.coast3d-map-marker')!;
@@ -550,7 +553,7 @@ export class Coast3dView {
     this.abort.abort();cancelAnimationFrame(this.frame);this.resize?.disconnect();
     this.walk?.release();this.island?.finish();releaseWalker(this.walker);
     if(this.petShadow)disposeGroup(this.petShadow);
-    this.sun?.shadow.dispose();this.renderer?.dispose();this.renderer?.forceContextLoss();
+    this.sun?.shadow.dispose();this.renderer?.dispose();
     this.scene.clear();this.root.replaceChildren();
     for(const key of Object.keys(this.root.dataset))delete this.root.dataset[key];
   }
