@@ -56,12 +56,32 @@ test('PostgreSQL commits wallet, stock, ledger and voucher together; retains sna
   await assert.rejects(repo.redeemVoucher('T002', voucher.id), { status: 404 });
   const redeemed = await repo.redeemVoucher('T001', voucher.id); assert.equal(redeemed.alreadyRedeemed, false);
   const again = await repo.redeemVoucher('T001', voucher.id); assert.equal(again.alreadyRedeemed, true); assert.equal(again.voucher.redeemedBy, 'T001');
+  assert.equal((await repo.vouchers({ teacherId: 'T001', status: 'redeemed' })).vouchers.map(r => r.id).includes(voucher.id), true);
+  assert.equal((await repo.vouchers({ teacherId: 'T001', status: 'unredeemed' })).vouchers.map(r => r.id).includes(voucher.id), false);
   assert.equal((await db.query('SELECT * FROM PetCurrencyLedger')).rows.length, 1);
   await require('./real-shop-teacher-scope.cjs')(repo, async rows => {
     await db.query(`INSERT INTO PetRealVouchers(VoucherID,StudentID,PurchaseKey,Code,Data,CreatedAt)
       SELECT (v->>'id')::uuid,v->>'studentId',v->>'purchaseKey',v->>'code',v,(v->>'purchasedAt')::timestamptz
       FROM jsonb_array_elements($1::jsonb) v`, [JSON.stringify(rows)]);
   });
+  await db.exec(`
+    ALTER TABLE Users ADD COLUMN Role text NOT NULL DEFAULT 'student', ADD COLUMN ClassName text NOT NULL DEFAULT '',
+      ADD COLUMN ClassNo integer, ADD COLUMN ChineseGroup text NOT NULL DEFAULT '',
+      ADD COLUMN EnglishGroup text NOT NULL DEFAULT '', ADD COLUMN MathGroup text NOT NULL DEFAULT '';
+    UPDATE Users SET ClassName='5A', ClassNo=1 WHERE StudentID='S001';
+    UPDATE Users SET ClassName='5B', ClassNo=2 WHERE StudentID='S002';
+  `);
+  const classProductId = randomUUID();
+  await repo.saveProduct('T003', classProductId, { name: '分班獎品', description: '', price: 10, stock: 5, active: true, imageId: null, revision: 0 }, '陳老師');
+  const v5a = (await repo.purchase('S001', classProductId, 10, 'pg-5a')).voucher;
+  const v5b = (await repo.purchase('S002', classProductId, 10, 'pg-5b')).voucher;
+  await repo.redeemVoucher('T003', v5a.id);
+  assert.deepEqual((await repo.vouchers({ teacherId: 'T003', className: '5A' })).vouchers.map(r => r.id), [v5a.id]);
+  assert.deepEqual((await repo.vouchers({ teacherId: 'T003', className: '5B' })).vouchers.map(r => r.id), [v5b.id]);
+  assert.deepEqual((await repo.vouchers({ teacherId: 'T003', className: '5A', status: 'unredeemed' })).vouchers, []);
+  assert.deepEqual((await repo.vouchers({ teacherId: 'T003', className: '5B', status: 'unredeemed' })).vouchers.map(r => r.id), [v5b.id]);
+  assert.deepEqual((await repo.vouchers({ teacherId: 'T003', className: '5A', status: 'redeemed' })).vouchers.map(r => r.id), [v5a.id]);
+  await assert.rejects(repo.vouchers({ teacherId: 'T003', status: 'invalid' }), { status: 400 });
   await db.exec("DELETE FROM Users WHERE StudentID='S001'");
   assert.equal((await repo.vouchers({ studentId: 'S001' })).vouchers.length, 0);
 });

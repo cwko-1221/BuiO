@@ -8,4 +8,5 @@ export interface RealVoucher {
   imageId: string | null; imageUrl: string; purchasedAt: string; redeemedAt: string | null; redeemedBy: string | null;
   listedBy: string; listedByName: string;
 }
+export type VoucherStatusFilter = '' | 'unredeemed' | 'redeemed';
 export interface VoucherPage { vouchers: RealVoucher[]; nextCursor: string | null }

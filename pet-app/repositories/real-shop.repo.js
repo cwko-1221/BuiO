@@ -5,6 +5,7 @@ const config = require('../../config');
 const store = require('../../db/jsonStore');
 const { getPool, withTransaction } = require('../../math-app/db/database');
 const pets = require('./pet.repo');
+const academicYears = require('../../math-app/repositories/academic-years.repo');
 const fail = (message, status = 400) => { throw Object.assign(new Error(message), { status }); };
 const uuid = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 const imageUrl = id => id ? `/api/pet/real-shop/images/${id}` : '';
@@ -181,13 +182,16 @@ function normalizeCode(code) {
   return 'RW-' + value.slice(2).match(/.{4}/g).join('-');
 }
 
-async function vouchers({ studentId, teacherId, code, before, search = '' } = {}) {
+async function vouchers({ studentId, teacherId, code, before, search = '', status = '', className = '' } = {}) {
   await ensure();
   if (teacherId !== undefined && (typeof teacherId !== 'string' || !teacherId.trim())) fail('請以老師帳戶登入。', 403);
   if (code !== undefined) code = normalizeCode(code);
   if (before !== undefined && (typeof before !== 'string' || !uuid(before))) fail('分頁識別碼無效。');
   if (typeof search !== 'string' || search.length > 100) fail('搜尋文字最多 100 個字。');
+  if (typeof status !== 'string' || !['', 'redeemed', 'unredeemed'].includes(status)) fail('派發狀態篩選無效。');
+  if (typeof className !== 'string' || className.length > 40) fail('班別篩選無效。');
   search = search.trim().toLowerCase();
+  className = className.trim();
   let rows;
   if (config.db.mode === 'postgres') {
     const params = [], clauses = [], add = (sql, value) => { params.push(value); clauses.push(sql.replace('?', `$${params.length}`)); };
@@ -197,9 +201,25 @@ async function vouchers({ studentId, teacherId, code, before, search = '' } = {}
     if (code) add('v.Code=?', code);
     if (before) add(`(v.CreatedAt,v.VoucherID) < (SELECT CreatedAt,VoucherID FROM PetRealVouchers WHERE VoucherID=?::uuid${cursorScope})`, before);
     if (search) add("strpos(lower(concat_ws(' ',u.Name,v.StudentID,v.Data->>'name')),?)>0", search);
-    rows = (await getPool().query(`SELECT v.Data AS data FROM PetRealVouchers v ${search ? 'LEFT JOIN Users u ON u.StudentID=v.StudentID' : ''} ${clauses.length ? 'WHERE ' + clauses.join(' AND ') : ''} ORDER BY v.CreatedAt DESC,v.VoucherID DESC LIMIT 201`, params)).rows.map(row => row.data);
+    if (status === 'redeemed') clauses.push("COALESCE(v.Data->>'redeemedAt','')<>''");
+    else if (status === 'unredeemed') clauses.push("COALESCE(v.Data->>'redeemedAt','')=''");
+    let classJoin = '';
+    if (className) {
+      const academicYear = await academicYears.getCurrentAcademicYear();
+      classJoin = 'JOIN StudentAcademicYears e ON e.StudentID=v.StudentID';
+      add('e.AcademicYear=?', academicYear);
+      add('e.ClassName=?', className);
+    }
+    rows = (await getPool().query(`SELECT v.Data AS data FROM PetRealVouchers v ${search ? 'LEFT JOIN Users u ON u.StudentID=v.StudentID' : ''} ${classJoin} ${clauses.length ? 'WHERE ' + clauses.join(' AND ') : ''} ORDER BY v.CreatedAt DESC,v.VoucherID DESC LIMIT 201`, params)).rows.map(row => row.data);
   } else {
     rows = store.load().petRealVouchers.filter(row => (!studentId || row.studentId === studentId) && (teacherId === undefined || row.listedBy === teacherId) && (!code || row.code === code)).slice().sort((a, b) => b.purchasedAt.localeCompare(a.purchasedAt) || b.id.localeCompare(a.id));
+    if (status === 'redeemed') rows = rows.filter(row => Boolean(row.redeemedAt));
+    else if (status === 'unredeemed') rows = rows.filter(row => !row.redeemedAt);
+    if (className) {
+      const academicYear = await academicYears.getCurrentAcademicYear();
+      const classStudents = new Set((await academicYears.listStudentClasses(academicYear)).filter(row => row.className === className).map(row => row.studentId));
+      rows = rows.filter(row => classStudents.has(row.studentId));
+    }
     if (search) { const names = new Map(store.load().users.map(user => [user.studentid, user.name || ''])); rows = rows.filter(row => `${names.get(row.studentId) || ''} ${row.studentId} ${row.name}`.toLowerCase().includes(search)); }
     if (before) { const index = rows.findIndex(row => row.id === before); rows = index < 0 ? [] : rows.slice(index + 1); }
   }

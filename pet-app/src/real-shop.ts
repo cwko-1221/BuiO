@@ -1,6 +1,6 @@
 import { api, ApiError } from './api';
 import { idempotencyKey, type Locale } from './types';
-import type { RealProduct, RealVoucher } from './real-shop-types';
+import type { RealProduct, RealVoucher, VoucherStatusFilter } from './real-shop-types';
 import './styles/real-shop.css';
 
 const esc = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
@@ -13,6 +13,8 @@ export class RealShop {
   private nextCursor: string | null = null;
   private section = 'products';
   private search = '';
+  private status: VoucherStatusFilter = '';
+  private className = '';
   private busy = false;
   private generation = 0;
   private pending: Pending | null = null;
@@ -35,7 +37,10 @@ export class RealShop {
     try {
       if (this.section === 'products') this.products = (await api.realProducts(this.teacher)).products;
       else {
-        const page = await api.realVouchers(this.teacher, this.search, append ? this.nextCursor || '' : '');
+        const page = await api.realVouchers(this.teacher, this.search, append ? this.nextCursor || '' : '', {
+          status: this.teacher ? this.status : '',
+          className: this.teacher ? this.className : '',
+        });
         if (generation !== this.generation || !this.root.isConnected) return;
         this.vouchers = append ? [...this.vouchers, ...page.vouchers] : page.vouchers; this.nextCursor = page.nextCursor;
       }
@@ -126,10 +131,35 @@ export class RealShop {
   private voucherCard(voucher: RealVoucher) {
     return `<article class="real-voucher ${voucher.redeemedAt ? 'redeemed' : ''}">${this.image(voucher.imageUrl, voucher.name)}<div><span class="real-state">${voucher.redeemedAt ? this.t('已核銷・請勿重複派發', 'Redeemed · do not issue again') : this.t('待領取', 'Ready to collect')}</span><h2>${esc(voucher.name)}</h2><p class="real-teacher">${this.t("領取老師", "Collect from")}: <b>${esc(voucher.listedByName || voucher.listedBy)}</b></p><p>${esc(this.teacher ? this.studentLabel(voucher) : this.studentId)}</p><p>🪙 ${voucher.price.toLocaleString()} · ${esc(this.date(voucher.purchasedAt))}</p>${voucher.redeemedAt ? `<p>${this.t('核銷時間', 'Redeemed')}: ${esc(this.date(voucher.redeemedAt))}<br>${this.t('核銷老師', 'Teacher')}: ${esc(voucher.redeemedBy)}</p>` : `<p>${this.t('請在派發實物時由老師核銷一次。', 'A teacher redeems this voucher once when handing over the item.')}</p>${this.teacher ? `<button type="button" class="primary" data-redeem="${voucher.id}">${this.t('核對並核銷', 'Review and redeem')}</button>` : ''}`}</div></article>`;
   }
+  private classOptions() {
+    return [...new Set(this.roster.map(row => String(row.className || '').trim()).filter(Boolean))]
+      .sort((left, right) => left.localeCompare(right, this.locale, { numeric: true }));
+  }
   private renderVouchers(content: HTMLElement) {
-    content.innerHTML = `${this.teacher ? `<form class="real-lookup"><label class="field"><span>${this.t('搜尋學生或商品', 'Search student or reward')}</span><input name="search" placeholder="${this.t('學生姓名、學號或商品名稱', 'Student name, ID or reward')}" value="${esc(this.search)}" maxlength="100"></label><button class="primary">${this.t('搜尋換領紀錄', 'Search vouchers')}</button><button type="button" data-all>${this.t('全部紀錄', 'All records')}</button></form>` : ''}<div class="real-vouchers">${this.vouchers.map(v => this.voucherCard(v)).join('') || `<p class="empty-state">${this.t(this.search ? '找不到符合的換領紀錄。' : '暫時沒有換領券。', this.search ? 'No matching voucher.' : 'No vouchers yet.')}</p>`}</div>${this.nextCursor ? `<button type="button" data-more>${this.t('載入更多', 'Load more')}</button>` : ''}`;
-    content.querySelector('form')?.addEventListener('submit', event => { event.preventDefault(); this.search = new FormData(event.currentTarget as HTMLFormElement).get('search')!.toString().trim(); void this.load(); });
-    content.querySelector<HTMLButtonElement>('[data-all]')?.addEventListener('click', () => { this.search = ''; void this.load(); });
+    const classes = this.teacher ? this.classOptions() : [];
+    const hasFilter = Boolean(this.search || this.status || this.className);
+    content.innerHTML = `${this.teacher ? `<form class="real-lookup"><label class="field real-search-field"><span>${this.t('搜尋學生或商品', 'Search student or reward')}</span><input name="search" placeholder="${this.t('學生姓名、學號或商品名稱', 'Student name, ID or reward')}" value="${esc(this.search)}" maxlength="100"></label><label class="field real-filter-field"><span>${this.t('派發狀態', 'Handover status')}</span><select name="status"><option value="" ${this.status === '' ? 'selected' : ''}>${this.t('全部', 'All')}</option><option value="unredeemed" ${this.status === 'unredeemed' ? 'selected' : ''}>${this.t('未派發', 'Not handed over')}</option><option value="redeemed" ${this.status === 'redeemed' ? 'selected' : ''}>${this.t('已派發', 'Handed over')}</option></select></label><label class="field real-filter-field"><span>${this.t('班別', 'Class')}</span><select name="className"><option value="" ${this.className === '' ? 'selected' : ''}>${this.t('全部班別', 'All classes')}</option>${classes.map(name => `<option value="${esc(name)}" ${this.className === name ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select></label><button class="primary">${this.t('搜尋換領紀錄', 'Search vouchers')}</button><button type="button" data-all>${this.t('全部紀錄', 'All records')}</button></form>` : ''}<div class="real-vouchers">${this.vouchers.map(v => this.voucherCard(v)).join('') || `<p class="empty-state">${this.t(hasFilter ? '找不到符合的換領紀錄。' : '暫時沒有換領券。', hasFilter ? 'No matching voucher.' : 'No vouchers yet.')}</p>`}</div>${this.nextCursor ? `<button type="button" data-more>${this.t('載入更多', 'Load more')}</button>` : ''}`;
+    const form = content.querySelector<HTMLFormElement>('form');
+    const syncFilters = () => {
+      if (!form) return;
+      const values = new FormData(form);
+      this.search = String(values.get('search') || '').trim();
+      this.status = String(values.get('status') || '') as VoucherStatusFilter;
+      this.className = String(values.get('className') || '');
+    };
+    form?.addEventListener('submit', event => { event.preventDefault(); if (this.busy) return; syncFilters(); void this.load(); });
+    form?.querySelectorAll<HTMLSelectElement>('select').forEach(select => select.addEventListener('change', () => {
+      if (this.busy) return;
+      syncFilters();
+      void this.load();
+    }));
+    content.querySelector<HTMLButtonElement>('[data-all]')?.addEventListener('click', () => {
+      if (this.busy) return;
+      this.search = '';
+      this.status = '';
+      this.className = '';
+      void this.load();
+    });
     content.querySelector<HTMLButtonElement>('[data-more]')?.addEventListener('click', event => { (event.currentTarget as HTMLButtonElement).disabled = true; void this.load(true); });
     content.querySelectorAll<HTMLButtonElement>('[data-redeem]').forEach(button => button.onclick = () => {
       const voucher = this.vouchers.find(v => v.id === button.dataset.redeem)!;

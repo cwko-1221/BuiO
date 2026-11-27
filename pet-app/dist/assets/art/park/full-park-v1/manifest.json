@@ -1,0 +1,150 @@
+{
+  "version": 1,
+  "generator": "Built-in ImageGen; Sharp packing only",
+  "assets": {
+    "home-ground": {
+      "file": "home-ground-v1-8d40a3d8f916.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 846782
+    },
+    "garden-ground": {
+      "file": "garden-ground-v1-c6fc27e944c1.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 897468
+    },
+    "forest-ground": {
+      "file": "forest-ground-v1-5bd07ab33747.webp",
+      "width": 1536,
+      "height": 1024,
+      "bytes": 851302
+    },
+    "grass": {
+      "file": "grass-v1-cdac26186685.webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 169888
+    },
+    "paving": {
+      "file": "paving-v1-243d3f326564.webp",
+      "width": 512,
+      "height": 512,
+      "bytes": 135616
+    },
+    "house": {
+      "file": "house-v1-945eeb59e505.webp",
+      "width": 900,
+      "height": 802,
+      "bytes": 340686
+    },
+    "mailbox": {
+      "file": "mailbox-v1-2ef6c23634a8.webp",
+      "width": 191,
+      "height": 384,
+      "bytes": 24842
+    },
+    "rabbit": {
+      "file": "rabbit-v1-8c168dd8efb6.webp",
+      "width": 322,
+      "height": 384,
+      "bytes": 48328
+    },
+    "deer": {
+      "file": "deer-v1-2241619442b8.webp",
+      "width": 270,
+      "height": 384,
+      "bytes": 44998
+    },
+    "squirrel": {
+      "file": "squirrel-v1-bc758f3eb8c5.webp",
+      "width": 317,
+      "height": 384,
+      "bytes": 55796
+    },
+    "sunflowers": {
+      "file": "sunflowers-v1-070dfd1a1d01.webp",
+      "width": 640,
+      "height": 308,
+      "bytes": 103484
+    },
+    "tulips": {
+      "file": "tulips-v1-d10f3ab7ac5d.webp",
+      "width": 640,
+      "height": 278,
+      "bytes": 98682
+    },
+    "daisies": {
+      "file": "daisies-v1-6f82603fb890.webp",
+      "width": 640,
+      "height": 298,
+      "bytes": 106130
+    },
+    "pond": {
+      "file": "pond-v1-80c8dafac9e9.webp",
+      "width": 800,
+      "height": 458,
+      "bytes": 177920
+    },
+    "apple": {
+      "file": "apple-v1-47402d1641cd.webp",
+      "width": 720,
+      "height": 768,
+      "bytes": 239126
+    },
+    "hollow": {
+      "file": "hollow-v1-efa432e899e9.webp",
+      "width": 723,
+      "height": 768,
+      "bytes": 286692
+    },
+    "acorn": {
+      "file": "acorn-v1-848948d81a90.webp",
+      "width": 192,
+      "height": 163,
+      "bytes": 15412
+    },
+    "litter": {
+      "file": "litter-v1-2450fd6de205.webp",
+      "width": 192,
+      "height": 162,
+      "bytes": 11130
+    },
+    "mushrooms": {
+      "file": "mushrooms-v1-a5d19e26a83a.webp",
+      "width": 448,
+      "height": 360,
+      "bytes": 73210
+    },
+    "bush": {
+      "file": "bush-v1-10d833f11884.webp",
+      "width": 640,
+      "height": 332,
+      "bytes": 121618
+    },
+    "conifer": {
+      "file": "conifer-v1-387c9ba3753a.webp",
+      "width": 504,
+      "height": 768,
+      "bytes": 163336
+    },
+    "log": {
+      "file": "log-v1-ad818c0ce1d6.webp",
+      "width": 512,
+      "height": 209,
+      "bytes": 56524
+    },
+    "sign": {
+      "file": "sign-v1-8e0ddae9f88a.webp",
+      "width": 253,
+      "height": 384,
+      "bytes": 36606
+    },
+    "portal": {
+      "file": "portal-v1-3068c5e2b18e.webp",
+      "width": 325,
+      "height": 512,
+      "bytes": 103460
+    }
+  }
+}

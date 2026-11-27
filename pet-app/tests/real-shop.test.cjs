@@ -92,6 +92,47 @@ test('teacher deletion preserves purchased vouchers, search and direct redemptio
   assert.equal(store.load().petCurrencyLedger.length, count);
 });
 
+test('teacher voucher filtering supports dispatch status and class filters in JSON mode', async () => {
+  store.load().users.push({ studentid: 'S003', name: '張大文', role: 'student', classname: '5B', classno: 3 });
+  const s002 = store.load().users.find(user => user.studentid === 'S002');
+  s002.classname = '5A';
+  store.load().studentAcademicYears = [];
+  store.save();
+  await pets.grantUnlimitedMoney('S002', 500);
+  await pets.grantUnlimitedMoney('S003', 500);
+  const productId = randomUUID();
+  await repo.saveProduct('T001', productId, { ...fields, stock: 5 }, '黃老師');
+  const v5aPending = (await repo.purchase('S002', productId, 120, 'filter-5a-pending')).voucher;
+  const v5aDone = (await repo.purchase('S002', productId, 120, 'filter-5a-done')).voucher;
+  const v5bPending = (await repo.purchase('S003', productId, 120, 'filter-5b-pending')).voucher;
+  await repo.redeemVoucher('T001', v5aDone.id);
+
+  const unredeemed = (await repo.vouchers({ teacherId: 'T001', status: 'unredeemed' })).vouchers.map(v => v.id);
+  assert.ok(unredeemed.includes(v5aPending.id));
+  assert.ok(unredeemed.includes(v5bPending.id));
+  assert.ok(!unredeemed.includes(v5aDone.id));
+
+  const redeemed = (await repo.vouchers({ teacherId: 'T001', status: 'redeemed' })).vouchers.map(v => v.id);
+  assert.ok(redeemed.includes(v5aDone.id));
+  assert.ok(!redeemed.includes(v5aPending.id));
+  assert.ok(!redeemed.includes(v5bPending.id));
+
+  const class5a = (await repo.vouchers({ teacherId: 'T001', className: '5A' })).vouchers.map(v => v.id);
+  assert.ok(class5a.includes(v5aPending.id));
+  assert.ok(class5a.includes(v5aDone.id));
+  assert.ok(!class5a.includes(v5bPending.id));
+
+  const class5aUnredeemed = (await repo.vouchers({ teacherId: 'T001', status: 'unredeemed', className: '5A' })).vouchers.map(v => v.id);
+  assert.ok(class5aUnredeemed.includes(v5aPending.id));
+  assert.ok(!class5aUnredeemed.includes(v5aDone.id));
+  assert.ok(!class5aUnredeemed.includes(v5bPending.id));
+
+  const class5b = (await repo.vouchers({ teacherId: 'T001', status: 'unredeemed', className: '5B' })).vouchers.map(v => v.id);
+  assert.deepEqual(class5b, [v5bPending.id]);
+
+  await assert.rejects(repo.vouchers({ teacherId: 'T001', status: 'bad' }), { status: 400 });
+});
+
 test('teacher records and redemption stay private across search, pagination and deleted products', async () => {
   await require('./real-shop-teacher-scope.cjs')(repo, async rows => {
     store.load().petRealVouchers.push(...rows); store.save();

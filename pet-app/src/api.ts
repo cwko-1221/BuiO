@@ -5,7 +5,7 @@ import type { ArcadePrize, ArcadePrizeKind } from './game/ArcadePrizes';
 import type { QuietSession, QuietSettings } from './quiet-room-types';
 import type { PetAccessStatus, PetAccessSettings, PetAccessUpdate } from './access-types';
 import { retrySettlement } from '../lib/brawl/settlement-retry.mjs';
-import type { RealProduct, RealVoucher, VoucherPage } from './real-shop-types';
+import type { RealProduct, RealVoucher, VoucherPage, VoucherStatusFilter } from './real-shop-types';
 
 // The shared runtime is loaded blocking in <head>, before this bundle runs.
 const t = (key: string) => (window as any).BuiI18n.t(key) as string;
@@ -55,7 +55,7 @@ export const api = {
   deleteRealProduct: (id: string, revision: number) => request<{ deleted: boolean }>(`/api/pet/real-shop/teacher/products/${encodeURIComponent(id)}`, { method: 'DELETE', body: JSON.stringify({ revision }) }),
   uploadRealImage: (file: File) => { const body = new FormData(); body.append('image', file); return request<{ imageId: string; imageUrl: string }>('/api/pet/real-shop/teacher/images', { method: 'POST', body }); },
   buyRealProduct: (productId: string, expectedPrice: number, key: string) => request<{ voucher: RealVoucher; balance: number }>('/api/pet/real-shop/purchase', { method: 'POST', headers: { 'Idempotency-Key': key }, body: JSON.stringify({ productId, expectedPrice }) }),
-  realVouchers: (teacher = false, search = '', before = '') => { const params = new URLSearchParams(); if (search) params.set('search', search); if (before) params.set('before', before); return request<VoucherPage>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}vouchers?${params}`); },
+  realVouchers: (teacher = false, search = '', before = '', filters: { status?: VoucherStatusFilter; className?: string } = {}) => { const params = new URLSearchParams(); if (search) params.set('search', search); if (before) params.set('before', before); if (filters.status) params.set('status', filters.status); if (filters.className) params.set('className', filters.className); return request<VoucherPage>(`/api/pet/real-shop/${teacher ? 'teacher/' : ''}vouchers?${params}`); },
   redeemRealVoucher: (id: string) => request<{ voucher: RealVoucher; alreadyRedeemed: boolean }>(`/api/pet/real-shop/teacher/vouchers/${encodeURIComponent(id)}/redeem`, { method: 'POST', body: '{}' }),
   parkSettings: () => request<{ dailyCap: number }>('/api/pet/teacher/park/settings'),
   saveParkSettings: (dailyCap: number) => request<{ dailyCap: number }>('/api/pet/teacher/park/settings', { method: 'PUT', body: JSON.stringify({ dailyCap }) }),

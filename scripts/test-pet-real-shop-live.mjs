@@ -17,6 +17,7 @@ await fs.mkdir(artifacts, { recursive: true });
 await fs.writeFile(databaseFile, JSON.stringify({ users: [
   { studentid: 'S001', name: '陳小星', role: 'student', classname: '5A', classno: 1, language: 'zh-HK', passwordhash: bcrypt.hashSync('student123', 4) },
   { studentid: 'S002', name: '李月兒', role: 'student', classname: '5A', classno: 2, language: 'zh-HK', passwordhash: bcrypt.hashSync('student123', 4) },
+  { studentid: 'S003', name: '張大文', role: 'student', classname: '5B', classno: 3, language: 'zh-HK', passwordhash: bcrypt.hashSync('student123', 4) },
   { studentid: 'T001', name: '黃老師', role: 'teacher', language: 'zh-HK', passwordhash: bcrypt.hashSync('teacher123', 4) },
   { studentid: 'T002', name: '李老師', role: 'teacher', language: 'zh-HK', passwordhash: bcrypt.hashSync('teacher123', 4) },
 ] }));
@@ -204,17 +205,37 @@ try {
   await page.getByText('核銷成功，已記錄領取時間。', { exact: true }).waitFor();
   const again = await (await teacher.request.post(`/api/pet/real-shop/teacher/vouchers/${voucher.id}/redeem`, { data: {} })).json(); assert.equal(again.alreadyRedeemed, true);
   await denyForeignRedemption();
+  // Verify dispatch status (已派發 / 未派發) and class (班別) filters on teacher's voucher redemption page.
+  const classBProductId = randomUUID();
+  assert.equal((await teacher.request.put(`/api/pet/real-shop/teacher/products/${classBProductId}`, { data: { name: '5B專屬書籤', description: '', price: 10, stock: 2, active: true, imageId: null, revision: 0 } })).status(), 200);
+  const classBStudent = await browser.newContext({ baseURL });
+  assert.equal((await classBStudent.request.post('/api/auth/login', { data: { studentId: 'S003', password: 'student123' } })).status(), 200);
+  assert.equal((await classBStudent.request.post('/api/pet/dev/unlimited-money')).status(), 200);
+  assert.equal((await classBStudent.request.post('/api/pet/real-shop/purchase', { headers: { 'Idempotency-Key': 'class-5b-purchase' }, data: { productId: classBProductId, expectedPrice: 10 } })).status(), 200);
+  await classBStudent.close();
+  await page.locator('[data-all]').click();
+  await page.waitForFunction(() => document.querySelectorAll('.real-voucher').length === 3);
+  await page.locator('.real-lookup [name="status"]').selectOption('redeemed');
+  await page.waitForFunction(() => document.querySelectorAll('.real-voucher').length === 1 && document.querySelector('.real-voucher')?.classList.contains('redeemed'));
+  await page.locator('.real-lookup [name="status"]').selectOption('unredeemed');
+  await page.waitForFunction(() => document.querySelectorAll('.real-voucher').length === 2 && [...document.querySelectorAll('.real-voucher')].every(el => !el.classList.contains('redeemed')));
+  await page.locator('.real-lookup [name="className"]').selectOption('5B');
+  await page.waitForFunction(() => document.querySelectorAll('.real-voucher').length === 1 && document.querySelector('.real-voucher')?.textContent?.includes('張大文'));
+  await page.locator('.real-lookup [name="status"]').selectOption('redeemed');
+  await page.getByText('找不到符合的換領紀錄。', { exact: true }).waitFor();
+  await page.locator('[data-all]').click();
+  await page.waitForFunction(() => document.querySelectorAll('.real-voucher').length === 3);
   await page.screenshot({ path: path.join(artifacts, 'teacher-redeemed.png'), fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 }); await page.screenshot({ path: path.join(artifacts, 'teacher-redeemed-phone.png'), fullPage: true });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await view.locator('[data-section="vouchers"]').click(); await view.locator('.real-voucher.redeemed').waitFor();
   assert.equal(await view.locator('.real-voucher code').count(), 0, 'redeemed student vouchers also hide the code');
   const final = JSON.parse(await fs.readFile(databaseFile, 'utf8'));
-  assert.equal(final.petRealVouchers.length, 3); assert.equal(final.petCurrencyLedger.filter(row => row.kind === 'real_shop_purchase').length, 3);
+  assert.equal(final.petRealVouchers.length, 4); assert.equal(final.petCurrencyLedger.filter(row => row.kind === 'real_shop_purchase').length, 4);
   assert.equal(final.petRealVouchers.filter(row => row.redeemedAt).length, 2);
   assert.ok(final.petRealVouchers.filter(row => row.redeemedAt).every(row => row.redeemedBy === row.listedBy));
   assert.deepEqual(errors, []);
-  await fs.writeFile(path.join(artifacts, 'verification.json'), JSON.stringify({ passed: true, teachers: ['黃老師', '李老師'], purchases: 3, redeemed: 2, duplicateCharges: 0, teacherRecordsPrivate: true, foreignRedemptionDenied: true, responseLossRecovered: true, codesHidden: true, directTeacherRedemption: true, deletedProductVouchersKept: true, teacherFormWheelScroll: scrollChecks, screenshots: 12 }, null, 2));
+  await fs.writeFile(path.join(artifacts, 'verification.json'), JSON.stringify({ passed: true, teachers: ['黃老師', '李老師'], purchases: 4, redeemed: 2, duplicateCharges: 0, teacherRecordsPrivate: true, foreignRedemptionDenied: true, responseLossRecovered: true, codesHidden: true, directTeacherRedemption: true, deletedProductVouchersKept: true, teacherVoucherFilters: true, teacherFormWheelScroll: scrollChecks, screenshots: 12 }, null, 2));
   console.log('Real shop live passed: two teachers see and redeem only their own sales; foreign ID/code redemption and spoofed query/body identities are rejected. Existing purchase, deletion, no-code and scroll flows pass.');
 } catch (error) { console.error(logs.slice(-3000)); throw error; }
 finally {
