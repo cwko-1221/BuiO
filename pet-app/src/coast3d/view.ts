@@ -137,7 +137,7 @@ export class Coast3dView {
       this.tier=detectDeviceTier();
       const coarsePointer=this.tier!=='desktop';
       this.phoneViewport=this.tier==='phone';
-      this.minFrameMs=this.phoneViewport?31:0;
+      this.minFrameMs=this.phoneViewport?13:0;
       const renderer=new T.WebGLRenderer({
         antialias:!this.phoneViewport && !(coarsePointer && (devicePixelRatio||1)>=2),
         alpha:false,
