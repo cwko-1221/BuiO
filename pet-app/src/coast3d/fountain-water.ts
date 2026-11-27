@@ -8,7 +8,7 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   group.position.set(x,y,z);
   const tier=detectDeviceTier();
   const compact=tier!=='desktop', phone=tier==='phone';
-  const resolution=compact?128:256;
+  const resolution=phone?224:256;
   const basin=new Reflector(new T.CircleGeometry(width*.446,48),{
     textureWidth:resolution,textureHeight:resolution,multisample:0,clipBias:.002,
     shader:{
@@ -51,32 +51,35 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
                 float sp=max(0.,pulse);
                 float sp2=sp*sp, sp4=sp2*sp2;
                 wave+=offset/(d+.04)*pulse*nearJet*1.15;
-                splash+=nearJet*(.23*sp4*sp4+.22*(1.-smoothstep(.08,.20,d)));
+                splash+=nearJet*(.26*sp4*sp4+.24*(1.-smoothstep(.08,.22,d)));
               }
             }
           }
           vec3 eye=normalize(cameraPosition-worldPoint);
-          vec3 normal=normalize(vec3(wave.x*.038,1.,-wave.y*.038));
-          float fresnel=pow(1.-clamp(dot(eye,normal),0.,1.),2.5);
+          vec3 normal=normalize(vec3(wave.x*.040,1.,-wave.y*.040));
+          float fresnel=pow(1.-clamp(dot(eye,normal),0.,1.),2.4);
           vec2 uv=reflection.xy/reflection.w+wave*.005;
           vec3 mirror=texture2D(tDiffuse,clamp(uv,.002,.998)).rgb;
-          float waves=.5+.5*sin(dot(p,vec2(2.4,1.5))-clock*1.35);
-          vec3 tint=mix(vec3(.018,.36,.39),vec3(.041,.59,.58),.26+waves*.20);
+          float waves=.5+.5*sin(dot(p,vec2(2.4,1.5))-clock*1.55);
+          float caustic=pow(max(0.,sin(p.x*5.2-clock*1.8+wave.y*.7)*cos(p.y*5.2+clock*1.5-wave.x*.7)),3.);
+          vec3 tint=mix(vec3(.028,.44,.48),vec3(.085,.69,.70),.28+waves*.24)+vec3(.18,.34,.32)*caustic*.42;
           vec3 sun=normalize(vec3(-.45,.78,.43));
           float g1=max(0.,dot(normal,normalize(eye+sun)));
           float g2=g1*g1,g4=g2*g2,g8=g4*g4,g16=g8*g8,g32=g16*g16;
           float glint=g32*g32*g16*g8*g4;
-          vec3 water=mix(tint,mirror*vec3(.78,.96,1.),.30+.58*fresnel);
-          water+=vec3(.88,.79,.58)*glint*.61+splash*vec3(.46,.69,.70);
-          gl_FragColor=vec4(water,1.);
+          vec3 water=mix(tint,mirror*vec3(.82,.97,1.),.34+.56*fresnel);
+          water+=vec3(.92,.86,.68)*glint*.72+splash*vec3(.56,.80,.82);
+          float alpha=clamp(mix(.66,.94,fresnel)+splash*.32+glint*.25,.64,.97);
+          gl_FragColor=vec4(water,alpha);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`,
     },
   });
-  if(compact)basin.getRenderTarget().texture.type=T.UnsignedByteType;
-  basin.rotation.x=-Math.PI/2;basin.position.y=waterline;
+  basin.rotation.x=-Math.PI/2;basin.position.y=waterline;basin.renderOrder=1;
   const surfaceMaterial=basin.material as T.ShaderMaterial;
+  surfaceMaterial.transparent=true;
+  surfaceMaterial.depthWrite=false;
   surfaceMaterial.uniforms.clock=clock;
   const reflect=basin.onBeforeRender.bind(basin);
   basin.onBeforeRender=()=>{};
@@ -85,15 +88,15 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   const update=(renderer:T.WebGLRenderer,scene:T.Scene,camera:T.Camera,force=false)=>{
     if(!force){
       const dx=x-camera.position.x, dz=z-camera.position.z, distSq=dx*dx+dz*dz;
-      if(distSq>(compact?784:1444) && previousCamera!==undefined)return;
+      if(distSq>(compact?900:1444) && previousCamera!==undefined)return;
       camera.getWorldDirection(camForward);
       if(distSq>25 && dx*camForward.x+dz*camForward.z<-Math.sqrt(distSq)*.25 && previousCamera!==undefined)return;
       const moved=camera!==previousCamera
-        || camera.position.distanceToSquared(lastCamPos)>(phone?16:compact?4:.0025)
-        || (!compact && camForward.distanceToSquared(lastForward)>.0006);
+        || camera.position.distanceToSquared(lastCamPos)>(compact?.006:.0025)
+        || camForward.distanceToSquared(lastForward)>(compact?.0008:.0006);
       if(!moved)return;
       const now=performance.now();
-      if(camera===previousCamera && now-lastReflection<(phone?1200:compact?600:80))return;
+      if(camera===previousCamera && now-lastReflection<(phone?64:compact?56:48))return;
       lastReflection=now;
     } else {
       camera.getWorldDirection(camForward);
@@ -135,18 +138,20 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
     renderer.setRenderTarget(prevTarget);
   };
 
-  const runningWater=new T.ShaderMaterial({uniforms:{clock},
+  const runningWater=new T.ShaderMaterial({uniforms:{clock},transparent:true,depthWrite:false,
     vertexShader:`varying vec2 flow; void main(){flow=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
     fragmentShader:`uniform float clock;varying vec2 flow;
       void main(){
         float r1=max(0.,sin(flow.x*48.-clock*12.+sin(flow.y*18.)*.55));
         float r2=r1*r1;
         float ribbon=r2*r2*r1;
+        float mist=max(0.,sin(flow.x*26.-clock*8.5-flow.y*12.));
         float s1=max(0.,cos(flow.y*6.283+.4));
         float s2=s1*s1,s4=s2*s2;
         float shine=s4*s4;
-        vec3 aqua=mix(vec3(.065,.46,.50),vec3(.60,.85,.93),ribbon*.63+shine*.31);
-        gl_FragColor=vec4(aqua,1.);
+        vec3 aqua=mix(vec3(.12,.60,.66),vec3(.82,.96,1.),ribbon*.68+shine*.38+mist*.12);
+        float alpha=clamp(.38+ribbon*.40+shine*.28+mist*.08,.36,.92);
+        gl_FragColor=vec4(aqua,alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
@@ -155,7 +160,9 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
     const direction=i*Math.PI/4,dx=Math.cos(direction),dz=Math.sin(direction);
     const controls=[[width*.131,height*.895],[width*.166,height*.898],[width*.197,height*.65],[impact,waterline-.023]];
     const flow=new T.CatmullRomCurve3(controls.map(([r,y])=>new T.Vector3(dx*r,y,dz*r)));
-    group.add(new T.Mesh(new T.TubeGeometry(flow,16,.047,6),runningWater));
+    const jet=new T.Mesh(new T.TubeGeometry(flow,16,.047,6),runningWater);
+    jet.renderOrder=2;
+    group.add(jet);
   }
   return {group,clock,warm,update,release:()=>basin.getRenderTarget().dispose()};
 }

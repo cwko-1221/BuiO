@@ -145,7 +145,7 @@ export class Coast3dView {
         powerPreference:coarsePointer?'default':'high-performance',
       });
       this.renderer=renderer;
-      renderer.setPixelRatio(Math.min(devicePixelRatio||1,this.phoneViewport?1.15:coarsePointer?1.2:1.5));
+      renderer.setPixelRatio(Math.min(devicePixelRatio||1,this.phoneViewport?1.75:coarsePointer?1.5:1.5));
       renderer.outputColorSpace=T.SRGBColorSpace;
       renderer.toneMapping=T.ACESFilmicToneMapping;
       renderer.toneMappingExposure=1.02;
@@ -203,6 +203,14 @@ export class Coast3dView {
       this.root.dataset.blenderModels=String(new Set([...assets.value.keys(),...sculpted.value.keys()]).size);
       this.root.dataset.previewModels=String([...sculpted.value].filter(([id,asset])=>asset.preview&&!assets.value.has(id)).length);
       this.root.dataset.joints=String(walker.value.joints);
+      const maxAniso=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+      walker.value.pivot.traverse(node=>{
+        if(!(node instanceof T.Mesh))return;
+        for(const mat of Array.isArray(node.material)?node.material:[node.material]){
+          if(!mat)continue;
+          for(const val of Object.values(mat))if(val instanceof T.Texture){val.anisotropy=maxAniso;val.needsUpdate=true;}
+        }
+      });
       const maxTextureDim=this.phoneViewport?256:coarsePointer?384:1024;
       const stripSecondary=coarsePointer;
       for(const item of assets.value.values())capModelTextures(item.model,maxTextureDim,stripSecondary);
@@ -498,10 +506,10 @@ export class Coast3dView {
     const {clientWidth:w,clientHeight:h}=this.root;
     if(!w||!h)return;
     if(this.renderer){
-      const baseDpr=Math.min(devicePixelRatio||1,this.phoneViewport?1.15:this.tier==='tablet'?1.2:1.5);
-      const maxPixels=this.phoneViewport?400000:this.tier==='tablet'?950000:Infinity;
+      const baseDpr=Math.min(devicePixelRatio||1,this.phoneViewport?1.75:this.tier==='tablet'?1.5:1.5);
+      const maxPixels=this.phoneViewport?900000:this.tier==='tablet'?1350000:Infinity;
       const area=w*h;
-      const dpr=area*baseDpr*baseDpr>maxPixels?Math.max(.45,Math.sqrt(maxPixels/area)):baseDpr;
+      const dpr=area*baseDpr*baseDpr>maxPixels?Math.max(.55,Math.sqrt(maxPixels/area)):baseDpr;
       this.renderer.setPixelRatio(dpr);
       this.renderer.setSize(w,h,false);
     }
