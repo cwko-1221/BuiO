@@ -158,7 +158,12 @@ try {
     assert.equal(cover.inert, true, 'content behind the countdown cannot be focused or pressed');
   }
   assert.equal(await teacher.locator('#questionText').isVisible(), false, 'question text is hidden until the countdown finishes');
-  for (const student of students) assert.equal(await student.locator('[data-answer]:enabled').count(), 0, 'answers stay locked during the transition');
+  for (const student of students) {
+    assert.equal(await student.locator('[data-answer]:enabled').count(), 0, 'answers stay locked during the transition');
+    assert.equal(await student.locator('#questionText').isVisible(), false, 'student question text stays hidden until the countdown finishes');
+    assert.equal(await student.locator('#questionImage').isVisible(), false, 'student question image stays hidden until the countdown finishes');
+    assert.equal(await student.locator('#answerPad .choice-text').first().isVisible(), false, 'student choice text stays hidden until the countdown finishes');
+  }
   await students[2].emulateMedia({ reducedMotion: 'reduce' });
   assert.equal(await students[2].locator('#questionIntro').isVisible(), true, 'reduced motion keeps the preparation countdown');
   await students[2].waitForFunction(() => document.getAnimations().every(animation => animation.playState !== 'running'));
@@ -180,14 +185,30 @@ try {
   assert.equal(fits, true, 'all choices stay visible on the teacher screen');
   for (const student of students) {
     await student.waitForSelector('[data-answer="1"]:enabled');
+    await student.waitForFunction(() => document.getElementById('questionImage')?.naturalWidth > 100);
     assert.equal(await student.locator('[data-answer]').count(), 4);
-    assert.equal(await student.locator('#questionImage, #questionText, .choice-text').count(), 0, 'student UI never renders question content');
-    const geometry=await student.locator('#answerPad').evaluate(pad=>{
-      const bounds=pad.getBoundingClientRect();
-      return {right:bounds.right,bottom:bounds.bottom,width:innerWidth,height:innerHeight,buttons:[...pad.children].map(button=>({width:button.getBoundingClientRect().width,height:button.getBoundingClientRect().height}))};
+    assert.equal(await student.locator('#questionText').isVisible(), true);
+    assert.equal(await student.locator('#questionText').textContent(), set.questions[0].question);
+    assert.equal(await student.locator('#questionImage').isVisible(), true);
+    assert.deepEqual(await student.locator('#answerPad .choice-text').allTextContents(), set.questions[0].choices);
+    const geometry = await student.evaluate(() => {
+      const bounds = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, width: r.width, height: r.height }; };
+      const pad = document.getElementById('answerPad');
+      return {
+        title: bounds('#questionText'),
+        image: bounds('#questionImage'),
+        pad: bounds('#answerPad'),
+        fit: getComputedStyle(document.getElementById('questionImage')).objectFit,
+        width: innerWidth,
+        height: innerHeight,
+        buttons: [...pad.children].map(button => { const r = button.getBoundingClientRect(); return { width: r.width, height: r.height }; }),
+      };
     });
-    assert.ok(geometry.right<=geometry.width+1&&geometry.bottom<=geometry.height+1,'all four answer buttons stay in the viewport');
-    assert.ok(geometry.buttons.every(b=>b.width>=130&&b.height>=140),'answer targets remain large');
+    assert.equal(geometry.fit, 'contain');
+    assert.ok(geometry.image.width >= 140 && geometry.image.height >= 120, `student image remains clearly visible: ${JSON.stringify(geometry.image)}`);
+    assert.ok(geometry.title.bottom <= geometry.image.y + 1 && geometry.image.bottom <= geometry.pad.y + 1, 'student question, image and choices never overlap');
+    assert.ok(geometry.pad.right <= geometry.width + 1 && geometry.pad.bottom <= geometry.height + 1, 'all four answer buttons stay in the viewport');
+    assert.ok(geometry.buttons.every(b => b.width >= 130 && b.height >= 64), `answer targets remain comfortable: ${JSON.stringify(geometry.buttons)}`);
   }
   await students[0].screenshot({ path: resolve(output, 'ipad-student-buttons.png') });
   await students[1].screenshot({ path: resolve(output, 'phone-student-buttons.png') });
@@ -210,8 +231,12 @@ try {
   assert.equal(await students[2].locator('.coin-feedback').count(), 0, 'wrong answers do not earn coin rewards');
   for (const student of students.slice(0, 2)) {
     await student.waitForSelector('.coin-feedback');
-    assert.ok(await student.locator('#answerPad').evaluate(pad => pad.getBoundingClientRect().bottom <= innerHeight), 'reward feedback keeps all student answer buttons in view');
+    assert.equal(await student.locator('#questionText').isVisible(), true);
+    assert.equal(await student.locator('#questionImage').isVisible(), true);
+    assert.deepEqual(await student.locator('#answerPad .choice-text').allTextContents(), set.questions[0].choices);
+    assert.ok(await student.locator('#answerPad').evaluate(pad => pad.getBoundingClientRect().bottom <= innerHeight + 1), 'reward feedback keeps question, image and student answer buttons in view');
   }
+  await students[0].screenshot({ path: resolve(output, 'ipad-student-results-image.png') });
   assert.equal(payments, 0, 'preview rooms never write real wallets');
   assert.deepEqual(await teacher.locator('.bar-count').allTextContents(), ['1', '2', '0', '0']);
   await teacher.locator('[data-bar="1"]').click();
@@ -253,7 +278,14 @@ try {
   await teacher.locator('#nextBtn').click();
   await teacher.waitForSelector('#questionIntro:not([hidden])');
   assert.match(await teacher.locator('#introQuestion').textContent(), /2 \/ 2/);
-  for (const student of students) await student.waitForSelector('[data-answer="2"]:enabled');
+  for (const student of students) {
+    await student.waitForSelector('[data-answer="2"]:enabled');
+    assert.equal(await student.locator('#questionText').textContent(), set.questions[1].question);
+    assert.equal(await student.locator('#questionImage').count(), 0);
+    assert.deepEqual(await student.locator('#answerPad .choice-text').allTextContents(), set.questions[1].choices);
+    assert.ok(await student.locator('#answerPad').evaluate(pad => pad.getBoundingClientRect().bottom <= innerHeight + 1));
+  }
+  await students[1].screenshot({ path: resolve(output, 'phone-student-text-question.png') });
   await students[0].locator('[data-answer="2"]').tap();
   await students[1].locator('[data-answer="0"]').tap();
   await teacher.waitForSelector('#distributionChart', { timeout: 10000 });
@@ -283,8 +315,13 @@ try {
   assert.equal(await teacher.evaluate(() => document.getAnimations().filter(a => a.playState === 'running').length), 0);
   assert.ok(studentPackets.some(packet => packet.phase === 'question'), 'live student packets were inspected');
   for (const packet of studentPackets) {
-    assert.equal(packet.question, undefined, 'question text, image and choices never reach student sockets');
     assert.equal(packet.distribution, undefined, 'individual answer lists stay teacher-only');
+    if (['question', 'results'].includes(packet.phase)) {
+      assert.ok(packet.question && typeof packet.question.question === 'string' && packet.question.choices.length === 4, 'student receives question and choices during active/results phase');
+      assert.equal(packet.question.correctIndex, undefined, 'question payload never includes correctIndex');
+    } else {
+      assert.equal(packet.question, undefined, 'non-question phases do not carry question payloads');
+    }
     if (packet.phase === 'question') {
       assert.equal(packet.correctIndex, undefined);
       assert.equal(packet.me.result, undefined);
@@ -354,6 +391,21 @@ try {
     }
     await teacher.screenshot({ path: resolve(output, `host-large-image-${viewport.width}.png`) });
   }
+  await students[0].waitForSelector('#questionImage');
+  for (const viewport of [{ width: 1180, height: 820 }, { width: 820, height: 1180 }, { width: 390, height: 844 }]) {
+    await students[0].setViewportSize(viewport);
+    const layout = await students[0].evaluate(() => {
+      const bounds = selector => { const r = document.querySelector(selector).getBoundingClientRect(); return { x: r.x, y: r.y, width: r.width, height: r.height, bottom: r.bottom, right: r.right }; };
+      return { title: bounds('#questionText'), image: bounds('#questionImage'), choices: bounds('#answerPad'),
+        fit: getComputedStyle(document.getElementById('questionImage')).objectFit, width: innerWidth, height: innerHeight };
+    });
+    assert.ok(layout.title.bottom <= layout.image.y + 1 && layout.image.bottom <= layout.choices.y + 1, `student bilingual question, image and answers never overlap at ${viewport.width}px`);
+    assert.ok(layout.choices.bottom <= layout.height + 1 && layout.choices.right <= layout.width + 1, `all student bilingual choices stay visible at ${viewport.width}px`);
+    assert.ok(layout.image.width >= 140 && layout.image.height >= 120, `student bilingual image remains clearly visible at ${viewport.width}px`);
+    assert.equal(layout.fit, 'contain');
+    await students[0].screenshot({ path: resolve(output, `student-large-image-${viewport.width}.png`) });
+  }
+  await students[0].setViewportSize({ width: 1180, height: 820 });
   await teacher.locator('#endBtn').click();
   await teacher.waitForSelector('#closeBtn');
   await teacher.locator('#closeBtn').click();
@@ -378,7 +430,9 @@ try {
   await teacher.waitForSelector('.coin-delivery', { state: 'detached' });
   await students[0].waitForFunction(() => document.querySelector('.coin-feedback')?.textContent.includes('+8'));
   assert.match(await students[0].locator('.coin-feedback').textContent(), /已存入寵物樂園/);
-  assert.ok(await students[0].locator('#answerPad').evaluate(pad => pad.getBoundingClientRect().bottom <= innerHeight));
+  assert.equal(await students[0].locator('#questionText').isVisible(), true);
+  assert.equal(await students[0].locator('#questionImage').isVisible(), true);
+  assert.ok(await students[0].locator('#answerPad').evaluate(pad => pad.getBoundingClientRect().bottom <= innerHeight + 1));
   await students[0].screenshot({ path: resolve(output, 'student-coins-deposited.png') });
   assert.equal(payments, 2);
   await teacher.locator('#endBtn').click();
@@ -391,7 +445,8 @@ try {
     'preserved voter selection', 'bar and podium transitions', 'animated scores', 'reduced motion',
     'custom trophy assets', 'responsive answer targets', 'lobby artwork', 'bounded spark effects',
     'fullscreen pre-question countdown', 'preserved answer duration', 'intro reconnect handling', 'intro cancellation',
-    'coin settings and preview isolation', 'large bilingual question images at 100% zoom'], audio: music, firstScores, output }, null, 2));
+    'coin settings and preview isolation', 'large bilingual question images at 100% zoom',
+    'student question text, image and choices across viewports'], audio: music, firstScores, output }, null, 2));
 } catch (failure) {
   console.error(JSON.stringify({ errors, teacher: await teacher.locator('body').innerText(),
     students: await Promise.all(students.map(page => page.locator('body').innerText())) }, null, 2));

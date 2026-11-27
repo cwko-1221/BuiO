@@ -112,7 +112,18 @@ function applyState(next) {
   $('roomPin').hidden = false;
   $('pinValue').textContent = state.code;
   $('identity').textContent = host ? state.hostName : state.me.name;
-  if (host && state.phase === 'question' && previous === renderKey) updateClock(); else render();
+  const sameQuestionPad = !host && prior?.phase === 'question' && state.phase === 'question'
+    && prior.roundId === state.roundId && $('answerPad');
+  if ((state.phase === 'question' && previous === renderKey) || sameQuestionPad) {
+    if (sameQuestionPad) {
+      $('answerPad').querySelectorAll('[data-answer]').forEach(button => {
+        const selected = Number(button.dataset.answer) === state.me.choice;
+        button.classList.toggle('is-selected', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+    updateClock();
+  } else render();
   if (!host && state.phase === 'question' && prior?.me?.choice == null && state.me.choice != null) {
     presentation.submitted($('answerPad')?.querySelector(`[data-answer="${state.me.choice}"]`));
   }
@@ -249,10 +260,15 @@ function renderStudent() {
   if (state.phase === 'lobby') {
     $('main').innerHTML = `<section class="waiting-state student-waiting">${trophyArt('waiting-trophy')}<span class="section-eyebrow">${text('qm.joined')}</span><h1>${text('qm.waiting')}</h1><p>${escapeHtml(state.setTitle)}</p><div class="waiting-player">${avatar(state.me.name)}<strong>${escapeHtml(state.me.name)}</strong></div><div class="waiting-answers" aria-hidden="true">${letters.map((letter, index) => `<span class="waiting-answer choice-${letter.toLowerCase()}">${answerSymbol(index)}<b>${letter}</b></span>`).join('')}</div></section>`;
   } else if (state.phase === 'question' || state.phase === 'results') {
+    const q = state.question;
     const result = state.me.result;
     const revealed = state.phase === 'results';
     const message = revealed ? t(result?.correct ? 'qm.right' : result?.choice == null ? 'qm.noAnswer' : 'qm.wrong') : '';
-    $('main').innerHTML = `<section class="player-round ${revealed ? 'is-revealed' : ''}"><div class="player-top"><span>${text('qm.question', { n: state.questionIndex + 1, total: state.questionCount })}</span><strong class="personal-score">${text('qm.points', { n: state.me.score.toLocaleString() })}</strong>${revealed ? '' : '<strong id="questionClock" class="clock" role="timer"></strong>'}</div><div class="round-feedback ${revealed ? result?.correct ? 'feedback-correct' : 'feedback-incorrect' : ''}"><div id="playerStatus" class="player-status" role="status">${revealed ? `<span class="feedback-mark" aria-hidden="true">${result?.correct ? '✓' : '!'}</span>` : ''}${escapeHtml(message)}</div>${revealed ? `<div class="personal-result"><strong>+${result?.points || 0}</strong><span>${text('qm.personalRank', { n: state.me.rank })}</span></div>` : ''}</div><div id="answerPad" class="answer-grid answer-pad">${letters.map((letter, index) => `<button type="button" class="choice choice-${letter.toLowerCase()} ${state.me.choice === index ? 'is-selected' : ''} ${revealed && state.correctIndex === index ? 'is-correct' : ''}" data-answer="${index}" aria-label="${letter}" aria-pressed="${state.me.choice === index}" disabled>${answerSymbol(index)}<span class="choice-letter">${letter}</span></button>`).join('')}</div></section>`;
+    $('main').innerHTML = `<section class="player-round ${revealed ? 'is-revealed' : ''} ${q?.image ? 'has-question-image' : ''}"><div class="player-top"><span>${text('qm.question', { n: state.questionIndex + 1, total: state.questionCount })}</span><strong class="personal-score">${text('qm.points', { n: state.me.score.toLocaleString() })}</strong>${revealed ? '' : '<strong id="questionClock" class="clock" role="timer"></strong>'}</div>${revealed ? '' : '<div class="time-track" aria-hidden="true"><div id="timeFill" class="time-fill"></div></div>'}<div class="round-feedback ${revealed ? result?.correct ? 'feedback-correct' : 'feedback-incorrect' : ''}"><div id="playerStatus" class="player-status" role="status">${revealed ? `<span class="feedback-mark" aria-hidden="true">${result?.correct ? '✓' : '!'}</span>` : ''}${escapeHtml(message)}</div>${revealed ? `<div class="personal-result"><strong>+${result?.points || 0}</strong><span>${text('qm.personalRank', { n: state.me.rank })}</span></div>` : ''}</div>${q ? `<div class="question-content"><div><h1 id="questionText">${escapeHtml(q.question)}</h1>${q.image ? `<figure class="question-media"><img id="questionImage" src="${escapeHtml(q.image)}" alt="${text('qm.image')}"></figure>` : ''}</div></div>` : ''}<div id="answerPad" class="answer-grid answer-pad">${letters.map((letter, index) => {
+      const choiceText = q?.choices?.[index];
+      return `<button type="button" class="choice choice-${letter.toLowerCase()} ${state.me.choice === index ? 'is-selected' : ''} ${revealed && state.correctIndex === index ? 'is-correct' : ''}" data-answer="${index}" aria-pressed="${state.me.choice === index}" disabled>${answerSymbol(index)}<span class="choice-letter">${letter}</span>${choiceText != null ? `<span class="choice-text">${escapeHtml(choiceText)}</span>` : ''}</button>`;
+    }).join('')}</div></section>`;
+    bindImageErrors();
     document.querySelectorAll('[data-answer]').forEach(b => b.addEventListener('click', () => answer(Number(b.dataset.answer))));
   } else {
     const ended = state.phase === 'ended';

@@ -40,6 +40,15 @@ module.exports = function registerQuiz(io, app) {
     for (const player of room.players.values()) if (player.connected) nsp.to(player.socketId).emit('quiz:state', room.playerView(player.key));
   }
 
+  function broadcastPresence(room, targetPlayer = null) {
+    if (['question', 'results'].includes(room.phase)) {
+      if (room.hostConnected) nsp.to(room.hostSocket).emit('quiz:state', room.hostView());
+      if (targetPlayer?.connected) nsp.to(targetPlayer.socketId).emit('quiz:state', room.playerView(targetPlayer.key));
+    } else {
+      broadcast(room);
+    }
+  }
+
   function close(room, message = '老師已關閉房間。') {
     clearTimeout(room.questionTimer); clearTimeout(room.hostTimer); clearTimeout(room.expiryTimer);
     rooms.delete(room.code);
@@ -191,7 +200,7 @@ module.exports = function registerQuiz(io, app) {
       const key = studentId ? `student:${studentId}` : `preview:${playerToken}`;
       if (socket.data.code && socket.data.code !== room.code) {
         const old = rooms.get(socket.data.code), player = old?.players.get(socket.data.playerKey);
-        if (player?.socketId === socket.id) { player.connected = false; broadcast(old); }
+        if (player?.socketId === socket.id) { player.connected = false; broadcastPresence(old); }
         socket.leave(socket.data.code);
       }
       const existing = room.players.get(key);
@@ -204,7 +213,7 @@ module.exports = function registerQuiz(io, app) {
       player.socketId = socket.id;
       socket.data = { role: 'player', code: room.code, playerKey: key }; socket.join(room.code);
       if (room.phase === 'question' && Date.now() >= room.closesAt) endQuestion(room);
-      broadcast(room);
+      broadcastPresence(room, player);
       return { state: room.playerView(key) };
     });
 
@@ -232,7 +241,7 @@ module.exports = function registerQuiz(io, app) {
         room.hostTimer.unref?.();
       } else {
         const player = room.players.get(socket.data.playerKey);
-        if (player?.socketId === socket.id) { player.connected = false; broadcast(room); }
+        if (player?.socketId === socket.id) { player.connected = false; broadcastPresence(room); }
       }
     });
   });

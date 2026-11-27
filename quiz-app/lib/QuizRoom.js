@@ -130,6 +130,10 @@ class QuizRoom {
     const state = this.common(now);
     const player = this.players.get(key);
     state.me = { key, name: player.name, score: player.score, choice: this.answers.get(key)?.choice ?? null };
+    if (this.index >= 0 && ['question', 'results'].includes(this.phase)) {
+      const question = this.questions[this.index];
+      state.question = { question: question.question, image: question.image || null, choices: question.choices };
+    }
     if (['results', 'leaderboard', 'ended'].includes(this.phase)) {
       state.me.result = this.participants.has(key) ? player.last : null;
       const reward = this.rewardJobs.get(this.roundId);
