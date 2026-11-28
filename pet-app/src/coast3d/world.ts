@@ -15,6 +15,7 @@ import type { TrialModel } from './trial-models';
 export type IslandCollider = { x:number; y:number; z:number; w:number; h:number; d:number; yaw:number; shape?:'round'; walkable?:boolean; noCamera?:boolean; dynamic?:string };
 export type Appearance = { model: T.Object3D; official:boolean; preview?:boolean };
 export const CLUTTER_LAYER = 1;
+export const REFLECT_LAYER = 2;
 const officialGlbUrls=import.meta.glob<string>('./models/*.glb',{eager:true,query:'?url',import:'default'});
 export const OFFICIAL_ASSET_IDS: ReadonlySet<AssetId> = new Set(
   Object.keys(officialGlbUrls).map(file=>file.slice('./models/'.length,-4) as AssetId)
@@ -23,14 +24,14 @@ type Vegetation = { near:T.Vector3; radiusSq:number; chunk:T.InstancedMesh; home
 type OfficialPart = { geometry:T.BufferGeometry; material:T.Material|T.Material[]; canopy:boolean; fadeMaterial?:T.Material|T.Material[]; localCenter:T.Vector3; radius:number };
 const yaxis=new T.Vector3(0,1,0), dynamicMatrix=new T.Matrix4();
 const landmarkAssets = new Set<AssetId>([
-  'crescent','fountain','market-coral','market-salmon','market-canopy','gazebo','flower-arch',
-  'observatory','orrery','waterfall','boathouse','west-bridge','east-bridge','sailboat',
-  'cottage-moss','cottage-clay','cottage-clay-annex','cottage-teal',
+  'crescent','fountain','observatory','waterfall','west-bridge','east-bridge',
 ]);
 const skylineAssets = new Set<AssetId>([
   'pine','green-tree','gold-tree','pink-tree','palm','cliff-rock','shore-rock','parasol',
   'dock-deck','dock-post','west-post','east-post','west-rail','east-rail','market-stall',
   'market-cart','village-cart','lamp','plaza-steps','summit-steps',
+  'market-coral','market-salmon','market-canopy','gazebo','flower-arch','orrery','boathouse','sailboat',
+  'cottage-moss','cottage-clay','cottage-clay-annex','cottage-teal',
 ]);
 const noShadowAssets = new Set<AssetId>([
   'daisy','lavender','hydrangea','shrub','flower-pot','flower-bed',
@@ -49,10 +50,13 @@ const clutterAssets = new Set<AssetId>([
 ]);
 const instancedOfficialAssets = new Set<AssetId>([
   'daisy','lavender','hydrangea','shrub','flower-pot','flower-bed','bench',
-  'village-fence','plaza-railing','summit-rail','dock-post','dock-rope','dock-deck',
+  'village-fence','plaza-railing','summit-rail','summit-steps','dock-post','dock-rope','dock-deck',
   'east-post','west-post','east-rail','west-rail',
   'pine','green-tree','gold-tree','pink-tree','palm','lamp','parasol','market-stall',
+  'market-salmon','market-canopy','market-cart','sailboat',
+  'cottage-moss','cottage-clay','cottage-clay-annex','cottage-teal',
 ]);
+const reflectAssets = new Set<AssetId>(['crescent','fountain','observatory','waterfall']);
 const secondaryPbrMaps = ['normalMap','roughnessMap','metalnessMap','aoMap','bumpMap','displacementMap'] as const;
 let scratchCanvas:HTMLCanvasElement|undefined;
 function resizeTextureToImageData(tex:T.Texture, maxDim:number) {
@@ -121,9 +125,11 @@ function plazaStonework(boxes:IslandCollider[], plants:Placement[], phoneDevice=
   }
   blocks.count=count;blocks.receiveShadow=true;blocks.castShadow=true;
   stonework.add(blocks);
-  // Low curved retaining beds flank the wide southern steps.
+  // Low curved retaining beds flank the wide southern steps (merged by material to minimize draw calls).
   const top=new T.MeshStandardMaterial({color:0xffe4b9,roughness:.85});
   const fill=new T.MeshStandardMaterial({color:0x658444,roughness:.98,side:T.DoubleSide});
+  const wallMat=new T.MeshStandardMaterial({color:0xe4b992,side:T.DoubleSide,roughness:.91});
+  const soilGeos:T.BufferGeometry[]=[], lipGeos:T.BufferGeometry[]=[], wallGeos:T.BufferGeometry[]=[];
   for(const side of [-1,1]){
     const path:number[]=[], indices:number[]=[], profiles:T.Vector3[][]=[[],[]];
     const count=28;
@@ -154,25 +160,33 @@ function plazaStonework(boxes:IslandCollider[], plants:Placement[], phoneDevice=
     }
     const soil=new T.BufferGeometry();
     soil.setAttribute('position',new T.Float32BufferAttribute(path,3));soil.setIndex(indices);soil.computeVertexNormals();
-    const bed=new T.Mesh(soil,fill);bed.receiveShadow=true;stonework.add(bed);
+    soilGeos.push(normalizeForMerge(soil));soil.dispose();
     for(const profile of profiles){
-      const lip=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(profile),44,.15,8),top);
-      lip.castShadow=true;lip.receiveShadow=true;stonework.add(lip);
+      const lipG=new T.TubeGeometry(new T.CatmullRomCurve3(profile),44,.15,8);
+      lipGeos.push(normalizeForMerge(lipG));lipG.dispose();
       const verts=profile.flatMap(p=>[p.x,p.y-.08,p.z,p.x,p.y-.52,p.z]);
       const wall=new T.BufferGeometry();wall.setAttribute('position',new T.Float32BufferAttribute(verts,3));
       wall.setIndex(indices);wall.computeVertexNormals();
-      const masonry=new T.Mesh(wall,new T.MeshStandardMaterial({color:0xe4b992,side:T.DoubleSide,roughness:.91}));
-      masonry.receiveShadow=true;stonework.add(masonry);
+      wallGeos.push(normalizeForMerge(wall));wall.dispose();
     }
     for(const i of [0,count]) {
       const points=profiles.map(row=>row[i]);
       const cap=new T.BufferGeometry();
       cap.setAttribute('position',new T.Float32BufferAttribute(points.flatMap(p=>[p.x,p.y,p.z,p.x,p.y-.52,p.z]),3));
       cap.setIndex([0,1,2,2,1,3]);cap.computeVertexNormals();
-      stonework.add(new T.Mesh(cap,new T.MeshStandardMaterial({color:0xe4b992,side:T.DoubleSide})),
-        new T.Mesh(new T.TubeGeometry(new T.LineCurve3(points[0],points[1]),2,.15,8),top));
+      wallGeos.push(normalizeForMerge(cap));cap.dispose();
+      const endLip=new T.TubeGeometry(new T.LineCurve3(points[0],points[1]),2,.15,8);
+      lipGeos.push(normalizeForMerge(endLip));endLip.dispose();
     }
   }
+  const addMerged=(geos:T.BufferGeometry[],mat:T.Material,name:string,cast:boolean)=>{
+    const merged=mergeGeometries(geos,false);geos.forEach(g=>g.dispose());
+    if(!merged)return;
+    const m=new T.Mesh(merged,mat);m.name=name;m.castShadow=cast;m.receiveShadow=true;stonework.add(m);
+  };
+  addMerged(soilGeos,fill,'plaza-bed-soil',false);
+  addMerged(lipGeos,top,'plaza-bed-lip',!phoneDevice);
+  addMerged(wallGeos,wallMat,'plaza-bed-wall',false);
   return stonework;
 }
 
@@ -269,22 +283,44 @@ function lagoonBotanics() {
   leaf.closePath();
   const blade=new T.ShapeGeometry(leaf).rotateX(-Math.PI/2);
   const pink=new T.SphereGeometry(.20,9,5);
-  const shades=[0x80ae47,0x6d9b42,0x92bd54,0x749742].map(color=>new T.MeshStandardMaterial({color,roughness:.89,side:T.DoubleSide}));
-  const petals=[0xef9db1,0xe588b0,0xf9b9c4].map(color=>new T.MeshStandardMaterial({color,roughness:.75}));
+  const padMat=new T.MeshStandardMaterial({color:0xffffff,roughness:.89,side:T.DoubleSide});
+  const petalMat=new T.MeshStandardMaterial({color:0xffffff,roughness:.75});
   const centre=new T.SphereGeometry(.09,10,6),pollen=new T.MeshStandardMaterial({color:0xfacc69,roughness:.9});
+  const padShades=[0x80ae47,0x6d9b42,0x92bd54,0x749742].map(c=>new T.Color(c));
+  const petalShades=[0xef9db1,0xe588b0,0xf9b9c4].map(c=>new T.Color(c));
+  const padMatrices:T.Matrix4[]=[], padColors:T.Color[]=[];
+  const budMatrices:T.Matrix4[]=[];
+  const petalMatrices:T.Matrix4[]=[], petalColors:T.Color[]=[];
+  const pose=new T.Object3D();
   for(const [gx,gz] of [[59,124],[56,128],[67,130],[62,135],[53,136]])for(let i=0;i<6;i++){
-    const a=i*2.399,r=.56+i*.47,x=gx+Math.sin(a)*r,z=gz+Math.cos(a)*r;
+    const a=i*2.399,rad=.56+i*.47,x=gx+Math.sin(a)*rad,z=gz+Math.cos(a)*rad;
     if(shore(x,z)>-.4)continue;
-    const pad=new T.Mesh(blade,shades[i%4]);pad.position.set(x,.046+i*.002,z);
-    pad.rotation.y=a;pad.scale.setScalar(.57+(i%4)*.21);plants.add(pad);
+    pose.position.set(x,.046+i*.002,z);pose.rotation.set(0,a,0);pose.scale.setScalar(.57+(i%4)*.21);pose.updateMatrix();
+    padMatrices.push(pose.matrix.clone());padColors.push(padShades[i%4]);
     if(i%3!==0)continue;
-    const bud=new T.Mesh(centre,pollen);bud.position.set(x,.19,z);plants.add(bud);
+    pose.position.set(x,.19,z);pose.rotation.set(0,0,0);pose.scale.setScalar(1);pose.updateMatrix();
+    budMatrices.push(pose.matrix.clone());
     for(let j=0;j<7;j++){
       const angle=j*Math.PI*2/7;
-      const petal=new T.Mesh(pink,petals[j%3]);
-      petal.position.set(x+Math.sin(angle)*.12,.135,z+Math.cos(angle)*.12);
-      petal.scale.set(.37,.28,.8);petal.rotation.set(.33,angle,0,'YXZ');plants.add(petal);
+      pose.position.set(x+Math.sin(angle)*.12,.135,z+Math.cos(angle)*.12);
+      pose.scale.set(.37,.28,.8);pose.rotation.set(.33,angle,0,'YXZ');pose.updateMatrix();
+      petalMatrices.push(pose.matrix.clone());petalColors.push(petalShades[j%3]);
     }
+  }
+  if(padMatrices.length){
+    const pads=new T.InstancedMesh(blade,padMat,padMatrices.length);
+    padMatrices.forEach((m,i)=>{pads.setMatrixAt(i,m);pads.setColorAt(i,padColors[i]);});
+    pads.computeBoundingSphere();plants.add(pads);
+  }
+  if(budMatrices.length){
+    const buds=new T.InstancedMesh(centre,pollen,budMatrices.length);
+    budMatrices.forEach((m,i)=>buds.setMatrixAt(i,m));
+    buds.computeBoundingSphere();plants.add(buds);
+  }
+  if(petalMatrices.length){
+    const petals=new T.InstancedMesh(pink,petalMat,petalMatrices.length);
+    petalMatrices.forEach((m,i)=>{petals.setMatrixAt(i,m);petals.setColorAt(i,petalColors[i]);});
+    petals.computeBoundingSphere();plants.add(petals);
   }
   return plants;
 }
@@ -314,8 +350,11 @@ function cottageWalkways() {
 export function lighting(scene:T.Scene) {
   scene.background=new T.Color(0x9ecfd1);
   scene.fog=new T.FogExp2(0xa4cfce,.0054);
-  scene.add(new T.HemisphereLight(0xfff0df,0x9eb9b1,1.56));
+  const hemi=new T.HemisphereLight(0xfff0df,0x9eb9b1,1.56);
+  hemi.layers.enable(REFLECT_LAYER);
+  scene.add(hemi);
   const sun=new T.DirectionalLight(0xffe3be,2.23);
+  sun.layers.enable(REFLECT_LAYER);
   sun.castShadow=true;
   Object.assign(sun.shadow.camera,{left:-62,right:62,top:62,bottom:-62,near:1,far:145});
   sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.00035;sun.shadow.normalBias=.065;
@@ -362,6 +401,14 @@ function enhanceFoliageMaterial(material:T.Material) {
   material.customProgramCacheKey=()=>'moonbay-foliage-sss-v1';
   material.needsUpdate=true;
 }
+function normalizeForMerge(geometry:T.BufferGeometry) {
+  const g=geometry.index?geometry.toNonIndexed():geometry.clone();
+  for(const key of Object.keys(g.attributes)){
+    if(key!=='position'&&key!=='normal'&&key!=='uv')g.deleteAttribute(key);
+  }
+  if(!g.getAttribute('normal'))g.computeVertexNormals();
+  return g;
+}
 function officialInstanceSources(model:T.Object3D, id?:AssetId): OfficialPart[] {
   const parts:OfficialPart[]=[];
   const fadeCache=new Map<T.Material,T.Material>();
@@ -372,6 +419,8 @@ function officialInstanceSources(model:T.Object3D, id?:AssetId): OfficialPart[] 
     return cached;
   };
   model.updateMatrixWorld(true);
+  const grouped=new Map<T.Material,{canopy:boolean;geos:T.BufferGeometry[]}>();
+  const multiMat:OfficialPart[]=[];
   model.traverse(node=>{
     if(!(node instanceof T.Mesh))return;
     let canopy=false;
@@ -380,14 +429,65 @@ function officialInstanceSources(model:T.Object3D, id?:AssetId): OfficialPart[] 
       for(const m of Array.isArray(node.material)?node.material:[node.material])enhanceFoliageMaterial(m);
     }
     const geometry=node.geometry.clone().applyMatrix4(node.matrixWorld);
+    if(Array.isArray(node.material)){
+      geometry.computeBoundingBox();
+      const box=geometry.boundingBox!;
+      multiMat.push({
+        geometry,
+        material:node.material,
+        canopy,
+        fadeMaterial:canopy?node.material.map(toFade):undefined,
+        localCenter:box.getCenter(new T.Vector3()),
+        radius:Math.max(1.4,box.getSize(new T.Vector3()).length()*.28),
+      });
+      return;
+    }
+    const bucket=grouped.get(node.material);
+    if(bucket && bucket.canopy===canopy){
+      bucket.geos.push(geometry);
+    } else if(!bucket){
+      grouped.set(node.material,{canopy,geos:[geometry]});
+    } else {
+      geometry.computeBoundingBox();
+      const box=geometry.boundingBox!;
+      multiMat.push({
+        geometry,
+        material:node.material,
+        canopy,
+        fadeMaterial:canopy?toFade(node.material):undefined,
+        localCenter:box.getCenter(new T.Vector3()),
+        radius:Math.max(1.4,box.getSize(new T.Vector3()).length()*.28),
+      });
+    }
+  });
+  for(const [mat,{canopy,geos}] of grouped){
+    let geometry:T.BufferGeometry;
+    if(geos.length===1){
+      geometry=geos[0];
+    } else {
+      const normalized=geos.map(normalizeForMerge);
+      const merged=mergeGeometries(normalized,false);
+      normalized.forEach(g=>g.dispose());
+      if(merged){
+        geos.forEach(g=>g.dispose());
+        geometry=merged;
+      } else {
+        for(const g of geos){
+          g.computeBoundingBox();
+          const box=g.boundingBox!;
+          parts.push({geometry:g,material:mat,canopy,fadeMaterial:canopy?toFade(mat):undefined,localCenter:box.getCenter(new T.Vector3()),radius:Math.max(1.4,box.getSize(new T.Vector3()).length()*.28)});
+        }
+        continue;
+      }
+    }
     geometry.computeBoundingBox();
     const box=geometry.boundingBox!;
     const localCenter=box.getCenter(new T.Vector3());
     const radius=Math.max(1.4,box.getSize(new T.Vector3()).length()*.28);
-    const fadeMaterial=canopy?(Array.isArray(node.material)?node.material.map(toFade):toFade(node.material)):undefined;
-    parts.push({geometry,material:node.material,canopy,fadeMaterial,localCenter,radius});
-  });
-  return parts;
+    const fadeMaterial=canopy?toFade(mat):undefined;
+    parts.push({geometry,material:mat,canopy,fadeMaterial,localCenter,radius});
+  }
+  return [...parts,...multiMat];
 }
 
 function rockInstanceSources(model:T.Object3D,id:AssetId) {
@@ -897,20 +997,26 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     .map(p=>[p.x,p.z,1.17*(p.scale??1)*(p.stretch?.[0]??1)] as const);
   const edges=new Float32Array((WIDTH+1)*(DEPTH+1));
   const pieces=createTerrain(terrainMaterial,edges), water=createWater(art.water,reefs,edges), scarps=createScarps(textures.rock);
-  const pool=fountainPlacement, basinSize=ASSETS.fountain.size;
-  const fountain=createFountainWater(pool.x,terrain(pool.x,pool.z).y,pool.z,basinSize[0]*pool.scale,basinSize[2]*pool.scale*pool.stretch[1]);
-  const waterfall=createWaterfallWater();
   const sky=createSkyDome();
+  sky.mesh.layers.enable(REFLECT_LAYER);
+  const pool=fountainPlacement, basinSize=ASSETS.fountain.size;
+  const fountain=createFountainWater(pool.x,terrain(pool.x,pool.z).y,pool.z,basinSize[0]*pool.scale,basinSize[2]*pool.scale*pool.stretch[1],{
+    reflectLayer:REFLECT_LAYER,
+    onReflect:(on)=>sky.setReflectMode(on),
+  });
+  const waterfall=createWaterfallWater();
   const moon=moonPlacement, [mw,md,mh]=ASSETS.crescent.size.map((size,i)=>size*moon.scale*moon.stretch[i]);
   const moonBounds=new T.Box3(new T.Vector3(moon.x-mw/2,moon.y,moon.z-md/2),new T.Vector3(moon.x+mw/2,moon.y+mh,moon.z+md/2));
   const boxes:IslandCollider[]=[], planterPlants:Placement[]=[], structures=scarps.map(scarp=>scarp.geometry), vegetation:Vegetation[]=[];
   const gazeboFloors:ReturnType<typeof gazeboFloor>[]=[];
-  const lagoon=lagoonBotanics(), walkways=cottageWalkways();
+  const lagoon=lagoonBotanics(), walkways=cottageWalkways(), stonework=plazaStonework(boxes,planterPlants,phoneDevice), banners=islandBanners();
   if(coarseDevice)walkways.castShadow=false;
   water.layers.set(CLUTTER_LAYER);
   lagoon.traverse(o=>{if(o instanceof T.Mesh)o.layers.set(CLUTTER_LAYER);});
   walkways.layers.set(CLUTTER_LAYER);
-  group.add(sky.mesh,...pieces,...scarps,water,fountain.group,plazaStonework(boxes,planterPlants,phoneDevice),lagoon,islandBanners(),walkways);
+  stonework.traverse(o=>{if(o instanceof T.Mesh)o.layers.enable(REFLECT_LAYER);});
+  banners.traverse(o=>{if(o instanceof T.Mesh)o.layers.enable(REFLECT_LAYER);});
+  group.add(sky.mesh,...pieces,...scarps,water,fountain.group,stonework,lagoon,banners,walkways);
   const officialCanopies: { bounds:T.Box3; meshes:{ mesh:T.Mesh; solid:T.Material|T.Material[]; fade:T.Material|T.Material[] }[] }[]=[];
   const sharedCanopyFade=new Map<T.Material,T.Material>();
   const getCanopyFade=(m:T.Material)=>{
@@ -920,12 +1026,12 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   };
   type Tile = { group:T.Group; x:number; z:number };
   const skylineTiles=new Map<string,Tile>(), detailTiles=new Map<string,Tile>();
-  const tileSize=CHUNK;
   const tileFor=(p:Pick<Placement,'x'|'z'>, id:AssetId)=>{
     const isSky=skylineAssets.has(id) && !(coarseDevice && id==='shore-rock');
     const store=isSky?skylineTiles:detailTiles;
-    const x=Math.floor(p.x/tileSize)*tileSize,z=Math.floor(p.z/tileSize)*tileSize,key=(isSky?'s:':'d:')+x+':'+z;
-    if(!store.has(key)){const tile=new T.Group();tile.name='objects-'+key;store.set(key,{group:tile,x:x+tileSize*.5,z:z+tileSize*.5});group.add(tile);}
+    const step=isSky?CHUNK*2:CHUNK;
+    const x=Math.floor(p.x/step)*step,z=Math.floor(p.z/step)*step,key=(isSky?'s:':'d:')+x+':'+z;
+    if(!store.has(key)){const tile=new T.Group();tile.name='objects-'+key;store.set(key,{group:tile,x:x+step*.5,z:z+step*.5});group.add(tile);}
     return store.get(key)!.group;
   };
   const fadeMaterial=new T.MeshStandardMaterial({vertexColors:true,transparent:true,opacity:.22,depthWrite:false,roughness:.9});
@@ -1066,6 +1172,9 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     [.153,0],[.153,.09],[.111,.12],[.08,.23],[.122,.35],[.122,.4],[.083,.5],[.106,.62],[.168,.66],[.168,.72]
   ].map(([r,y])=>new T.Vector2(r,y)),12);
   const landings=new Set<TerrainNode>();
+  const balusterOffsets:[number,number,number][]=[];
+  const curbMat=new T.MeshStandardMaterial({color:0xd7b69a,side:T.DoubleSide,roughness:.93});
+  const curbGeos:T.BufferGeometry[]=[], railGeos:T.BufferGeometry[]=[];
   type TerrainNode=(typeof staircase)[number]['a'];
   for (const {a,b,rise,modules:count,width,length,pad} of staircase) {
     const dx=b.at[0]-a.at[0],dz=b.at[1]-a.at[1],yaw=Math.atan2(dx,dz);
@@ -1088,13 +1197,12 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     for(const side of [-1,1]){
       const posts:number[]=[], quads=[0,1,2,1,3,2];
       for(const i of [1,2]){
-        const x=values[i*6+(side===1?0:3)],y=values[i*6+1],z=values[i*6+(side===1?2:5)];
+        const x=values[i*6+(side===1?0:3)],y=values[i*6+1],z=values[i*6+2+(side===1?0:3)];
         posts.push(x,y+.035,z,x,y-.79,z);
       }
       const g=new T.BufferGeometry();
       g.setAttribute('position',new T.Float32BufferAttribute(posts,3));g.setIndex(quads);g.computeVertexNormals();
-      const curb=new T.Mesh(g,new T.MeshStandardMaterial({color:0xd7b69a,side:T.DoubleSide,roughness:.93}));
-      curb.receiveShadow=true;group.add(curb);
+      curbGeos.push(normalizeForMerge(g));g.dispose();
       const railPoints:T.Vector3[]=[];
       const lengthOfRail=run-.44,count=Math.ceil(lengthOfRail/.69);
       for(let i=0;i<=count;i++){
@@ -1102,20 +1210,43 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
         const x=a.at[0]+dx*t+side*nx*1.06,z=a.at[1]+dz*t+side*nz*1.06;
         const y=a.y+rise*(t*length-pad)/run;
         railPoints.push(new T.Vector3(x,y+.77,z));
-        const post=new T.Mesh(balusterGeometry,railStone);
-        post.position.set(x,y+.035,z);post.receiveShadow=true;post.castShadow=!coarseDevice;group.add(post);
+        balusterOffsets.push([x,y+.035,z]);
       }
-      const rail=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(railPoints),count*2,.105,8),railStone);
-      rail.castShadow=!coarseDevice;rail.receiveShadow=true;group.add(rail);
+      const railG=new T.TubeGeometry(new T.CatmullRomCurve3(railPoints),count*2,.105,8);
+      railGeos.push(normalizeForMerge(railG));railG.dispose();
     }
     landings.add(a);landings.add(b);
   }
+  if(curbGeos.length){
+    const mergedCurbs=mergeGeometries(curbGeos,false);curbGeos.forEach(g=>g.dispose());
+    if(mergedCurbs){const m=new T.Mesh(mergedCurbs,curbMat);m.name='stair-curbs';m.receiveShadow=true;group.add(m);}
+  }
+  if(railGeos.length){
+    const mergedRails=mergeGeometries(railGeos,false);railGeos.forEach(g=>g.dispose());
+    if(mergedRails){const m=new T.Mesh(mergedRails,railStone);m.name='stair-rails';m.castShadow=!coarseDevice;m.receiveShadow=true;group.add(m);}
+  }
+  if(balusterOffsets.length){
+    const balusters=new T.InstancedMesh(balusterGeometry,railStone,balusterOffsets.length);
+    balusters.name='stair-balusters';
+    const bp=new T.Object3D();
+    balusterOffsets.forEach(([x,y,z],i)=>{bp.position.set(x,y,z);bp.updateMatrix();balusters.setMatrixAt(i,bp.matrix);});
+    balusters.receiveShadow=true;balusters.castShadow=!coarseDevice;balusters.computeBoundingSphere();
+    group.add(balusters);
+  }
+  const landingGeos:T.BufferGeometry[]=[];
+  const baseLanding=new T.CylinderGeometry(STAIR_LANDING_RADIUS,STAIR_LANDING_RADIUS+.08,.39,12);
   for(const node of landings){
-    const landing=new T.Mesh(new T.CylinderGeometry(STAIR_LANDING_RADIUS,STAIR_LANDING_RADIUS+.08,.39,12),landingStone);
-    landing.position.set(node.at[0],node.y-.186,node.at[1]);
-    landing.receiveShadow=true;landing.castShadow=true;group.add(landing);
+    const lg=normalizeForMerge(baseLanding);
+    lg.translate(node.at[0],node.y-.186,node.at[1]);
+    landingGeos.push(lg);
     structures.push(new T.CircleGeometry(STAIR_LANDING_RADIUS,12).rotateX(-Math.PI/2).translate(node.at[0],node.y+.012,node.at[1]));
   }
+  baseLanding.dispose();
+  if(landingGeos.length){
+    const mergedLandings=mergeGeometries(landingGeos,false);landingGeos.forEach(g=>g.dispose());
+    if(mergedLandings){const m=new T.Mesh(mergedLandings,landingStone);m.name='stair-landings';m.receiveShadow=true;m.castShadow=!coarseDevice;group.add(m);}
+  }
+  const foundationGeos:T.BufferGeometry[]=[];
   for(const [id,anchors] of batch) {
     const asset:Asset=ASSETS[id], replace=approved.get(id)??sculpted.get(id);
     const fits=replace?.official?placementFits[id]:undefined;
@@ -1171,6 +1302,26 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     const buckets=new Map<T.Group,Placement[]>();
     if(!direct) for(const p of placements){const tile=tileFor(p,id),own=buckets.get(tile)??[];own.push(p);buckets.set(tile,own);}
     const plinthFootprint=asset.shape==='cottage'?extractPlinthFootprint(model):null;
+    const isReflectLandmark=reflectAssets.has(id)||(!phoneDevice && id==='market-coral');
+    // Build merged world-space limestone foundations for any sloped cottage/market building (works for both direct & instanced!)
+    if(plinthFootprint){
+      for(const p of placements){
+        const baseY=p.y??terrain(p.x,p.z).y;
+        const sc=p.scale??1, [sx,sy,sz]=p.stretch??[1,1,1];
+        const minGround=minFootprintTerrainY(p,plinthFootprint);
+        const dropWorld=baseY-minGround;
+        if(dropWorld>.03){
+          const dropLocal=(dropWorld+.85)/(sy*sc);
+          const geo=buildFoundationGeometry(plinthFootprint,dropLocal,sx*sc,sy*sc,sz*sc);
+          transform.position.set(p.x,baseY,p.z);
+          transform.rotation.set(0,p.yaw,p.roll??0,'YXZ');
+          transform.scale.set(sx,sy,sz).multiplyScalar(sc);
+          transform.updateMatrix();
+          geo.applyMatrix4(transform.matrix);
+          foundationGeos.push(geo);
+        }
+      }
+    }
     // Approved GLBs retain their authored PBR materials and textures.
     if(direct) for(const p of placements) {
       const pose=model.clone(true);
@@ -1178,19 +1329,16 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
       const sc=p.scale??1, [sx,sy,sz]=p.stretch??[1,1,1];
       pose.position.set(p.x,baseY,p.z);pose.rotation.set(0,p.yaw,p.roll??0,'YXZ');
       pose.scale.set(sx,sy,sz).multiplyScalar(sc);
-      if(plinthFootprint){
-        const minGround=minFootprintTerrainY(p,plinthFootprint);
-        const dropWorld=baseY-minGround;
-        if(dropWorld>.03){
-          const dropLocal=(dropWorld+.85)/(sy*sc);
-          const skirt=new T.Mesh(buildFoundationGeometry(plinthFootprint,dropLocal,sx*sc,sy*sc,sz*sc),foundationMaterial);
-          skirt.name=id+'-foundation';
-          pose.add(skirt);
+      pose.traverse(child=>{
+        if(child instanceof T.Mesh){
+          child.castShadow=castShadow;child.receiveShadow=true;
+          if(clutterAssets.has(id))child.layers.set(CLUTTER_LAYER);
+          if(isReflectLandmark)child.layers.enable(REFLECT_LAYER);
         }
-      }
-      pose.traverse(child=>{if(child instanceof T.Mesh){child.castShadow=castShadow;child.receiveShadow=true;if(clutterAssets.has(id))child.layers.set(CLUTTER_LAYER);}});
+      });
       if(id==='waterfall'&&replace.official){
         waterfall.dress(pose);
+        if(isReflectLandmark)pose.traverse(child=>{if(child instanceof T.Mesh)child.layers.enable(REFLECT_LAYER);});
         const bed=pose.getObjectByName('Cascade_bedrock_and_fractured_banks');
         if(bed){
           pose.updateMatrixWorld(true);
@@ -1372,10 +1520,20 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
       }
     }
   }
+  if(foundationGeos.length){
+    const mergedFoundations=mergeGeometries(foundationGeos,false);
+    foundationGeos.forEach(g=>g.dispose());
+    if(mergedFoundations){
+      const foundationsMesh=new T.Mesh(mergedFoundations,foundationMaterial);
+      foundationsMesh.name='island-foundations';
+      foundationsMesh.receiveShadow=true;
+      group.add(foundationsMesh);
+    }
+  }
   // Cape, beach and plains use the same chunk meshes for visible ground and collision.
   const npcs=createNpcWanderSystem(trials,boxes);
   scene.add(group);
-  const skylineRange=phoneDevice?88:coarseDevice?125:220, detailRange=phoneDevice?40:coarseDevice?62:145;
+  const skylineRange=phoneDevice?82:coarseDevice?120:220, detailRange=phoneDevice?36:coarseDevice?58:145;
   const faded = new Map<Vegetation,T.Mesh>();
   const ray=new T.Line3(), closest=new T.Vector3(), canopyRay=new T.Ray(), hit=new T.Vector3();
   function softenCanopies(eye:T.Vector3,subject:T.Vector3) {

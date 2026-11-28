@@ -187,7 +187,7 @@ export class Coast3dView {
       this.tier=detectDeviceTier();
       const coarsePointer=this.tier!=='desktop';
       this.phoneViewport=this.tier==='phone';
-      this.minFrameMs=this.phoneViewport?13:0;
+      this.minFrameMs=this.phoneViewport?11:0;
       const renderer=new T.WebGLRenderer({
         antialias:!this.phoneViewport && !(coarsePointer && (devicePixelRatio||1)>=2),
         alpha:false,
@@ -366,14 +366,54 @@ export class Coast3dView {
           } finally {walker.release();}
           return report;
         };
+        const drawBreakdown=(eye?:[number,number,number],focus?:[number,number,number])=>{
+          const cam=eye&&focus?new T.PerspectiveCamera(48,1648/545,.15,650):this.camera.camera;
+          if(eye&&focus){cam.layers.enable(CLUTTER_LAYER);cam.position.set(...eye);cam.lookAt(...focus);cam.updateMatrixWorld();}
+          const px=eye?eye[0]:this.walk!.position().x, pz=eye?eye[2]:this.walk!.position().z;
+          island.showChunks(px,pz,false);
+          cam.updateMatrixWorld();
+          const frustum=new T.Frustum().setFromProjectionMatrix(new T.Matrix4().multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse));
+          const byName=new Map<string,{calls:number;tris:number}>();
+          let totalCalls=0, totalTris=0;
+          const sphere=new T.Sphere();
+          this.scene.traverse(obj=>{
+            if(!obj.visible)return;
+            for(let cur=obj.parent;cur;cur=cur.parent)if(!cur.visible)return;
+            if(!(obj instanceof T.Mesh))return;
+            if(!obj.layers.test(cam.layers))return;
+            if(obj.frustumCulled){
+              if(!obj.geometry.boundingSphere)obj.geometry.computeBoundingSphere();
+              if(obj instanceof T.InstancedMesh){
+                if(!obj.boundingSphere)obj.computeBoundingSphere();
+                if(obj.boundingSphere){sphere.copy(obj.boundingSphere).applyMatrix4(obj.matrixWorld);if(!frustum.intersectsSphere(sphere))return;}
+              } else if(obj.geometry.boundingSphere){
+                sphere.copy(obj.geometry.boundingSphere).applyMatrix4(obj.matrixWorld);
+                if(!frustum.intersectsSphere(sphere))return;
+              }
+            }
+            const g=obj.geometry;
+            const idx=g.index?g.index.count:(g.attributes.position?.count??0);
+            const count=obj instanceof T.InstancedMesh?obj.count:1;
+            const tris=Math.floor(idx/3)*count;
+            const calls=Array.isArray(obj.material)?obj.material.length:1;
+            const label=(obj.name||obj.parent?.name||'unnamed').replace(/-\d+-\d+$/,'');
+            const cur=byName.get(label)??{calls:0,tris:0};
+            cur.calls+=calls;cur.tris+=tris;byName.set(label,cur);
+            totalCalls+=calls;totalTris+=tris;
+          });
+          const top=[...byName.entries()].map(([name,v])=>({name,...v})).sort((a,b)=>b.tris-a.tris).slice(0,25);
+          const topCalls=[...byName.entries()].map(([name,v])=>({name,...v})).sort((a,b)=>b.calls-a.calls).slice(0,20);
+          return {totalCalls,totalTris,topByTris:top,topByCalls:topCalls};
+        };
         Object.assign(window,{__moonbay3dAudit:run,__moonbay3dTrialPlacements:trialPlacements,__moonbay3dCaptureArt:captureArt,
-          __moonbay3dPhysicsProbe:probe,__moonbay3dFountainFrame:fountainFrame});
+          __moonbay3dPhysicsProbe:probe,__moonbay3dFountainFrame:fountainFrame,__moonbay3dDrawBreakdown:drawBreakdown});
         signal.addEventListener('abort',()=>{
           Reflect.deleteProperty(window,'__moonbay3dAudit');
           Reflect.deleteProperty(window,'__moonbay3dTrialPlacements');
           Reflect.deleteProperty(window,'__moonbay3dCaptureArt');
           Reflect.deleteProperty(window,'__moonbay3dPhysicsProbe');
           Reflect.deleteProperty(window,'__moonbay3dFountainFrame');
+          Reflect.deleteProperty(window,'__moonbay3dDrawBreakdown');
         },{once:true});
       }
       this.scene.add(walker.value.pivot);
@@ -695,8 +735,8 @@ export class Coast3dView {
     const {clientWidth:w,clientHeight:h}=this.root;
     if(!w||!h)return;
     if(this.renderer){
-      const baseDpr=Math.min(devicePixelRatio||1,this.phoneViewport?1.75:this.tier==='tablet'?1.5:1.5);
-      const maxPixels=this.phoneViewport?900000:this.tier==='tablet'?1350000:Infinity;
+      const baseDpr=Math.min(devicePixelRatio||1,this.phoneViewport?1.65:this.tier==='tablet'?1.5:1.5);
+      const maxPixels=this.phoneViewport?720000:this.tier==='tablet'?1250000:Infinity;
       const area=w*h;
       const dpr=area*baseDpr*baseDpr>maxPixels?Math.max(.55,Math.sqrt(maxPixels/area)):baseDpr;
       this.renderer.setPixelRatio(dpr);

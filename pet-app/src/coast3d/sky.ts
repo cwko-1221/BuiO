@@ -1,4 +1,5 @@
 import * as T from 'three';
+import { detectDeviceTier } from './device';
 
 function hash2(ix: number, iy: number, period: number, seed: number) {
   const x = ((ix % period) + period) % period;
@@ -95,11 +96,15 @@ function createCloudNoiseTexture(size = 256) {
 
 export function createSkyDome() {
   const clock = { value: 0 };
+  const uReflect = { value: 0 };
+  const tier = detectDeviceTier();
+  const cloudSteps = tier === 'phone' ? 5 : tier === 'tablet' ? 6 : 8;
   const noiseTex = createCloudNoiseTexture(256);
 
   const material = new T.ShaderMaterial({
     uniforms: {
       clock,
+      uReflect,
       tNoise: { value: noiseTex },
     },
     side: T.BackSide,
@@ -113,6 +118,7 @@ export function createSkyDome() {
       }`,
     fragmentShader: `
       uniform float clock;
+      uniform float uReflect;
       uniform sampler2D tNoise;
       varying vec3 vDir;
 
@@ -123,21 +129,29 @@ export function createSkyDome() {
         return dir.xz * t;
       }
 
-      // 3D sculpted Nubis / Perlin-Worley cumulus density at normalized altitude h in [0, 1]
+      // 3D sculpted Nubis / Perlin-Worley cumulus density with exact macro early-out (skips detail fetches on clear blue sky)
       float sampleCumulus(vec2 uv, float h, float t) {
         vec2 wind = vec2(t * 0.0038, -t * 0.0015);
+        float heightProfile = smoothstep(0.0, 0.16, h) * (1.0 - smoothstep(0.52, 1.0, h) * 0.68);
+        float threshold = 0.445 + h * 0.105;
         vec4 sBase = texture2D(tNoise, uv * 0.28 + wind);
+        float macroCoverage = (sBase.r * 0.66 + sBase.g * 0.34) * heightProfile;
+        if (macroCoverage <= threshold) return 0.0;
         vec4 sBill = texture2D(tNoise, uv * 0.68 - wind * 1.15 + vec2(0.31, 0.17) + h * vec2(0.08, -0.05));
         vec4 sFine = texture2D(tNoise, uv * 1.45 + wind * 1.65 + vec2(0.67, 0.43));
-
-        // Authentic cumulus vertical silhouette: flat wide base (h~0.14), towering cauliflower domes narrowing near top
-        float heightProfile = smoothstep(0.0, 0.16, h) * (1.0 - smoothstep(0.52, 1.0, h) * 0.68);
-        // Classic Nubis base-minus-erosion: plump macro domes carved by high-frequency Worley cauliflower puffs
-        float macroCoverage = (sBase.r * 0.66 + sBase.g * 0.34) * heightProfile;
         float billowErosion = (1.0 - (sBill.g * 0.65 + sFine.b * 0.35)) * (0.15 + 0.13 * h);
         float shape = macroCoverage - billowErosion;
-        float threshold = 0.445 + h * 0.105;
         return smoothstep(threshold, threshold + 0.075, shape);
+      }
+
+      // Fast 1-tap macro density for soft directional sun self-shadowing
+      float sampleCumulusShadow(vec2 uv, float h, float t) {
+        vec2 wind = vec2(t * 0.0038, -t * 0.0015);
+        float heightProfile = smoothstep(0.0, 0.16, h) * (1.0 - smoothstep(0.52, 1.0, h) * 0.68);
+        vec4 sBase = texture2D(tNoise, uv * 0.28 + wind);
+        float macroCoverage = (sBase.r * 0.66 + sBase.g * 0.34) * heightProfile;
+        float threshold = 0.495 + h * 0.115;
+        return smoothstep(threshold, threshold + 0.12, macroCoverage);
       }
 
       void main() {
@@ -162,40 +176,42 @@ export function createSkyDome() {
         float sunDisc = smoothstep(0.9985, 0.9994, sunCos);
         sky += vec3(1.0, 0.92, 0.72) * sunHalo + vec3(1.45, 1.35, 1.10) * sunDisc;
 
-        // 2. High-altitude cirrus wisps + 8-slice 3D Volumetric Cumulus Cloud Deck
+        // 2. High-altitude cirrus wisps + adaptive 3D Volumetric Cumulus Cloud Deck
         if (dir.y > 0.008) {
-          vec2 cirrusP = shellProject(dir, 2.25) * 0.055 + vec2(clock * 0.0014, -clock * 0.0005);
-          float c1 = texture2D(tNoise, cirrusP).a;
-          float c2 = texture2D(tNoise, cirrusP * 2.1 + vec2(0.41, 0.19)).a;
-          float cirrus = smoothstep(0.66, 0.93, c1 * 0.65 + c2 * 0.45) * smoothstep(0.08, 0.30, y) * 0.12;
-          sky = mix(sky, mix(vec3(0.86, 0.94, 1.0), vec3(1.0, 0.97, 0.89), pow(sunCos, 2.0)), cirrus);
+          bool reflectPass = uReflect > 0.5;
+          if (!reflectPass) {
+            vec2 cirrusP = shellProject(dir, 2.25) * 0.055 + vec2(clock * 0.0014, -clock * 0.0005);
+            float c1 = texture2D(tNoise, cirrusP).a;
+            float c2 = texture2D(tNoise, cirrusP * 2.1 + vec2(0.41, 0.19)).a;
+            float cirrus = smoothstep(0.66, 0.93, c1 * 0.65 + c2 * 0.45) * smoothstep(0.08, 0.30, y) * 0.12;
+            sky = mix(sky, mix(vec3(0.86, 0.94, 1.0), vec3(1.0, 0.97, 0.89), pow(sunCos, 2.0)), cirrus);
+          }
 
-          // 8-slice front-to-back volumetric raymarch through towering 3D cumulus layer (H = 0.86 -> 1.88)
           vec3 accumLight = vec3(0.0);
           float transmittance = 1.0;
           vec2 sunOff = normalize(sunDir.xz + vec2(0.0001)) * 0.26;
           float hg = pow(sunCos, 6.0) * 0.52 + pow(sunCos, 2.0) * 0.12;
+          float denom = reflectPass ? 3.0 : float(${cloudSteps});
+          float alphaGain = reflectPass ? 0.92 : (0.70 * 8.0 / float(${cloudSteps}));
 
-          for (int i = 0; i < 8; i++) {
-            float h = (float(i) + 0.5) / 8.0;
+          for (int i = 0; i < ${cloudSteps}; i++) {
+            if (reflectPass && i >= 3) break;
+            float h = (float(i) + 0.5) / denom;
             float alt = mix(0.86, 1.88, h);
             vec2 uv = shellProject(dir, alt) * 0.30;
             float d = sampleCumulus(uv, h, clock);
             if (d > 0.005) {
-              // 1-tap directional sun self-shadow along sun vector + upper altitude step
-              float dSun = sampleCumulus(uv + sunOff, min(0.98, h + 0.20), clock);
-              // Beer-Lambert direct sunlight + subtle powder-sugar edge glow + bright sunlit cumulus crown
+              float dSun = sampleCumulusShadow(uv + sunOff, min(0.98, h + 0.20), clock);
               float sunTrans = exp(-dSun * 2.35);
               float heightLit = smoothstep(0.05, 0.84, h);
               float lit = clamp(sunTrans * (0.44 + 0.56 * heightLit) + heightLit * 0.22, 0.0, 1.0);
 
-              // Lush Ghibli / Mediterranean cloud shading: crisp sunlit warm cream crowns, cool sky-azure shaded bellies!
               vec3 bellyCol = mix(vec3(0.21, 0.39, 0.61), vec3(0.35, 0.54, 0.74), smoothstep(0.0, 0.36, y));
               vec3 crownCol = vec3(1.12, 1.07, 0.99);
               vec3 sampleCol = mix(bellyCol, crownCol, smoothstep(0.14, 0.80, lit));
               sampleCol += vec3(1.0, 0.94, 0.80) * hg * sunTrans * (1.0 - d * 0.42);
 
-              float stepAlpha = clamp(d * 0.70, 0.0, 0.95);
+              float stepAlpha = clamp(d * alphaGain, 0.0, 0.95);
               accumLight += transmittance * sampleCol * stepAlpha;
               transmittance *= (1.0 - stepAlpha);
               if (transmittance < 0.03) break;
@@ -205,7 +221,6 @@ export function createSkyDome() {
           float cloudAlpha = 1.0 - transmittance;
           if (cloudAlpha > 0.002) {
             vec3 cloudRgb = accumLight / max(cloudAlpha, 0.001);
-            // Smooth coastal atmospheric perspective near distant ocean horizon
             float horizonFade = smoothstep(0.015, 0.14, y);
             cloudRgb = mix(horizonLin * 1.04, cloudRgb, 0.42 + 0.58 * horizonFade);
             sky = mix(sky, cloudRgb, cloudAlpha * horizonFade);
@@ -220,7 +235,7 @@ export function createSkyDome() {
       }`,
   });
 
-  const geometry = new T.SphereGeometry(440, 32, 20);
+  const geometry = new T.SphereGeometry(440, 28, 16);
   const mesh = new T.Mesh(geometry, material);
   mesh.name = 'moonbay-sky-dome';
   mesh.renderOrder = -10;
@@ -229,6 +244,9 @@ export function createSkyDome() {
   return {
     mesh,
     clock,
+    setReflectMode(active: boolean) {
+      uReflect.value = active ? 1 : 0;
+    },
     release() {
       geometry.dispose();
       material.dispose();

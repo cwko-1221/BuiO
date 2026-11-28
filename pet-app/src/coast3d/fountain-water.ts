@@ -180,13 +180,16 @@ function splashPlumeGeometry(cx: number, cy: number, cz: number, phase: number) 
   return geometry;
 }
 
-export function createFountainWater(x:number,y:number,z:number,width:number,height:number) {
+export function createFountainWater(
+  x:number,y:number,z:number,width:number,height:number,
+  options?:{ reflectLayer?:number; onReflect?:(active:boolean)=>void },
+) {
   const clock={value:0}, waterline=height*.345, impact=width*.242, basinRadius=width*.446;
   const group=new T.Group();
   group.position.set(x,y,z);
   const tier=detectDeviceTier();
   const compact=tier!=='desktop', phone=tier==='phone';
-  const resolution=phone?224:compact?256:384;
+  const resolution=phone?192:compact?256:384;
   const { normalMap, causticMap } = createWaterTextures(256);
 
   const basin=new Reflector(new T.CircleGeometry(basinRadius,48),{
@@ -337,6 +340,7 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
     },
   });
   basin.rotation.x=-Math.PI/2;basin.position.y=waterline;basin.renderOrder=1;
+  if(options?.reflectLayer!==undefined)basin.camera.layers.set(options.reflectLayer);
   const surfaceMaterial=basin.material as T.ShaderMaterial;
   surfaceMaterial.transparent=true;
   surfaceMaterial.depthWrite=false;
@@ -345,9 +349,9 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   basin.onBeforeRender=()=>{};
   let previousCamera:T.Camera|undefined,lastReflection=-Infinity;
   const lastCamPos=new T.Vector3(Infinity,0,0), lastForward=new T.Vector3(), camForward=new T.Vector3();
-  const maxDistSq = phone ? 3136 : compact ? 5625 : 7744;
-  const moveIntervalMs = phone ? 64 : compact ? 56 : 48;
-  const idleIntervalMs = phone ? 240 : compact ? 180 : 140;
+  const maxDistSq = phone ? 2500 : compact ? 4900 : 7744;
+  const moveIntervalMs = phone ? 85 : compact ? 64 : 48;
+  const idleIntervalMs = phone ? 300 : compact ? 200 : 140;
   const update=(renderer:T.WebGLRenderer,scene:T.Scene,camera:T.Camera,force=false)=>{
     if(!force){
       const dx=x-camera.position.x, dz=z-camera.position.z, distSq=dx*dx+dz*dz;
@@ -372,7 +376,12 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
     const prevShadowNeeds=renderer.shadowMap.needsUpdate;
     renderer.autoClear=true;
     renderer.shadowMap.needsUpdate=false;
-    reflect(renderer,scene,camera,basin.geometry,surfaceMaterial,null!);
+    options?.onReflect?.(true);
+    try {
+      reflect(renderer,scene,camera,basin.geometry,surfaceMaterial,null!);
+    } finally {
+      options?.onReflect?.(false);
+    }
     renderer.shadowMap.needsUpdate=prevShadowNeeds;
     renderer.autoClear=prevClear;
     renderer.setRenderTarget(prevTarget);
@@ -385,15 +394,21 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
     const prevVisible=basin.visible;
     const prevClear=renderer.autoClear;
     const warmCam=new T.PerspectiveCamera(155,1,.2,450);
+    if(options?.reflectLayer!==undefined)warmCam.layers.set(options.reflectLayer);
     basin.visible=false;
     renderer.shadowMap.autoUpdate=false;
     renderer.autoClear=true;
     renderer.setRenderTarget(basin.getRenderTarget());
-    for(const lookZ of [z-20,z+20]){
-      warmCam.position.set(x,y+12,z);
-      warmCam.lookAt(x,y+6,lookZ);
-      warmCam.updateMatrixWorld();
-      renderer.render(scene,warmCam);
+    options?.onReflect?.(true);
+    try {
+      for(const lookZ of [z-20,z+20]){
+        warmCam.position.set(x,y+12,z);
+        warmCam.lookAt(x,y+6,lookZ);
+        warmCam.updateMatrixWorld();
+        renderer.render(scene,warmCam);
+      }
+    } finally {
+      options?.onReflect?.(false);
     }
     basin.visible=prevVisible;
     renderer.shadowMap.autoUpdate=prevShadow;
@@ -525,6 +540,7 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   if(mergedJets){
     const jets=new T.Mesh(mergedJets,runningWater);
     jets.renderOrder=2;
+    if(options?.reflectLayer!==undefined)jets.layers.enable(options.reflectLayer);
     group.add(jets);
   }
   const mergedSplashes=mergeGeometries(splashGeos,false);
@@ -532,6 +548,7 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   if(mergedSplashes){
     const splashes=new T.Mesh(mergedSplashes,splashMaterial);
     splashes.renderOrder=3;
+    if(options?.reflectLayer!==undefined)splashes.layers.enable(options.reflectLayer);
     group.add(splashes);
   }
 

@@ -52,48 +52,71 @@ export function groundMaterials(art:ArtMaterials={}) {
         float grassVariation=.5+.5*cos(metres.y*.66-metres.x*.51+sin(metres.x*.108));
         groundColor=mix(groundColor*vec3(.86,1.09,.69),groundColor*vec3(1.13,1.23,.91),meadows);
         groundColor*=.97+.075*grassVariation;
-        vec3 earth=texture2D(soilDetail,metres*${art.soil?'.38':'.52'}).rgb;
-        float grains=dot(earth,vec3(.299,.587,.114));
-        earth=mix(earth,vec3(.70,.47,.26)*(.78+.48*grains),.78);
-        vec3 paving=texture2D(stoneDetail,metres*${art.stone?'.29':'.83'}).rgb;
-        float villageRoad=smoothstep(132.0,139.5,metres.y)*smoothstep(71.0,85.0,metres.x);
-        float gravel=dot(${phone?'paving':'texture2D(stoneDetail,metres*.92).rgb'},vec3(.30,.57,.13));
-        vec3 warmTrack=mix(earth*vec3(1.10,.96,.91),vec3(.82,.57,.36),.20)*(.89+.31*gravel);
-        groundColor=mix(groundColor,mix(earth,warmTrack,villageRoad),vBlend.x);
-        vec2 plaza=metres-vec2(121.0,88.0);float plazaRadius=length(plaza);
-        float angle=atan(plaza.y,plaza.x);
-        float swept=floor(plazaRadius/.72);
-        float joint=abs(fract(angle*(4.+swept)*.95+mod(swept,2.)*.5)-.5);
-        float radiusJoint=abs(fract(plazaRadius/.72)-.5);
-        vec3 radial=mix(vec3(.66,.45,.32),vec3(.85,.65,.48),.5+.26*sin(angle*(5.+swept*1.13)+swept*6.1));
-        radial*=1.-.14*max(smoothstep(.456,.50,joint),smoothstep(.453,.50,radiusJoint));
-        float ring=(1.-smoothstep(.12,.24,abs(plazaRadius-17.5)))+.85*(1.-smoothstep(.16,.32,abs(plazaRadius-21.4)));
-        float inlay=max(1.-smoothstep(.22,.46,abs(plazaRadius-18.3)),1.-smoothstep(.24,.47,abs(plazaRadius-22.4)));
-        radial=mix(radial,radial*vec3(.83,.67,.47),min(.65,ring*.60));
-        radial=mix(radial,radial*vec3(1.19,1.15,1.09),inlay*.70);
-        paving=mix(paving,radial,1.-smoothstep(22.8,24.3,plazaRadius));
-        vec2 market=metres-vec2(66.0,50.6);
-        float marketRadius=length(market);
-        float marketTiles=1.-smoothstep(19.,29.,length(market*vec2(.77,1.23)));
-        vec2 brick=vec2(market.x+.39*mod(floor(market.y/.52),2.),market.y);
-        vec2 seam=abs(fract(brick/vec2(.78,.52))-.5);
-        float mortar=smoothstep(.455,.50,max(seam.x,seam.y));
-        vec3 coral=vec3(.70,.44,.31)*(.93+.15*sin(brick.x*8.+brick.y*5.));
-        coral=mix(coral,vec3(.83,.62,.43),mortar*.60);
-        float medallion=max(1.-smoothstep(.08,.21,abs(marketRadius-3.18)),1.-smoothstep(.12,.24,abs(marketRadius-2.71)));
-        coral=mix(coral,vec3(.91,.72,.49),medallion);
-        paving=mix(paving,coral,.86*marketTiles);
-        groundColor=mix(groundColor,paving,vBlend.y);
-        vec3 sand=texture2D(sandDetail,metres*.47).rgb;
-        sand*=mix(vec3(.73,.68,.62),vec3(1.08,1.04,.98),smoothstep(.04,.66,tideHeight));
-        groundColor=mix(groundColor,sand,vBlend.z);
-        vec3 strataA=texture2D(rockDetail,vec2(metres.x+metres.y*.31,tideHeight*.41)*.62).rgb;
-        ${phone?'vec3 strataB=strataA;':'vec3 strataB=texture2D(rockDetail,vec2(metres.y-metres.x*.43,tideHeight*.76)*.92).rgb;'}
-        float exposure=.5+.5*sin(metres.x*.23+metres.y*.32);
-        float bedline=sin(tideHeight*2.82+sin(metres.x*.33+metres.y*.44)*.71);
-        vec3 grit=mix(strataA,strataB,.43)*mix(vec3(.89,.90,1.00),vec3(1.16,1.11,1.03),exposure);
-        grit*=.94+.11*bedline;
-        groundColor=mix(groundColor,grit,vBlend.w);
+        vec3 paving=vec3(0.);
+        bool sampledPaving=false;
+        if(vBlend.x>.004){
+          vec3 earth=texture2D(soilDetail,metres*${art.soil?'.38':'.52'}).rgb;
+          float grains=dot(earth,vec3(.299,.587,.114));
+          earth=mix(earth,vec3(.70,.47,.26)*(.78+.48*grains),.78);
+          float villageRoad=smoothstep(132.0,139.5,metres.y)*smoothstep(71.0,85.0,metres.x);
+          if(villageRoad>.004){
+            if(${phone?'true':'false'}){
+              paving=texture2D(stoneDetail,metres*${art.stone?'.29':'.83'}).rgb;
+              sampledPaving=true;
+            }
+            float gravel=dot(${phone?'paving':'texture2D(stoneDetail,metres*.92).rgb'},vec3(.30,.57,.13));
+            vec3 warmTrack=mix(earth*vec3(1.10,.96,.91),vec3(.82,.57,.36),.20)*(.89+.31*gravel);
+            earth=mix(earth,warmTrack,villageRoad);
+          }
+          groundColor=mix(groundColor,earth,vBlend.x);
+        }
+        if(vBlend.y>.004){
+          if(!sampledPaving)paving=texture2D(stoneDetail,metres*${art.stone?'.29':'.83'}).rgb;
+          vec2 plaza=metres-vec2(121.0,88.0);float plazaRadius=length(plaza);
+          if(plazaRadius<24.5){
+            float angle=atan(plaza.y,plaza.x);
+            float swept=floor(plazaRadius/.72);
+            float joint=abs(fract(angle*(4.+swept)*.95+mod(swept,2.)*.5)-.5);
+            float radiusJoint=abs(fract(plazaRadius/.72)-.5);
+            vec3 radial=mix(vec3(.66,.45,.32),vec3(.85,.65,.48),.5+.26*sin(angle*(5.+swept*1.13)+swept*6.1));
+            radial*=1.-.14*max(smoothstep(.456,.50,joint),smoothstep(.453,.50,radiusJoint));
+            float ring=(1.-smoothstep(.12,.24,abs(plazaRadius-17.5)))+.85*(1.-smoothstep(.16,.32,abs(plazaRadius-21.4)));
+            float inlay=max(1.-smoothstep(.22,.46,abs(plazaRadius-18.3)),1.-smoothstep(.24,.47,abs(plazaRadius-22.4)));
+            radial=mix(radial,radial*vec3(.83,.67,.47),min(.65,ring*.60));
+            radial=mix(radial,radial*vec3(1.19,1.15,1.09),inlay*.70);
+            paving=mix(paving,radial,1.-smoothstep(22.8,24.3,plazaRadius));
+          }
+          vec2 market=metres-vec2(66.0,50.6);
+          float marketEllip=length(market*vec2(.77,1.23));
+          if(marketEllip<29.2){
+            float marketRadius=length(market);
+            float marketTiles=1.-smoothstep(19.,29.,marketEllip);
+            vec2 brick=vec2(market.x+.39*mod(floor(market.y/.52),2.),market.y);
+            vec2 seam=abs(fract(brick/vec2(.78,.52))-.5);
+            float mortar=smoothstep(.455,.50,max(seam.x,seam.y));
+            vec3 coral=vec3(.70,.44,.31)*(.93+.15*sin(brick.x*8.+brick.y*5.));
+            coral=mix(coral,vec3(.83,.62,.43),mortar*.60);
+            float medallion=max(1.-smoothstep(.08,.21,abs(marketRadius-3.18)),1.-smoothstep(.12,.24,abs(marketRadius-2.71)));
+            coral=mix(coral,vec3(.91,.72,.49),medallion);
+            paving=mix(paving,coral,.86*marketTiles);
+          }
+          groundColor=mix(groundColor,paving,vBlend.y);
+        }
+        if(vBlend.z>.004){
+          vec3 sand=texture2D(sandDetail,metres*.47).rgb;
+          sand*=mix(vec3(.73,.68,.62),vec3(1.08,1.04,.98),smoothstep(.04,.66,tideHeight));
+          groundColor=mix(groundColor,sand,vBlend.z);
+        }
+        vec3 grit=groundColor;
+        if(vBlend.w>.004){
+          vec3 strataA=texture2D(rockDetail,vec2(metres.x+metres.y*.31,tideHeight*.41)*.62).rgb;
+          ${phone?'vec3 strataB=strataA;':'vec3 strataB=texture2D(rockDetail,vec2(metres.y-metres.x*.43,tideHeight*.76)*.92).rgb;'}
+          float exposure=.5+.5*sin(metres.x*.23+metres.y*.32);
+          float bedline=sin(tideHeight*2.82+sin(metres.x*.33+metres.y*.44)*.71);
+          grit=mix(strataA,strataB,.43)*mix(vec3(.89,.90,1.00),vec3(1.16,1.11,1.03),exposure);
+          grit*=.94+.11*bedline;
+          groundColor=mix(groundColor,grit,vBlend.w);
+        }
         float lightPatch=sin(metres.x*.32+sin(metres.y*.13))*sin(metres.y*.23);
         diffuseColor.rgb*=groundColor*(1.04+lightPatch*.085);
         ${phone?'':'float grainHeight=mix(dot(groundColor,vec3(.31,.52,.17))*.071,dot(grit,vec3(.29,.55,.16))*.24,vBlend.w);'}
@@ -119,15 +142,18 @@ export function createTerrain(material:T.Material, edgesOut?:Float32Array) {
     if(edgesOut)edgesOut[z*(WIDTH+1)+x]=v.edge;
   }
   // Normals use the same neighbours on both sides of every chunk boundary.
+  // Use 32x32m terrain tiles (48 chunks total vs 180) to slash draw calls while keeping crisp frustum culling.
+  const tileStep=CHUNK*2;
   const get=(x:number,z:number)=>vertices[Math.min(DEPTH,Math.max(0,z))*(WIDTH+1)+Math.min(WIDTH,Math.max(0,x))];
-  for(let z0=0;z0<DEPTH;z0+=CHUNK) for(let x0=0;x0<WIDTH;x0+=CHUNK) {
+  for(let z0=0;z0<DEPTH;z0+=tileStep) for(let x0=0;x0<WIDTH;x0+=tileStep) {
+    const nx=Math.min(tileStep,WIDTH-x0), nz=Math.min(tileStep,DEPTH-z0);
     const xyz:number[]=[], blend:number[]=[], normals:number[]=[], uv:number[]=[], height:number[]=[], indices:number[]=[];
-    for(let j=0;j<=CHUNK;j++) for(let i=0;i<=CHUNK;i++) {
+    for(let j=0;j<=nz;j++) for(let i=0;i<=nx;i++) {
       const x=x0+i,z=z0+j, v=get(x,z);
       xyz.push(x,v.y,z); blend.push(v.soil,v.stone,v.sand,v.rock); uv.push(x,z); height.push(v.y);
-      const nx=get(x-1,z).y-get(x+1,z).y,nz=get(x,z-1).y-get(x,z+1).y;
-      const len=Math.hypot(nx,2,nz);normals.push(nx/len,2/len,nz/len);
-      if(i<CHUNK && j<CHUNK) { const a=j*(CHUNK+1)+i,b=a+CHUNK+1;indices.push(a,b,a+1,a+1,b,b+1); }
+      const gx=get(x-1,z).y-get(x+1,z).y,gz=get(x,z-1).y-get(x,z+1).y;
+      const len=Math.hypot(gx,2,gz);normals.push(gx/len,2/len,gz/len);
+      if(i<nx && j<nz) { const a=j*(nx+1)+i,b=a+nx+1;indices.push(a,b,a+1,a+1,b,b+1); }
     }
     const g=new T.BufferGeometry();
     g.setAttribute('position',new T.Float32BufferAttribute(xyz,3));
@@ -136,7 +162,7 @@ export function createTerrain(material:T.Material, edgesOut?:Float32Array) {
     g.setAttribute('altitude',new T.Float32BufferAttribute(height,1));
     g.setAttribute('uv',new T.Float32BufferAttribute(uv,2));g.setIndex(indices);
     const mesh=new T.Mesh(g,material);
-    mesh.name='terrain-'+(x0/CHUNK)+'-'+(z0/CHUNK);mesh.receiveShadow=true;
+    mesh.name='terrain-'+(x0/tileStep)+'-'+(z0/tileStep);mesh.receiveShadow=true;
     pieces.push(mesh);
   }
   return pieces;
