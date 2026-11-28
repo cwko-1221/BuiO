@@ -127,8 +127,12 @@ export type WalkerPoseOptions = {
   landSquash?: number;
 };
 
+export function hasWalker(petId: string) {
+  return Object.hasOwn(pets, petId);
+}
+
 export async function loadWalker(petId: string, height = 5.0) {
-  const companion = !pets[petId], id = pets[petId] ?? 'golden-pup';
+  const companion = !hasWalker(petId), id = companion ? 'golden-pup' : pets[petId];
   const loader = new GLTFLoader();
   // Decode embedded images through Image; the app's image policy allows blob URLs.
   loader.register(parser => {

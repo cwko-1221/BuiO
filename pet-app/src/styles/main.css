@@ -257,12 +257,10 @@ img { max-width: 100%; }
 .room-bar-stage { font-weight: 600; font-size: .82rem; color: var(--ink-soft); }
 .room-bar-identity .progress { flex: 1 1 140px; min-width: 120px; max-width: 320px; }
 
-/* Six equal actions on one row (or two complete rows of three on phones). These are
-   the primary controls of the app, so
-   they get a generous target rather than the 32px chips they replaced. */
+/* Equal action targets on desktop, with up to three actions per row on phones. */
 .room-bar-actions {
   display: grid; gap: var(--s1);
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(1px, 1fr));
 }
 .room-bar-actions button {
   min-height: 56px; padding: var(--s1);
@@ -321,6 +319,34 @@ img { max-width: 100%; }
 #coin-pusher-root .coin-pusher-fallback b { font-size: var(--fs-title); }
 #coin-pusher-root .coin-pusher-fallback span { color: #f3e9ff; }
 #game-root canvas { display: block; }
+#game-root.room-touch-surface { touch-action: none; }
+.room-joystick {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  translate: -50% -50%;
+  width: 98px;
+  height: 98px;
+  border-radius: 50%;
+  border: 2px solid #fff2cfba;
+  background: radial-gradient(circle, #59472c30, #4b392c8a);
+  box-shadow: inset 0 0 0 9px #fff2cf20, 0 4px 16px #42341b52;
+  pointer-events: none;
+}
+.room-joystick[hidden] { display: none; }
+.room-joystick span {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid #8a704288;
+  background: radial-gradient(circle at 35% 32%, #fff 0%, #fff3d2 60%, #eac88a 100%);
+  box-shadow: 0 3px 9px #42341b52;
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  .room-joystick { width: 78px; height: 78px; }
+  .room-joystick span { width: 30px; height: 30px; }
+}
 
 .side-panel {
   position: relative; min-width: 0; overflow: hidden;
