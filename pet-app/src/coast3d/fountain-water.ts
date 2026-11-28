@@ -23,47 +23,26 @@ function tileableValueNoise(u: number, v: number, period: number, seed: number) 
   return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
 }
 
-function tileableVoronoi(u: number, v: number, cells: number, seed: number) {
-  const fx = u * cells, fy = v * cells;
-  const ix = Math.floor(fx), iy = Math.floor(fy);
-  let f1 = 9, f2 = 9;
-  for (let oy = -1; oy <= 1; oy++) {
-    for (let ox = -1; ox <= 1; ox++) {
-      const cx = ix + ox, cy = iy + oy;
-      const rx = cx + 0.15 + 0.70 * hash2(cx, cy, cells, seed);
-      const ry = cy + 0.15 + 0.70 * hash2(cx, cy, cells, seed + 19.3);
-      const dx = rx - fx, dy = ry - fy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < f1) { f2 = f1; f1 = dist; }
-      else if (dist < f2) { f2 = dist; }
-    }
-  }
-  // Sharp optical caustic filament along Voronoi cell ridges (where F2 - F1 approaches 0).
-  const ridge = Math.max(0, 1 - (f2 - f1) * 2.8);
-  const cellGlow = Math.pow(Math.min(1, f1 * 1.15), 2.4);
-  return Math.min(1, ridge * ridge * 0.85 + cellGlow * 0.45);
-}
-
-/** Generate seamless tileable tangent-space water normal+height map and Voronoi optical caustic map once. */
+/** Generate seamless multi-scale liquid wave normal map, soft organic light-ribbon map, and lacy foam noise. */
 function createWaterTextures(size = 256) {
   const heights = new Float32Array(size * size);
   for (let y = 0; y < size; y++) {
     const v = y / size;
     for (let x = 0; x < size; x++) {
       const u = x / size;
-      // 4-octave periodic fBm wave height field (zero seams, zero directional plaid).
+      // Rich smooth swells + medium capillary ripples (no harsh polygonal net).
       const h =
-        tileableValueNoise(u, v, 6, 1.1) * 0.48 +
-        tileableValueNoise(u, v, 12, 3.7) * 0.28 +
-        tileableValueNoise(u, v, 24, 7.3) * 0.15 +
-        tileableValueNoise(u, v, 48, 13.9) * 0.09;
+        tileableValueNoise(u, v, 5, 1.1) * 0.48 +
+        tileableValueNoise(u, v, 11, 3.7) * 0.30 +
+        tileableValueNoise(u, v, 21, 7.3) * 0.15 +
+        tileableValueNoise(u, v, 36, 13.9) * 0.07;
       heights[y * size + x] = h;
     }
   }
 
   const normalData = new Uint8Array(size * size * 4);
   const causticData = new Uint8Array(size * size * 4);
-  const strength = 5.2;
+  const strength = 4.4;
 
   for (let y = 0; y < size; y++) {
     const ym = (y - 1 + size) % size, yp = (y + 1) % size;
@@ -81,14 +60,19 @@ function createWaterTextures(size = 256) {
       normalData[idx + 2] = Math.round((invLen * 0.5 + 0.5) * 255);
       normalData[idx + 3] = Math.round(Math.min(1, Math.max(0, h)) * 255);
 
-      const c1 = tileableVoronoi(u, v, 7, 5.2);
-      const c2 = tileableVoronoi(u, v, 11, 21.4);
+      // Soft organic wave-ribbon light fields (flowing sunlit bands, zero Voronoi polygons/mesh).
+      const warpU = u + (tileableValueNoise(u, v, 4, 9.1) - 0.5) * 0.14;
+      const warpV = v + (tileableValueNoise(u, v, 4, 15.7) - 0.5) * 0.14;
+      const ribbon1 = Math.sin((warpU * 2.0 + warpV * 1.0) * Math.PI * 2) * 0.5 + 0.5;
+      const ribbon2 = Math.sin((warpU * -1.0 + warpV * 2.0) * Math.PI * 2) * 0.5 + 0.5;
+      const softLight1 = Math.pow(ribbon1 * tileableValueNoise(u, v, 5, 5.2), 1.35);
+      const softLight2 = Math.pow(ribbon2 * tileableValueNoise(u, v, 6, 21.4), 1.35);
       const foam =
-        tileableValueNoise(u, v, 10, 31.1) * 0.52 +
-        tileableValueNoise(u, v, 22, 47.3) * 0.32 +
-        tileableValueNoise(u, v, 44, 63.7) * 0.16;
-      causticData[idx] = Math.round(Math.min(1, c1) * 255);
-      causticData[idx + 1] = Math.round(Math.min(1, c2) * 255);
+        tileableValueNoise(u, v, 10, 31.1) * 0.46 +
+        tileableValueNoise(u, v, 22, 47.3) * 0.34 +
+        tileableValueNoise(u, v, 44, 63.7) * 0.20;
+      causticData[idx] = Math.round(Math.min(1, softLight1 * 1.5) * 255);
+      causticData[idx + 1] = Math.round(Math.min(1, softLight2 * 1.5) * 255);
       causticData[idx + 2] = Math.round(Math.min(1, foam) * 255);
       causticData[idx + 3] = 255;
     }
@@ -202,7 +186,7 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   group.position.set(x,y,z);
   const tier=detectDeviceTier();
   const compact=tier!=='desktop', phone=tier==='phone';
-  const resolution=phone?224:256;
+  const resolution=phone?224:compact?256:384;
   const { normalMap, causticMap } = createWaterTextures(256);
 
   const basin=new Reflector(new T.CircleGeometry(basinRadius,48),{
@@ -238,91 +222,114 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
           float pr=length(p);
           vec2 radialDir=p/(pr+.001);
 
-          // Dual counter-flowing seamless fBm normal maps (zero directional sine-plaid artifacts).
-          vec2 uvA=p*.17-radialDir*(clock*.026)+vec2(clock*.018,-clock*.014);
+          // 3-layer physical liquid wave normals:
+          // (1) medium basin swells + (2) ambient cross-chop + (3) crisp capillary micro-ripples.
+          vec2 uvA=p*.17-radialDir*(clock*.026)+vec2(clock*.016,-clock*.013);
           vec2 rotP=vec2(p.x*.80-p.y*.60,p.x*.60+p.y*.80);
-          vec2 uvB=rotP*.33+vec2(-clock*.024,clock*.029);
+          vec2 uvB=rotP*.36+vec2(-clock*.025,clock*.028);
+          vec2 uvC=p*.82+vec2(clock*.042,clock*.034);
           vec4 sA=texture2D(tNormal,uvA);
           vec4 sB=texture2D(tNormal,uvB);
+          vec4 sC=texture2D(tNormal,uvC);
           vec2 nA=(sA.xy*2.-1.);
           vec2 nB=(sB.xy*2.-1.);
-          vec2 slope=nA*.16+nB*.11;
+          vec2 nC=(sC.xy*2.-1.);
+          vec2 slope=nA*.22+nB*.20+nC*.14;
 
-          // Subtle analytic concentric ripples & organic aeration foam around each of the 8 jet landings.
-          float foamNoise=texture2D(tCaustic,p*.46-radialDir*(clock*.08)).b;
+          // Organically warped 8-jet interfering wave heightfield (softly broken up by turbulence — ZERO compass bullseyes!).
+          float foamN1=texture2D(tCaustic,p*.68-radialDir*(clock*.12)).b;
+          float foamN2=texture2D(tCaustic,rotP*1.45+vec2(clock*.08,-clock*.10)).b;
+          float crispBubble=foamN1*.54+foamN2*.60;
+          float ringTurb=(sA.a-.5)*.44+(sB.a-.5)*.24;
+          float ringMod=.56+.74*sB.a;
           float foam=0.;
-          if(abs(pr-impact)<2.15){
-            const vec2 J0=vec2(1.,0.),J1=vec2(.70710678,.70710678),J2=vec2(0.,1.),J3=vec2(-.70710678,.70710678);
-            for(int i=0;i<8;i++){
-              vec2 dir=i==0?J0:i==1?J1:i==2?J2:i==3?J3:i==4?-J0:i==5?-J1:i==6?-J2:-J3;
-              if(dot(p,dir)<=0.)continue;
-              vec2 offset=p-impact*dir;
-              float d2=dot(offset,offset);
-              if(d2<3.8){
-                float d=sqrt(d2);
-                // Smooth cubic envelope prevents any visible hard circle cutoff.
-                float env=smoothstep(1.92,.14,d)*smoothstep(.02,.16,d);
-                float ripple=cos(d*15.5-clock*8.8)*env;
-                slope+=(offset/(d+.06))*ripple*.095;
-                // Organic aerated bubble cloud breaking up with multi-octave noise.
-                float core=smoothstep(.42,.05,d);
-                float cloud=smoothstep(.88,.18,d)*smoothstep(.36,.74,foamNoise);
-                float ring=max(0.,sin(d*15.5-clock*8.8))*smoothstep(1.25,.24,d)*smoothstep(.42,.78,foamNoise)*.22;
-                foam+=core*.62+cloud*.48+ring;
+          float waveDiv=0.;
+          const vec2 J0=vec2(1.,0.),J1=vec2(.70710678,.70710678),J2=vec2(0.,1.),J3=vec2(-.70710678,.70710678);
+          for(int i=0;i<8;i++){
+            vec2 dir=i==0?J0:i==1?J1:i==2?J2:i==3?J3:i==4?-J0:i==5?-J1:i==6?-J2:-J3;
+            vec2 offset=p-impact*dir;
+            float d2=dot(offset,offset);
+            if(d2<8.0){
+              float d=sqrt(d2);
+              float dWarp=d+ringTurb*smoothstep(.10,1.05,d);
+              float atten=1./(1.+d*d*1.12)*smoothstep(2.75,.22,d)*smoothstep(.02,.10,d)*ringMod;
+              float w1=cos(dWarp*11.4-clock*7.4);
+              float w2=cos(dWarp*19.5-clock*10.8)*.36;
+              float rip=(w1+w2)*atten;
+              slope+=(offset/(d+.06))*rip*.095;
+              waveDiv+=(-sin(dWarp*11.4-clock*7.4))*atten;
+              if(d<.52){
+                // Crisp, compact lacy bubble boil strictly at plunge core (<0.46m), zero outer halo rings.
+                float core=smoothstep(.25,.03,d)*smoothstep(.18,.54,crispBubble);
+                float lace=smoothstep(.46,.12,d)*smoothstep(.50,.80,crispBubble);
+                foam+=core*1.18+lace*.78;
               }
             }
           }
 
           vec3 eye=normalize(cameraPosition-worldPoint);
           vec3 normal=normalize(vec3(slope.x,1.,-slope.y));
+          // High-frequency capillary micro-normal solely for discrete pinprick sunlit diamond sparkles.
+          vec3 microNormal=normalize(vec3(slope.x+nC.x*.28+nB.x*.10,1.,-(slope.y+nC.y*.28+nB.y*.10)));
+          vec3 sun=normalize(vec3(-.45,.78,.43));
+          vec3 skyKey=normalize(vec3(.24,.64,-.73));
 
-          // Physical Schlick Fresnel (F0 = 0.02 for pure water).
+          // True physical Schlick Fresnel (F0 = 0.02, power ~4.8): crystal-clear looking down, silky mirror at grazing angles.
           float ndv=clamp(dot(eye,normal),0.,1.);
-          float fresnel=.02+.98*pow(1.-ndv,4.6);
-          float reflWeight=clamp(.12+.84*pow(1.-ndv,2.5),.12,.94);
+          float fresnel=.02+.98*pow(1.-ndv,4.8);
+          float reflWeight=clamp(.03+.84*pow(1.-ndv,4.2),.03,.85);
 
-          // Live reflection gently rippled by organic tangent-space normals.
-          vec2 reflUv=reflection.xy/reflection.w+slope*.048;
+          // Silky organic live reflection warp (0.088) so moon, plinth, trees & banners shimmer naturally.
+          vec2 reflUv=reflection.xy/reflection.w+slope*.088;
           vec3 mirror=texture2D(tDiffuse,clamp(reflUv,.002,.998)).rgb;
 
-          // Realistic depth absorption across the stone fountain trough.
-          float outerShallow=1.-smoothstep(radius*.72,radius,pr);
-          float innerShallow=smoothstep(radius*.26,radius*.48,pr);
-          float depth=clamp(outerShallow*innerShallow,0.,1.);
+          // True Beer-Lambert optical depth & wet-stone AO (TRUE LINEAR RGB for ACES + sRGB output).
+          float outerShallow=1.-smoothstep(radius*.60,radius,pr);
+          float innerTrough=smoothstep(radius*.25,radius*.46,pr);
+          float depth=clamp(outerShallow*innerTrough,0.,1.);
+          float plinthAO=smoothstep(radius*.21,radius*.40,pr);
+          float rimAO=1.-smoothstep(radius*.90,radius*.998,pr)*.36;
+          float sunSide=clamp(.5+.5*dot(radialDir,normalize(vec2(-.45,.43))),0.,1.);
 
-          // Real Voronoi optical caustics refracted onto the sunlit shallow basin floor.
-          vec2 cUv1=p*.24+slope*.34+vec2(clock*.024,-clock*.018);
-          vec2 cUv2=rotP*.30-slope*.26+vec2(-clock*.021,clock*.026);
-          float caust1=texture2D(tCaustic,cUv1).r;
-          float caust2=texture2D(tCaustic,cUv2).g;
-          float caustics=pow(clamp(caust1*.68+caust2*.68,0.,1.),2.0)*(1.-fresnel*.65)*(.55+.45*outerShallow);
+          // Silky continuous Mediterranean resort water (zero blotchy patches!):
+          // pure Beer-Lambert depth absorption + smooth sunlight scatter + delicate wave-crest highlight.
+          vec3 shallowLinear=vec3(.018,.39,.46);
+          vec3 midLinear=vec3(.0045,.195,.32);
+          vec3 deepLinear=vec3(.0018,.068,.165);
+          vec3 waterBody=mix(shallowLinear,midLinear,smoothstep(0.,.54,depth));
+          waterBody=mix(waterBody,deepLinear,smoothstep(.34,1.,depth)*(.46+.34*(1.-sunSide)));
+          // Darken wet-stone shadow troughs around central plinth & rim cleanly without blotches.
+          waterBody*=(.54+.46*plinthAO)*rimAO;
 
-          // Clean, luminous Mediterranean fountain water palette (clear shallow glass -> cool mineral turquoise-blue).
-          vec3 shallowWater=vec3(.30,.72,.76);
-          vec3 deepWater=vec3(.055,.39,.52);
-          vec3 waterBody=mix(shallowWater,deepWater,.20+.64*depth);
-          waterBody+=vec3(.66,.90,.86)*caustics*.52;
+          // Subtle physical wave-facet light transmission (follows true wave normals continuously — zero spotted/patchy islands!).
+          float sunFacet=clamp(dot(normal,sun),0.,1.);
+          float crestGlow=clamp(waveDiv*.22,0.,1.)*plinthAO*(1.-fresnel*.85);
+          waterBody*=mix(.92,1.08,sunFacet);
+          waterBody+=vec3(.025,.16,.18)*crestGlow*.36;
 
-          // Multi-lobe sunlight specular: sharp liquid sun-diamonds + soft sky sheen.
-          vec3 sun=normalize(vec3(-.45,.78,.43));
-          vec3 halfVec=normalize(eye+sun);
-          float ndh=max(0.,dot(normal,halfVec));
-          float sparkle=pow(ndh,140.)*1.45;
-          float sheen=pow(ndh,22.)*.20;
+          // Razor-sharp discrete sunlit diamond sparkles on capillary micro-facets (ZERO broad white chrome glare!).
+          vec3 halfSun=normalize(eye+sun);
+          vec3 halfSky=normalize(eye+skyKey);
+          float ndhSunMicro=max(0.,dot(microNormal,halfSun));
+          float ndhSkyMicro=max(0.,dot(microNormal,halfSky));
+          float ndhSun=max(0.,dot(normal,halfSun));
+          float sparkle=pow(ndhSunMicro,820.)*4.4+pow(ndhSkyMicro,1050.)*2.4;
+          float glisten=pow(ndhSun,150.)*.10;
 
-          // Delicate water meniscus catching light where water kisses the stone rim.
-          float rimLine=smoothstep(radius*.962,radius*.998,pr)*(.18+.16*foamNoise);
+          // Crisp thin wet meniscus shimmer right where water meets the stone rim.
+          float rimLine=smoothstep(radius*.976,radius*.998,pr)*(.15+.20*foamN1);
 
-          vec3 col=mix(waterBody,mirror*vec3(.95,.99,1.),reflWeight);
-          col+=vec3(1.,.97,.88)*(sparkle+sheen);
+          // Blend crystal Mediterranean water with live distorted reflection + tight sunlit diamond sparkles.
+          vec3 col=mix(waterBody,mirror*vec3(.92,.97,1.),reflWeight);
+          col+=vec3(1.,.97,.88)*sparkle+vec3(.82,.96,1.)*glisten;
 
           float foamAmt=clamp(foam+rimLine,0.,1.);
           vec3 foamCol=vec3(.95,.99,1.);
-          col=mix(col,foamCol,clamp(foamAmt*.80,0.,.88));
+          col=mix(col,foamCol,clamp(foamAmt*.90,0.,.94));
 
-          // Physical translucency: crystal-clear looking down into shallows, reflective at grazing angles.
-          float depthAlpha=mix(.40,.68,depth);
-          float alpha=clamp(mix(depthAlpha,.95,reflWeight)+foamAmt*.45+sparkle*.30,.36,.97);
+          // True optical clarity: crystal-clear looking steeply into sunlit sandstone floor, rich teal depth, mirror at grazing angles.
+          float depthAlpha=mix(.38,.73,depth);
+          float alpha=clamp(mix(depthAlpha,.95,reflWeight)+foamAmt*.52+min(.35,sparkle*.22),.36,.97);
           gl_FragColor=vec4(col,alpha);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -338,18 +345,21 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
   basin.onBeforeRender=()=>{};
   let previousCamera:T.Camera|undefined,lastReflection=-Infinity;
   const lastCamPos=new T.Vector3(Infinity,0,0), lastForward=new T.Vector3(), camForward=new T.Vector3();
+  const maxDistSq = phone ? 3136 : compact ? 5625 : 7744;
+  const moveIntervalMs = phone ? 64 : compact ? 56 : 48;
+  const idleIntervalMs = phone ? 240 : compact ? 180 : 140;
   const update=(renderer:T.WebGLRenderer,scene:T.Scene,camera:T.Camera,force=false)=>{
     if(!force){
       const dx=x-camera.position.x, dz=z-camera.position.z, distSq=dx*dx+dz*dz;
-      if(distSq>(compact?900:1444) && previousCamera!==undefined)return;
+      if(distSq>maxDistSq && previousCamera!==undefined)return;
       camera.getWorldDirection(camForward);
       if(distSq>25 && dx*camForward.x+dz*camForward.z<-Math.sqrt(distSq)*.25 && previousCamera!==undefined)return;
+      const now=performance.now();
       const moved=camera!==previousCamera
         || camera.position.distanceToSquared(lastCamPos)>(compact?.006:.0025)
         || camForward.distanceToSquared(lastForward)>(compact?.0008:.0006);
-      if(!moved)return;
-      const now=performance.now();
-      if(camera===previousCamera && now-lastReflection<(phone?64:compact?56:48))return;
+      const minInterval=moved?moveIntervalMs:idleIntervalMs;
+      if(camera===previousCamera && now-lastReflection<minInterval)return;
       lastReflection=now;
     } else {
       camera.getWorldDirection(camForward);
@@ -432,36 +442,37 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
         float bubble1=texture2D(tCaustic,uv1).b;
         float bubble2=texture2D(tCaustic,uv2).b;
 
-        // Perturb surface normal organically for real liquid shimmer.
-        vec2 pert=(nSample.xy*2.-1.)*.32;
+        // Perturb surface normal organically for real liquid glass shimmer.
+        vec2 pert=(nSample.xy*2.-1.)*.38;
         vec3 N=normalize(baseN+vec3(pert.x,pert.y*.5,-pert.x*.5));
 
         float ndv=clamp(abs(dot(N,V)),0.,1.);
-        float fresnel=pow(1.-ndv,2.0);
+        float fresnel=pow(1.-ndv,2.3);
 
-        // Organic frothy filaments & air-entrainment increasing smoothly toward plunge.
-        float filaments=smoothstep(.46,.82,bubble1*.60+bubble2*.55);
-        float aeration=smoothstep(.38,1.,t);
-        float foam=clamp(filaments*.72+aeration*(.24+.48*bubble2),0.,1.);
+        // Crisp aerated filaments increasing smoothly toward plunge (clear glass mid-arc, frothy plunge).
+        float filaments=smoothstep(.52,.84,bubble1*.58+bubble2*.58);
+        float aeration=smoothstep(.48,1.,t);
+        float foam=clamp(filaments*.65+aeration*(.22+.52*bubble2),0.,1.);
 
         vec3 H=normalize(V+L);
-        float spec=pow(max(0.,dot(N,H)),64.)*1.2;
+        float spec=pow(max(0.,dot(N,H)),130.)*2.6;
         float skyTint=.5+.5*N.y;
 
-        vec3 glassAqua=mix(vec3(.26,.68,.76),vec3(.74,.93,.98),skyTint*.65);
-        vec3 whiteSpray=vec3(.96,.99,1.);
-        vec3 col=mix(glassAqua,whiteSpray,clamp(fresnel*.52+foam*.78,0.,1.));
-        col+=vec3(1.,.98,.92)*spec;
+        // True linear crystal aqua-glass stream core + sparkling sunlit specular streaks.
+        vec3 glassAqua=mix(vec3(.025,.24,.34),vec3(.24,.60,.72),skyTint*.75);
+        vec3 whiteSpray=vec3(.92,.97,1.);
+        vec3 col=mix(glassAqua,whiteSpray,clamp(fresnel*.58+foam*.72,0.,1.));
+        col+=vec3(1.,.98,.90)*spec;
 
-        float ends=smoothstep(0.,.04,t)*(1.-smoothstep(.94,1.,t)*.35);
-        float alpha=clamp((.22+fresnel*.46+foam*.48+spec*.45)*ends,.14,.92);
+        float ends=smoothstep(0.,.04,t)*(1.-smoothstep(.94,1.,t)*.30);
+        float alpha=clamp((.18+fresnel*.48+foam*.48+min(.45,spec*.35))*ends,.12,.92);
         gl_FragColor=vec4(col,alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
   });
 
-  // Soft volumetric sunlit mist plumes rising where each stream strikes the basin (1 merged draw call).
+  // Crisp sparkling aerated spray droplets rising where each stream strikes the basin (1 merged draw call).
   const splashMaterial=new T.ShaderMaterial({
     uniforms:{clock,tCaustic:{value:causticMap}},
     transparent:true,
@@ -482,18 +493,18 @@ export function createFountainWater(x:number,y:number,z:number,width:number,heig
       varying vec2 vUv;
       varying float vSeed;
       void main(){
-        vec2 c=vUv-vec2(.5,.18);
-        float horiz=1.-smoothstep(.08,.50,abs(c.x));
-        float vert=smoothstep(0.,.22,vUv.y)*(1.-smoothstep(.35,1.,vUv.y));
-        float radial=1.-smoothstep(.15,.62,length(vec2(c.x*1.15,c.y*.85)));
+        vec2 c=vUv-vec2(.5,.16);
+        float horiz=1.-smoothstep(.06,.44,abs(c.x));
+        float vert=smoothstep(0.,.18,vUv.y)*(1.-smoothstep(.32,1.,vUv.y));
+        float radial=1.-smoothstep(.12,.54,length(vec2(c.x*1.25,c.y*.90)));
         float mask=horiz*vert*radial;
         if(mask<.01)discard;
-        float n1=texture2D(tCaustic,vec2(vUv.x*1.5+vSeed,vUv.y*1.4-clock*1.9)).b;
-        float n2=texture2D(tCaustic,vec2(vUv.x*2.8-vSeed*.7,vUv.y*2.4-clock*2.9)).b;
-        float spray=smoothstep(.34,.78,n1*.58+n2*.56)*mask;
-        vec3 col=mix(vec3(.82,.95,.98),vec3(.99,1.,1.),.45+.55*n2);
-        float alpha=clamp(spray*.82,0.,.72);
-        if(alpha<.015)discard;
+        float n1=texture2D(tCaustic,vec2(vUv.x*2.2+vSeed,vUv.y*2.0-clock*2.4)).b;
+        float n2=texture2D(tCaustic,vec2(vUv.x*4.6-vSeed*.7,vUv.y*4.0-clock*3.8)).b;
+        float spray=smoothstep(.40,.78,n1*.54+n2*.66)*mask;
+        vec3 col=mix(vec3(.65,.92,.98),vec3(1.,1.,1.),smoothstep(.35,.74,n2));
+        float alpha=clamp(spray*1.05,0.,.86);
+        if(alpha<.02)discard;
         gl_FragColor=vec4(col,alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>

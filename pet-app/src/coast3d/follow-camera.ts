@@ -4,8 +4,8 @@ import type { Point } from './island';
 const radians=Math.PI/180;
 const wrap=(angle:number)=>Math.atan2(Math.sin(angle),Math.cos(angle));
 export const CAMERA = {
-  pitch:36*radians, verticalFov:37, distance:8.8, compactDistance:9.3,
-  minPitch:16*radians, maxPitch:65*radians,
+  pitch:36*radians, verticalFov:37, lowAngleFov:48, distance:8.8, compactDistance:9.3,
+  minPitch:3*radians, maxPitch:75*radians,
   followSeconds:.17, heightSeconds:.21, orbitSeconds:.055,
   turnDelay:.52, maxYawSpeed:30*radians, yawDeadZone:6*radians, manualPause:3,
 } as const;
@@ -26,7 +26,6 @@ export class FollowCamera {
   private readonly look=new T.Vector3();
   private readonly boom=new T.Vector3();
   private readonly intended=new T.Vector3();
-  private readonly landmark=new T.Vector3();
   private initialized=false;
 
   get yaw(){return wrap(this.angle);}
@@ -75,7 +74,7 @@ export class FollowCamera {
   }
 
   follow(dt:number,position:{x:number;y:number;z:number},
-    clear:(subject:T.Vector3,eye:T.Vector3)=>number, reduced:boolean,moon?:T.Box3) {
+    clear:(subject:T.Vector3,eye:T.Vector3)=>number, reduced:boolean,_moon?:T.Box3) {
     const {x,y,z}=position;
     const immediate=reduced||!this.initialized;
     const horizontal=immediate?1:damp(dt,CAMERA.followSeconds);
@@ -88,30 +87,16 @@ export class FollowCamera {
     const desired=this.camera.aspect<1?CAMERA.compactDistance:CAMERA.distance;
     this.intended.copy(this.look).addScaledVector(this.boom,desired);
     const available=desired*clear(this.look,this.intended);
-    this.distance=immediate||available<this.distance?available:this.distance+(available-this.distance)*damp(dt,.24);
+    const pullRate=available<this.distance?.065:.24;
+    this.distance=immediate?available:this.distance+(available-this.distance)*damp(dt,pullRate);
     this.camera.position.copy(this.look).addScaledVector(this.boom,this.distance);
-    let fov:number=CAMERA.verticalFov;
+    // Gentle eye-height lift when compressed close against a real wall/cliff so camera never buries in pet fur.
+    const compression=1-T.MathUtils.clamp((this.distance-2.45)/3.1,0,1);
+    if(compression>0)this.camera.position.y+=.55*compression;
+    // Uniform 360-degree low-angle horizon view everywhere on the island (no fountain-only restriction).
     const lowAngle=1-T.MathUtils.smoothstep(this.elevation,CAMERA.minPitch,26*radians);
-    if(moon&&lowAngle>0){
-      moon.getCenter(this.landmark);
-      const nearby=1-T.MathUtils.smoothstep(Math.hypot(x-this.landmark.x,z-this.landmark.z),30,42);
-      const eye=this.camera.position, dx=this.landmark.x-eye.x,dz=this.landmark.z-eye.z;
-      const forwards=-dx*sin-dz*cos, sideways=dx*cos-dz*sin;
-      if(nearby>0&&forwards>3&&Math.abs(sideways)<forwards*.67){
-        const halfW=(moon.max.x-moon.min.x)*.5,halfD=(moon.max.z-moon.min.z)*.5;
-        const near=Math.max(1,forwards-Math.abs(sin)*halfW-Math.abs(cos)*halfD);
-        const crown=Math.atan2(moon.max.y-eye.y,near);
-        const petFeet=Math.atan2(y-eye.y,Math.max(.15,-(x-eye.x)*sin-(z-eye.z)*cos));
-        const horizontal=Math.atan((Math.abs(sideways)+Math.abs(cos)*halfW+Math.abs(sin)*halfD)/near/this.camera.aspect);
-        const margin=2.4*radians;
-        const required=Math.max(crown-petFeet+2*margin,2*(horizontal+1.4*radians))/radians;
-        const fitFov=T.MathUtils.clamp(required,CAMERA.verticalFov,54);
-        const influence=lowAngle*nearby*(1-T.MathUtils.smoothstep(Math.abs(sideways)/forwards,.35,.67));
-        fov=T.MathUtils.lerp(CAMERA.verticalFov,fitFov,influence);
-        const aim=T.MathUtils.lerp(-this.elevation,Math.max(-this.elevation,crown+margin-fitFov*radians*.5),influence);
-        this.look.y=eye.y+this.distance*flat*Math.tan(aim);
-      }
-    }
+    const fov=T.MathUtils.lerp(CAMERA.verticalFov,CAMERA.lowAngleFov,lowAngle);
+    this.look.y+=1.55*lowAngle;
     if(Math.abs(this.camera.fov-fov)>.01){this.camera.fov=fov;this.camera.updateProjectionMatrix();}
     this.camera.lookAt(this.look);this.camera.updateMatrixWorld();this.initialized=true;
   }

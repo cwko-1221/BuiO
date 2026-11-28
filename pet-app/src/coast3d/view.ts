@@ -2,11 +2,13 @@ import * as T from 'three';
 import type { Locale, PetDefinition } from '../types';
 import { loadWalker } from '../coast/pet-model';
 import { contactShadow, disposeGroup } from '../coast/scenery';
+import { lockGameBrowserInteractions } from '../game/GameBrowserInteractions';
 import { ASSETS } from './assets';
 import { detectDeviceTier, type DeviceTier } from './device';
 import { BRIDGE_CHECKPOINTS, DISTRICTS, SPAWN, district, dist, ground, nearestTrail, onStairTread, route, visibleFoot, type Point } from './island';
 import { CAMERA, FollowCamera } from './follow-camera';
 import { createMovement, WALK_SPEED } from './movement';
+import { getNpcStory, type NpcStoryProfile } from './npc-stories';
 import type { ArtMaterials } from './terrain';
 import { capArtTextures, capModelTextures, CLUTTER_LAYER, createIsland, lighting, OFFICIAL_ASSET_IDS, officialModels, overviewCamera, releaseTextureScratch, type LoadProgress } from './world';
 import '../coast/coast.css';
@@ -77,9 +79,25 @@ export class Coast3dView {
   private perfShd=0;
   private perfRafMax=0;
   private perfLastRaf=0;
+  private runToggle=false;
+  private sprintKey=false;
+  private wasGrounded=true;
+  private landSquash=0;
+  private lastPointerJumpAt=-Infinity;
+  private releaseBrowserLock?:()=>void;
+  private nearNpcId:string|null=null;
+  private dialogueNpc:NpcStoryProfile|null=null;
+  private dialogueChapter=0;
+  private dialoguePage=0;
+  private dialogueFullText='';
+  private dialogueShownChars=0;
+  private dialogueCharAccum=0;
+  private readonly npcStoryCursor=new Map<string,number>();
+  private noticeTimer=0;
 
   constructor(private readonly root:HTMLElement,private readonly options:{locale:Locale;definition:PetDefinition;close:()=>void;requireFinal?:boolean}) {
     const t=(zh:string,en:string)=>this.t(zh,en);
+    this.releaseBrowserLock=lockGameBrowserInteractions('coast-input-locked');
     root.className='moonbay moonbay-3d';
     root.innerHTML=`
       <div class="moonbay-world"></div>
@@ -96,7 +114,32 @@ export class Coast3dView {
         ${DISTRICTS.map(d=>`<button type="button" data-coast-place="${d.id}"><i style="--district:${d.tint}"></i>${this.t(d.zh,d.en)}</button>`).join('')}
       </div>
       <div class="coast3d-joystick" aria-label="${t('移動搖桿','Movement joystick')}" role="group" aria-hidden="true"><span></span></div>
-      <p class="moonbay-hint"><span class="coast3d-hint-desktop">${t('方向鍵移動 · 左右／上下拖曳轉鏡頭','Arrow keys to move · Drag sideways or vertically to look')}</span><span class="coast3d-hint-touch">${t('按住左邊滑動移動 · 右邊滑動控制視角','Hold and drag left side to move · Drag right side to look')}</span></p>
+      <div class="coast3d-controls" role="group" aria-label="${t('動作控制','Action controls')}">
+        <button type="button" class="coast3d-btn-interact" data-coast="interact" data-available="false" aria-label="${t('與居民互動','Interact with villager')}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H11l-4.2 3.6c-.5.4-1.3.05-1.3-.6V16A2.5 2.5 0 0 1 4 13.5v-8z"/></svg>
+          <span>${t('互動','Talk')}</span>
+        </button>
+        <button type="button" class="coast3d-btn-run" data-coast="run" aria-pressed="false" aria-label="${t('跑步切換','Toggle run')}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2L4.5 13.5h6L9 22l10.5-12h-6L13 2z"/></svg>
+          <span>${t('跑步','Run')}</span>
+        </button>
+        <button type="button" class="coast3d-btn-jump" data-coast="jump" aria-label="${t('跳躍','Jump')}">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l-6.5 6.5 1.8 1.8L10.7 8.9V20h2.6V8.9l3.4 3.4 1.8-1.8L12 4z"/></svg>
+          <span>${t('跳躍','Jump')}</span>
+        </button>
+      </div>
+      <section class="coast3d-dialogue" role="dialog" aria-modal="false" aria-live="polite" hidden>
+        <div class="coast3d-dialogue-head">
+          <div class="coast3d-dialogue-speaker">
+            <span class="coast3d-dialogue-badge" aria-hidden="true"></span>
+            <strong class="coast3d-dialogue-name"></strong>
+            <small class="coast3d-dialogue-role"></small>
+          </div>
+          <button type="button" class="coast3d-dialogue-close" data-coast="dialogue-close" aria-label="${t('關閉對話','Close dialogue')}">✕</button>
+        </div>
+        <p class="coast3d-dialogue-text"></p>
+      </section>
+      <p class="moonbay-hint"><span class="coast3d-hint-desktop">${t('方向鍵移動 · Shift 跑步 · 空白鍵跳躍 · F 與居民互動 · 拖曳轉鏡頭','Arrow keys to move · Shift run · Space jump · F talk · Drag to look')}</span><span class="coast3d-hint-touch">${t('按住左邊滑動移動 · 右邊滑動控制視角 · 右下互動跑步跳躍','Hold left side to move · Drag right to look · Talk, Run & Jump on bottom right')}</span></p>
       <div class="moonbay-status" role="status">
         <div class="coast3d-status-head">
           <span class="coast3d-status-text">${t('正在載入海岸小鎮…','Loading Moonbay Coast…')}</span>
@@ -124,11 +167,18 @@ export class Coast3dView {
     bar.dataset.progress=String(clamped);
     status.querySelector<HTMLElement>('.coast3d-progress-bar')!.style.width=`${clamped}%`;
   }
-  private showStatusNote(text:string) {
+  private showStatusNote(text:string, autoHideMs=0) {
     const status=this.status;
     status.dataset.mode='notice';
     status.querySelector('.coast3d-status-text')!.textContent=text;
     status.hidden=false;
+    if(this.noticeTimer){window.clearTimeout(this.noticeTimer);this.noticeTimer=0;}
+    if(autoHideMs>0){
+      this.noticeTimer=window.setTimeout(()=>{
+        this.noticeTimer=0;
+        if(!this.abort.signal.aborted && status.dataset.mode==='notice')status.hidden=true;
+      },autoHideMs);
+    }
   }
 
   async open() {
@@ -245,6 +295,7 @@ export class Coast3dView {
           sun.position.copy(sun.target.position).add(focus?new T.Vector3(-28,63,38.5):new T.Vector3(-77,172,105));
           if(!focus){Object.assign(shadow,{left:-141,right:141,top:109,bottom:-109,far:420});shadow.updateProjectionMatrix();}
           sun.target.updateMatrixWorld();renderer.shadowMap.needsUpdate=true;
+          island.sky.mesh.position.set(camera.position.x,0,camera.position.z);
           island.fountain.update(renderer,this.scene,camera,true);
           renderer.render(this.scene,camera);
           const image=renderer.domElement.toDataURL('image/png');
@@ -379,22 +430,136 @@ export class Coast3dView {
     if(value)this.clearInput();
     if(value)this.cancelRoute();
   }
-  private clearInput(){this.held.clear();this.analog=STILL;this.releasePointers?.();}
+  private clearInput(){this.held.clear();this.sprintKey=false;this.syncRunButton();this.analog=STILL;this.releasePointers?.();}
+  private isRunning(){return this.runToggle||this.sprintKey;}
+  private syncRunButton(){
+    const btn=this.root.querySelector<HTMLButtonElement>('[data-coast="run"]');
+    if(btn)btn.setAttribute('aria-pressed',String(this.isRunning()));
+  }
+  private triggerJump(){
+    if(this.locked||this.overview||this.dialogueNpc||!this.walk)return;
+    this.walk.jump();
+  }
+  private syncInteractButton(npcId:string|null) {
+    if(this.nearNpcId===npcId)return;
+    this.nearNpcId=npcId;
+    const btn=this.root.querySelector<HTMLButtonElement>('[data-coast="interact"]');
+    if(!btn)return;
+    btn.dataset.available=npcId?'true':'false';
+    const label=btn.querySelector('span');
+    if(npcId){
+      const profile=getNpcStory(npcId);
+      const name=this.t(profile.name.zh,profile.name.en);
+      btn.setAttribute('aria-label',this.t(`與${name}互動`,`Talk to ${name}`));
+      if(label)label.textContent=this.t('互動','Talk');
+      this.setData('nearNpc',npcId);
+    } else {
+      btn.setAttribute('aria-label',this.t('與居民互動','Interact with villager'));
+      if(label)label.textContent=this.t('互動','Talk');
+      if(this.lastDataset.nearNpc){delete this.lastDataset.nearNpc;delete this.root.dataset.nearNpc;}
+    }
+  }
+  private renderDialoguePage() {
+    const profile=this.dialogueNpc;
+    const panel=this.root.querySelector<HTMLElement>('.coast3d-dialogue')!;
+    if(!profile){panel.hidden=true;return;}
+    const lines=profile.chapters[this.dialogueChapter]??profile.chapters[0];
+    const line=lines[this.dialoguePage]??lines[0];
+    this.dialogueFullText=this.t(line.zh,line.en);
+    this.dialogueShownChars=this.prefersReduced?this.dialogueFullText.length:0;
+    this.dialogueCharAccum=0;
+    panel.style.setProperty('--npc-accent',profile.accent);
+    panel.querySelector('.coast3d-dialogue-badge')!.textContent=profile.badge;
+    panel.querySelector('.coast3d-dialogue-name')!.textContent=this.t(profile.name.zh,profile.name.en);
+    panel.querySelector('.coast3d-dialogue-role')!.textContent=this.t(profile.title.zh,profile.title.en);
+    panel.querySelector('.coast3d-dialogue-text')!.textContent=this.dialogueFullText.slice(0,this.dialogueShownChars);
+    panel.hidden=false;
+  }
+  private openDialogue(npcId:string) {
+    const profile=getNpcStory(npcId);
+    const cursor=this.npcStoryCursor.get(npcId)??0;
+    this.dialogueNpc=profile;
+    this.dialogueChapter=cursor%profile.chapters.length;
+    this.dialoguePage=0;
+    this.clearInput();
+    this.cancelRoute();
+    this.island?.npcs.setTalking(npcId);
+    this.root.dataset.dialogue=npcId;
+    this.renderDialoguePage();
+  }
+  private advanceDialogue() {
+    const profile=this.dialogueNpc;
+    if(!profile)return;
+    if(this.dialogueShownChars<this.dialogueFullText.length){
+      this.dialogueShownChars=this.dialogueFullText.length;
+      this.root.querySelector('.coast3d-dialogue-text')!.textContent=this.dialogueFullText;
+      return;
+    }
+    const lines=profile.chapters[this.dialogueChapter]??profile.chapters[0];
+    if(this.dialoguePage+1<lines.length){
+      this.dialoguePage++;
+      this.renderDialoguePage();
+    } else {
+      this.npcStoryCursor.set(profile.id,(this.npcStoryCursor.get(profile.id)??0)+1);
+      this.closeDialogue();
+    }
+  }
+  private closeDialogue() {
+    if(!this.dialogueNpc)return;
+    this.dialogueNpc=null;
+    this.dialogueFullText='';
+    this.dialogueShownChars=0;
+    this.island?.npcs.setTalking(null);
+    delete this.root.dataset.dialogue;
+    this.root.querySelector<HTMLElement>('.coast3d-dialogue')!.hidden=true;
+  }
+  private triggerInteract() {
+    if(this.locked||this.overview||!this.walk||!this.island)return;
+    if(this.dialogueNpc){this.advanceDialogue();return;}
+    const p=this.walk.position();
+    const near=this.island.npcs.findNearest(p.x,p.z,3.8);
+    if(near){
+      this.openDialogue(near.id);
+    } else {
+      this.showStatusNote(this.t('走近小鎮居民，就能按「互動」聽他們的故事喔！','Walk closer to a villager to chat and hear their story!'),2200);
+    }
+  }
   private cancelRoute() {this.target='';this.queued=[];this.stall=0;delete this.root.dataset.arrived;}
   private bind() {
     const {signal}=this.abort;
+    const clearNativeSelection=()=>{const s=window.getSelection();if(s?.rangeCount)s.removeAllRanges();};
+    this.root.addEventListener('selectstart',e=>{e.preventDefault();clearNativeSelection();},{signal});
+    this.root.addEventListener('dragstart',e=>e.preventDefault(),{signal});
+    this.root.addEventListener('contextmenu',e=>e.preventDefault(),{signal});
     window.addEventListener('keydown',e=>{
       if(this.locked||e.defaultPrevented)return;
+      if(e.code==='ShiftLeft'||e.code==='ShiftRight'){this.sprintKey=true;this.syncRunButton();return;}
       if(e.code==='Escape') {
-        if(this.overview)this.setMap(false);else this.options.close();
-      } else if(!this.overview && moves[e.code]) {
+        if(this.dialogueNpc)this.closeDialogue();
+        else if(this.overview)this.setMap(false);
+        else this.options.close();
+      } else if(this.dialogueNpc && (e.code==='Space'||e.code==='Enter'||e.code==='KeyF')) {
+        e.preventDefault();
+        if(!e.repeat)this.advanceDialogue();
+      } else if(!this.overview && !this.dialogueNpc && e.code==='KeyF') {
+        e.preventDefault();
+        if(!e.repeat)this.triggerInteract();
+      } else if(!this.overview && !this.dialogueNpc && e.code==='Space') {
+        const active=document.activeElement;
+        if(active instanceof HTMLElement && active.matches('input,textarea,select,[data-coast="home"],[data-coast="map"],[data-coast-place]'))return;
+        e.preventDefault();
+        if(!e.repeat)this.triggerJump();
+      } else if(!this.overview && !this.dialogueNpc && moves[e.code]) {
         e.preventDefault();
         if(!this.held.has(e.code)){this.cancelRoute();this.held.add(e.code);}
-      } else if(!this.overview && cameraKeys[e.code]){
+      } else if(!this.overview && !this.dialogueNpc && cameraKeys[e.code]){
         e.preventDefault();this.camera.rotate(...cameraKeys[e.code]);
       }
     },{signal});
-    window.addEventListener('keyup',e=>this.held.delete(e.code),{signal});
+    window.addEventListener('keyup',e=>{
+      if(e.code==='ShiftLeft'||e.code==='ShiftRight'){this.sprintKey=false;this.syncRunButton();}
+      this.held.delete(e.code);
+    },{signal});
     const stop=()=>{this.clearInput();this.last=0;};
     window.addEventListener('blur',stop,{signal});
     document.addEventListener('visibilitychange',()=>{
@@ -417,13 +582,32 @@ export class Coast3dView {
         this.perfFrames=0;this.perfLastReport=now;this.perfJsSum=0;this.perfPhysSum=0;this.perfRenSum=0;this.perfShd=0;this.perfRafMax=0;this.perfLastRaf=now;
       }
     },{signal});
+    const jumpButton=this.root.querySelector<HTMLButtonElement>('[data-coast="jump"]')!;
+    jumpButton.addEventListener('pointerdown',e=>{
+      if(this.locked||this.overview||(e.pointerType==='mouse'&&e.button!==0))return;
+      e.preventDefault();
+      this.lastPointerJumpAt=performance.now();
+      this.triggerJump();
+    },{signal});
     this.root.addEventListener('click',e=>{
       if(this.locked)return;
       const button=(e.target as HTMLElement).closest<HTMLButtonElement>('button');
       if(button?.dataset.coast==='home'){this.options.close();return;}
       if(!this.walk)return;
+      if(button?.dataset.coast==='dialogue-close'){this.closeDialogue();if(e.detail>0)button.blur();return;}
+      if(button?.dataset.coast==='interact'){this.triggerInteract();if(e.detail>0)button.blur();return;}
+      if(this.dialogueNpc && (e.target as HTMLElement).closest('.coast3d-dialogue') && !button){
+        this.advanceDialogue();
+        return;
+      }
+      if(button?.dataset.coast==='run'){this.runToggle=!this.runToggle;this.syncRunButton();if(e.detail>0)button.blur();return;}
+      if(button?.dataset.coast==='jump'){
+        if(performance.now()-this.lastPointerJumpAt>250)this.triggerJump();
+        if(e.detail>0)button.blur();
+        return;
+      }
       if(button?.dataset.coast==='map')this.setMap(!this.overview);
-      if(button?.dataset.coast==='turn')this.camera.reset();
+      if(button?.dataset.coast==='turn'){this.camera.reset();if(e.detail>0)button.blur();}
       const destination=button?.dataset.coastPlace;
       if(destination && this.overview){
         const p=this.walk.position();
@@ -460,10 +644,14 @@ export class Coast3dView {
       this.analog=[x*strength,z*strength];
     };
     drag.addEventListener('contextmenu',e=>{
-      if(matchMedia('(pointer: coarse)').matches)e.preventDefault();
+      e.preventDefault();
     },{signal});
+    drag.addEventListener('touchstart',e=>{
+      if(this.locked||this.overview||this.dialogueNpc)return;
+      if(e.cancelable)e.preventDefault();
+    },{signal,passive:false});
     drag.addEventListener('pointerdown',e=>{
-      if(this.locked||this.overview)return;
+      if(this.locked||this.overview||this.dialogueNpc)return;
       if(e.pointerType==='mouse'&&e.button!==0)return;
       const rect=drag.getBoundingClientRect();
       const localX=e.clientX-rect.left,localY=e.clientY-rect.top;
@@ -486,7 +674,7 @@ export class Coast3dView {
     drag.addEventListener('pointermove',e=>{
       if(e.pointerId===finger){moveStick(e);return;}
       if(e.pointerId!==dragged)return;
-      this.camera.rotate((previousX-e.clientX)*.009,(e.clientY-previousY)*.007);
+      this.camera.rotate((previousX-e.clientX)*.009,(e.clientY-previousY)*.0082);
       previousX=e.clientX;previousY=e.clientY;
     },{signal});
     for(const name of ['pointerup','lostpointercapture','pointercancel'])drag.addEventListener(name,e=>{
@@ -496,6 +684,7 @@ export class Coast3dView {
     },{signal});
   }
   private setMap(active:boolean) {
+    if(active)this.closeDialogue();
     this.overview=active;this.clearInput();
     this.root.dataset.overview=String(active);
     this.root.querySelector('[data-coast="map"]')!.setAttribute('aria-pressed',String(active));
@@ -572,7 +761,7 @@ export class Coast3dView {
     }
     const dt=this.last?Math.max(0,Math.min(.10,(time-this.last)/1000)):0;this.last=time;
     {
-      const travel=this.walk!,start=travel.position(),canMove=!this.locked&&!this.overview;
+      const travel=this.walk!,start=travel.position(),canMove=!this.locked&&!this.overview&&!this.dialogueNpc;
       const input=canMove?this.manualDirection():STILL;
       const manual=!!(input[0]||input[1]);
       const here:Point=[start.x,start.z];
@@ -581,8 +770,21 @@ export class Coast3dView {
       // the input back towards itself. Follow roads on forward input or routes.
       const followRoad=travel.motion().speed>.20 && (!manual || input[1]<-.15&&-input[1]>=Math.abs(input[0])*.85);
       this.camera.turn(dt,followRoad?this.roadDirection(here,course):STILL,followRoad,this.prefersReduced);
-      travel.step(dt,manual?this.camera.groundDirection(input):course);
-      const p=travel.sample(),{speed,heading}=travel.motion();
+      const wantRun=canMove&&this.isRunning()&&!!(manual||this.target);
+      this.island!.npcs.update(dt,{x:start.x,z:start.z},(id,nx,ny,nz)=>travel.moveDynamic(id,nx,ny,nz),this.prefersReduced);
+      const nearNpc=this.overview?null:this.island!.npcs.findNearest(start.x,start.z,3.8);
+      this.syncInteractButton(nearNpc?.id??null);
+      if(this.dialogueNpc && this.dialogueShownChars<this.dialogueFullText.length){
+        this.dialogueCharAccum+=dt*44;
+        const step=Math.floor(this.dialogueCharAccum);
+        if(step>0){
+          this.dialogueCharAccum-=step;
+          this.dialogueShownChars=Math.min(this.dialogueFullText.length,this.dialogueShownChars+step);
+          this.root.querySelector('.coast3d-dialogue-text')!.textContent=this.dialogueFullText.slice(0,this.dialogueShownChars);
+        }
+      }
+      travel.step(dt,manual?this.camera.groundDirection(input):course,{run:wantRun});
+      const p=travel.sample(),{speed,heading,running,grounded,verticalSpeed}=travel.motion();
       const rawMoved=speed>.06;
       if(rawMoved)this.moveHold=.10;else this.moveHold=Math.max(0,this.moveHold-dt);
       const moved=rawMoved||(canMove&&(manual||!!this.target)&&this.moveHold>0);
@@ -595,20 +797,31 @@ export class Coast3dView {
           setTimeout(()=>{if(!this.abort.signal.aborted)this.status.hidden=true;},1600);
         }
       }
-      const support=travel.support(p), stepHeight=this.island!.gazeboTread(p.x,visibleFoot(p.x,support.y,p.z),p.z);
-      const stepped=onStairTread(p.x,support.y,p.z)||Math.abs(stepHeight-support.y)>.001;
-      const targetNormal=stepped?this.up:support.normal;
-      const targetY=stepHeight+.006;
+      const support=travel.support(p);
+      const rawGround=grounded?support.y:travel.groundUnder(p);
+      const groundFloor=this.island!.gazeboTread(p.x,visibleFoot(p.x,rawGround,p.z),p.z);
+      const stepped=onStairTread(p.x,rawGround,p.z)||Math.abs(groundFloor-rawGround)>.001;
+      const targetNormal=grounded?(stepped?this.up:support.normal):this.up;
+      if(grounded && !this.wasGrounded)this.landSquash=1;
+      this.wasGrounded=grounded;
+      if(this.landSquash>0)this.landSquash=Math.max(0,this.landSquash-dt*5.4);
+      const groundY=grounded?groundFloor:Math.min(p.y,groundFloor);
+      const targetY=(grounded?groundFloor:Math.max(p.y,groundY))+.006;
       this.footY=this.footY===undefined||this.prefersReduced||Math.abs(targetY-this.footY)>1.2
         ? targetY
-        : this.footY+(targetY-this.footY)*(1-Math.exp(-dt*18));
+        : this.footY+(targetY-this.footY)*(1-Math.exp(-dt*(grounded?18:42)));
+      const airHeight=Math.max(0,(this.footY-.006)-groundY);
       this.floorNormal.set(targetNormal.x,targetNormal.y,targetNormal.z);
       if(this.prefersReduced)this.visualNormal.copy(this.floorNormal);
-      else this.visualNormal.lerp(this.floorNormal,1-Math.exp(-dt*9)).normalize();
+      else this.visualNormal.lerp(this.floorNormal,1-Math.exp(-dt*(grounded?9:14))).normalize();
       this.walker!.pivot.position.set(p.x,this.footY,p.z);
-      this.petShadow!.position.set(p.x,this.footY-.006,p.z).addScaledVector(this.visualNormal,.013);
+      this.petShadow!.position.set(p.x,groundY+.012,p.z).addScaledVector(this.visualNormal,.006);
       this.petShadow!.quaternion.setFromUnitVectors(this.up,this.visualNormal);
-      this.walker!.update(dt,moved,heading,Math.max(.45,Math.min(1.5,this.visualSpeed/this.walker!.strideSpeed)),this.visualNormal);
+      this.petShadow!.scale.setScalar(.24*Math.max(.38,1-airHeight*.48));
+      (this.petShadow!.material as T.MeshBasicMaterial).opacity=Math.max(.22,1-airHeight*.65);
+      const gait=!grounded?'jump':moved?(running?'run':'walk'):'idle';
+      this.walker!.update(dt,moved,heading,Math.max(.45,Math.min(2.0,this.visualSpeed/this.walker!.strideSpeed)),this.visualNormal,
+        {gait,verticalSpeed,airHeight,landSquash:this.landSquash});
       this.camera.follow(dt,{x:p.x,y:this.footY-.006,z:p.z},travel.visibility,this.prefersReduced,this.island!.moonBounds);
       const tPhys=perf?performance.now():0;
       const region=district(here);
@@ -617,9 +830,10 @@ export class Coast3dView {
         this.setData('x',p.x.toFixed(2));
         this.setData('z',p.z.toFixed(2));
         this.setData('height',p.y.toFixed(2));
+        this.setData('groundY',groundY.toFixed(2));
         this.setData('yaw',this.camera.yaw.toFixed(4));
         this.setData('pitch',this.camera.pitch.toFixed(4));
-        this.setData('gait',moved?'Walk':'Idle');
+        this.setData('gait',!grounded?'Jump':moved?(running?'Run':'Walk'):'Idle');
         const feet=(1-this.framing.set(p.x,p.y,p.z).project(this.camera.camera).y)/2;
         const top=(1-this.framing.set(p.x,p.y+1,p.z).project(this.camera.camera).y)/2;
         this.setData('projectedFeet',feet.toFixed(3));
@@ -629,6 +843,7 @@ export class Coast3dView {
       this.island!.water.material.uniforms.clock.value=this.prefersReduced?0:time/1000;
       this.island!.fountain.clock.value=this.island!.water.material.uniforms.clock.value;
       this.island!.waterfall.clock.value=this.island!.water.material.uniforms.clock.value;
+      this.island!.sky.clock.value=this.island!.water.material.uniforms.clock.value;
       const fog=this.scene.fog;
       this.island!.showChunks(p.x,p.z,this.overview);
       this.updateShadowBox(p.x,p.y,p.z);
@@ -641,6 +856,8 @@ export class Coast3dView {
       }
       else this.island!.softenCanopies(this.camera.camera.position,this.walker!.pivot.position);
       const activeCamera=this.overview?this.mapCamera:this.camera.camera;
+      this.island!.sky.mesh.visible=!this.overview;
+      if(!this.overview)this.island!.sky.mesh.position.set(activeCamera.position.x,0,activeCamera.position.z);
       const tRen=perf?performance.now():0;
       if(!this.overview)this.island!.fountain.update(this.renderer!,this.scene,activeCamera);
       this.renderer!.render(this.scene,activeCamera);
@@ -670,6 +887,9 @@ export class Coast3dView {
     this.frame=requestAnimationFrame(this.draw);
   };
   destroy() {
+    if(this.noticeTimer){window.clearTimeout(this.noticeTimer);this.noticeTimer=0;}
+    this.closeDialogue();
+    this.releaseBrowserLock?.();this.releaseBrowserLock=undefined;
     this.abort.abort();cancelAnimationFrame(this.frame);this.resize?.disconnect();
     this.walk?.release();this.island?.finish();releaseWalker(this.walker);
     if(this.petShadow)disposeGroup(this.petShadow);

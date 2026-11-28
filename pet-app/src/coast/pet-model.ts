@@ -120,12 +120,15 @@ function measureStrideSpeed(pivot: T.Group, scene: T.Object3D, walkClip: T.Anima
   return Math.max(height * 0.35, best);
 }
 
-export function hasWalker(petId: string) {
-  return Object.hasOwn(pets, petId);
-}
+export type WalkerPoseOptions = {
+  gait?: 'idle' | 'walk' | 'run' | 'jump';
+  verticalSpeed?: number;
+  airHeight?: number;
+  landSquash?: number;
+};
 
 export async function loadWalker(petId: string, height = 5.0) {
-  const companion = !hasWalker(petId), id = companion ? 'golden-pup' : pets[petId];
+  const companion = !pets[petId], id = pets[petId] ?? 'golden-pup';
   const loader = new GLTFLoader();
   // Decode embedded images through Image; the app's image policy allows blob URLs.
   loader.register(parser => {
@@ -133,8 +136,13 @@ export async function loadWalker(petId: string, height = 5.0) {
     return { name: 'MoonbayEmbeddedImages' };
   });
   const { scene, animations } = await loader.loadAsync(models['./assets/' + id + '.glb']);
-  const idleClip = animations.find(clip => clip.name === 'Idle');
-  const walkClip = animations.find(clip => clip.name === 'Walk');
+  const clipByName = (name: string) => animations.find(clip => clip.name === name);
+  const idleClip = clipByName('Idle');
+  const walkClip = clipByName('Walk');
+  const runClip = clipByName('Run');
+  const jumpStartClip = clipByName('JumpStart');
+  const jumpAirClip = clipByName('JumpAir');
+  const jumpLandClip = clipByName('JumpLand');
   let joints = 0;
   scene.traverse(node => {
     if (node instanceof T.SkinnedMesh) {
@@ -155,18 +163,85 @@ export async function loadWalker(petId: string, height = 5.0) {
   const strideSpeed = measureStrideSpeed(pivot, scene, walkClip, height);
   const up=new T.Vector3(0,1,0), slope=new T.Vector3(), lean=new T.Quaternion();
   const mixer = new T.AnimationMixer(scene);
-  const idle = mixer.clipAction(idleClip), walk = mixer.clipAction(walkClip);
-  idle.play();
-  let moving = false;
+  type AnimKey = 'idle' | 'walk' | 'run' | 'jumpStart' | 'jumpAir' | 'jumpLand';
+  const makeAction = (clip: T.AnimationClip | undefined, once = false) => {
+    if (!clip) return undefined;
+    const act = mixer.clipAction(clip);
+    if (once) {
+      act.setLoop(T.LoopOnce, 1);
+      act.clampWhenFinished = true;
+    }
+    return act;
+  };
+  const actions: Partial<Record<AnimKey, T.AnimationAction>> = {
+    idle: makeAction(idleClip),
+    walk: makeAction(walkClip),
+    run: makeAction(runClip),
+    jumpStart: makeAction(jumpStartClip, true),
+    jumpAir: makeAction(jumpAirClip),
+    jumpLand: makeAction(jumpLandClip, true),
+  };
+  let activeKey: AnimKey = 'idle';
+  let activeAction = actions.idle!;
+  activeAction.play();
+  let wasJump = false, jumpElapsed = 0, landTimer = 0;
+
+  const transitionTo = (key: AnimKey, fade: number, forceReset = false) => {
+    const next = actions[key] ?? actions.idle!;
+    const resolvedKey: AnimKey = actions[key] ? key : 'idle';
+    if (resolvedKey === activeKey && !forceReset) return;
+    const prev = activeAction;
+    if (forceReset || next.getEffectiveWeight() < 0.08) next.reset();
+    next.enabled = true;
+    next.setEffectiveWeight(1);
+    next.play();
+    if (prev !== next) next.crossFadeFrom(prev, fade, false);
+    activeKey = resolvedKey;
+    activeAction = next;
+  };
+
   return {
     pivot, id, companion, joints, radius:Math.min(size.x,size.z)*scale*.44, strideSpeed,
-    update(dt: number, isMoving: boolean, heading: number, walkRate = 1, supportNormal?:{x:number;y:number;z:number}) {
-      if (isMoving !== moving) {
-        const next = isMoving ? walk : idle, last = isMoving ? idle : walk;
-        if (next.getEffectiveWeight() < 0.08) next.reset();
-        next.play().crossFadeFrom(last, isMoving ? .09 : .14, false);
-        moving = isMoving;
+    update(dt: number, isMoving: boolean, heading: number, walkRate = 1, supportNormal?:{x:number;y:number;z:number}, pose?: WalkerPoseOptions) {
+      const gait = pose?.gait ?? (isMoving ? 'walk' : 'idle');
+      const isJump = gait === 'jump';
+      const isRun = gait === 'run';
+      const vy = pose?.verticalSpeed ?? 0;
+
+      if (isJump) {
+        landTimer = 0;
+        if (!wasJump) {
+          jumpElapsed = 0;
+          if (actions.jumpStart) transitionTo('jumpStart', .055, true);
+          else if (actions.jumpAir) transitionTo('jumpAir', .08, true);
+        } else {
+          jumpElapsed += dt;
+          if (activeKey === 'jumpStart' && actions.jumpAir && (jumpElapsed >= .20 || vy <= 1.2)) {
+            transitionTo('jumpAir', .10);
+          }
+        }
+      } else {
+        if (wasJump && actions.jumpLand) {
+          // Crisp skeletal landing cushion (shorter when continuing straight into run/walk).
+          landTimer = isMoving ? .14 : .28;
+          transitionTo('jumpLand', .055, true);
+        } else if (landTimer > 0) {
+          landTimer = Math.max(0, landTimer - dt);
+        }
+        if (landTimer <= 0) {
+          if (isRun && actions.run) {
+            transitionTo('run', .10);
+            actions.run.setEffectiveTimeScale(Math.max(.90, Math.min(1.30, walkRate * .62)));
+          } else if (isMoving) {
+            transitionTo('walk', .13);
+            actions.walk!.setEffectiveTimeScale(walkRate);
+          } else {
+            transitionTo('idle', .16);
+          }
+        }
       }
+      wasJump = isJump;
+
       const angle = heading - pivot.rotation.y;
       pivot.rotation.y += Math.atan2(Math.sin(angle), Math.cos(angle)) * (1 - Math.exp(-dt * 15));
       if(supportNormal){
@@ -174,7 +249,6 @@ export async function loadWalker(petId: string, height = 5.0) {
         lean.setFromUnitVectors(up,slope);
         stance.quaternion.slerp(lean,1-Math.exp(-dt*10));
       }
-      if (isMoving) walk.setEffectiveTimeScale(walkRate);
       mixer.update(dt);
     },
     release() {

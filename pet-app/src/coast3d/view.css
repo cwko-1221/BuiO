@@ -5,11 +5,187 @@
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
+.moonbay-3d,
+.moonbay-3d * {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+}
 .moonbay-3d .moonbay-world:active { cursor: grabbing; }
 .moonbay-3d .moonbay-hud {
   inset: max(var(--coast-side), env(safe-area-inset-top)) max(var(--coast-side), env(safe-area-inset-right)) auto max(var(--coast-side), env(safe-area-inset-left));
 }
-.moonbay-3d .moonbay-area { pointer-events: auto; user-select: none; -webkit-user-select: none; }
+.moonbay-3d .moonbay-area { pointer-events: auto; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.coast3d-controls {
+  position: absolute;
+  right: max(var(--coast-side), env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+.coast3d-controls button {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 78px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #fff7dfeb;
+  border: 2px solid #bfa572;
+  color: #294a45;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #6d59344f, 0 8px 20px #16332c33;
+  touch-action: none;
+  transition: transform .08s ease, background .12s ease, border-color .12s ease;
+}
+.coast3d-controls button svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+.coast3d-controls button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #6d59344f, 0 4px 12px #16332c33;
+}
+.coast3d-controls .coast3d-btn-run[aria-pressed="true"] {
+  background: linear-gradient(180deg, #ffe39d 0%, #f8bf5a 100%);
+  border-color: #b76f1c;
+  color: #4f2c05;
+  box-shadow: 0 3px 0 #8d521059, 0 6px 18px #d9821f44;
+}
+.coast3d-controls .coast3d-btn-interact[data-available="false"] {
+  opacity: .72;
+  background: #f5eed9de;
+  border-color: #c5b694;
+  color: #5b6e68;
+}
+.coast3d-controls .coast3d-btn-interact[data-available="true"] {
+  background: linear-gradient(180deg, #fff4c8 0%, #ffd877 100%);
+  border-color: #b8741e;
+  color: #4b2a04;
+  box-shadow: 0 4px 0 #8a51105c, 0 0 0 3px #ffe08a66, 0 8px 20px #c97f1940;
+  animation: coast3d-interact-pulse 1.8s ease-in-out infinite;
+}
+@keyframes coast3d-interact-pulse {
+  0%, 100% { box-shadow: 0 4px 0 #8a51105c, 0 0 0 2px #ffe08a55, 0 8px 20px #c97f1940; }
+  50% { box-shadow: 0 4px 0 #8a51105c, 0 0 0 6px #ffe08a80, 0 10px 24px #c97f1955; }
+}
+.moonbay-3d[data-overview="true"] .coast3d-controls,
+.moonbay-3d[data-dialogue] .coast3d-controls,
+.moonbay-3d[data-dialogue] .moonbay-hint,
+.moonbay-3d:not([data-ready]) .coast3d-controls { display: none; }
+.coast3d-dialogue {
+  position: absolute;
+  left: 50%;
+  bottom: max(18px, env(safe-area-inset-bottom));
+  translate: -50%;
+  z-index: 4;
+  width: min(620px, calc(100% - 28px));
+  padding: 15px 20px 18px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fffdf4f7 0%, #fcf2daf7 100%);
+  border: 2.5px solid #c2a56c;
+  box-shadow: 0 6px 0 #6e58303d, 0 16px 38px #112d2847;
+  color: #26433e;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+.coast3d-dialogue[hidden] { display: none; }
+.coast3d-dialogue-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.coast3d-dialogue-speaker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.coast3d-dialogue-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--npc-accent, #e09a3e);
+  box-shadow: inset 0 1px 0 #ffffff66, 0 2px 6px #18322c2b;
+  font-size: 16px;
+}
+.coast3d-dialogue-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1f3c37;
+}
+.coast3d-dialogue-role {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--npc-accent, #e09a3e) 18%, #fff8e6);
+  border: 1px solid color-mix(in srgb, var(--npc-accent, #e09a3e) 42%, #cbb482);
+  color: #4c3b20;
+  font-size: 12px;
+  font-weight: 700;
+}
+.moonbay-3d .coast3d-dialogue-close {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1.5px solid #cbb689;
+  background: #fff9e8;
+  color: #5a4b31;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: none;
+  cursor: pointer;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.moonbay-3d .coast3d-dialogue-close:hover { background: #fae7be; }
+.coast3d-dialogue-text {
+  margin: 0;
+  min-height: 48px;
+  font-size: 15.5px;
+  line-height: 1.65;
+  font-weight: 600;
+  color: #27443f;
+  letter-spacing: .01em;
+}
+@media (max-width: 560px) {
+  .coast3d-controls { gap: 7px; }
+  .coast3d-controls button { min-width: 68px; padding: 9px 11px; font-size: 13px; }
+  .coast3d-dialogue { padding: 13px 16px 15px; border-radius: 18px; }
+  .coast3d-dialogue-text { font-size: 14.5px; }
+}
+@media (pointer: coarse) {
+  .coast3d-controls {
+    bottom: max(18px, env(safe-area-inset-bottom));
+    gap: 10px;
+  }
+  .coast3d-controls button {
+    min-width: 76px;
+    min-height: 52px;
+    padding: 10px 15px;
+    font-size: 14px;
+  }
+}
 .coast3d-perf {
   display: block;
   margin-top: 3px;
@@ -88,7 +264,7 @@
   .moonbay-3d[data-ready]:not([data-overview="true"]):not([data-touched="true"]) .moonbay-hint {
     display: block;
     left: 50%;
-    bottom: max(14px, env(safe-area-inset-bottom));
+    bottom: max(80px, calc(env(safe-area-inset-bottom) + 74px));
     translate: -50%;
     text-align: center;
     width: max-content;
@@ -140,5 +316,6 @@
 .moonbay-3d .moonbay-status[data-mode="notice"] :is(.coast3d-status-pct, .coast3d-progress) { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .coast3d-progress-bar { transition: none; }
+  .coast3d-controls .coast3d-btn-interact[data-available="true"] { animation: none; }
 }
 .moonbay-3d[data-overview="true"] [data-coast="turn"] { display: none; }

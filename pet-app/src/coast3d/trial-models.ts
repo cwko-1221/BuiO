@@ -10,6 +10,8 @@ export interface TrialModel {
   placement: TrialPlacement;
   object: T.Group;
   size: T.Vector3;
+  animations: T.AnimationClip[];
+  walkGroundSpeed?: number;
 }
 
 export async function loadTrialModels(progress?:LoadProgress):Promise<TrialModel[]> {
@@ -20,7 +22,7 @@ export async function loadTrialModels(progress?:LoadProgress):Promise<TrialModel
   const results=await Promise.allSettled(entries.map(async ([id,placement])=>{
     const file=files['./trial-assets/'+id+'.glb'];
     if(!file)throw Error('Trial model missing from the preview: '+id);
-    const {scene}=await loader.loadAsync(file);
+    const {scene,animations}=await loader.loadAsync(file);
     progress?.step();
     const box=new T.Box3().setFromObject(scene,true);
     const size=box.getSize(new T.Vector3()), centre=box.getCenter(new T.Vector3());
@@ -30,14 +32,23 @@ export async function loadTrialModels(progress?:LoadProgress):Promise<TrialModel
     scene.position.x-=centre.x;
     scene.position.y-=box.min.y;
     scene.position.z-=centre.z;
+    let rawWalkSpeed:number|undefined;
     const object=new T.Group();
     object.name='moonbay-trial-'+id;object.add(scene);
     object.scale.setScalar(scale);
     object.rotateY(placement.yaw);
     object.traverse(child=>{
-      if(child instanceof T.Mesh){child.castShadow=true;child.receiveShadow=true;}
+      if(typeof child.userData?.walkGroundSpeed==='number' && child.userData.walkGroundSpeed>0){
+        rawWalkSpeed=child.userData.walkGroundSpeed;
+      }
+      if(child instanceof T.Mesh){
+        child.castShadow=true;
+        child.receiveShadow=true;
+        if(child instanceof T.SkinnedMesh)child.frustumCulled=false;
+      }
     });
-    return {id,placement,object,size:size.multiplyScalar(scale)};
+    const walkGroundSpeed=rawWalkSpeed?rawWalkSpeed*scale:undefined;
+    return {id,placement,object,size:size.multiplyScalar(scale),animations,walkGroundSpeed};
   }));
   const models=results.flatMap(item=>item.status==='fulfilled'?[item.value]:[]);
   const problem=results.find(item=>item.status==='rejected');

@@ -4,13 +4,15 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { ASSETS, authoredObjectCount, cottageLocation, cottagePlots, fountainPlacement, moonPlacement, objects, type Asset, type AssetId, type Placement } from './assets';
 import { detectDeviceTier } from './device';
 import { createFountainWater } from './fountain-water';
+import { createNpcWanderSystem } from './npc-wander';
+import { createSkyDome } from './sky';
 import { createWaterfallWater } from './waterfall-water';
 import { WIDTH, DEPTH, CHUNK, STAIR_LANDING_RADIUS, trails, terrain, nodes, staircase, stairLevels, shore, trailHeight, nearestTrail } from './island';
 import { makeModel } from './models';
 import { createTerrain, createScarps, createWater, deckGeometry, deckMiter, dockEdge, groundMaterials, type ArtMaterials } from './terrain';
 import type { TrialModel } from './trial-models';
 
-export type IslandCollider = { x:number; y:number; z:number; w:number; h:number; d:number; yaw:number; shape?:'round'; walkable?:boolean };
+export type IslandCollider = { x:number; y:number; z:number; w:number; h:number; d:number; yaw:number; shape?:'round'; walkable?:boolean; noCamera?:boolean; dynamic?:string };
 export type Appearance = { model: T.Object3D; official:boolean; preview?:boolean };
 export const CLUTTER_LAYER = 1;
 const officialGlbUrls=import.meta.glob<string>('./models/*.glb',{eager:true,query:'?url',import:'default'});
@@ -137,7 +139,8 @@ function plazaStonework(boxes:IslandCollider[], plants:Placement[], phoneDevice=
         const x=121+Math.sin(middle)*r,z=88+Math.cos(middle)*r;
         const edges=[...profiles[0].slice(-2),...profiles[1].slice(-2)];
         const bottom=Math.min(...edges.map(p=>p.y))-.61, top=Math.max(...edges.map(p=>p.y))+.14;
-        boxes.push({x,y:(top+bottom)*.5,z,w:r*.038+.083,h:top-bottom,d:2.18,yaw:middle});
+        const bedTop=top+1.15;
+        boxes.push({x,y:(bedTop+bottom)*.5,z,w:r*.038+.083,h:bedTop-bottom,d:2.18,yaw:middle,noCamera:true});
         for(const [row,plantRadius] of [24.12,25.07].entries()) {
           if(phoneDevice && (i+row)%3!==0)continue;
           const a=middle+Math.sin(i*2.4+row)*.010;
@@ -323,9 +326,46 @@ export function lighting(scene:T.Scene) {
  * Approved rock variants share one atlas and a single material. Batch
  * each silhouette per visibility tile without dropping the baked textures.
  */
-function officialInstanceSources(model:T.Object3D): OfficialPart[] {
+const treeFoliageAssets = new Set<AssetId>(['pink-tree','green-tree','gold-tree','pine','palm']);
+function enhanceFoliageMaterial(material:T.Material) {
+  if(!(material instanceof T.MeshStandardMaterial) || material.userData.foliageEnhanced)return;
+  material.userData.foliageEnhanced=true;
+  material.side=T.DoubleSide;
+  if(material.alphaTest>0)material.alphaTest=Math.max(material.alphaTest,.40);
+  const prevCompile=material.onBeforeCompile;
+  material.onBeforeCompile=(shader,renderer)=>{
+    prevCompile?.(shader,renderer);
+    shader.vertexShader=shader.vertexShader
+      .replace('#include <common>','#include <common>\nvarying vec3 vFoliageWorld;\nvarying vec3 vFoliageN;')
+      .replace('#include <begin_vertex>',`#include <begin_vertex>
+        #ifdef USE_INSTANCING
+          vec4 fwPos=modelMatrix*instanceMatrix*vec4(transformed,1.);
+          vFoliageN=normalize(mat3(modelMatrix)*mat3(instanceMatrix)*objectNormal);
+        #else
+          vec4 fwPos=modelMatrix*vec4(transformed,1.);
+          vFoliageN=normalize(mat3(modelMatrix)*objectNormal);
+        #endif
+        vFoliageWorld=fwPos.xyz;`);
+    shader.fragmentShader=shader.fragmentShader
+      .replace('#include <common>','#include <common>\nvarying vec3 vFoliageWorld;\nvarying vec3 vFoliageN;')
+      .replace('#include <opaque_fragment>',`
+        vec3 sssSun=normalize(vec3(-.45,.78,.43));
+        vec3 sssView=normalize(cameraPosition-vFoliageWorld);
+        vec3 sssN=normalize(vFoliageN);
+        float sssBack=pow(clamp(dot(-sssView,sssSun),0.,1.),2.6);
+        float sssWrap=clamp(dot(sssN,sssSun)*.5+.5,0.,1.);
+        float sssSky=clamp(sssN.y*.5+.5,0.,1.);
+        vec3 sssCol=diffuseColor.rgb*vec3(1.10,1.04,.96);
+        outgoingLight+=sssCol*(.10+.15*sssWrap+.07*sssSky+.32*sssBack)*vec3(1.,.94,.84);
+        #include <opaque_fragment>`);
+  };
+  material.customProgramCacheKey=()=>'moonbay-foliage-sss-v1';
+  material.needsUpdate=true;
+}
+function officialInstanceSources(model:T.Object3D, id?:AssetId): OfficialPart[] {
   const parts:OfficialPart[]=[];
   const fadeCache=new Map<T.Material,T.Material>();
+  const isTree=id!==undefined && treeFoliageAssets.has(id);
   const toFade=(m:T.Material)=>{
     let cached=fadeCache.get(m);
     if(!cached){cached=m.clone();cached.transparent=true;cached.opacity=.24;cached.depthWrite=false;fadeCache.set(m,cached);}
@@ -336,6 +376,9 @@ function officialInstanceSources(model:T.Object3D): OfficialPart[] {
     if(!(node instanceof T.Mesh))return;
     let canopy=false;
     for(let cur:T.Object3D|null=node;cur&&cur!==model;cur=cur.parent)if(cur.name==='canopy'){canopy=true;break;}
+    if(canopy && isTree){
+      for(const m of Array.isArray(node.material)?node.material:[node.material])enhanceFoliageMaterial(m);
+    }
     const geometry=node.geometry.clone().applyMatrix4(node.matrixWorld);
     geometry.computeBoundingBox();
     const box=geometry.boundingBox!;
@@ -686,6 +729,165 @@ export async function officialModels(progress?:LoadProgress) {
   return models;
 }
 
+type LowColliderBox = { cx:number; cz:number; w:number; d:number };
+function extractLowColliderBox(root:T.Object3D, yMax=1.6): LowColliderBox | null {
+  root.updateMatrixWorld(true);
+  let minX=Infinity, maxX=-Infinity, minZ=Infinity, maxZ=-Infinity;
+  const v=new T.Vector3();
+  root.traverse(child=>{
+    if(!(child instanceof T.Mesh))return;
+    const pos=child.geometry.getAttribute('position');
+    if(!pos)return;
+    for(let i=0;i<pos.count;i++){
+      v.fromBufferAttribute(pos,i).applyMatrix4(child.matrixWorld);
+      if(v.y>=-.05 && v.y<=yMax){
+        if(v.x<minX)minX=v.x; if(v.x>maxX)maxX=v.x;
+        if(v.z<minZ)minZ=v.z; if(v.z>maxZ)maxZ=v.z;
+      }
+    }
+  });
+  if(!Number.isFinite(minX)||maxX-minX<.05||maxZ-minZ<.05)return null;
+  return {cx:(minX+maxX)*.5,cz:(minZ+maxZ)*.5,w:maxX-minX,d:maxZ-minZ};
+}
+type PlinthFootprint = {
+  minX:number; maxX:number; minZ:number; maxZ:number;
+  steps?: { minX:number; maxX:number; maxZ:number };
+};
+function extractPlinthFootprint(root:T.Object3D): PlinthFootprint | null {
+  root.updateMatrixWorld(true);
+  const xs:number[]=[], zs:number[]=[];
+  const v=new T.Vector3();
+  let allMinX=Infinity, allMaxX=-Infinity, allMinZ=Infinity;
+  root.traverse(child=>{
+    if(!(child instanceof T.Mesh))return;
+    const pos=child.geometry.getAttribute('position');
+    if(!pos)return;
+    for(let i=0;i<pos.count;i++){
+      v.fromBufferAttribute(pos,i).applyMatrix4(child.matrixWorld);
+      if(v.y>=-0.03 && v.y<=0.12){
+        xs.push(v.x); zs.push(v.z);
+        if(v.x<allMinX)allMinX=v.x;
+        if(v.x>allMaxX)allMaxX=v.x;
+        if(v.z<allMinZ)allMinZ=v.z;
+      }
+    }
+  });
+  if(!xs.length || allMaxX-allMinX<.5)return null;
+  const centerX=(allMinX+allMaxX)*.5, sideThreshold=(allMaxX-allMinX)*.26;
+  let minX=Infinity, maxX=-Infinity, maxZ=-Infinity;
+  for(let i=0;i<xs.length;i++){
+    if(Math.abs(xs[i]-centerX)>sideThreshold){
+      if(xs[i]<minX)minX=xs[i];
+      if(xs[i]>maxX)maxX=xs[i];
+      if(zs[i]>maxZ)maxZ=zs[i];
+    }
+  }
+  if(!Number.isFinite(maxZ))return null;
+  let stepMinX=Infinity, stepMaxX=-Infinity, stepMaxZ=-Infinity;
+  for(let i=0;i<xs.length;i++){
+    if(zs[i]>maxZ+.05){
+      if(xs[i]<stepMinX)stepMinX=xs[i];
+      if(xs[i]>stepMaxX)stepMaxX=xs[i];
+      if(zs[i]>stepMaxZ)stepMaxZ=zs[i];
+    }
+  }
+  const steps=Number.isFinite(stepMaxZ)&&stepMaxX-stepMinX>.3?{minX:stepMinX,maxX:stepMaxX,maxZ:stepMaxZ}:undefined;
+  return {minX,maxX,minZ:allMinZ,maxZ,steps};
+}
+function minFootprintTerrainY(p:Placement, fp:PlinthFootprint) {
+  const sc=p.scale??1, [sx,,sz]=p.stretch??[1,1,1];
+  const c=Math.cos(p.yaw), s=Math.sin(p.yaw);
+  let minY=Infinity;
+  const sample=(lx:number,lz:number)=>{
+    const wx=p.x+lx*sx*sc*c+lz*sz*sc*s;
+    const wz=p.z-lx*sx*sc*s+lz*sz*sc*c;
+    const ty=terrain(wx,wz).y;
+    if(ty<minY)minY=ty;
+  };
+  for(let ix=0;ix<=4;ix++){
+    const lx=fp.minX+(fp.maxX-fp.minX)*(ix/4);
+    for(let iz=0;iz<=4;iz++){
+      const lz=fp.minZ+(fp.maxZ-fp.minZ)*(iz/4);
+      sample(lx,lz);
+    }
+  }
+  if(fp.steps){
+    for(const lx of [fp.steps.minX,(fp.steps.minX+fp.steps.maxX)*.5,fp.steps.maxX]) sample(lx,fp.steps.maxZ);
+  }
+  return minY;
+}
+function createLimestoneMasonryTexture() {
+  const size=128, data=new Uint8Array(size*size*4);
+  const hash=(x:number,y:number)=>{const n=Math.sin(x*127.1+y*311.7)*43758.5453;return n-Math.floor(n);};
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const row=y>>5, shift=(row&1)*32;
+    const bx=(x+shift)&63, by=y&31;
+    const colIdx=((x+shift)>>6)&1;
+    const mortar=bx<2||bx>62||by<2||by>30;
+    const bevel=by===2||bx===2 ? 10 : (by===30||bx===62 ? -10 : 0);
+    const blockTint=(hash(colIdx+row*3.1,row*7.3)-.5)*14;
+    const grain=(hash(x,y)-.5)*9;
+    const baseR=220, baseG=207, baseB=184;
+    const delta=mortar ? -34+grain*.4 : blockTint+bevel+grain;
+    const i=(y*size+x)*4;
+    data[i]=Math.max(0,Math.min(255,Math.round(baseR+delta)));
+    data[i+1]=Math.max(0,Math.min(255,Math.round(baseG+delta*.96)));
+    data[i+2]=Math.max(0,Math.min(255,Math.round(baseB+delta*.90)));
+    data[i+3]=255;
+  }
+  const tex=new T.DataTexture(data,size,size,T.RGBAFormat);
+  tex.colorSpace=T.SRGBColorSpace;
+  tex.wrapS=tex.wrapT=T.RepeatWrapping;
+  tex.magFilter=T.LinearFilter;
+  tex.minFilter=T.LinearMipmapLinearFilter;
+  tex.generateMipmaps=true;
+  tex.needsUpdate=true;
+  return tex;
+}
+function buildFoundationGeometry(fp:PlinthFootprint, dropLocal:number, worldScaleX:number, worldScaleY:number, worldScaleZ:number) {
+  const pos:number[]=[], norm:number[]=[], uvs:number[]=[], cols:number[]=[];
+  const topY=.045, botY=-dropLocal;
+  const tileW=1.45, tileH=.92;
+  const topCol=[1.0,.995,.985], botCol=[.72,.70,.67];
+  const pushBox=(x0:number,x1:number,z0:number,z1:number)=>{
+    const wWorld=(x1-x0)*worldScaleX, dWorld=(z1-z0)*worldScaleZ, hWorld=(topY-botY)*worldScaleY;
+    const quad=(a:[number,number,number],b:[number,number,number],c:[number,number,number],d:[number,number,number],
+      n:[number,number,number],uLen:number,vLen:number)=>{
+      const u1=uLen/tileW, v1=vLen/tileH;
+      const verts:[number,number,number,number,number,number[]][]=[
+        [...a,0,0,botCol],[...b,u1,0,botCol],[...c,u1,v1,topCol],[...d,0,v1,topCol],
+      ];
+      for(const idx of [0,1,2, 0,2,3]){
+        const [vx,vy,vz,uu,vv,col]=verts[idx];
+        pos.push(vx,vy,vz);norm.push(...n);uvs.push(uu,vv);cols.push(...col);
+      }
+    };
+    // +Z front, -Z back, +X right, -X left, +Y top cap (closes any open-bottom plinth lip)
+    quad([x0,botY,z1],[x1,botY,z1],[x1,topY,z1],[x0,topY,z1],[0,0,1],wWorld,hWorld);
+    quad([x1,botY,z0],[x0,botY,z0],[x0,topY,z0],[x1,topY,z0],[0,0,-1],wWorld,hWorld);
+    quad([x1,botY,z1],[x1,botY,z0],[x1,topY,z0],[x1,topY,z1],[1,0,0],dWorld,hWorld);
+    quad([x0,botY,z0],[x0,botY,z1],[x0,topY,z1],[x0,topY,z0],[-1,0,0],dWorld,hWorld);
+    const capVerts:[number,number,number,number,number][]=[
+      [x0,topY,z1,0,0],[x1,topY,z1,wWorld/tileW,0],[x1,topY,z0,wWorld/tileW,dWorld/tileW],[x0,topY,z0,0,dWorld/tileW],
+    ];
+    for(const idx of [0,1,2, 0,2,3]){
+      const [vx,vy,vz,uu,vv]=capVerts[idx];
+      pos.push(vx,vy,vz);norm.push(0,1,0);uvs.push(uu,vv);cols.push(...topCol);
+    }
+  };
+  const inset=.012;
+  pushBox(fp.minX+inset,fp.maxX-inset,fp.minZ+inset,fp.maxZ-inset);
+  if(fp.steps){
+    pushBox(fp.steps.minX+inset,fp.steps.maxX-inset,fp.maxZ-.08,fp.steps.maxZ-inset);
+  }
+  const geo=new T.BufferGeometry();
+  geo.setAttribute('position',new T.Float32BufferAttribute(pos,3));
+  geo.setAttribute('normal',new T.Float32BufferAttribute(norm,3));
+  geo.setAttribute('uv',new T.Float32BufferAttribute(uvs,2));
+  geo.setAttribute('color',new T.Float32BufferAttribute(cols,3));
+  return geo;
+}
+
 export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, trials:TrialModel[]=[], sculpted=new Map<AssetId,Appearance>(), art:ArtMaterials={}) {
   const tier=detectDeviceTier();
   const coarseDevice=tier!=='desktop';
@@ -698,6 +900,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   const pool=fountainPlacement, basinSize=ASSETS.fountain.size;
   const fountain=createFountainWater(pool.x,terrain(pool.x,pool.z).y,pool.z,basinSize[0]*pool.scale,basinSize[2]*pool.scale*pool.stretch[1]);
   const waterfall=createWaterfallWater();
+  const sky=createSkyDome();
   const moon=moonPlacement, [mw,md,mh]=ASSETS.crescent.size.map((size,i)=>size*moon.scale*moon.stretch[i]);
   const moonBounds=new T.Box3(new T.Vector3(moon.x-mw/2,moon.y,moon.z-md/2),new T.Vector3(moon.x+mw/2,moon.y+mh,moon.z+md/2));
   const boxes:IslandCollider[]=[], planterPlants:Placement[]=[], structures=scarps.map(scarp=>scarp.geometry), vegetation:Vegetation[]=[];
@@ -707,7 +910,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   water.layers.set(CLUTTER_LAYER);
   lagoon.traverse(o=>{if(o instanceof T.Mesh)o.layers.set(CLUTTER_LAYER);});
   walkways.layers.set(CLUTTER_LAYER);
-  group.add(...pieces,...scarps,water,fountain.group,plazaStonework(boxes,planterPlants,phoneDevice),lagoon,islandBanners(),walkways);
+  group.add(sky.mesh,...pieces,...scarps,water,fountain.group,plazaStonework(boxes,planterPlants,phoneDevice),lagoon,islandBanners(),walkways);
   const officialCanopies: { bounds:T.Box3; meshes:{ mesh:T.Mesh; solid:T.Material|T.Material[]; fade:T.Material|T.Material[] }[] }[]=[];
   const sharedCanopyFade=new Map<T.Material,T.Material>();
   const getCanopyFade=(m:T.Material)=>{
@@ -746,6 +949,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
   };
   const board=new T.MeshStandardMaterial({map:textures.wood,color:0xf7dac1,roughness:.83,side:T.DoubleSide});
   const flagStone=new T.MeshStandardMaterial({map:textures.stone,color:0xffe1b6,roughness:.83});
+  const foundationMaterial=new T.MeshStandardMaterial({map:createLimestoneMasonryTexture(),vertexColors:true,roughness:.90});
   const batch=new Map<AssetId,Placement[]>();
   const add=(p:Placement)=>{
     const list=batch.get(p.id)??[];list.push(p);batch.set(p.id,list);
@@ -764,9 +968,12 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     const {x,z,yaw,collider}=placement;
     if(!collider)continue;
     const actor=placement.source.startsWith('npc_done/');
-    const h=size.y*(actor ? .79 : 1);
-    const w=size.x*(actor ? .8 : .94),d=size.z*(actor ? .75 : .94);
-    boxes.push({x,z,y:object.position.y+h/2,yaw,w,h,d,shape:collider==='round'?'round':undefined});
+    const h=size.y;
+    const w=size.x*(actor ? .92 : .96),d=size.z*(actor ? .90 : .96);
+    const shape=collider==='round'?'round':undefined;
+    const walkable=trialId==='stone-platform';
+    const bh=walkable ? h : (trialId==='stone-fountain' ? Math.max(h,2.8) : Math.max(h,1.9));
+    boxes.push({x,z,y:object.position.y+bh/2,yaw,w,h:bh,d,shape,walkable,noCamera:true,dynamic:actor&&placement.wander?trialId:undefined});
   }
   const bySpan=[
     {a:'west-north',b:'west-south',c:'west-crown',id:'west-bridge',rail:'west-rail',post:'west-post'},
@@ -814,7 +1021,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
           const mid=t+.5/nEdge, mX=ax+edx*mid, mZ=az+edz*mid, mY=trail.a.y+rise*mid;
           add({id:'dock-rope',x:mX,z:mZ,y:mY+.49,yaw:edgeYaw-Math.PI/2,
             roll:Math.atan2(rise,edgeLen),stretch:[bayRun/ASSETS['dock-rope'].size[0],1,1]});
-          boxes.push({x:mX,y:mY+.45,z:mZ,w:.22,h:.86,d:edgeLen/nEdge+.12,yaw:edgeYaw});
+          boxes.push({x:mX,y:mY+.92,z:mZ,w:.22,h:1.84,d:edgeLen/nEdge+.12,yaw:edgeYaw,noCamera:true});
         }
       }
       continue;
@@ -849,7 +1056,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
           add({id:rail,x:mX,z:mZ,y:mY-.012,yaw:yaw-Math.PI/2,
             roll:Math.atan2(rise,distance),stretch:[(run-.008)/ASSETS[rail].size[0],1,1]});
         } else add({id:rail,x:mX,z:mZ,y:mY+(wood?.41:.015),yaw:yaw-Math.PI/2});
-        boxes.push({x:mX,y:mY+.39,z:mZ,w:.19,h:.82,d:distance/n+.16,yaw});
+        boxes.push({x:mX,y:mY+.92,z:mZ,w:.19,h:1.84,d:distance/n+.16,yaw,noCamera:true});
       }
     }
   }
@@ -921,7 +1128,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     const model=replace?.model ?? makeModel(id);
     const stoneBatches=(id==='shore-rock'||id==='cliff-rock')&&replace?.official?rockInstanceSources(model,id):undefined;
     const officialBatches=!stoneBatches&&replace?.official&&instancedOfficialAssets.has(id)&&placements.length>=2
-      ? officialInstanceSources(model) : undefined;
+      ? officialInstanceSources(model,id) : undefined;
     const castShadow=!noShadowAssets.has(id) && !(coarseDevice && coarseNoShadowAssets.has(id)) && (asset.size[2]>.70||id==='village-fence');
     const direct=!stoneBatches&&!officialBatches&&replace&&(replace.official||replace.preview||['cottage','observatory','gazebo','moon','basin','boat','cascade','orrery','bridge'].includes(asset.shape));
     const transform=new T.Object3D();
@@ -940,7 +1147,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
           const x=Math.sin(angle)*1.93*width,z=Math.cos(angle)*1.93*depth;
           const c=Math.cos(p.yaw),s=Math.sin(p.yaw),height=2.42*rise;
           boxes.push({x:p.x+x*c+z*s,z:p.z-x*s+z*c,y:base+.61*rise+height/2,
-            w:.47*width,d:.47*depth,h:height,yaw:p.yaw,shape:'round'});
+            w:.47*width,d:.47*depth,h:height,yaw:p.yaw,shape:'round',noCamera:true});
         }
       }
     } else if(id==='gazebo'){
@@ -963,11 +1170,24 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     }
     const buckets=new Map<T.Group,Placement[]>();
     if(!direct) for(const p of placements){const tile=tileFor(p,id),own=buckets.get(tile)??[];own.push(p);buckets.set(tile,own);}
+    const plinthFootprint=asset.shape==='cottage'?extractPlinthFootprint(model):null;
     // Approved GLBs retain their authored PBR materials and textures.
     if(direct) for(const p of placements) {
       const pose=model.clone(true);
-      pose.position.set(p.x,p.y??terrain(p.x,p.z).y,p.z);pose.rotation.set(0,p.yaw,p.roll??0,'YXZ');
-      pose.scale.set(...p.stretch??[1,1,1]).multiplyScalar(p.scale??1);
+      const baseY=p.y??terrain(p.x,p.z).y;
+      const sc=p.scale??1, [sx,sy,sz]=p.stretch??[1,1,1];
+      pose.position.set(p.x,baseY,p.z);pose.rotation.set(0,p.yaw,p.roll??0,'YXZ');
+      pose.scale.set(sx,sy,sz).multiplyScalar(sc);
+      if(plinthFootprint){
+        const minGround=minFootprintTerrainY(p,plinthFootprint);
+        const dropWorld=baseY-minGround;
+        if(dropWorld>.03){
+          const dropLocal=(dropWorld+.85)/(sy*sc);
+          const skirt=new T.Mesh(buildFoundationGeometry(plinthFootprint,dropLocal,sx*sc,sy*sc,sz*sc),foundationMaterial);
+          skirt.name=id+'-foundation';
+          pose.add(skirt);
+        }
+      }
       pose.traverse(child=>{if(child instanceof T.Mesh){child.castShadow=castShadow;child.receiveShadow=true;if(clutterAssets.has(id))child.layers.set(CLUTTER_LAYER);}});
       if(id==='waterfall'&&replace.official){
         waterfall.dress(pose);
@@ -1084,7 +1304,7 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
         const {x,y:base,z,yaw}=fitted??{x:p.x,y:p.y??terrain(p.x,p.z).y,z:p.z,yaw:p.yaw};
         const approach=nearestTrail(x,z);
         if(base+solidHeight<.3 || approach.distance<approach.trail.width/2+Math.max(solidWidth,solidDepth)/2+.4)continue;
-        boxes.push({x,y:base+solidHeight/2,z,w:solidWidth,h:solidHeight,d:solidDepth,yaw,shape:'round'});
+        boxes.push({x,y:base+solidHeight/2,z,w:solidWidth,h:solidHeight,d:solidDepth,yaw,shape:'round',noCamera:id==='shore-rock'});
       }
     }
     if(id==='market-canopy'&&replace?.official){
@@ -1093,27 +1313,67 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
         const w=asset.size[0]*ax*scale,d=asset.size[1]*az*scale,base=p.y??terrain(p.x,p.z).y;
         const c=Math.cos(p.yaw),s=Math.sin(p.yaw);
         for(const [mx,mz] of [[-0.482*w,0.4565*d],[0.482*w,0.4355*d],[0,-0.4565*d]] as const)
-          boxes.push({x:p.x+mx*c+mz*s,y:base+1.4,z:p.z-mx*s+mz*c,w:.48,h:2.8,d:.48,yaw:p.yaw,shape:'round'});
+          boxes.push({x:p.x+mx*c+mz*s,y:base+1.4,z:p.z-mx*s+mz*c,w:.48,h:2.8,d:.48,yaw:p.yaw,shape:'round',noCamera:true});
       }
     }
-    if(!asset.collision)continue;
+    if(id==='flower-arch'){
+      for(const p of placements){
+        const base=p.y??terrain(p.x,p.z).y, c=Math.cos(p.yaw), s=Math.sin(p.yaw);
+        for(const side of [-1,1])
+          boxes.push({x:p.x+side*3.41*c,y:base+1.5,z:p.z-side*3.41*s,w:1.05,h:3.0,d:1.05,yaw:p.yaw,shape:'round',noCamera:true});
+      }
+    }
+    if(id==='flower-pot'){
+      for(const p of placements){
+        const sc=p.scale??1, base=p.y??terrain(p.x,p.z).y, diam=.54*sc;
+        boxes.push({x:p.x,y:base+.82,z:p.z,w:diam,h:1.64,d:diam,yaw:p.yaw,shape:'round',noCamera:true});
+      }
+    }
+    if(id==='parasol'){
+      for(const p of placements){
+        const sc=p.scale??1, base=p.y??terrain(p.x,p.z).y, diam=.68*sc;
+        boxes.push({x:p.x,y:base+.95*sc,z:p.z,w:diam,h:1.90*sc,d:diam,yaw:p.yaw,shape:'round',noCamera:true});
+      }
+    }
+    if(!asset.collision || id==='west-rail' || id==='east-rail')continue;
+    const isRail=id==='plaza-railing'||id==='summit-rail'||id==='village-fence';
+    const blocksCamera=asset.shape==='cottage'||asset.shape==='observatory';
+    const lowBox=asset.collision==='box'&&!isRail&&id!=='fountain'&&id!=='lamp'&&id!=='flower-bed'
+      ? extractLowColliderBox(model,1.6) : null;
     for(const p of placements) {
       const scale=p.scale??1,[ax,ay,az]=p.stretch??[1,1,1];
       const w=asset.size[0]*ax,d=asset.size[1]*az,h=asset.size[2]*ay;
-      const height=asset.collision==='trunk' ? h*.77 : h*.83;
       const y=p.y??terrain(p.x,p.z).y;
       if(id==='fountain'){
-        const rim=h*scale*.62;
-        boxes.push({x:p.x,y:y+rim*.5,z:p.z,w:w*scale*.995,d:d*scale*.995,h:rim,yaw:p.yaw,shape:'round'});
+        // Tall camera-transparent barrier prevents jumping pets from landing inside the fountain basin without snapping camera.
+        const keepOut=3.4;
+        boxes.push({x:p.x,y:y+keepOut*.5,z:p.z,w:w*scale*.995,d:d*scale*.995,h:keepOut,yaw:p.yaw,shape:'round',noCamera:true});
       } else if(id==='lamp'||id==='flower-bed'){
-        boxes.push({x:p.x,y:y+height*scale*.5,z:p.z,w:w*scale,d:d*scale,h:height*scale,yaw:p.yaw,shape:id==='lamp'?'round':undefined});
+        const bh=id==='flower-bed'?1.80:h*scale;
+        boxes.push({x:p.x,y:y+bh*.5,z:p.z,w:w*scale,d:d*scale,h:bh,yaw:p.yaw,shape:id==='lamp'?'round':undefined,noCamera:true});
+      } else if(isRail){
+        const rw=w*1.02*scale, rd=d*scale;
+        boxes.push({x:p.x,y:y+.92,z:p.z,w:rw,h:1.84,d:rd,yaw:p.yaw,noCamera:true});
+      } else if(asset.collision==='trunk'){
+        const bh=h*.85*scale, diam=.66*scale;
+        boxes.push({x:p.x,y:y+bh*.5,z:p.z,w:diam,h:bh,d:diam,yaw:p.yaw,shape:'round',noCamera:true});
       } else {
-        boxes.push({x:p.x,y:y+height*scale/2,z:p.z,w:(asset.collision==='trunk'?.52:w*.78)*scale,
-          h:height*scale,d:(asset.collision==='trunk'?.52:d*.78)*scale,yaw:p.yaw});
+        const minGround=plinthFootprint?minFootprintTerrainY(p,plinthFootprint):y;
+        const bottom=minGround<y-.03?minGround-.5:y;
+        const bh=blocksCamera?h*scale:Math.max(h*scale,1.82);
+        const top=y+bh;
+        const bw=(lowBox?lowBox.w*ax*.98:w*.94)*scale;
+        const bd=(lowBox?lowBox.d*az*.98:d*.94)*scale;
+        const c=Math.cos(p.yaw), s=Math.sin(p.yaw);
+        const lx=lowBox?lowBox.cx*ax*scale:0, lz=lowBox?lowBox.cz*az*scale:0;
+        const bx=p.x+lx*c+lz*s, bz=p.z-lx*s+lz*c;
+        const shape=id==='orrery'?'round':undefined;
+        boxes.push({x:bx,y:(top+bottom)*.5,z:bz,w:bw,h:top-bottom,d:bd,yaw:p.yaw,shape,noCamera:!blocksCamera});
       }
     }
   }
   // Cape, beach and plains use the same chunk meshes for visible ground and collision.
+  const npcs=createNpcWanderSystem(trials,boxes);
   scene.add(group);
   const skylineRange=phoneDevice?88:coarseDevice?125:220, detailRange=phoneDevice?40:coarseDevice?62:145;
   const faded = new Map<Vegetation,T.Mesh>();
@@ -1164,9 +1424,11 @@ export function createIsland(scene:T.Scene, approved:Map<AssetId,Appearance>, tr
     }
     return y;
   }
-  return {group,pieces,structures,boxes,water,fountain,waterfall,moonBounds,gazeboTread,softenCanopies,showChunks,finish() {
+  return {group,pieces,structures,boxes,water,fountain,waterfall,sky,npcs,moonBounds,gazeboTread,softenCanopies,showChunks,finish() {
     fountain.release();
-    const geometry=new Set<T.BufferGeometry>(), materials=new Set<T.Material>([fadeMaterial,solidMaterial,stoneFaces,board,flagStone,terrainMaterial,water.material]);
+    sky.release();
+    npcs.release();
+    const geometry=new Set<T.BufferGeometry>(), materials=new Set<T.Material>([fadeMaterial,solidMaterial,stoneFaces,board,flagStone,foundationMaterial,terrainMaterial,water.material]);
     group.traverse(o=>{if(o instanceof T.Mesh||o instanceof T.Points){geometry.add(o.geometry); for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);}});
     for(const tree of officialCanopies)for(const leaf of tree.meshes)
       for(const m of [...(Array.isArray(leaf.solid)?leaf.solid:[leaf.solid]),...(Array.isArray(leaf.fade)?leaf.fade:[leaf.fade])])materials.add(m);

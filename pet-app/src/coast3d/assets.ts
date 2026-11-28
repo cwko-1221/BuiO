@@ -92,8 +92,10 @@ set('market-stall',52,50);set('market-stall',80,50,.16);set('market-cart',74,55,
 for(const [x,z,yaw] of [[48,45,-.15],[56.4,46,.11],[62.5,42.7,-.06],[70.6,45.2,-.15],[78.8,44,.11],[91.7,42,.20]]){
   set('market-stall',x,z,yaw,undefined,1.19);
   const c=Math.cos(yaw),s=Math.sin(yaw),[px,pz]=x>91?[91.5,43.4]:[x,z];
-  set('flower-pot',px+2.28*c+.45*s,pz-2.28*s+.45*c,yaw,undefined,1.28);
-  set('flower-pot',px-2.28*c+.45*s,pz+2.28*s+.45*c,-yaw);
+  const rx=px+2.28*c+.45*s, rz=pz-2.28*s+.45*c;
+  const lx=px-2.28*c+.45*s, lz=pz+2.28*s+.45*c;
+  if(nearestTrail(rx,rz).distance>1.15)set('flower-pot',rx,rz,yaw,undefined,1.28);
+  if(nearestTrail(lx,lz).distance>1.15)set('flower-pot',lx,lz,-yaw);
 }
 set('market-stall',37.5,50.2,-.33,undefined,1.18);set('market-stall',96,49,.3,undefined,1.14);
 set('market-cart',86.4,56.6,.28,undefined,1.18);
